@@ -3,6 +3,7 @@ package twilightforest.structures.mushroomtower;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -62,7 +63,7 @@ public class ComponentTFMushroomTowerBridge extends ComponentTFMushroomTowerWing
         if (!madeWing) {
             int[] dx = offsetTowerCoords(dest[0], dest[1], dest[2], dSize, 0);
 
-            System.out.println("Making tower wing failed when bridge was already made.  Size = " + dSize + ", x = " + dx[0] + " z = " + dx[2]);
+            FMLLog.fine("[TwilightForest] Making tower wing failed when bridge was already made.  Size = " + dSize + ", x = " + dx[0] + " z = " + dx[2]);
         }
     }
 

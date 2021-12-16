@@ -3,6 +3,7 @@ package twilightforest.structures.finalcastle;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -109,7 +110,7 @@ public class ComponentTFFinalCastleEntranceTower extends ComponentTFFinalCastleM
 
             return true;
         } else {
-            System.out.println("side entrance tower blocked");
+            FMLLog.fine("[TwilightForest] side entrance tower blocked");
             return false;
         }
     }

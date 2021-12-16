@@ -2,6 +2,7 @@ package twilightforest.tileentity;
 
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -240,7 +241,7 @@ public class TileEntityTFReverter extends TileEntity {
         if (thereBlockID == Blocks.air && !replaceBlockID.getMaterial().blocksMovement()) {
             // do not revert
 
-            System.out.println("Not replacing block " + replaceBlockID + " because it doesn't block movement");
+            FMLLog.fine("[TwilightForest]  Not replacing block " + replaceBlockID + " because it doesn't block movement");
 
             return false;
         }

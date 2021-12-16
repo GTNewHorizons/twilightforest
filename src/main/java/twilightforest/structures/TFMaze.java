@@ -2,6 +2,7 @@ package twilightforest.structures;
 
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
@@ -135,7 +136,7 @@ public class TFMaze {
         } else if (dx == sx && dz == sz - 1) {
             return getRaw(sx * 2 + 1, sz * 2 + 0);
         } else {
-            System.out.println("Wall check out of bounds; s = " + sx + ", " + sz + "; d = " + dx + ", " + dz);
+            FMLLog.fine("[TwilightForest] Wall check out of bounds; s = " + sx + ", " + sz + "; d = " + dx + ", " + dz);
             return OUT_OF_BOUNDS;
         }
     }
@@ -523,7 +524,7 @@ public class TFMaze {
     }
 
     /**
-     * Called after copyToWorld. Places torches in the maze as appropriate
+     * Called after copyToWorld. Place torches in the maze as appropriate
      * 
      * @param world
      * @param dx

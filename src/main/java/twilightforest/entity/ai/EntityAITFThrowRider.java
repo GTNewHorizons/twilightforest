@@ -1,5 +1,6 @@
 package twilightforest.entity.ai;
 
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
@@ -58,7 +59,7 @@ public class EntityAITFThrowRider extends EntityAIBase {
 
         }
 
-        System.out.println("throw!");
+        FMLLog.finer("[TwilightForest] throw!");
         this.throwTimer = 0;
     }
 

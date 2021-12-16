@@ -3,6 +3,7 @@ package twilightforest.structures.mushroomtower;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -107,10 +108,10 @@ public class ComponentTFMushroomTowerMain extends ComponentTFMushroomTowerWing {
         boolean madeIt = makeBridge(list, rand, this.getComponentType() + 1, dest[0], dest[1], dest[2], size - 4, childHeight, mainDir, true);
 
         if (madeIt) {
-            System.out.println("Main tower made a bridge to another tower");
+            FMLLog.fine("[TwilightForest] Main tower made a bridge to another tower");
             return mainDir;
         } else {
-            System.out.println("Main tower failed to branch off at index " + this.componentType);
+            FMLLog.fine("[TwilightForest] Main tower failed to branch off at index " + this.componentType);
             return -1;
         }
 

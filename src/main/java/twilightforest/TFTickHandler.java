@@ -133,7 +133,7 @@ public class TFTickHandler {
 
     @SubscribeEvent
     public void tickStart(ItemTossEvent event) {
-        System.out.println("ItemTossEvent Tick");
+        FMLLog.fine("[TwilightForest] ItemTossEvent Tick");
     }
 
     private void checkForPortalCreation(EntityPlayer player, World world, float rangeToCheck) {

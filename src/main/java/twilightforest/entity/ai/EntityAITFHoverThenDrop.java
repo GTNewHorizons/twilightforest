@@ -1,5 +1,6 @@
 package twilightforest.entity.ai;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -182,10 +183,6 @@ public class EntityAITFHoverThenDrop extends EntityAIBase {
             if (!isPositionOccupied(hx, hy, hz) && this.canEntitySee(this.attacker, hx, hy, hz) && this.canEntitySee(target, hx, hy, hz)) {
                 break;
             }
-        }
-
-        if (tries == 99) {
-            System.out.println("Found no spots, giving up");
         }
 
         this.hoverPosX = hx;

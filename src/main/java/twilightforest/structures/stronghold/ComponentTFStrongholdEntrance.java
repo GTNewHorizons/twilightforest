@@ -3,6 +3,7 @@ package twilightforest.structures.stronghold;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -34,28 +35,22 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
         lowerPieces.prepareStructurePieces();
         addNewComponent(parent, list, random, 0, 4, 1, 18);
         lowerPieces.prepareStructurePieces();
-        if (!listContainsBossRoom(list)) {
-            // System.out.println("Did not find boss room from exit 0");
-        } else {
+        if (listContainsBossRoom(list)) {
             lowerPieces.markBossRoomUsed();
         }
         addNewComponent(parent, list, random, 1, -1, 1, 13);
         lowerPieces.prepareStructurePieces();
-        if (!listContainsBossRoom(list)) {
-            // System.out.println("Did not find boss room from exit 1");
-        } else {
+        if (listContainsBossRoom(list)) {
             lowerPieces.markBossRoomUsed();
         }
         addNewComponent(parent, list, random, 2, 13, 1, -1);
         lowerPieces.prepareStructurePieces();
-        if (!listContainsBossRoom(list)) {
-            // System.out.println("Did not find boss room from exit 2");
-        } else {
+        if (listContainsBossRoom(list)) {
             lowerPieces.markBossRoomUsed();
         }
         addNewComponent(parent, list, random, 3, 18, 1, 4);
         if (!listContainsBossRoom(list)) {
-            System.out.println("Did not find boss room from exit 3 - EPIC FAIL");
+            FMLLog.fine("[TwilightForest]  Did not find boss room from exit 3 - EPIC FAIL");
         }
         List<StructureTFStrongholdComponent> pieceList = (List<StructureTFStrongholdComponent>) list;
         StructureBoundingBox shieldBox = new StructureBoundingBox(this.boundingBox);
@@ -87,10 +82,10 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
             }
         }
 
-//        System.out.printf("MEGASHIELD computed!  %d, %d, %d to %d, %d, %d.\n", shieldBox.minX, shieldBox.minY, shieldBox.minZ, shieldBox.maxX, shieldBox.maxY, shieldBox.maxZ);
-//        System.out.printf("Stronghold at this point contains %d elements.\n", pieceList.size());
+//        FMLLog.fine("MEGASHIELD computed!  %d, %d, %d to %d, %d, %d.\n", shieldBox.minX, shieldBox.minY, shieldBox.minZ, shieldBox.maxX, shieldBox.maxY, shieldBox.maxZ);
+//        FMLLog.fine("Stronghold at this point contains %d elements.\n", pieceList.size());
 //        
-//        System.out.printf("Room count! TStairs = %d, TCorr = %d, Dead End = %d, TRoom = %d, Boss = %d \n", tStairs, tCorridors, deadEnd, tRooms, bossRooms);
+//        FMLLog.fine("Room count! TStairs = %d, TCorr = %d, Dead End = %d, TRoom = %d, Boss = %d \n", tStairs, tCorridors, deadEnd, tRooms, bossRooms);
 
 //        StructureTFStrongholdShield shield = new StructureTFStrongholdShield(shieldBox.minX - 1, shieldBox.minY, shieldBox.minZ - 1, shieldBox.maxX, shieldBox.maxY, shieldBox.maxZ);
 //        list.add(shield);
@@ -130,7 +125,7 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
         int var9 = this.getYWithOffset(0);
         int var10 = this.getZWithOffset(0, 0);
 
-        // System.out.println("Drawing STRONGHOLD entrance at " + var8 + ", " + var9 + ", " + var10);
+        // FMLLog.fine("Drawing STRONGHOLD entrance at " + var8 + ", " + var9 + ", " + var10);
 
         // statues
         placeCornerStatue(world, 5, 1, 5, 0, sbb);

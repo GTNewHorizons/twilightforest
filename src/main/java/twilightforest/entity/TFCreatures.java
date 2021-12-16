@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry.EntityRegistration;
@@ -58,7 +59,7 @@ public class TFCreatures {
         }
 
         if (entity == null) {
-            System.out.println("Skipping Entity with id " + entityID);
+            FMLLog.fine("[TwilightForest] Skipping Entity with id " + entityID);
         }
         return entity;
     }

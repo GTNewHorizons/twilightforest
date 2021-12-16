@@ -2,6 +2,7 @@ package twilightforest.world;
 
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
@@ -119,7 +120,7 @@ public class TFGenDarkCanopyTree extends TFTreeGenerator {
         drawBresehnam(world, src.posX, src.posY, src.posZ, dest.posX, dest.posY, dest.posZ, treeBlock, branchMeta);
 
         if (Math.abs(x - dest.posX) + 2 > 7 || Math.abs(z - dest.posZ) + 2 > 7) {
-            System.out.println("getting branch too far.  x = " + (x - dest.posX + 2) + ", z = " + (z - dest.posZ + 2));
+            FMLLog.fine("[TwilightForest]  getting branch too far.  x = " + (x - dest.posX + 2) + ", z = " + (z - dest.posZ + 2));
         }
 
         leafAround(world, dest.posX, dest.posY, dest.posZ);

@@ -7,6 +7,7 @@ package twilightforest.world;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
@@ -628,8 +629,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
 
         float pr = pseudoRand(x >> 2, z >> 2);
 
-        // System.out.println("pr = " + pr + ", /18 = " + (dist / 18F));
-        System.out.println("pr = " + pr + ", dist = " + dist + "dx = " + dx + " dz = " + dz);
+        FMLLog.finer("[TwilightForest] pr = " + pr + ", dist = " + dist + "dx = " + dx + " dz = " + dz);
 
         double cv = (dist - 9F) - (pr * 4F);
 

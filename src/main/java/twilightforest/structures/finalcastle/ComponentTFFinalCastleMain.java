@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ChunkCoordinates;
@@ -34,8 +35,8 @@ public class ComponentTFFinalCastleMain extends StructureTFComponent {
         int cx = (x >> 8) << 8;
         int cz = (z >> 8) << 8;
 
-        System.out.println("Making castle at " + x + ", " + z + ". center is " + cc.posX + ", " + cc.posZ);
-        System.out.println("Natural center at " + cx + ", " + cz);
+        FMLLog.fine("[TwilightForest] Making castle at " + x + ", " + z + ". center is " + cc.posX + ", " + cc.posZ);
+        FMLLog.fine("[TwilightForest] Natural center at " + cx + ", " + cz);
 
         // decorator
         if (this.deco == null) {
@@ -135,10 +136,10 @@ public class ComponentTFFinalCastleMain extends StructureTFComponent {
 
         // check if we've successfully built the end tower
         if (this.isMazeComplete(list, type)) {
-            System.out.println("Tower maze type " + type + " complete!");
+            FMLLog.fine("[TwilightForest] Tower maze type " + type + " complete!");
         } else {
             // TODO: add limit on retrying, in case of infinite loop?
-            System.out.println("Tower maze type " + type + " INCOMPLETE, retrying!");
+            FMLLog.fine("[TwilightForest] Tower maze type " + type + " INCOMPLETE, retrying!");
             list.clear();
             list.addAll(before);
             this.buildTowerMaze(list, rand, x, y, z, howFar, direction, type, dest);

@@ -3,6 +3,7 @@ package twilightforest.entity.ai;
 import java.util.ArrayList;
 import java.util.List;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITarget;
@@ -38,7 +39,7 @@ public class EntityAITFFlockTarget extends EntityAITarget {
             // hmm, just pick a random target?
             EntityLivingBase randomTarget = targetList.get(this.flockCreature.worldObj.rand.nextInt(targetList.size()));
 
-            System.out.println("randomTarget = " + randomTarget);
+            FMLLog.fine("[TwilightForest] randomTarget = " + randomTarget);
 
             this.flockTarget = randomTarget;
             return this.isSuitableTarget(this.flockTarget, true);

@@ -40,7 +40,7 @@ public class TFTeleporter extends Teleporter {
                 int px = MathHelper.floor_double(entity.posX);
                 int pz = MathHelper.floor_double(entity.posZ);
                 if (!isSafeBiomeAt(px, pz, entity)) {
-                    System.out.println("[TwilightForest] Portal destination looks unsafe, rerouting!");
+                    FMLLog.fine("[TwilightForest] Portal destination looks unsafe, rerouting!");
 
                     ChunkCoordinates safeCoords = findSafeCoords(200, px, pz, entity);
 
@@ -49,18 +49,18 @@ public class TFTeleporter extends Teleporter {
                         x = safeCoords.posX;
                         z = safeCoords.posZ;
 
-                        System.out.println("[TwilightForest] Safely rerouted!");
+                        FMLLog.fine("[TwilightForest] Safely rerouted!");
                     } else {
-                        System.out.println("[TwilightForest] Did not find a safe spot at first try, trying again with longer range.");
+                        FMLLog.fine("[TwilightForest] Did not find a safe spot at first try, trying again with longer range.");
                         safeCoords = findSafeCoords(400, px, pz, entity);
                         if (safeCoords != null) {
                             entity.setLocationAndAngles(safeCoords.posX, entity.posY, safeCoords.posZ, 90.0F, 0.0F);
                             x = safeCoords.posX;
                             z = safeCoords.posZ;
 
-                            System.out.println("[TwilightForest] Safely rerouted to long range portal.  Return trip not guaranteed.");
+                            FMLLog.fine("[TwilightForest] Safely rerouted to long range portal.  Return trip not guaranteed.");
                         } else {
-                            System.out.println("[TwilightForest] Did not find a safe spot.");
+                            FMLLog.fine("[TwilightForest] Did not find a safe spot.");
                         }
                     }
                 }

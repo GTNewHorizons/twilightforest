@@ -3,6 +3,7 @@ package twilightforest.structures.mushroomtower;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -73,9 +74,9 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
             boolean madeIt = makeMainBridge(list, rand, this.getComponentType() + 1, dest[0], dest[1], dest[2], size + 4, childHeight, 2);
 
             if (!madeIt) {
-                System.out.println("Did not make bridge back to new main");
+                FMLLog.fine("[TwilightForest]  Did not make bridge back to new main");
             } else {
-                System.out.println("Made bridge back to new main");
+                FMLLog.fine("[TwilightForest]  Made bridge back to new main");
             }
         }
 
