@@ -14,7 +14,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -24,6 +26,8 @@ import twilightforest.block.BlockTFPortal;
 import twilightforest.block.TFBlocks;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.WorldProviderTwilightForest;
+
+import static twilightforest.block.BlockTFPortal.isGoodPortalPool;
 
 /**
  * This class listens for ticks in the world. If the player is near a diamond in the water, this
@@ -149,6 +153,9 @@ public class TFTickHandler {
 
             // check to see if someone's thrown the portal item into the water
             for (EntityItem entityItem : itemList) {
+                int dx = MathHelper.floor_double(entityItem.posX);
+                int dy = MathHelper.floor_double(entityItem.posY);
+                int dz = MathHelper.floor_double(entityItem.posZ);
                 if (entityItem.getEntityItem().getItem() == portalItem && world.isMaterialInBB(entityItem.boundingBox, Material.water)) {
                     // make sparkles in the area
                     Random rand = new Random();
@@ -161,12 +168,13 @@ public class TFTickHandler {
                     }
 
                     // try to make a portal
-                    int dx = MathHelper.floor_double(entityItem.posX);
-                    int dy = MathHelper.floor_double(entityItem.posY);
-                    int dz = MathHelper.floor_double(entityItem.posZ);
-
                     if (((BlockTFPortal) TFBlocks.portal).tryToCreatePortal(world, dx, dy, dz)) {
                         player.triggerAchievement(TFAchievementPage.twilightPortal);
+                    }
+                }
+                else if (entityItem.getEntityItem().getItem() != portalItem && isGoodPortalPool(world, dx, dy, dz) && entityItem.age < 20) {
+                    if (player instanceof EntityPlayerMP) {
+                        player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal("chat.tf.wrongportalitem")));
                     }
                 }
             }

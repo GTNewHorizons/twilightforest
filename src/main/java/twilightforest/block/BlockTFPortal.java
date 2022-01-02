@@ -116,7 +116,7 @@ public class BlockTFPortal extends BlockBreakable {
     /**
      * If this spot, or a spot in any one of the 8 directions around me is good, we're good.
      */
-    public boolean isGoodPortalPool(World world, int dx, int dy, int dz) {
+    public static boolean isGoodPortalPool(World world, int dx, int dy, int dz) {
         boolean flag = false;
 
         flag |= isGoodPortalPoolStrict(world, dx + 0, dy, dz + 0);
@@ -144,7 +144,7 @@ public class BlockTFPortal extends BlockBreakable {
      * 
      * 
      */
-    public boolean isGoodPortalPoolStrict(World world, int dx, int dy, int dz) {
+    public static boolean isGoodPortalPoolStrict(World world, int dx, int dy, int dz) {
         boolean flag = true;
 
         // 4 squares of water
@@ -207,7 +207,7 @@ public class BlockTFPortal extends BlockBreakable {
     /**
      * Does the block at this location count as a "nature" block for portal purposes?
      */
-    public boolean isNatureBlock(World world, int dx, int dy, int dz) {
+    public static boolean isNatureBlock(World world, int dx, int dy, int dz) {
         Material mat = world.getBlock(dx, dy, dz).getMaterial();
 
         if (mat == Material.plants || mat == Material.vine || mat == Material.leaves) {
@@ -250,7 +250,7 @@ public class BlockTFPortal extends BlockBreakable {
         }
     }
 
-    protected boolean isGrassOrDirt(World world, int dx, int dy, int dz) {
+    protected static boolean isGrassOrDirt(World world, int dx, int dy, int dz) {
         Material mat = world.getBlock(dx, dy, dz).getMaterial();
         return mat == Material.grass || mat == Material.ground;
         // grass = grass
