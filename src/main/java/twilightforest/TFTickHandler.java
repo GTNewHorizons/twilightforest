@@ -185,11 +185,6 @@ public class TFTickHandler {
                         break;
                     }
                 }
-                else if (entityItem.getEntityItem().getItem() != portalItem && isGoodPortalPool(world, dx, dy, dz) && entityItem.age < 20) {
-                    if (player instanceof EntityPlayerMP) {
-                        player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal("chat.tf.wrongportalitem")));
-                    }
-                }
             }
         }
     }
