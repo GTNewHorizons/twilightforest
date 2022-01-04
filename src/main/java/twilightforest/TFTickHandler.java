@@ -13,6 +13,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
@@ -170,11 +171,18 @@ public class TFTickHandler {
                     // try to make a portal
                     if (((BlockTFPortal) TFBlocks.portal).tryToCreatePortal(world, dx, dy, dz)) {
                         player.triggerAchievement(TFAchievementPage.twilightPortal);
+                        return;
                     }
                 }
-                else if (entityItem.getEntityItem().getItem() != portalItem && isGoodPortalPool(world, dx, dy, dz) && entityItem.age < 20) {
+            }
+            for (EntityItem entityItem : itemList) {
+                int dx = MathHelper.floor_double(entityItem.posX);
+                int dy = MathHelper.floor_double(entityItem.posY);
+                int dz = MathHelper.floor_double(entityItem.posZ);
+                if (isGoodPortalPool(world, dx, dy, dz) && entityItem.age < 20) {
                     if (player instanceof EntityPlayerMP) {
-                        player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal("chat.tf.wrongportalitem")));
+                        player.addChatComponentMessage(new ChatComponentText(String.format(StatCollector.translateToLocal("chat.tf.wrongportalitem"), portalItem.getItemStackDisplayName(new ItemStack(portalItem)))));
+                        break;
                     }
                 }
             }
