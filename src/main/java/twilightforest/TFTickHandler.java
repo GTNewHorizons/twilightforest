@@ -51,7 +51,7 @@ public class TFTickHandler {
         World world = player.worldObj;
 
         // check for portal creation, at least if it's not disabled
-        if (!TwilightForestMod.disablePortalCreation && event.phase == TickEvent.Phase.END && !world.isRemote && world.getWorldTime() % 20 == 0) {
+        if (!TwilightForestMod.disablePortalCreation && event.phase == TickEvent.Phase.END && !world.isRemote && world.getTotalWorldTime() % 20 == 0) {
             // skip non admin players when the option is on
             if (TwilightForestMod.adminOnlyPortals) {
                 try {
