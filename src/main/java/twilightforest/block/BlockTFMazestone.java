@@ -96,7 +96,10 @@ public class BlockTFMazestone extends Block {
         // damage the player's pickaxe
         ItemStack cei = entityplayer.getCurrentEquippedItem();
         if (cei != null && cei.getItem() instanceof ItemTool && !(cei.getItem() instanceof ItemTFMazebreakerPick)) {
-            cei.damageItem(16, entityplayer);
+            Item item = cei.getItem();
+            for (int i = 0; i < 16 && cei.stackSize > 0; i++) {
+                item.onBlockDestroyed(cei, entityplayer.worldObj, this, x, y, z, entityplayer);
+            }
         }
 
         super.harvestBlock(world, entityplayer, x, y, z, meta);
