@@ -6,6 +6,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
@@ -218,8 +219,8 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
 //            this.renderYawOffset = ((EntityLiving)this.ridingEntity).renderYawOffset;
 //        }
         super.updateRidden();
-        if (this.ridingEntity != null) {
-            this.renderYawOffset = ((EntityLiving) this.ridingEntity).renderYawOffset;
+        if (this.ridingEntity instanceof EntityLivingBase) {
+            this.renderYawOffset = ((EntityLivingBase) this.ridingEntity).renderYawOffset;
         }
     }
 
