@@ -1,8 +1,5 @@
 package twilightforest;
 
-import static twilightforest.block.BlockTFPortal.isGoodPortalPool;
-
-import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.material.Material;
@@ -10,11 +7,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -25,7 +19,6 @@ import twilightforest.block.BlockTFPortal;
 import twilightforest.block.TFBlocks;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.WorldProviderTwilightForest;
-import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.PlayerTickEvent;
@@ -54,34 +47,6 @@ public class TFTickHandler {
 
         EntityPlayer player = event.player;
         World world = player.worldObj;
-
-        // check for portal creation, at least if it's not disabled
-        if (!TwilightForestMod.disablePortalCreation && event.phase == TickEvent.Phase.END
-                && !world.isRemote
-                && world.getTotalWorldTime() % 20 == 0) {
-            // skip non admin players when the option is on
-            if (TwilightForestMod.adminOnlyPortals) {
-                try {
-                    // if
-                    // (MinecraftServer.getServer().getConfigurationManager().isPlayerOpped(player.getCommandSenderName().toString()))
-                    // {
-                    if (MinecraftServer.getServer().getConfigurationManager().func_152596_g(player.getGameProfile())) {
-                        // reduce range to 4.0 when the option is on
-                        checkForPortalCreation(player, world, 4.0F);
-
-                    }
-                } catch (NoSuchMethodError ex) {
-                    // stop checking admin
-                    FMLLog.warning(
-                            "[TwilightForest] Could not determine op status for adminOnlyPortals option, ignoring option.");
-                    TwilightForestMod.adminOnlyPortals = false;
-                }
-            } else {
-                // normal check, no special options
-                checkForPortalCreation(player, world, 32.0F);
-
-            }
-        }
 
         // check the player for being in a forbidden progression area, only every 20 ticks
         if (!world.isRemote && event.phase == TickEvent.Phase.END
@@ -149,75 +114,6 @@ public class TFTickHandler {
         }
     }
 
-    @SubscribeEvent
-    public void tickStart(ItemTossEvent event) {
-        FMLLog.fine("[TwilightForest] ItemTossEvent Tick");
-    }
-
-    private void checkForPortalCreation(EntityPlayer player, World world, float rangeToCheck) {
-        // make sure we are allowed to make a portal in this dimension
-        if (world != null && player != null
-                && (world.provider.dimensionId == 0 || world.provider.dimensionId == TwilightForestMod.dimensionID
-                        || TwilightForestMod.allowPortalsInOtherDimensions)) {
-            @SuppressWarnings("unchecked")
-            List<EntityItem> itemList = world.getEntitiesWithinAABB(
-                    EntityItem.class,
-                    player.boundingBox.expand(rangeToCheck, rangeToCheck, rangeToCheck));
-
-            // do we have the item set? if not, can we set it?
-            if (this.portalItem == null) {
-
-            }
-
-            // check to see if someone's thrown the portal item into the water
-            for (EntityItem entityItem : itemList) {
-                int dx = MathHelper.floor_double(entityItem.posX);
-                int dy = MathHelper.floor_double(entityItem.posY);
-                int dz = MathHelper.floor_double(entityItem.posZ);
-                if (entityItem.getEntityItem().getItem() == portalItem
-                        && world.isMaterialInBB(entityItem.boundingBox, Material.water)) {
-                    // make sparkles in the area
-                    Random rand = new Random();
-                    for (int k = 0; k < 2; k++) {
-                        double d = rand.nextGaussian() * 0.02D;
-                        double d1 = rand.nextGaussian() * 0.02D;
-                        double d2 = rand.nextGaussian() * 0.02D;
-
-                        world.spawnParticle(
-                                "spell",
-                                entityItem.posX,
-                                entityItem.posY + 0.2,
-                                entityItem.posZ,
-                                d,
-                                d1,
-                                d2);
-                    }
-
-                    // try to make a portal
-                    if (((BlockTFPortal) TFBlocks.portal).tryToCreatePortal(world, dx, dy, dz)) {
-                        player.triggerAchievement(TFAchievementPage.twilightPortal);
-                        return;
-                    }
-                }
-            }
-            for (EntityItem entityItem : itemList) {
-                int dx = MathHelper.floor_double(entityItem.posX);
-                int dy = MathHelper.floor_double(entityItem.posY);
-                int dz = MathHelper.floor_double(entityItem.posZ);
-                if (isGoodPortalPool(world, dx, dy, dz) && entityItem.age < 20) {
-                    if (player instanceof EntityPlayerMP) {
-                        player.addChatComponentMessage(
-                                new ChatComponentText(
-                                        String.format(
-                                                StatCollector.translateToLocal("chat.tf.wrongportalitem"),
-                                                portalItem.getItemStackDisplayName(new ItemStack(portalItem)))));
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * Check what biome the player is in, and see if current progression allows that biome. If not, take appropriate
      * action
@@ -235,4 +131,69 @@ public class TFTickHandler {
             }
         }
     }
+
+    @SubscribeEvent
+    public void onItemDroppedByPlayer(ItemTossEvent event) {
+        if (!TwilightForestMod.disablePortalCreation && !event.isCanceled()
+                && this.portalItem != null
+                && event.entityItem.getEntityItem().getItem() == this.portalItem) {
+            // Check if player is opped
+            if (TwilightForestMod.adminOnlyPortals && !MinecraftServer.getServer().getConfigurationManager()
+                    .func_152596_g(event.player.getGameProfile())) {
+                return;
+            }
+            event.player.joinEntityItemWithWorld(new PortalEntityItem(event.entityItem, event.player));
+            event.setCanceled(true);
+        }
+    }
+
+    private static class PortalEntityItem extends EntityItem {
+
+        // the player that dropped this portal item
+        private final EntityPlayer playerDroppedEntityItem;
+
+        public PortalEntityItem(EntityItem entityItemToReplace, EntityPlayer player) {
+            super(
+                    entityItemToReplace.worldObj,
+                    entityItemToReplace.posX,
+                    entityItemToReplace.posY,
+                    entityItemToReplace.posZ,
+                    entityItemToReplace.getEntityItem());
+            this.delayBeforeCanPickup = entityItemToReplace.delayBeforeCanPickup;
+            this.motionX = entityItemToReplace.motionX;
+            this.motionY = entityItemToReplace.motionY;
+            this.motionZ = entityItemToReplace.motionZ;
+            this.playerDroppedEntityItem = player;
+        }
+
+        @Override
+        public void onUpdate() {
+            if (!this.worldObj.isRemote && this.ticksExisted % 20 == 0) if (this.worldObj.provider.dimensionId == 0
+                    || this.worldObj.provider.dimensionId == TwilightForestMod.dimensionID
+                    || TwilightForestMod.allowPortalsInOtherDimensions) {
+                        if (this.worldObj.isMaterialInBB(this.boundingBox, Material.water)) {
+                            // make sparkles in the area
+                            Random rand = new Random();
+                            for (int k = 0; k < 2; k++) {
+                                double d = rand.nextGaussian() * 0.02D;
+                                double d1 = rand.nextGaussian() * 0.02D;
+                                double d2 = rand.nextGaussian() * 0.02D;
+                                this.worldObj.spawnParticle("spell", this.posX, this.posY + 0.2, this.posZ, d, d1, d2);
+                            }
+                            int dx = MathHelper.floor_double(this.posX);
+                            int dy = MathHelper.floor_double(this.posY);
+                            int dz = MathHelper.floor_double(this.posZ);
+                            // try to make a portal
+                            if (((BlockTFPortal) TFBlocks.portal).tryToCreatePortal(this.worldObj, dx, dy, dz)) {
+                                if (this.playerDroppedEntityItem != null) {
+                                    this.playerDroppedEntityItem.triggerAchievement(TFAchievementPage.twilightPortal);
+                                }
+                            }
+                        }
+                    }
+            super.onUpdate();
+        }
+
+    }
+
 }

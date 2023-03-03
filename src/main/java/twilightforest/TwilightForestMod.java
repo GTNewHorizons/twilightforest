@@ -277,7 +277,9 @@ public class TwilightForestMod {
             portalItem = Items.diamond;
         }
         // tick listener
-        FMLCommonHandler.instance().bus().register(new TFTickHandler(portalItem));
+        final TFTickHandler tfTickHandler = new TFTickHandler(portalItem);
+        MinecraftForge.EVENT_BUS.register(tfTickHandler);
+        FMLCommonHandler.instance().bus().register(tfTickHandler);
 
         // make some channels for our maps
         TFMapPacketHandler mapPacketHandler = new TFMapPacketHandler();
