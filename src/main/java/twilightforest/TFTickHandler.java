@@ -1,6 +1,7 @@
 package twilightforest;
 
 import java.util.Random;
+import java.util.UUID;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityItem;
@@ -149,8 +150,8 @@ public class TFTickHandler {
 
     private static class PortalEntityItem extends EntityItem {
 
-        // the player that dropped this portal item
-        private final EntityPlayer playerDroppedEntityItem;
+        // the UUID of the player that dropped this portal item
+        private final UUID uuidPlayerWhoDroppedThis;
 
         public PortalEntityItem(EntityItem entityItemToReplace, EntityPlayer player) {
             super(
@@ -163,7 +164,7 @@ public class TFTickHandler {
             this.motionX = entityItemToReplace.motionX;
             this.motionY = entityItemToReplace.motionY;
             this.motionZ = entityItemToReplace.motionZ;
-            this.playerDroppedEntityItem = player;
+            this.uuidPlayerWhoDroppedThis = player.getUniqueID();
         }
 
         @Override
@@ -185,8 +186,10 @@ public class TFTickHandler {
                             int dz = MathHelper.floor_double(this.posZ);
                             // try to make a portal
                             if (((BlockTFPortal) TFBlocks.portal).tryToCreatePortal(this.worldObj, dx, dy, dz)) {
-                                if (this.playerDroppedEntityItem != null) {
-                                    this.playerDroppedEntityItem.triggerAchievement(TFAchievementPage.twilightPortal);
+                                // func_152378_a = getPlayerEntityByUUID
+                                final EntityPlayer player = this.worldObj.func_152378_a(this.uuidPlayerWhoDroppedThis);
+                                if (player != null) {
+                                    player.triggerAchievement(TFAchievementPage.twilightPortal);
                                 }
                                 this.setDead();
                             }
