@@ -188,6 +188,7 @@ public class TFTickHandler {
                                 if (this.playerDroppedEntityItem != null) {
                                     this.playerDroppedEntityItem.triggerAchievement(TFAchievementPage.twilightPortal);
                                 }
+                                this.setDead();
                             }
                         }
                     }

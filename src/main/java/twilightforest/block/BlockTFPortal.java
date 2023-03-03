@@ -82,9 +82,7 @@ public class BlockTFPortal extends BlockBreakable {
     public boolean tryToCreatePortal(World world, int dx, int dy, int dz) {
         if (isGoodPortalPool(world, dx, dy, dz)) {
             world.addWeatherEffect(new EntityLightningBolt(world, dx, dy, dz));
-
             transmuteWaterToPortal(world, dx, dy, dz);
-
             return true;
         } else {
             return false;
