@@ -40,7 +40,11 @@ import cpw.mods.fml.common.network.internal.FMLProxyPacket;
  */
 public class TFTickHandler {
 
-    public Item portalItem = null;
+    private final Item portalItem;
+
+    public TFTickHandler(Item portalItemIn) {
+        this.portalItem = portalItemIn;
+    }
 
     /**
      * On the tick, we check for eligible portals
