@@ -145,6 +145,7 @@ public class TFBiomeDecorator extends BiomeDecorator {
      * The method that does the work of actually decorating chunks
      */
     protected void genDecorations(BiomeGenBase biome) {
+        Random randomGenerator = this.randomGenerator;
 
         // random features!
         if (randomGenerator.nextInt(6) == 0) {
@@ -154,6 +155,7 @@ public class TFBiomeDecorator extends BiomeDecorator {
             if (ry < 75) {
                 TFGenerator rf = randomFeature(randomGenerator);
                 rf.generate(currentWorld, randomGenerator, rx, ry, rz);
+                if (this.randomGenerator != null) randomGenerator = this.randomGenerator;
             }
         }
 
@@ -169,6 +171,7 @@ public class TFBiomeDecorator extends BiomeDecorator {
             } else {
                 canopyTreeGen.generate(currentWorld, randomGenerator, rx, ry, rz);
             }
+            if (this.randomGenerator != null) randomGenerator = this.randomGenerator;
         }
 
         // mangrove trees
@@ -177,6 +180,7 @@ public class TFBiomeDecorator extends BiomeDecorator {
             int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
             int ry = currentWorld.getHeightValue(rx, rz);
             mangroveTreeGen.generate(currentWorld, randomGenerator, rx, ry, rz);
+            if (this.randomGenerator != null) randomGenerator = this.randomGenerator;
         }
         // add extra lakes for swamps
         for (int i = 0; i < lakesPerChunk; i++) {
@@ -184,6 +188,7 @@ public class TFBiomeDecorator extends BiomeDecorator {
             int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
             int ry = currentWorld.getHeightValue(rx, rz);
             extraLakeGen.generate(currentWorld, randomGenerator, rx, ry, rz);
+            if (this.randomGenerator != null) randomGenerator = this.randomGenerator;
         }
 
         // add extra lava for fire swamps
@@ -192,6 +197,7 @@ public class TFBiomeDecorator extends BiomeDecorator {
             int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
             int ry = currentWorld.getHeightValue(rx, rz);
             extraLavaPoolGen.generate(currentWorld, randomGenerator, rx, ry, rz);
+            if (this.randomGenerator != null) randomGenerator = this.randomGenerator;
         }
 
         // mycelium blobs
@@ -200,9 +206,11 @@ public class TFBiomeDecorator extends BiomeDecorator {
             int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
             int ry = currentWorld.getHeightValue(rx, rz);
             myceliumBlobGen.generate(currentWorld, randomGenerator, rx, ry, rz);
+            if (this.randomGenerator != null) randomGenerator = this.randomGenerator;
         }
 
         super.genDecorations(biome);
+        if (this.randomGenerator != null) randomGenerator = this.randomGenerator;
 
         decorateUnderground(currentWorld, randomGenerator, chunk_X, chunk_Z);
 
