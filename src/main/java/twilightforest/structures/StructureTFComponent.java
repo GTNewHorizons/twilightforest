@@ -653,21 +653,11 @@ public abstract class StructureTFComponent extends StructureComponent {
     /**
      * Discover if bounding box can fit within the current bounding box object.
      */
-    public static StructureComponent findIntersectingExcluding(List list, StructureBoundingBox toCheck,
+    public static StructureComponent findIntersectingExcluding(List<StructureComponent> list, StructureBoundingBox toCheck,
             StructureComponent exclude) {
-        Iterator iterator = list.iterator();
-        StructureComponent structurecomponent;
-
-        do {
-            if (!iterator.hasNext()) {
-                return null;
-            }
-
-            structurecomponent = (StructureComponent) iterator.next();
-        } while (structurecomponent == exclude || structurecomponent.getBoundingBox() == null
-                || !structurecomponent.getBoundingBox().intersectsWith(toCheck));
-
-        return structurecomponent;
+        return list.stream().filter(component -> component != exclude
+                && component.getBoundingBox() != null
+                && component.getBoundingBox().intersectsWith(toCheck)).findFirst().orElse(null);
     }
 
 }
