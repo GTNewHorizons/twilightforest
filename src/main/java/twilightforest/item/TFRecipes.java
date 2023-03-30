@@ -584,16 +584,14 @@ public class TFRecipes {
         addEnchantedRecipe(TFItems.yetiHelm, Enchantment.protection, 2, "###", "# #", '#', TFItems.alphaFur);
         addEnchantedRecipe(TFItems.yetiPlate, Enchantment.protection, 2, "# #", "###", "###", '#', TFItems.alphaFur);
         addEnchantedRecipe(TFItems.yetiLegs, Enchantment.protection, 2, "###", "# #", "# #", '#', TFItems.alphaFur);
+        // noinspection RedundantArrayCreation Ambiguous method call
         addEnchantedRecipe(
                 TFItems.yetiBoots,
                 Enchantment.protection,
                 2,
                 Enchantment.featherFalling,
                 4,
-                "# #",
-                "# #",
-                '#',
-                TFItems.alphaFur);
+                new Object[] { "# #", "# #", '#', TFItems.alphaFur });
 
         GameRegistry.addRecipe(new ItemStack(TFItems.arcticHelm), "###", "# #", '#', TFItems.arcticFur);
         GameRegistry.addRecipe(new ItemStack(TFItems.arcticPlate), "# #", "###", "###", '#', TFItems.arcticFur);
