@@ -436,7 +436,7 @@ public class BlockTFPlant extends BlockBush implements IShearable {
     // returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List itemList) {
+    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
         itemList.add(new ItemStack(this, 1, META_MOSSPATCH));
         itemList.add(new ItemStack(this, 1, META_MAYAPPLE));
         // itemList.add(new ItemStack(this, 1, META_CLOVERPATCH));

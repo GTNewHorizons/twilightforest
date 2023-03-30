@@ -206,7 +206,7 @@ public class BlockTFMagicLeaves extends BlockLeaves {
      */
     @SuppressWarnings({ "unchecked" })
     @Override
-    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List itemList) {
+    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
         itemList.add(new ItemStack(item, 1, 0));
         itemList.add(new ItemStack(item, 1, 1));
         itemList.add(new ItemStack(item, 1, 2));

@@ -231,7 +231,7 @@ public class BlockTFTowerTranslucent extends Block {
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
     @Override
-    public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+    public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
         list.add(new ItemStack(item, 1, 0));
         list.add(new ItemStack(item, 1, 1));
         list.add(new ItemStack(item, 1, 2));

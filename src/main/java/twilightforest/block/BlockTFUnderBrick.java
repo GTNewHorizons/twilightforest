@@ -83,7 +83,7 @@ public class BlockTFUnderBrick extends Block {
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
     @Override
-    public void getSubBlocks(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
+    public void getSubBlocks(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> par3List) {
         par3List.add(new ItemStack(par1, 1, 0));
         par3List.add(new ItemStack(par1, 1, 1));
         par3List.add(new ItemStack(par1, 1, 2));

@@ -61,7 +61,7 @@ public class BlockTFPlanks extends Block {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item item, CreativeTabs creativeTab, List itemList) {
+    public void getSubBlocks(Item item, CreativeTabs creativeTab, List<ItemStack> itemList) {
         for (int i = 0; i < textureNames.length; i++) {
             itemList.add(new ItemStack(item, 1, i));
         }

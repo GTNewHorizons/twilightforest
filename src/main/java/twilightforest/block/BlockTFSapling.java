@@ -158,7 +158,7 @@ public class BlockTFSapling extends BlockSapling {
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List itemList) {
+    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
         itemList.add(new ItemStack(item, 1, 0));
         itemList.add(new ItemStack(item, 1, 1));
         itemList.add(new ItemStack(item, 1, 2));

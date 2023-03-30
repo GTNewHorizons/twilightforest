@@ -329,7 +329,7 @@ public class BlockTFFireJet extends Block {
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
     @Override
-    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List itemList) {
+    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
         itemList.add(new ItemStack(item, 1, META_SMOKER));
         itemList.add(new ItemStack(item, 1, META_JET_IDLE));
         itemList.add(new ItemStack(item, 1, META_ENCASED_SMOKER_OFF));
