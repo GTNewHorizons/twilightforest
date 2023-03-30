@@ -128,13 +128,13 @@ public class BlockTFPlant extends BlockBush implements IShearable {
         Block soil = world.getBlock(x, y - 1, z);
 
         return switch (meta) {
-            case META_TORCHBERRY, META_ROOT_STRAND ->
-                    BlockTFPlant.canPlaceRootBelow(world, x, y + 1, z); // let's make this happen
-            case 0, META_FORESTGRASS, META_DEADBUSH ->
-                    (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, this));
-            case META_MUSHGLOOM, META_MOSSPATCH -> soil != null && soil.isSideSolid(world, x, y, z, ForgeDirection.UP);
-            default -> (world.getFullBlockLightValue(x, y, z) >= 3 || world.canBlockSeeTheSky(x, y, z)) && (soil != null
+            case META_TORCHBERRY, META_ROOT_STRAND -> BlockTFPlant.canPlaceRootBelow(world, x, y + 1, z); // let's make
+                                                                                                          // this happen
+            case 0, META_FORESTGRASS, META_DEADBUSH -> (soil != null
                     && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, this));
+            case META_MUSHGLOOM, META_MOSSPATCH -> soil != null && soil.isSideSolid(world, x, y, z, ForgeDirection.UP);
+            default -> (world.getFullBlockLightValue(x, y, z) >= 3 || world.canBlockSeeTheSky(x, y, z))
+                    && (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, this));
         };
     }
 

@@ -333,8 +333,7 @@ public class TFWeatherRenderer extends IRenderHandler {
                         int rainFloor = Math.max(rainHeight, floorY);
 
                         if (rainMin != rainMax) {
-                            this.random
-                                    .setSeed(dx * dx * 3121 + dx * 45238971 ^ dz * dz * 418711 + dz * 13761);
+                            this.random.setSeed(dx * dx * 3121 + dx * 45238971 ^ dz * dz * 418711 + dz * 13761);
 
                             if (biomegenbase instanceof TFBiomeSnow || biomegenbase instanceof TFBiomeGlacier) {
                                 // SNOW
@@ -709,8 +708,7 @@ public class TFWeatherRenderer extends IRenderHandler {
 
                         float one = 1.0F;
                         if (rainMin != rainMax) {
-                            this.random
-                                    .setSeed(dx * dx * 3121 + dx * 45238971 ^ dz * dz * 418711 + dz * 13761);
+                            this.random.setSeed(dx * dx * 3121 + dx * 45238971 ^ dz * dz * 418711 + dz * 13761);
 
                             if (drawFlag != 0) {
                                 if (drawFlag >= 0) {

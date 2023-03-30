@@ -88,9 +88,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                     renderer.renderMinX > 0.0D ? blockBrightness
                             : block.getMixedBrightnessForBlock(renderer.blockAccess, x - 1, y, z));
             tessellator.setColorOpaque_F(bRed, bGreen, bBlue);
-            renderer.renderFaceXNeg(
-                    block, x, y, z,
-                    renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 4));
+            renderer.renderFaceXNeg(block, x, y, z, renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 4));
         }
 
         if (renderer.renderAllFaces || block.shouldSideBeRendered(renderer.blockAccess, x + 1, y, z, 5)) {
@@ -98,9 +96,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                     renderer.renderMaxX < 1.0D ? blockBrightness
                             : block.getMixedBrightnessForBlock(renderer.blockAccess, x + 1, y, z));
             tessellator.setColorOpaque_F(tRed, tGreen, tBlue);
-            renderer.renderFaceXPos(
-                    block, x, y, z,
-                    renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 5));
+            renderer.renderFaceXPos(block, x, y, z, renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 5));
         }
 
         drawXSides(
@@ -238,9 +234,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                     renderer.renderMinY > 0.0D ? blockBrightness
                             : block.getMixedBrightnessForBlock(world, x, y - 1, z));
             tessellator.setColorOpaque_F(bRed, bGreen, bBlue);
-            renderer.renderFaceYNeg(
-                    block, x, y, z,
-                    renderer.getBlockIcon(block, world, x, y, z, 0));
+            renderer.renderFaceYNeg(block, x, y, z, renderer.getBlockIcon(block, world, x, y, z, 0));
         }
 
         if (renderer.renderAllFaces || block.shouldSideBeRendered(world, x, y + 1, z, 1)) {
@@ -248,9 +242,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                     renderer.renderMaxY < 1.0D ? blockBrightness
                             : block.getMixedBrightnessForBlock(world, x, y + 1, z));
             tessellator.setColorOpaque_F(tRed, tGreen, tBlue);
-            renderer.renderFaceYPos(
-                    block, x, y, z,
-                    renderer.getBlockIcon(block, world, x, y, z, 1));
+            renderer.renderFaceYPos(block, x, y, z, renderer.getBlockIcon(block, world, x, y, z, 1));
         }
 
         drawYSides(
@@ -390,9 +382,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                     renderer.renderMinZ > 0.0D ? blockBrightness
                             : block.getMixedBrightnessForBlock(renderer.blockAccess, x, y, z - 1));
             tessellator.setColorOpaque_F(bRed, bGreen, bBlue);
-            renderer.renderFaceZNeg(
-                    block, x, y, z,
-                    renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 2));
+            renderer.renderFaceZNeg(block, x, y, z, renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 2));
         }
 
         if (renderer.renderAllFaces || block.shouldSideBeRendered(renderer.blockAccess, x, y, z + 1, 1)) {
@@ -400,9 +390,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                     renderer.renderMaxZ < 1.0D ? blockBrightness
                             : block.getMixedBrightnessForBlock(renderer.blockAccess, x, y, z + 1));
             tessellator.setColorOpaque_F(tRed, tGreen, tBlue);
-            renderer.renderFaceZPos(
-                    block, x, y, z,
-                    renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 3));
+            renderer.renderFaceZPos(block, x, y, z, renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 3));
         }
 
         drawZSides(

@@ -278,8 +278,7 @@ public class ItemTFMazeMap extends ItemMap {
      * Add the map number to the tooltip
      */
     public String getItemStackDisplayName(ItemStack itemStack) {
-        return (StatCollector.translateToLocal(this.getUnlocalizedNameInefficiently(itemStack) + ".name")
-                + " #"
+        return (StatCollector.translateToLocal(this.getUnlocalizedNameInefficiently(itemStack) + ".name") + " #"
                 + itemStack.getItemDamage()).trim();
     }
 

@@ -54,19 +54,22 @@ public class BlockTFSlider extends BlockRotatedPillar {
         float inset = 5F;
 
         return switch (rotation) {
-            default -> AxisAlignedBB.getBoundingBox(x + pixel * inset,
+            default -> AxisAlignedBB.getBoundingBox(
+                    x + pixel * inset,
                     y,
                     z + pixel * inset,
                     x + 1F - pixel * inset,
                     y + 1F,
                     z + 1F - pixel * inset);
-            case 4 -> AxisAlignedBB.getBoundingBox(x,
+            case 4 -> AxisAlignedBB.getBoundingBox(
+                    x,
                     y + pixel * inset,
                     z + pixel * inset,
                     x + 1F,
                     y + 1F - pixel * inset,
                     z + 1F - pixel * inset);
-            case 8 -> AxisAlignedBB.getBoundingBox(x + pixel * inset,
+            case 8 -> AxisAlignedBB.getBoundingBox(
+                    x + pixel * inset,
                     y + pixel * inset,
                     z,
                     x + 1F - pixel * inset,

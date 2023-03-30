@@ -170,7 +170,10 @@ public class BlockTFCinderFurnace extends BlockContainer {
 
                             itemstack.stackSize -= j1;
                             EntityItem entityitem = new EntityItem(
-                                    world, (float) x + dx, (float) y + dy, (float) z + dz,
+                                    world,
+                                    (float) x + dx,
+                                    (float) y + dy,
+                                    (float) z + dz,
                                     new ItemStack(itemstack.getItem(), j1, itemstack.getItemDamage()));
 
                             if (itemstack.hasTagCompound()) {
@@ -180,8 +183,7 @@ public class BlockTFCinderFurnace extends BlockContainer {
 
                             float pointFive = 0.05F;
                             entityitem.motionX = (float) this.furnaceRandom.nextGaussian() * pointFive;
-                            entityitem.motionY = (float) this.furnaceRandom.nextGaussian() * pointFive
-                                    + 0.2F;
+                            entityitem.motionY = (float) this.furnaceRandom.nextGaussian() * pointFive + 0.2F;
                             entityitem.motionZ = (float) this.furnaceRandom.nextGaussian() * pointFive;
                             world.spawnEntityInWorld(entityitem);
                         }

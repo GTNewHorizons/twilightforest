@@ -370,13 +370,8 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         if (event.getResult() == Result.DENY) return;
 
         double d0 = 0.03125D;
-        this.stoneNoise = this.field_147430_m.func_151599_a(
-                this.stoneNoise, chunkX * 16, chunkZ * 16,
-                16,
-                16,
-                d0 * 2.0D,
-                d0 * 2.0D,
-                1.0D);
+        this.stoneNoise = this.field_147430_m
+                .func_151599_a(this.stoneNoise, chunkX * 16, chunkZ * 16, 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
 
         for (int z = 0; z < 16; ++z) {
             for (int x = 0; x < 16; ++x) {

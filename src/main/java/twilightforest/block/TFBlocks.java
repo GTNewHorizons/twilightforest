@@ -185,11 +185,15 @@ public class TFBlocks {
         registerMyBlock(auroraPillar, ItemBlock.class);
         registerMyBlock(
                 auroraSlab,
-                twilightforest.item.ItemBlockTFAuroraSlab.class, auroraSlab, auroraDoubleSlab,
+                twilightforest.item.ItemBlockTFAuroraSlab.class,
+                auroraSlab,
+                auroraDoubleSlab,
                 false);
         registerMyBlock(
                 auroraDoubleSlab,
-                twilightforest.item.ItemBlockTFAuroraSlab.class, auroraSlab, auroraDoubleSlab,
+                twilightforest.item.ItemBlockTFAuroraSlab.class,
+                auroraSlab,
+                auroraDoubleSlab,
                 true);
         registerMyBlock(trollSteinn, ItemBlock.class);
         registerMyBlock(wispyCloud, ItemBlock.class);

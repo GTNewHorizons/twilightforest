@@ -1,6 +1,5 @@
 package twilightforest.client.model;
 
-import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.MathHelper;
 

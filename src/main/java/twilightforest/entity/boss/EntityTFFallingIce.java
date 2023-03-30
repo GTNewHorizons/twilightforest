@@ -99,7 +99,8 @@ public class EntityTFFallingIce extends Entity {
 
         // kill other nearby blocks if they are not as old as this one
         if (!this.worldObj.isRemote) {
-            ArrayList<Entity> nearby = new ArrayList<>(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox));
+            ArrayList<Entity> nearby = new ArrayList<>(
+                    this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox));
 
             for (Entity entity : nearby) {
                 if (entity instanceof EntityTFFallingIce otherIce) {
@@ -133,8 +134,8 @@ public class EntityTFFallingIce extends Entity {
         int distance = MathHelper.ceiling_float_int(par1 - 1.0F);
 
         if (distance > 0) {
-            ArrayList<Entity> nearby = new ArrayList<>(this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
-                    this.boundingBox.expand(2, 0, 2)));
+            ArrayList<Entity> nearby = new ArrayList<>(
+                    this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(2, 0, 2)));
             DamageSource damagesource = DamageSource.fallingBlock;
             for (Entity entity : nearby) {
                 if (!(entity instanceof EntityTFYetiAlpha)) {

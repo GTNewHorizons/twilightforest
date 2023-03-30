@@ -170,8 +170,7 @@ public class EntityTFQuestRam extends EntityAnimal {
                 --currentItem.stackSize;
 
                 if (currentItem.stackSize <= 0) {
-                    par1EntityPlayer.inventory
-                            .setInventorySlotContents(par1EntityPlayer.inventory.currentItem, null);
+                    par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, null);
                 }
             }
 

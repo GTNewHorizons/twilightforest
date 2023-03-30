@@ -94,8 +94,7 @@ public class ItemTFScepterLifeDrain extends ItemTF {
 
             if (possibleEntity.canBeCollidedWith()) {
                 float borderSize = possibleEntity.getCollisionBorderSize();
-                AxisAlignedBB collisionBB = possibleEntity.boundingBox
-                        .expand(borderSize, borderSize, borderSize);
+                AxisAlignedBB collisionBB = possibleEntity.boundingBox.expand(borderSize, borderSize, borderSize);
                 MovingObjectPosition interceptPos = collisionBB.calculateIntercept(srcVec, destVec);
 
                 if (collisionBB.isVecInside(srcVec)) {
@@ -274,7 +273,8 @@ public class ItemTFScepterLifeDrain extends ItemTF {
      */
     @Override
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List<String> par3List, boolean par4) {
+    public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List<String> par3List,
+            boolean par4) {
         super.addInformation(par1ItemStack, par2EntityPlayer, par3List, par4);
         par3List.add((par1ItemStack.getMaxDamage() - par1ItemStack.getItemDamage()) + " charges left");
     }

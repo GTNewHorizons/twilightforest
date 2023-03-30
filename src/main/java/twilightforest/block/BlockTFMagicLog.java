@@ -53,25 +53,17 @@ public class BlockTFMagicLog extends BlockLog {
         int woodType = meta & 3;
 
         return switch (woodType) {
-            default -> orient == 0 && (side == 1 || side == 0)
-                    ? SPR_TIMETOP
-                    : (orient == 4 && (side == 5 || side == 4)
-                            ? SPR_TIMETOP
+            default -> orient == 0 && (side == 1 || side == 0) ? SPR_TIMETOP
+                    : (orient == 4 && (side == 5 || side == 4) ? SPR_TIMETOP
                             : (orient == 8 && (side == 2 || side == 3) ? SPR_TIMETOP : SPR_TIMESIDE));
-            case META_TRANS -> orient == 0 && (side == 1 || side == 0)
-                    ? SPR_TRANSTOP
-                    : (orient == 4 && (side == 5 || side == 4)
-                            ? SPR_TRANSTOP
+            case META_TRANS -> orient == 0 && (side == 1 || side == 0) ? SPR_TRANSTOP
+                    : (orient == 4 && (side == 5 || side == 4) ? SPR_TRANSTOP
                             : (orient == 8 && (side == 2 || side == 3) ? SPR_TRANSTOP : SPR_TRANSSIDE));
-            case META_MINE -> orient == 0 && (side == 1 || side == 0)
-                    ? SPR_MINETOP
-                    : (orient == 4 && (side == 5 || side == 4)
-                            ? SPR_MINETOP
+            case META_MINE -> orient == 0 && (side == 1 || side == 0) ? SPR_MINETOP
+                    : (orient == 4 && (side == 5 || side == 4) ? SPR_MINETOP
                             : (orient == 8 && (side == 2 || side == 3) ? SPR_MINETOP : SPR_MINESIDE));
-            case META_SORT -> orient == 0 && (side == 1 || side == 0)
-                    ? SPR_SORTTOP
-                    : (orient == 4 && (side == 5 || side == 4)
-                            ? SPR_SORTTOP
+            case META_SORT -> orient == 0 && (side == 1 || side == 0) ? SPR_SORTTOP
+                    : (orient == 4 && (side == 5 || side == 4) ? SPR_SORTTOP
                             : (orient == 8 && (side == 2 || side == 3) ? SPR_SORTTOP : SPR_SORTSIDE));
         };
 

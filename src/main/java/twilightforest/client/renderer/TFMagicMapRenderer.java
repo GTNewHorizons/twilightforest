@@ -1,8 +1,6 @@
 package twilightforest.client.renderer;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
@@ -130,19 +128,27 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
         GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glDisable(GL11.GL_ALPHA_TEST);
         tesselator.startDrawingQuads();
-        tesselator.addVertexWithUV((float) (var15 + 0) + var18, (float) (var16 + 128) - var18,
+        tesselator.addVertexWithUV(
+                (float) (var15 + 0) + var18,
+                (float) (var16 + 128) - var18,
                 -0.009999999776482582D,
                 0.0D,
                 1.0D);
-        tesselator.addVertexWithUV((float) (var15 + 128) - var18, (float) (var16 + 128) - var18,
+        tesselator.addVertexWithUV(
+                (float) (var15 + 128) - var18,
+                (float) (var16 + 128) - var18,
                 -0.009999999776482582D,
                 1.0D,
                 1.0D);
-        tesselator.addVertexWithUV((float) (var15 + 128) - var18, (float) (var16 + 0) + var18,
+        tesselator.addVertexWithUV(
+                (float) (var15 + 128) - var18,
+                (float) (var16 + 0) + var18,
                 -0.009999999776482582D,
                 1.0D,
                 0.0D);
-        tesselator.addVertexWithUV((float) (var15 + 0) + var18, (float) (var16 + 0) + var18,
+        tesselator.addVertexWithUV(
+                (float) (var15 + 0) + var18,
+                (float) (var16 + 0) + var18,
                 -0.009999999776482582D,
                 0.0D,
                 0.0D);

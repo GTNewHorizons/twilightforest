@@ -41,7 +41,9 @@ public class CommandTFProgress extends CommandBase {
             func_152373_a(
                     sender,
                     this,
-                    "Setting player %s progress to past boss %s.", player.getCommandSenderName(), bosses[bossIndex]);
+                    "Setting player %s progress to past boss %s.",
+                    player.getCommandSenderName(),
+                    bosses[bossIndex]);
 
             setProgress(player, bossIndex);
         }

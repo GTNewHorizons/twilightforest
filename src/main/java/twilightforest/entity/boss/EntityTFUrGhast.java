@@ -623,8 +623,7 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
         double offsetZ = this.targetedEntity.posZ - this.posZ;
 
         // fireball sound effect
-        this.worldObj
-                .playAuxSFXAtEntity(null, 1008, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
+        this.worldObj.playAuxSFXAtEntity(null, 1008, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
 
         EntityTFUrGhastFireball entityFireball = new EntityTFUrGhastFireball(
                 this.worldObj,

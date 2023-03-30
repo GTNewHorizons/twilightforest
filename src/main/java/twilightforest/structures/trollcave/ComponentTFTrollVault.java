@@ -32,8 +32,7 @@ public class ComponentTFTrollVault extends StructureTFComponent {
     }
 
     @Override
-    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-    }
+    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {}
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {

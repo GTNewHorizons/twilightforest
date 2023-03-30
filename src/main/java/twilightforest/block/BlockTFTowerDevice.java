@@ -275,8 +275,7 @@ public class BlockTFTowerDevice extends Block {
         int meta = world.getBlockMetadata(x, y, z);
 
         return switch (meta) {
-            case META_REAPPEARING_ACTIVE, META_VANISH_INACTIVE, META_VANISH_ACTIVE, META_VANISH_LOCKED, META_VANISH_UNLOCKED ->
-                    -1;
+            case META_REAPPEARING_ACTIVE, META_VANISH_INACTIVE, META_VANISH_ACTIVE, META_VANISH_LOCKED, META_VANISH_UNLOCKED -> -1;
             default -> super.getBlockHardness(world, x, y, z);
         };
     }

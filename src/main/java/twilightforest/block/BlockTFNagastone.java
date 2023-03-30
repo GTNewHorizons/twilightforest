@@ -169,7 +169,7 @@ public class BlockTFNagastone extends Block {
             orient = switch (side) {
                 default ->
                     // don't know
-                        1;
+                    1;
                 case 2 -> 0;
                 case 3 -> 1;
                 case 4 -> 2;
@@ -355,7 +355,7 @@ public class BlockTFNagastone extends Block {
             case 5 -> par1World.getBlock(x, y + 1, z) == this;
             default ->
                 // welp,
-                    false;
+                false;
         };
     }
 

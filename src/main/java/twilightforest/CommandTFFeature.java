@@ -44,8 +44,7 @@ public class CommandTFFeature extends CommandBase {
                             .getFeatureAt(dx, dz, player.worldObj);
 
                     sender.addChatMessage(
-                            new ChatComponentTranslation(
-                                    "The nearest feature is %s", nearbyFeature.name));
+                            new ChatComponentTranslation("The nearest feature is %s", nearbyFeature.name));
 
                     // are you in a structure?
                     ChunkProviderTwilightForest chunkProvider = ((WorldProviderTwilightForest) player.worldObj.provider)
@@ -57,7 +56,8 @@ public class CommandTFFeature extends CommandBase {
 
                         sender.addChatMessage(
                                 new ChatComponentTranslation(
-                                        "Structure conquer flag = %s.", chunkProvider.isStructureConquered(dx, dy, dz)));
+                                        "Structure conquer flag = %s.",
+                                        chunkProvider.isStructureConquered(dx, dy, dz)));
 
                         // are you in a room?
 

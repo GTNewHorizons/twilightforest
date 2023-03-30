@@ -37,8 +37,8 @@ public class TFEntityEggInfo {
                 : (new StatBase(
                         "stat.killEntity." + s,
                         new ChatComponentTranslation(
-                                "stat.entityKill", new ChatComponentTranslation("entity." + s + ".name"))))
-                                        .registerStat();
+                                "stat.entityKill",
+                                new ChatComponentTranslation("entity." + s + ".name")))).registerStat();
     }
 
     public static StatBase makeEntityKilledByStat(TFEntityEggInfo p_151176_0_) {
@@ -47,7 +47,7 @@ public class TFEntityEggInfo {
                 : (new StatBase(
                         "stat.entityKilledBy." + s,
                         new ChatComponentTranslation(
-                                "stat.entityKilledBy", new ChatComponentTranslation("entity." + s + ".name"))))
-                                        .registerStat();
+                                "stat.entityKilledBy",
+                                new ChatComponentTranslation("entity." + s + ".name")))).registerStat();
     }
 }

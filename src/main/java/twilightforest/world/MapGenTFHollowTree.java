@@ -2,11 +2,9 @@ package twilightforest.world;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Callable;
 
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReport;
@@ -50,13 +48,15 @@ public class MapGenTFHollowTree extends MapGenBase {
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception preparing hollow tree");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Feature being prepared");
-                crashreportcategory.addCrashSectionCallable("Is feature chunk",
+                crashreportcategory.addCrashSectionCallable(
+                        "Is feature chunk",
                         () -> MapGenTFHollowTree.this.canSpawnStructureAtCoords(chunkX, chunkZ) ? "True" : "False");
-                crashreportcategory
-                        .addCrashSection("Chunk location", String.format("%d,%d", chunkX, chunkZ));
-                crashreportcategory.addCrashSectionCallable("Chunk pos hash",
+                crashreportcategory.addCrashSection("Chunk location", String.format("%d,%d", chunkX, chunkZ));
+                crashreportcategory.addCrashSectionCallable(
+                        "Chunk pos hash",
                         () -> String.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ)));
-                crashreportcategory.addCrashSectionCallable("Structure type",
+                crashreportcategory.addCrashSectionCallable(
+                        "Structure type",
                         () -> MapGenTFHollowTree.this.getClass().getCanonicalName());
                 throw new ReportedException(crashreport);
             }
@@ -70,12 +70,10 @@ public class MapGenTFHollowTree extends MapGenBase {
         boolean flag = false;
 
         for (StructureStart structurestart : this.structureMap.values()) {
-            if (structurestart.isSizeableStructure() && structurestart.getBoundingBox()
-                    .intersectsWith(mapX, mapZ, mapX + 15, mapZ + 15)) {
-                structurestart.generateStructure(
-                        world,
-                        rand,
-                        new StructureBoundingBox(mapX, mapZ, mapX + 15, mapZ + 15));
+            if (structurestart.isSizeableStructure()
+                    && structurestart.getBoundingBox().intersectsWith(mapX, mapZ, mapX + 15, mapZ + 15)) {
+                structurestart
+                        .generateStructure(world, rand, new StructureBoundingBox(mapX, mapZ, mapX + 15, mapZ + 15));
                 flag = true;
             }
         }

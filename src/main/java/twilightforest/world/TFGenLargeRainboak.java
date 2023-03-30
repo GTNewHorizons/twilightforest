@@ -188,8 +188,7 @@ public class TFGenLargeRainboak extends TFTreeGenerator {
             } else if (Math.abs(var3) >= var2) {
                 var4 = 0.0F;
             } else {
-                var4 = (float) Math
-                        .sqrt(Math.pow(Math.abs(var2), 2.0D) - Math.pow(Math.abs(var3), 2.0D));
+                var4 = (float) Math.sqrt(Math.pow(Math.abs(var2), 2.0D) - Math.pow(Math.abs(var3), 2.0D));
             }
 
             var4 *= 0.5F;

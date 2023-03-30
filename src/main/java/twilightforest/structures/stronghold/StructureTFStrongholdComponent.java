@@ -86,31 +86,36 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
     public static StructureBoundingBox getComponentToAddBoundingBox(int x, int y, int z, int xOff, int yOff, int zOff,
             int xSize, int ySize, int zSize, int facing) {
         return switch (facing) {
-            case 0 -> new StructureBoundingBox(x + xOff,
+            case 0 -> new StructureBoundingBox(
+                    x + xOff,
                     y + yOff,
                     z + zOff,
                     x + xSize - 1 + xOff,
                     y + ySize - 1 + yOff,
                     z + zSize - 1 + zOff);
-            case 1 -> new StructureBoundingBox(x - zSize + 1 + zOff,
+            case 1 -> new StructureBoundingBox(
+                    x - zSize + 1 + zOff,
                     y + yOff,
                     z + xOff,
                     x + zOff,
                     y + ySize - 1 + yOff,
                     z + xSize - 1 + xOff);
-            case 2 -> new StructureBoundingBox(x - xSize + 1 - xOff,
+            case 2 -> new StructureBoundingBox(
+                    x - xSize + 1 - xOff,
                     y + yOff,
                     z - zSize + 1 + zOff,
                     x - xOff,
                     y + ySize - 1 + yOff,
                     z + zOff);
-            case 3 -> new StructureBoundingBox(x + zOff,
+            case 3 -> new StructureBoundingBox(
+                    x + zOff,
                     y + yOff,
                     z - xSize + 1 - xOff,
                     x + zSize - 1 + zOff,
                     y + ySize - 1 + yOff,
                     z - xOff);
-            default -> new StructureBoundingBox(x + xOff,
+            default -> new StructureBoundingBox(
+                    x + xOff,
                     y + yOff,
                     z + zOff,
                     x + xSize - 1 + xOff,

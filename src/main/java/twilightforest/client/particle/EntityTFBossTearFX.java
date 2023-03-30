@@ -92,22 +92,26 @@ public class EntityTFBossTearFX extends EntityFX {
         float f13 = (float) (this.prevPosZ + (this.posZ - this.prevPosZ) * (double) par2 - interpPosZ);
         float f14 = 1.0F;
         par1Tessellator.setColorOpaque_F(f14 * this.particleRed, f14 * this.particleGreen, f14 * this.particleBlue);
-        par1Tessellator.addVertexWithUV(f11 - par3 * f10 - par6 * f10,
+        par1Tessellator.addVertexWithUV(
+                f11 - par3 * f10 - par6 * f10,
                 f12 - par4 * f10,
                 f13 - par5 * f10 - par7 * f10,
                 f6,
                 f9);
-        par1Tessellator.addVertexWithUV(f11 - par3 * f10 + par6 * f10,
+        par1Tessellator.addVertexWithUV(
+                f11 - par3 * f10 + par6 * f10,
                 f12 + par4 * f10,
                 f13 - par5 * f10 + par7 * f10,
                 f6,
                 f8);
-        par1Tessellator.addVertexWithUV(f11 + par3 * f10 + par6 * f10,
+        par1Tessellator.addVertexWithUV(
+                f11 + par3 * f10 + par6 * f10,
                 f12 + par4 * f10,
                 f13 + par5 * f10 + par7 * f10,
                 f7,
                 f8);
-        par1Tessellator.addVertexWithUV(f11 + par3 * f10 - par6 * f10,
+        par1Tessellator.addVertexWithUV(
+                f11 + par3 * f10 - par6 * f10,
                 f12 - par4 * f10,
                 f13 + par5 * f10 - par7 * f10,
                 f7,

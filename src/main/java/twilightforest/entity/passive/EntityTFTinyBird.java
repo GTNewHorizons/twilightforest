@@ -221,26 +221,14 @@ public class EntityTFTinyBird extends EntityTFBird {
                     MathHelper.floor_double(this.posY - 1),
                     MathHelper.floor_double(this.posZ))) {
                 this.setIsBirdLanded(false);
-                this.worldObj.playAuxSFXAtEntity(
-                        null,
-                        1015,
-                        (int) this.posX,
-                        (int) this.posY,
-                        (int) this.posZ,
-                        0);
+                this.worldObj.playAuxSFXAtEntity(null, 1015, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
                 this.motionY = 0.4;
                 // FMLLog.info("bird taking off because it is no longer on land");
             } else {
                 if (isSpooked()) {
                     this.setIsBirdLanded(false);
                     this.motionY = 0.4;
-                    this.worldObj.playAuxSFXAtEntity(
-                            null,
-                            1015,
-                            (int) this.posX,
-                            (int) this.posY,
-                            (int) this.posZ,
-                            0);
+                    this.worldObj.playAuxSFXAtEntity(null, 1015, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
                     // FMLLog.info("bird taking off because it was spooked");
                 }
             }

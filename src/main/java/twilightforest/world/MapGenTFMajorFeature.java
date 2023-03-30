@@ -1,8 +1,5 @@
 package twilightforest.world;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.MapGenStructureData;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -51,8 +48,8 @@ public class MapGenTFMajorFeature extends MapGenStructure {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(par1, par3, par1, par3)) {
 
                 for (StructureComponent component : start.getComponents()) {
-                    if (component != null && component.getBoundingBox() != null && component.getBoundingBox()
-                            .isVecInside(par1, par2, par3)) {
+                    if (component != null && component.getBoundingBox() != null
+                            && component.getBoundingBox().isVecInside(par1, par2, par3)) {
                         if (component instanceof StructureTFComponent tfComponent) {
 
                             // System.out.println("found a tfComponent at the specified coordinates. It's a " +

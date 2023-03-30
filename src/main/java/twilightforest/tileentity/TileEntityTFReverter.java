@@ -327,6 +327,7 @@ public class TileEntityTFReverter extends TileEntity {
         return this.worldObj.getClosestPlayer(
                 (double) this.xCoord + 0.5D,
                 (double) this.yCoord + 0.5D,
-                (double) this.zCoord + 0.5D, this.requiredPlayerRange) != null;
+                (double) this.zCoord + 0.5D,
+                this.requiredPlayerRange) != null;
     }
 }

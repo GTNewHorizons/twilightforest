@@ -235,7 +235,8 @@ public class TFTreasure {
                 uncommon.add(Blocks.torch, 12);
                 uncommon.add(TFItems.steeleafIngot, 4);
                 rare.add(TFItems.nagaScale, 1);
-                rare.addEnchanted(new ItemStack(TFItems.ironwoodPick, 1),
+                rare.addEnchanted(
+                        new ItemStack(TFItems.ironwoodPick, 1),
                         Enchantment.efficiency,
                         1,
                         Enchantment.fortune,
@@ -418,7 +419,8 @@ public class TFTreasure {
                 common.add(new ItemStack(Items.potionitem, 1, 16370)); // extended swiftness ii
                 uncommon.addEnchanted(new ItemStack(Items.bow), Enchantment.infinity, 1, Enchantment.punch, 2);
                 uncommon.addEnchanted(new ItemStack(Items.bow), Enchantment.power, 3, Enchantment.flame, 1);
-                uncommon.addEnchanted(new ItemStack(TFItems.steeleafShovel),
+                uncommon.addEnchanted(
+                        new ItemStack(TFItems.steeleafShovel),
                         Enchantment.efficiency,
                         4,
                         Enchantment.unbreaking,
@@ -431,22 +433,26 @@ public class TFTreasure {
                 uncommon.addEnchanted(new ItemStack(TFItems.steeleafHelm), Enchantment.respiration, 3);
                 rare.add(Blocks.emerald_block, 1);
                 rare.add(Blocks.ender_chest, 1);
-                rare.addEnchanted(new ItemStack(TFItems.steeleafPick),
+                rare.addEnchanted(
+                        new ItemStack(TFItems.steeleafPick),
                         Enchantment.efficiency,
                         4,
                         Enchantment.silkTouch,
                         1);
-                rare.addEnchanted(new ItemStack(TFItems.steeleafSword),
+                rare.addEnchanted(
+                        new ItemStack(TFItems.steeleafSword),
                         Enchantment.sharpness,
                         4,
                         Enchantment.knockback,
                         2);
-                rare.addEnchanted(new ItemStack(TFItems.steeleafSword),
+                rare.addEnchanted(
+                        new ItemStack(TFItems.steeleafSword),
                         Enchantment.baneOfArthropods,
                         5,
                         Enchantment.fireAspect,
                         2);
-                rare.addEnchanted(new ItemStack(TFItems.mazebreakerPick),
+                rare.addEnchanted(
+                        new ItemStack(TFItems.mazebreakerPick),
                         Enchantment.efficiency,
                         4,
                         Enchantment.unbreaking,

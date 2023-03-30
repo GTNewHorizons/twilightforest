@@ -59,10 +59,10 @@ public class BlockTFRoots extends Block {
         return switch (meta) {
             case ROOT_META ->
                 // roots drop sticks
-                    Items.stick;
+                Items.stick;
             case OREROOT_META ->
                 // oreroots drop liveroot
-                    TFItems.liveRoot;
+                TFItems.liveRoot;
             default -> Item.getItemFromBlock(this);
         };
     }
@@ -75,13 +75,13 @@ public class BlockTFRoots extends Block {
         return switch (meta) {
             case ROOT_META ->
                 // roots drop sticks, no meta
-                    0;
+                0;
             case OREROOT_META ->
                 // oreroots drop liveroot, no meta
-                    0;
+                0;
             default ->
                 // set log flag on wood blocks
-                    meta | 8;
+                meta | 8;
         };
     }
 
@@ -98,7 +98,7 @@ public class BlockTFRoots extends Block {
         return switch (meta) {
             case ROOT_META ->
                 // roots drop several sticks
-                    3 + random.nextInt(2);
+                3 + random.nextInt(2);
             default -> super.quantityDropped(meta, fortune, random);
         };
     }

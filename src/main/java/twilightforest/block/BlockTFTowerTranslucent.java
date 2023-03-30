@@ -164,8 +164,7 @@ public class BlockTFTowerTranslucent extends Block {
                 return TEX_REVERTER_REPLACEMENT;
             }
             case META_REACTOR_DEBRIS -> {
-                Block toMimic = sideRNG.nextBoolean()
-                        ? (sideRNG.nextBoolean() ? Blocks.portal : Blocks.netherrack)
+                Block toMimic = sideRNG.nextBoolean() ? (sideRNG.nextBoolean() ? Blocks.portal : Blocks.netherrack)
                         : (sideRNG.nextBoolean() ? Blocks.bedrock : Blocks.obsidian);
                 return toMimic.getIcon(side, meta);
             }

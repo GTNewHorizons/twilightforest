@@ -118,7 +118,10 @@ public class ItemBlockTFPlant extends ItemBlock {
                         plantBlock.onBlockPlacedBy(world, x, y, z, player, itemStack);
                     }
 
-                    world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F,
+                    world.playSoundEffect(
+                            x + 0.5F,
+                            y + 0.5F,
+                            z + 0.5F,
                             plantBlock.stepSound.getBreakSound(),
                             (plantBlock.stepSound.getVolume() + 1.0F) / 2.0F,
                             plantBlock.stepSound.getPitch() * 0.8F);

@@ -108,8 +108,7 @@ public class ModelTFTowerBoss extends ModelTFGhast {
      * 
      * @param i
      */
-    protected void makeSmallTentacle(int num) {
-    }
+    protected void makeSmallTentacle(int num) {}
 
     /**
      * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms

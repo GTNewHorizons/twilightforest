@@ -407,7 +407,8 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
         StructureBoundingBox exclusionBox = switch (rotation) {
             default -> new StructureBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
             case 1 -> new StructureBoundingBox(this.size - 1 - maxZ, minY, minX, this.size - 1 - minZ, maxY, maxX);
-            case 2 -> new StructureBoundingBox(this.size - 1 - maxX,
+            case 2 -> new StructureBoundingBox(
+                    this.size - 1 - maxX,
                     minY,
                     this.size - 1 - maxZ,
                     this.size - 1 - minX,

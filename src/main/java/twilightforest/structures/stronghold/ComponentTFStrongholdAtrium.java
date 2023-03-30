@@ -149,13 +149,13 @@ public class ComponentTFStrongholdAtrium extends StructureTFStrongholdComponent 
             treeGen = switch (treeNum) {
                 default ->
                     // oak tree
-                        new WorldGenTrees(true, minHeight, 0, 0, false);
+                    new WorldGenTrees(true, minHeight, 0, 0, false);
                 case 1 ->
                     // jungle tree
-                        new WorldGenTrees(true, minHeight, 3, 3, false);
+                    new WorldGenTrees(true, minHeight, 3, 3, false);
                 case 2 ->
                     // birch
-                        new WorldGenTrees(true, minHeight, 2, 2, false);
+                    new WorldGenTrees(true, minHeight, 2, 2, false);
                 case 3 -> new TFGenSmallTwilightOak(false, minHeight);
                 case 4 -> new TFGenSmallRainboak(false);
             };

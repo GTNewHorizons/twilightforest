@@ -1223,8 +1223,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
-                    if (x != minX && x != maxX && y != minY && y != maxY && z != minZ && z != maxZ) {
-                    } else {
+                    if (x != minX && x != maxX && y != minY && y != maxY && z != minZ && z != maxZ) {} else {
                         // wall
                         if (((x == minY || x == maxX) && ((y == minY || y == maxY) || (z == minZ || z == maxZ)))
                                 || ((y == minY || y == maxY) && ((x == minY || x == maxX) || (z == minZ || z == maxZ)))
@@ -1347,8 +1346,12 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
 
             switch (doorType) {
                 default -> makeDoorOpening(world, doorCoords.posX, doorCoords.posY, doorCoords.posZ, sbb);
-                case REAPPEARING ->
-                        makeReappearingDoorOpening(world, doorCoords.posX, doorCoords.posY, doorCoords.posZ, sbb);
+                case REAPPEARING -> makeReappearingDoorOpening(
+                        world,
+                        doorCoords.posX,
+                        doorCoords.posY,
+                        doorCoords.posZ,
+                        sbb);
                 case LOCKED -> makeLockedDoorOpening(world, doorCoords.posX, doorCoords.posY, doorCoords.posZ, sbb);
             }
 

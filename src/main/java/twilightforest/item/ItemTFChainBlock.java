@@ -2,7 +2,6 @@ package twilightforest.item;
 
 import java.util.HashMap;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

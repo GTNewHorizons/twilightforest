@@ -277,8 +277,7 @@ public class BlockTFFireJet extends Block {
     @Override
     public boolean hasTileEntity(int meta) {
         return switch (meta) {
-            case META_SMOKER, META_ENCASED_SMOKER_ON, META_JET_POPPING, META_JET_FLAME, META_ENCASED_JET_POPPING, META_ENCASED_JET_FLAME ->
-                    true;
+            case META_SMOKER, META_ENCASED_SMOKER_ON, META_JET_POPPING, META_JET_FLAME, META_ENCASED_JET_POPPING, META_ENCASED_JET_FLAME -> true;
             default -> false;
         };
     }

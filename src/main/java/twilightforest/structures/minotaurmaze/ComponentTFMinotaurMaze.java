@@ -240,15 +240,14 @@ public class ComponentTFMinotaurMaze extends StructureTFComponent {
         return switch (decorationType) {
             default ->
                 // blank with fence doorway
-                    new ComponentTFMazeDeadEnd(4, worldX, worldY, worldZ, rotation);
+                new ComponentTFMazeDeadEnd(4, worldX, worldY, worldZ, rotation);
             case 1 -> new ComponentTFMazeDeadEndChest(4, worldX, worldY, worldZ, rotation);
             case 2 -> new ComponentTFMazeDeadEndTrappedChest(4, worldX, worldY, worldZ, rotation);
             case 3 -> new ComponentTFMazeDeadEndTorches(4, worldX, worldY, worldZ, rotation);
             case 4 -> new ComponentTFMazeDeadEndFountain(4, worldX, worldY, worldZ, rotation);
             case 5 -> new ComponentTFMazeDeadEndFountainLava(4, worldX, worldY, worldZ, rotation);
             case 6 -> new ComponentTFMazeDeadEndPainting(4, worldX, worldY, worldZ, rotation);
-            case 7 -> this.level == 1
-                    ? new ComponentTFMazeDeadEndRoots(4, worldX, worldY, worldZ, rotation)
+            case 7 -> this.level == 1 ? new ComponentTFMazeDeadEndRoots(4, worldX, worldY, worldZ, rotation)
                     : new ComponentTFMazeDeadEndShrooms(4, worldX, worldY, worldZ, rotation);
         };
 
@@ -266,8 +265,7 @@ public class ComponentTFMinotaurMaze extends StructureTFComponent {
             case 1 -> new ComponentTFMazeCorridor(4, worldX, worldY, worldZ, rotation);
             case 2 -> new ComponentTFMazeCorridorIronFence(4, worldX, worldY, worldZ, rotation);
             case 3 -> null; // painting
-            case 4 -> this.level == 1
-                    ? new ComponentTFMazeCorridorRoots(4, worldX, worldY, worldZ, rotation)
+            case 4 -> this.level == 1 ? new ComponentTFMazeCorridorRoots(4, worldX, worldY, worldZ, rotation)
                     : new ComponentTFMazeCorridorShrooms(4, worldX, worldY, worldZ, rotation);
         };
 

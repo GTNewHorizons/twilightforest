@@ -2,12 +2,10 @@ package twilightforest.structures.lichtower;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockMushroom;
 import net.minecraft.block.BlockSapling;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.entity.Entity;

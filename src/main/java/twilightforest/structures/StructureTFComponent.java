@@ -1,6 +1,5 @@
 package twilightforest.structures;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -53,28 +52,31 @@ public abstract class StructureTFComponent extends StructureComponent {
             int maxX, int maxY, int maxZ, int dir) {
         return switch (dir) {
             default -> // '\0'
-                    new StructureBoundingBox(x + minX,
-                            y + minY,
-                            z + minZ,
-                            x + maxX + minX,
-                            y + maxY + minY,
-                            z + maxZ + minZ);
+                new StructureBoundingBox(
+                        x + minX,
+                        y + minY,
+                        z + minZ,
+                        x + maxX + minX,
+                        y + maxY + minY,
+                        z + maxZ + minZ);
             case 1 -> // '\001'
-                    new StructureBoundingBox(x - maxZ + minZ,
-                            y + minY,
-                            z + minX,
-                            x + minZ,
-                            y + maxY + minY,
-                            z + maxX + minX);
+                new StructureBoundingBox(
+                        x - maxZ + minZ,
+                        y + minY,
+                        z + minX,
+                        x + minZ,
+                        y + maxY + minY,
+                        z + maxX + minX);
             case 2 -> // '\002'
-                    new StructureBoundingBox(x - maxX - minX,
-                            y + minY,
-                            z - maxZ - minZ,
-                            x - minX,
-                            y + maxY + minY,
-                            z - minZ);
+                new StructureBoundingBox(
+                        x - maxX - minX,
+                        y + minY,
+                        z - maxZ - minZ,
+                        x - minX,
+                        y + maxY + minY,
+                        z - minZ);
             case 3 -> // '\003'
-                    new StructureBoundingBox(x + minZ, y + minY, z - maxX, x + maxZ + minZ, y + maxY + minY, z + minX);
+                new StructureBoundingBox(x + minZ, y + minY, z - maxX, x + maxZ + minZ, y + maxY + minY, z + minX);
         };
     }
 
@@ -85,28 +87,31 @@ public abstract class StructureTFComponent extends StructureComponent {
             int maxX, int maxY, int maxZ, int dir) {
         return switch (dir) {
             default -> // '\0'
-                    new StructureBoundingBox(x + minX,
-                            y + minY,
-                            z + minZ,
-                            x + maxX + minX,
-                            y + maxY + minY,
-                            z + maxZ + minZ);
+                new StructureBoundingBox(
+                        x + minX,
+                        y + minY,
+                        z + minZ,
+                        x + maxX + minX,
+                        y + maxY + minY,
+                        z + maxZ + minZ);
             case 1 -> // '\001'
-                    new StructureBoundingBox(x - maxZ - minZ,
-                            y + minY,
-                            z + minX,
-                            x - minZ,
-                            y + maxY + minY,
-                            z + maxX + minX);
+                new StructureBoundingBox(
+                        x - maxZ - minZ,
+                        y + minY,
+                        z + minX,
+                        x - minZ,
+                        y + maxY + minY,
+                        z + maxX + minX);
             case 2 -> // '\002'
-                    new StructureBoundingBox(x - maxX - minX,
-                            y + minY,
-                            z - maxZ - minZ,
-                            x - minX,
-                            y + maxY + minY,
-                            z - minZ);
+                new StructureBoundingBox(
+                        x - maxX - minX,
+                        y + minY,
+                        z - maxZ - minZ,
+                        x - minX,
+                        y + maxY + minY,
+                        z - minZ);
             case 3 -> // '\003'
-                    new StructureBoundingBox(x + minZ, y + minY, z - maxX, x + maxZ + minZ, y + maxY + minY, z - minX);
+                new StructureBoundingBox(x + minZ, y + minY, z - maxX, x + maxZ + minZ, y + maxY + minY, z - minX);
         };
     }
 
@@ -289,13 +294,13 @@ public abstract class StructureTFComponent extends StructureComponent {
     protected int getXWithOffset(int x, int z) {
         return switch (getCoordBaseMode()) {
             case 0 -> // '\0'
-                    boundingBox.minX + x;
+                boundingBox.minX + x;
             case 1 -> // '\001'
-                    boundingBox.maxX - z;
+                boundingBox.maxX - z;
             case 2 -> // '\002'
-                    boundingBox.maxX - x;
+                boundingBox.maxX - x;
             case 3 -> // '\003'
-                    boundingBox.minX + z;
+                boundingBox.minX + z;
             default -> x;
         };
     }
@@ -307,13 +312,13 @@ public abstract class StructureTFComponent extends StructureComponent {
     protected int getZWithOffset(int x, int z) {
         return switch (getCoordBaseMode()) {
             case 0 -> // '\0'
-                    boundingBox.minZ + z;
+                boundingBox.minZ + z;
             case 1 -> // '\001'
-                    boundingBox.minZ + x;
+                boundingBox.minZ + x;
             case 2 -> // '\002'
-                    boundingBox.maxZ - z;
+                boundingBox.maxZ - z;
             case 3 -> // '\003'
-                    boundingBox.maxZ - x;
+                boundingBox.maxZ - x;
             default -> z;
         };
     }
@@ -605,11 +610,13 @@ public abstract class StructureTFComponent extends StructureComponent {
     /**
      * Discover if bounding box can fit within the current bounding box object.
      */
-    public static StructureComponent findIntersectingExcluding(List<StructureComponent> list, StructureBoundingBox toCheck,
-            StructureComponent exclude) {
-        return list.stream().filter(component -> component != exclude
-                && component.getBoundingBox() != null
-                && component.getBoundingBox().intersectsWith(toCheck)).findFirst().orElse(null);
+    public static StructureComponent findIntersectingExcluding(List<StructureComponent> list,
+            StructureBoundingBox toCheck, StructureComponent exclude) {
+        return list.stream()
+                .filter(
+                        component -> component != exclude && component.getBoundingBox() != null
+                                && component.getBoundingBox().intersectsWith(toCheck))
+                .findFirst().orElse(null);
     }
 
 }

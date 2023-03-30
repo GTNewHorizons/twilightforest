@@ -98,7 +98,10 @@ public class ItemTFMoonwormQueen extends ItemTF {
                     TFBlocks.moonworm.onBlockPlacedBy(world, x, y, z, player, par1ItemStack);
                 }
 
-                world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F,
+                world.playSoundEffect(
+                        x + 0.5F,
+                        y + 0.5F,
+                        z + 0.5F,
                         this.getSound(),
                         TFBlocks.moonworm.stepSound.getVolume() / 2.0F,
                         TFBlocks.moonworm.stepSound.getPitch() * 0.8F);

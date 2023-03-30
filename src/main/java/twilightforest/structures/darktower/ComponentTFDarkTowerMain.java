@@ -781,7 +781,8 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 0, y + 1, z + 1, sbb);
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, y + 1, z + 1, sbb);
                 placeBlockAtCurrentPosition(world, Blocks.chest, 0, x + 0, y + 2, z + 1, sbb);
-                this.placeTreasureAtCurrentPosition(world,
+                this.placeTreasureAtCurrentPosition(
+                        world,
                         decoRNG,
                         x + 1,
                         y + 2,
@@ -793,7 +794,8 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 0, y + 1, z + 0, sbb);
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 0, y + 1, z + 1, sbb);
                 placeBlockAtCurrentPosition(world, Blocks.chest, rotation, x + 0, y + 2, z + 0, sbb);
-                this.placeTreasureAtCurrentPosition(world,
+                this.placeTreasureAtCurrentPosition(
+                        world,
                         decoRNG,
                         x + 0,
                         y + 2,
@@ -805,7 +807,8 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 0, y + 1, z + 0, sbb);
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, y + 1, z + 0, sbb);
                 placeBlockAtCurrentPosition(world, Blocks.chest, rotation, x + 0, y + 2, z + 0, sbb);
-                this.placeTreasureAtCurrentPosition(world,
+                this.placeTreasureAtCurrentPosition(
+                        world,
                         decoRNG,
                         x + 1,
                         y + 2,
@@ -817,7 +820,8 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, y + 1, z + 0, sbb);
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, y + 1, z + 1, sbb);
                 placeBlockAtCurrentPosition(world, Blocks.chest, rotation, x + 1, y + 2, z + 0, sbb);
-                this.placeTreasureAtCurrentPosition(world,
+                this.placeTreasureAtCurrentPosition(
+                        world,
                         decoRNG,
                         x + 1,
                         y + 2,
@@ -1497,13 +1501,13 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
             WorldGenerator treeGen = switch (treeNum) {
                 default ->
                     // oak tree
-                        new WorldGenTrees(false);
+                    new WorldGenTrees(false);
                 case 1 ->
                     // jungle tree
-                        new WorldGenTrees(true, 3, 3, 3, false);
+                    new WorldGenTrees(true, 3, 3, 3, false);
                 case 2 ->
                     // birch
-                        new WorldGenForest(true, false);
+                    new WorldGenForest(true, false);
                 case 3 -> new TFGenSmallTwilightOak(false);
                 case 4 -> new TFGenSmallRainboak(false);
             };

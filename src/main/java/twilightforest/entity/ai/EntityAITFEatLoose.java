@@ -75,8 +75,7 @@ public class EntityAITFEatLoose extends EntityAIBase {
      * Execute a one shot task or start executing a continuous task
      */
     @Override
-    public void startExecuting() {
-    }
+    public void startExecuting() {}
 
     /**
      * Resets the task

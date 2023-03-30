@@ -50,6 +50,5 @@ public class BlockTFBurntThorns extends BlockTFThorns {
     /**
      * no need for leaf decay, I think
      */
-    public void breakBlock(World world, int x, int y, int z, Block logBlock, int metadata) {
-    }
+    public void breakBlock(World world, int x, int y, int z, Block logBlock, int metadata) {}
 }

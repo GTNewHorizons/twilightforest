@@ -1,7 +1,6 @@
 package twilightforest.inventory;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import net.minecraft.enchantment.Enchantment;

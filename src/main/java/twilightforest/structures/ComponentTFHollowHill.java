@@ -260,7 +260,7 @@ public class ComponentTFHollowHill extends StructureTFComponent {
             case 3 -> getLevel3Mob(rand);
             default ->
                 // aaah, default: spider!
-                    "Spider";
+                "Spider";
         };
     }
 
