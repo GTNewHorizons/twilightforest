@@ -22,7 +22,7 @@ public class ComponentTFFinalCastleDungeonEntrance extends ComponentTFFinalCastl
     }
 
     @Override
-    public void buildComponent(StructureComponent parent, List list, Random rand) {
+    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         this.deco = new StructureTFDecoratorCastle();
         this.deco.blockID = TFBlocks.castleMagic;
         this.deco.blockMeta = 2;

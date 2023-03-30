@@ -79,7 +79,7 @@ public class ComponentTFTrollCaveMain extends StructureTFComponent {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void buildComponent(StructureComponent parent, List list, Random rand) {
+    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         // make 4 caves
         for (int i = 0; i < 4; i++) {
             ChunkCoordinates dest = getValidOpening(rand, 5, i);

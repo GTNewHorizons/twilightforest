@@ -22,7 +22,7 @@ public class ComponentTFFinalCastleDungeonSteps extends StructureTFComponent {
     }
 
     @Override
-    public void buildComponent(StructureComponent parent, List list, Random rand) {
+    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }

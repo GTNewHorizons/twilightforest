@@ -20,7 +20,7 @@ public class ComponentTFDarkTowerEntrance extends ComponentTFDarkTowerWing {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void buildComponent(StructureComponent parent, List list, Random rand) {
+    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         super.buildComponent(parent, list, rand);
 
         // a few more openings

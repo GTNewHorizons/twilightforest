@@ -33,7 +33,7 @@ public class ComponentTFTrollVault extends StructureTFComponent {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void buildComponent(StructureComponent parent, List list, Random rand) {
+    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         ;
     }
 

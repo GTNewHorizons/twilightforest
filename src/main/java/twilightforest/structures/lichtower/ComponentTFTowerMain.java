@@ -26,7 +26,7 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
     }
 
     @Override
-    public void buildComponent(StructureComponent parent, List list, Random rand) {
+    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         // add a roof?
         makeARoof(parent, list, rand);
 
