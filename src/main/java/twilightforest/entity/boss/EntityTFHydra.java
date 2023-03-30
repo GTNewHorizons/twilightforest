@@ -75,7 +75,7 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
         }
 
         // re-do partArray
-        ArrayList<Entity> partList = new ArrayList<Entity>();
+        ArrayList<Entity> partList = new ArrayList<>();
         Collections.addAll(partList, partArray);
 
         for (int i = 0; i < numHeads; i++) {

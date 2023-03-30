@@ -18,7 +18,7 @@ public class TileEntityTFGhastTrapInactive extends TileEntity {
     int counter;
     Random rand = new Random();
 
-    ArrayList<EntityTFMiniGhast> dyingGhasts = new ArrayList<EntityTFMiniGhast>();
+    ArrayList<EntityTFMiniGhast> dyingGhasts = new ArrayList<>();
 
     /**
      * Determines if this TileEntity requires update calls.

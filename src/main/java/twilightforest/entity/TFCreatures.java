@@ -16,7 +16,7 @@ import cpw.mods.fml.common.registry.EntityRegistry.EntityRegistration;
 public class TFCreatures {
 
     /** This is a HashMap of the Creative Entity Eggs/Spawners. */
-    public static HashMap<Integer, TFEntityEggInfo> entityEggs = new LinkedHashMap<Integer, TFEntityEggInfo>();
+    public static HashMap<Integer, TFEntityEggInfo> entityEggs = new LinkedHashMap<>();
 
     public static void registerTFCreature(Class<? extends Entity> entityClass, String entityName, int id,
             int backgroundEggColour, int foregroundEggColour) {

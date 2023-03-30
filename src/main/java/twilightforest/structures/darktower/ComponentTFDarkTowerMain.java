@@ -148,7 +148,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
         // flag certain towers for keys
         if (!this.placedKeys && this.getComponentType() < 2) {
             // count how many size 9 towers we have hanging off us
-            ArrayList<ComponentTFDarkTowerWing> possibleKeyTowers = new ArrayList<ComponentTFDarkTowerWing>();
+            ArrayList<ComponentTFDarkTowerWing> possibleKeyTowers = new ArrayList<>();
 
             int smallTowers = 0;
 

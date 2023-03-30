@@ -32,7 +32,7 @@ public class TFBiomeDarkForest extends TFBiomeBase {
 
     private static final int MONSTER_SPAWN_RATE = 20;
     Random monsterRNG;
-    ArrayList<SpawnListEntry> emptyList = new ArrayList<SpawnListEntry>();
+    ArrayList<SpawnListEntry> emptyList = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     public TFBiomeDarkForest(int i) {

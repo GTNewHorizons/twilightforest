@@ -33,7 +33,7 @@ import twilightforest.structures.lichtower.ComponentTFTowerWing;
 public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
 
     protected boolean keyTower = false;
-    protected ArrayList<EnumDarkTowerDoor> openingTypes = new ArrayList<EnumDarkTowerDoor>();
+    protected ArrayList<EnumDarkTowerDoor> openingTypes = new ArrayList<>();
 
     public ComponentTFDarkTowerWing() {
         super();

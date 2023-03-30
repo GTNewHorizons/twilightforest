@@ -478,8 +478,8 @@ public class EntityTFYetiAlpha extends EntityMob implements IRangedAttackMob {
 
     @SuppressWarnings("unchecked")
     private void hitNearbyEntities() {
-        ArrayList<Entity> nearby = new ArrayList<Entity>(
-                this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(5, 0, 5)));
+        ArrayList<Entity> nearby = new ArrayList<>(this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                this.boundingBox.expand(5, 0, 5)));
 
         for (Entity entity : nearby) {
             if (entity instanceof EntityLivingBase) {

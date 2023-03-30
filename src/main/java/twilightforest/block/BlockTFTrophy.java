@@ -190,7 +190,7 @@ public class BlockTFTrophy extends BlockContainer {
 
     @Override
     public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
-        ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
+        ArrayList<ItemStack> drops = new ArrayList<>();
         if ((metadata & 8) == 0) {
             ItemStack var7 = new ItemStack(TFItems.trophy, 1, this.getDamageValue(world, x, y, z));
             TileEntityTFTrophy var8 = (TileEntityTFTrophy) world.getTileEntity(x, y, z);

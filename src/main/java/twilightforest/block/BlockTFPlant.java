@@ -349,7 +349,7 @@ public class BlockTFPlant extends BlockBush implements IShearable {
      */
     @Override
     public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int meta, int fortune) {
-        ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
+        ArrayList<ItemStack> ret = new ArrayList<>();
 
         // TODO: this needs to not drop if the player is shearing! Grrr!
 
@@ -415,7 +415,7 @@ public class BlockTFPlant extends BlockBush implements IShearable {
      */
     @Override
     public ArrayList<ItemStack> onSheared(ItemStack item, IBlockAccess world, int x, int y, int z, int fortune) {
-        ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
+        ArrayList<ItemStack> ret = new ArrayList<>();
         ret.add(new ItemStack(this, 1, world.getBlockMetadata(x, y, z)));
         // world.setBlockToAir(x, y, z);
         return ret;

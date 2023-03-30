@@ -26,7 +26,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ItemTFChainBlock extends ItemTool {
 
     // which items have launched which blocks?
-    private HashMap<ItemStack, Entity> launchedBlocksMap = new HashMap<ItemStack, Entity>();
+    private HashMap<ItemStack, Entity> launchedBlocksMap = new HashMap<>();
 
     protected ItemTFChainBlock() {
         super(6, TFItems.TOOL_KNIGHTLY, Sets.newHashSet(new Block[] { Blocks.stone }));

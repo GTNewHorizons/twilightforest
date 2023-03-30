@@ -57,7 +57,7 @@ public class TFBiomeDecorator extends BiomeDecorator {
     public int lakesPerChunk;
     public float lavaPoolChance;
 
-    static final List<RuinEntry> ruinList = new ArrayList<RuinEntry>();
+    static final List<RuinEntry> ruinList = new ArrayList<>();
     static {
         // make list of ruins
         ruinList.add(new RuinEntry(new TFGenStoneCircle(), 10));

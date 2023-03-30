@@ -18,7 +18,7 @@ import twilightforest.structures.StructureTFComponent;
 
 public abstract class StructureTFStrongholdComponent extends StructureTFComponent {
 
-    public List<ChunkCoordinates> doors = new ArrayList<ChunkCoordinates>();
+    public List<ChunkCoordinates> doors = new ArrayList<>();
 
     public StructureTFStrongholdComponent() {
         super();

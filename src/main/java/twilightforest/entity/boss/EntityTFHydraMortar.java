@@ -111,9 +111,8 @@ public class EntityTFHydraMortar extends EntityThrowable {
 
         if (!worldObj.isRemote) {
             // damage nearby things
-            List<Entity> nearbyList = new ArrayList<Entity>(
-                    this.worldObj
-                            .getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(1.0D, 1.0D, 1.0D)));
+            List<Entity> nearbyList = new ArrayList<>(this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
+                    this.boundingBox.expand(1.0D, 1.0D, 1.0D)));
 
             for (Entity nearby : nearbyList) {
                 if (nearby.attackEntityFrom(DamageSource.causeFireballDamage(null, this.getThrower()), DIRECT_DAMAGE)

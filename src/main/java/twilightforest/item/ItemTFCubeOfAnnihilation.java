@@ -20,7 +20,7 @@ public class ItemTFCubeOfAnnihilation extends ItemTF {
 
     private IIcon annihilateIcon;
 
-    private HashMap<ItemStack, Entity> launchedCubesMap = new HashMap<ItemStack, Entity>();
+    private HashMap<ItemStack, Entity> launchedCubesMap = new HashMap<>();
 
     protected ItemTFCubeOfAnnihilation() {
         super();

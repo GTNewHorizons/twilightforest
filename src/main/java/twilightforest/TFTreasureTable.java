@@ -22,7 +22,7 @@ public class TFTreasureTable {
     protected ArrayList<TFTreasureItem> list;
 
     public TFTreasureTable() {
-        this.list = new ArrayList<TFTreasureItem>();
+        this.list = new ArrayList<>();
     }
 
     /**

@@ -273,7 +273,7 @@ public class StructureTFMajorFeatureStart extends StructureStart {
         shieldBox.maxY++;
         shieldBox.maxZ++;
 
-        ArrayList<StructureComponent> intersecting = new ArrayList<StructureComponent>();
+        ArrayList<StructureComponent> intersecting = new ArrayList<>();
 
         for (StructureComponent other : otherComponents) {
             if (other != component && shieldBox.intersectsWith(other.getBoundingBox())) {

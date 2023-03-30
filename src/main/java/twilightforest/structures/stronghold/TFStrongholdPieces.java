@@ -60,7 +60,7 @@ public class TFStrongholdPieces {
      * sets up Arrays with the Structure pieces and their weights
      */
     public void prepareStructurePieces() {
-        pieceList = new ArrayList<TFStrongholdPieceWeight>();
+        pieceList = new ArrayList<>();
 
         for (TFStrongholdPieceWeight piece : pieceWeightArray) {
             piece.instancesSpawned = 0;

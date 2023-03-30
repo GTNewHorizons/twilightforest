@@ -263,7 +263,7 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         int YSEARCH = 16;
         int ZSEARCH = 16;
 
-        ArrayList<IInventory> chests = new ArrayList<IInventory>();
+        ArrayList<IInventory> chests = new ArrayList<>();
         int itemCount = 0;
 
         for (int sx = x - XSEARCH; sx < x + XSEARCH; sx++) {

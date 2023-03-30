@@ -34,7 +34,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
 
     protected TFWorldChunkManager() {
         myBiomeCache = new BiomeCache(this);
-        myBiomesToSpawnIn = new ArrayList<BiomeGenBase>();
+        myBiomesToSpawnIn = new ArrayList<>();
         myBiomesToSpawnIn.add(TFBiomeBase.twilightForest);
         myBiomesToSpawnIn.add(TFBiomeBase.twilightForest2);
         myBiomesToSpawnIn.add(TFBiomeBase.clearing);

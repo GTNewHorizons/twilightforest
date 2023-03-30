@@ -37,7 +37,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
     protected int height;
     protected Class<? extends ComponentTFTowerRoof> roofType;
 
-    protected ArrayList<ChunkCoordinates> openings = new ArrayList<ChunkCoordinates>();
+    protected ArrayList<ChunkCoordinates> openings = new ArrayList<>();
     protected int highestOpening;
     protected boolean[] openingTowards = new boolean[] { false, false, true, false };
 
@@ -605,7 +605,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
         placeSpawnerAtCurrentPosition(world, rand, size / 2, bottom + 2, size / 2, "Skeleton", sbb);
 
         // floor-to-ceiling chains
-        ArrayList<ChunkCoordinates> chainList = new ArrayList<ChunkCoordinates>();
+        ArrayList<ChunkCoordinates> chainList = new ArrayList<>();
         chainList.add(new ChunkCoordinates(size / 2, bottom + 2, size / 2)); // don't block the spawner
         for (int i = 0; i < size + 2; i++) {
             ChunkCoordinates chain = new ChunkCoordinates(
@@ -657,7 +657,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
         }
 
         // slab tables
-        ArrayList<ChunkCoordinates> slabList = new ArrayList<ChunkCoordinates>();
+        ArrayList<ChunkCoordinates> slabList = new ArrayList<>();
         slabList.add(new ChunkCoordinates(size / 2, bottom + 2, size / 2)); // don't block the spawner
         for (int i = 0; i < size - 1; i++) {
             ChunkCoordinates slab = new ChunkCoordinates(
@@ -694,7 +694,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
         }
 
         // cacti
-        ArrayList<ChunkCoordinates> cactusList = new ArrayList<ChunkCoordinates>();
+        ArrayList<ChunkCoordinates> cactusList = new ArrayList<>();
         cactusList.add(new ChunkCoordinates(size / 2, bottom + 2, size / 2)); // don't block the spawner
         for (int i = 0; i < size + 12; i++) {
             ChunkCoordinates cactus = new ChunkCoordinates(
@@ -1317,7 +1317,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      */
     protected void decorateHangingChains(World world, Random rand, int decoTop, StructureBoundingBox sbb) {
         // a list of existing chains
-        ArrayList<ChunkCoordinates> chainList = new ArrayList<ChunkCoordinates>();
+        ArrayList<ChunkCoordinates> chainList = new ArrayList<>();
         // try size + 2 times to find a chain that does not collide
         for (int i = 0; i < size + 2; i++) {
             int filled = size < 15 ? 2 : 4;
@@ -1414,7 +1414,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      */
     protected void decorateFloatingBooks(World world, Random rand, int decoTop, StructureBoundingBox sbb) {
         // a list of existing bookshelves
-        ArrayList<ChunkCoordinates> shelfList = new ArrayList<ChunkCoordinates>();
+        ArrayList<ChunkCoordinates> shelfList = new ArrayList<>();
         // try size + 2 times to find a shelf that does not collide
         for (int i = 0; i < size + 2; i++) {
             int filled = size < 15 ? 2 : 4;
@@ -1441,7 +1441,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      */
     protected void decorateFloatingVines(World world, Random rand, int decoTop, StructureBoundingBox sbb) {
         // a list of existing blocks
-        ArrayList<ChunkCoordinates> mossList = new ArrayList<ChunkCoordinates>();
+        ArrayList<ChunkCoordinates> mossList = new ArrayList<>();
         // try size + 2 times to find a rock pillar that does not collide
         for (int i = 0; i < size + 2; i++) {
             int filled = size < 15 ? 2 : 4;
@@ -2224,7 +2224,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      * At least one of the painting's parameters must be the specified size or greater
      */
     protected EnumArt getPaintingOfSize(Random rand, int minSize) {
-        ArrayList<EnumArt> valid = new ArrayList<EnumArt>();
+        ArrayList<EnumArt> valid = new ArrayList<>();
 
         for (EnumArt art : EnumArt.values()) {
             if (art.sizeX >= minSize || art.sizeY >= minSize) {

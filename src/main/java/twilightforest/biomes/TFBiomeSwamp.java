@@ -34,7 +34,7 @@ public class TFBiomeSwamp extends TFBiomeBase {
 
     private static final int MONSTER_SPAWN_RATE = 20;
     Random monsterRNG = new Random(53439L);
-    ArrayList<SpawnListEntry> emptyList = new ArrayList<SpawnListEntry>();
+    ArrayList<SpawnListEntry> emptyList = new ArrayList<>();
 
     WorldGenVines worldgenvines = new WorldGenVines();
     WorldGenerator hugeLilyPadGen = new TFGenHugeLilyPad();

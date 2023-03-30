@@ -100,7 +100,7 @@ public class TFFeature {
     public static final TFFeature finalCastle = new TFFeature(19, 3, "Final Castle");
     public static final TFFeature mushroomTower = new TFFeature(20, 2, "Mushroom Tower");
 
-    ArrayList<SpawnListEntry> emptyList = new ArrayList<SpawnListEntry>();
+    ArrayList<SpawnListEntry> emptyList = new ArrayList<>();
 
     static {
         // spawn lists!
@@ -226,9 +226,9 @@ public class TFFeature {
         this.areChunkDecorationsEnabled = false;
         this.isStructureEnabled = true;
         this.isTerrainAltered = false;
-        this.spawnableMonsterLists = new ArrayList<List<SpawnListEntry>>();
-        this.ambientCreatureList = new ArrayList<SpawnListEntry>();
-        this.waterCreatureList = new ArrayList<SpawnListEntry>();
+        this.spawnableMonsterLists = new ArrayList<>();
+        this.ambientCreatureList = new ArrayList<>();
+        this.waterCreatureList = new ArrayList<>();
         this.hasProtectionAura = true;
 
         ambientCreatureList.add(new SpawnListEntry(EntityBat.class, 10, 8, 8));
@@ -270,7 +270,7 @@ public class TFFeature {
         if (this.spawnableMonsterLists.size() > listIndex) {
             monsterList = this.spawnableMonsterLists.get(listIndex);
         } else {
-            monsterList = new ArrayList<SpawnListEntry>();
+            monsterList = new ArrayList<>();
             this.spawnableMonsterLists.add(listIndex, monsterList);
         }
 

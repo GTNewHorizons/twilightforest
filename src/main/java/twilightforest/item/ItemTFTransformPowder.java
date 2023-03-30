@@ -48,7 +48,7 @@ public class ItemTFTransformPowder extends ItemTF {
         this.maxStackSize = 64;
         this.setCreativeTab(TFItems.creativeTab);
 
-        transformMap = new HashMap<Class<? extends EntityLivingBase>, Class<? extends EntityLivingBase>>();
+        transformMap = new HashMap<>();
 
         addTwoWayTransformation(EntityTFMinotaur.class, EntityPigZombie.class);
         addTwoWayTransformation(EntityTFDeer.class, EntityCow.class);

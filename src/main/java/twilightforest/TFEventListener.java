@@ -68,7 +68,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class TFEventListener {
 
-    protected HashMap<String, InventoryPlayer> playerKeepsMap = new HashMap<String, InventoryPlayer>();
+    protected HashMap<String, InventoryPlayer> playerKeepsMap = new HashMap<>();
     private boolean isBreakingWithGiantPick = false;
     private boolean shouldMakeGiantCobble = false;
     private int amountOfCobbleToReplace = 0;
@@ -258,8 +258,8 @@ public class TFEventListener {
         if (event.harvester != null && event.harvester.inventory.getCurrentItem() != null
                 && event.harvester.inventory.getCurrentItem().getItem().func_150897_b(event.block)) {
             if (event.harvester.inventory.getCurrentItem().getItem() == TFItems.fieryPick) {
-                ArrayList<ItemStack> removeThese = new ArrayList<ItemStack>(1);
-                ArrayList<ItemStack> addThese = new ArrayList<ItemStack>(1);
+                ArrayList<ItemStack> removeThese = new ArrayList<>(1);
+                ArrayList<ItemStack> addThese = new ArrayList<>(1);
 
                 for (ItemStack input : event.drops) {
                     // does it smelt?
