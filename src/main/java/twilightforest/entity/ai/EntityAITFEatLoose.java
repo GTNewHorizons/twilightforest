@@ -77,7 +77,6 @@ public class EntityAITFEatLoose extends EntityAIBase {
      */
     @Override
     public void startExecuting() {
-        ;
     }
 
     /**

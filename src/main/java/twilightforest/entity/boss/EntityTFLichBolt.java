@@ -134,7 +134,6 @@ public class EntityTFLichBolt extends EntityThrowable {
             // if we're not set to pass, damage what we hit
             if (!passThrough && par1MovingObjectPosition.entityHit
                     .attackEntityFrom(DamageSource.causeIndirectMagicDamage(this, this.getThrower()), 6)) {
-                ;
             }
         }
         // if we don't pass through, then stop and die

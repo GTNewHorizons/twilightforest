@@ -76,7 +76,6 @@ public class EntityTFRavenLookHelper extends EntityLookHelper {
         float var11;
 
         for (var11 = this.entity.rotationYawHead - this.entity.renderYawOffset; var11 < -180.0F; var11 += 360.0F) {
-            ;
         }
 
         while (var11 >= 180.0F) {
@@ -98,7 +97,6 @@ public class EntityTFRavenLookHelper extends EntityLookHelper {
         float var4;
 
         for (var4 = par2 - par1; var4 < -180.0F; var4 += 360.0F) {
-            ;
         }
 
         while (var4 >= 180.0F) {

@@ -61,7 +61,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         WAITING_FOR_LEADER,
         ATTACK_PLAYER_START,
         ATTACK_PLAYER_ATTACK
-    };
+    }
 
     public EntityTFKnightPhantom(World par1World) {
         super(par1World);

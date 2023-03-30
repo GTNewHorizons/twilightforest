@@ -88,13 +88,9 @@ public class RenderBlockTFMagicLeaves implements ISimpleBlockRenderingHandler {
                 renderer.uvRotateBottom = (x + y + z) & 3;
                 renderer.uvRotateTop = (x + y + z) & 3;
                 renderer.uvRotateEast = (x + y + z) & 3;
-                ;
                 renderer.uvRotateWest = (x + y + z) & 3;
-                ;
                 renderer.uvRotateNorth = (x + y + z) & 3;
-                ;
                 renderer.uvRotateSouth = (x + y + z) & 3;
-                ;
             }
         }
     }

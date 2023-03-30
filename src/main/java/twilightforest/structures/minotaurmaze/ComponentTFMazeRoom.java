@@ -29,7 +29,6 @@ public class ComponentTFMazeRoom extends StructureTFComponent {
      */
     @Override
     public void buildComponent(StructureComponent structurecomponent, List list, Random random) {
-        ;
     }
 
     @Override

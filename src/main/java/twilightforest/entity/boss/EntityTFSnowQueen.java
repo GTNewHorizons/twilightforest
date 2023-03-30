@@ -53,7 +53,7 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
         SUMMON,
         DROP,
         BEAM
-    };
+    }
 
     public Entity[] iceArray;
 

@@ -163,7 +163,7 @@ public class ComponentTFFinalCastleMural extends StructureTFComponent {
         }
         if (clear) {
             int bx = sx;
-            int by = sy + (plusY ? downLine : -downLine);;
+            int by = sy + (plusY ? downLine : -downLine);
 
             // jag
             this.fillHorizontalLine(mural, bx, by, 1, plusX);

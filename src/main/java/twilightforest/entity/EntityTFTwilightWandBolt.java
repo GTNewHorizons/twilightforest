@@ -60,7 +60,6 @@ public class EntityTFTwilightWandBolt extends EntityThrowable {
                 && par1MovingObjectPosition.entityHit instanceof EntityLivingBase) {
             if (par1MovingObjectPosition.entityHit
                     .attackEntityFrom(DamageSource.causeIndirectMagicDamage(this, this.getThrower()), 6)) {
-                ;
             }
         }
 

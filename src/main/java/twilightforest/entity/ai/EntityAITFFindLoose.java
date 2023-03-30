@@ -71,7 +71,6 @@ public class EntityAITFFindLoose extends EntityAIBase {
      */
     @Override
     public void startExecuting() {
-        ;
     }
 
     /**

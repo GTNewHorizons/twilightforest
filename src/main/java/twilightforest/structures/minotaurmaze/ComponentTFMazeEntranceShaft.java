@@ -32,7 +32,6 @@ public class ComponentTFMazeEntranceShaft extends StructureTFComponent {
      */
     @Override
     public void buildComponent(StructureComponent structurecomponent, List list, Random random) {
-        ;
     }
 
     @Override

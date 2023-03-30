@@ -21,7 +21,7 @@ public class StructureDecoratorDarkTower extends StructureTFDecorator {
         this.pillarID = TFBlocks.towerWood;
         this.pillarMeta = 1;
 
-        this.platformID = TFBlocks.towerWood;;
+        this.platformID = TFBlocks.towerWood;
         this.platformMeta = 1;
 
         this.randomBlocks = new StructureTFTowerWoods();

@@ -109,7 +109,6 @@ public class ModelTFTowerBoss extends ModelTFGhast {
      * @param i
      */
     protected void makeSmallTentacle(int num) {
-        ;
     }
 
     /**

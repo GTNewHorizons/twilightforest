@@ -549,12 +549,10 @@ public class TileEntityTFCinderFurnace extends TileEntity implements ISidedInven
 
     @Override
     public void openInventory() {
-        ;
     }
 
     @Override
     public void closeInventory() {
-        ;
     }
 
     @Override

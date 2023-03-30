@@ -109,6 +109,6 @@ public class BlockTFBossSpawner extends BlockContainer {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister par1IconRegister) {
-        ; // don't load anything
+        // don't load anything
     }
 }

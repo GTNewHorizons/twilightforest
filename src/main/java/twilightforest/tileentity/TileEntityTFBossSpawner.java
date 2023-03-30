@@ -16,7 +16,6 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
     protected Entity displayCreature = null;
 
     public TileEntityTFBossSpawner() {
-        ;
     }
 
     /**

@@ -1225,7 +1225,6 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
                     if (x != minX && x != maxX && y != minY && y != maxY && z != minZ && z != maxZ) {
-                        ;
                     } else {
                         // wall
                         if (((x == minY || x == maxX) && ((y == minY || y == maxY) || (z == minZ || z == maxZ)))
