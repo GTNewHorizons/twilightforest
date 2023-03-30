@@ -999,7 +999,7 @@ public class TFEventListener {
     public void commandSent(CommandEvent event) {
         if (event.command instanceof CommandGameRule && event.parameters.length > 1
                 && TwilightForestMod.ENFORCED_PROGRESSION_RULE.equals(event.parameters[0])) {
-            boolean isEnforced = Boolean.valueOf(event.parameters[1]);
+            boolean isEnforced = Boolean.parseBoolean(event.parameters[1]);
             TwilightForestMod.genericChannel
                     .sendToAll(TFGenericPacketHandler.makeEnforcedProgressionStatusPacket(isEnforced));
         }

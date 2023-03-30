@@ -293,7 +293,7 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
     protected void entityInit() {
         super.entityInit();
         dataWatcher.addObject(DATA_SPAWNHEADS, (byte) 0);
-        this.dataWatcher.addObject(DATA_BOSSHEALTH, new Integer(MAX_HEALTH));
+        this.dataWatcher.addObject(DATA_BOSSHEALTH, MAX_HEALTH);
     }
 
     public boolean shouldSpawnHeads() {

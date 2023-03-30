@@ -428,7 +428,7 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
                 : (this.aggroCounter > 0 || this.isAggressive) ? 1 : 0);
 
         if (currentAggroStatus != newAggroStatus) {
-            this.dataWatcher.updateObject(16, Byte.valueOf(newAggroStatus));
+            this.dataWatcher.updateObject(16, newAggroStatus);
         }
     }
 

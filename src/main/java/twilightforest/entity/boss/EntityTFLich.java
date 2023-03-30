@@ -93,7 +93,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
         this.dataWatcher.addObject(DATA_ISCLONE, (byte) 0);
         this.dataWatcher.addObject(DATA_SHIELDSTRENGTH, (byte) 0);
         this.dataWatcher.addObject(DATA_MINIONSLEFT, (byte) 0);
-        this.dataWatcher.addObject(DATA_BOSSHEALTH, new Integer(EntityTFLich.MAX_HEALTH));
+        this.dataWatcher.addObject(DATA_BOSSHEALTH, EntityTFLich.MAX_HEALTH);
         this.dataWatcher.addObject(DATA_ATTACKTYPE, (byte) 0);
     }
 

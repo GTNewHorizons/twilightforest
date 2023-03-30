@@ -38,7 +38,7 @@ public class ItemTFSpawnEgg extends ItemMonsterPlacer {
     @SideOnly(Side.CLIENT)
     @Override
     public int getColorFromItemStack(ItemStack itemStack, int par2) {
-        TFEntityEggInfo info = (TFEntityEggInfo) TFCreatures.entityEggs.get(Integer.valueOf(itemStack.getItemDamage()));
+        TFEntityEggInfo info = (TFEntityEggInfo) TFCreatures.entityEggs.get(itemStack.getItemDamage());
         return info != null ? (par2 == 0 ? info.primaryColor : info.secondaryColor) : 16777215;
     }
 
@@ -104,7 +104,7 @@ public class ItemTFSpawnEgg extends ItemMonsterPlacer {
     public static Entity spawnCreature(World world, int par1, double par2, double par4, double par6) {
         // System.out.println("Trying to spawn twilight egg");
 
-        if (!TFCreatures.entityEggs.containsKey(Integer.valueOf(par1))) {
+        if (!TFCreatures.entityEggs.containsKey(par1)) {
             return null;
         } else {
             Entity entityToSpawn = TFCreatures.createEntityByID(par1, world);
