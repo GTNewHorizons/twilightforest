@@ -69,15 +69,13 @@ public class MapGenTFHollowTree extends MapGenBase {
         int mapZ = (chunkZ << 4) + 8;
         boolean flag = false;
 
-        Iterator<StructureStart> iterator = this.structureMap.values().iterator();
-
-        while (iterator.hasNext()) {
-            StructureStart structurestart = iterator.next();
-
-            if (structurestart.isSizeableStructure()
-                    && structurestart.getBoundingBox().intersectsWith(mapX, mapZ, mapX + 15, mapZ + 15)) {
-                structurestart
-                        .generateStructure(world, rand, new StructureBoundingBox(mapX, mapZ, mapX + 15, mapZ + 15));
+        for (StructureStart structurestart : this.structureMap.values()) {
+            if (structurestart.isSizeableStructure() && structurestart.getBoundingBox()
+                    .intersectsWith(mapX, mapZ, mapX + 15, mapZ + 15)) {
+                structurestart.generateStructure(
+                        world,
+                        rand,
+                        new StructureBoundingBox(mapX, mapZ, mapX + 15, mapZ + 15));
                 flag = true;
             }
         }

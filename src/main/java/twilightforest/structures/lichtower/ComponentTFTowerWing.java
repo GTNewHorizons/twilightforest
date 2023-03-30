@@ -1080,9 +1080,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      * Although since there's usually only one opening, I guess it's not bad.
      */
     protected boolean isOpeningPos(int x, int y, int z) {
-        Iterator<ChunkCoordinates> itr = openings.iterator();
-        while (itr.hasNext()) {
-            ChunkCoordinates door = itr.next();
+        for (ChunkCoordinates door : openings) {
             // determine which wall we're at
             ChunkCoordinates inside = new ChunkCoordinates(door);
             if (inside.posX == 0) {
@@ -1341,9 +1339,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      * Return true if the specified coords are orthogonally adjacent to any other coords on the list.
      */
     protected boolean chainCollides(ChunkCoordinates coords, List<ChunkCoordinates> list) {
-        Iterator<ChunkCoordinates> itr = list.iterator();
-        while (itr.hasNext()) {
-            ChunkCoordinates existing = itr.next();
+        for (ChunkCoordinates existing : list) {
             // if x is within 1 and z is equal, we collide
             if (coords.posZ == existing.posZ && Math.abs(coords.posX - existing.posX) <= 1) {
                 return true;

@@ -124,10 +124,8 @@ public class ItemTFSpawnEgg extends ItemMonsterPlacer {
     // returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
     @Override
     public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList) {
-        Iterator<TFEntityEggInfo> var4 = TFCreatures.entityEggs.values().iterator();
 
-        while (var4.hasNext()) {
-            TFEntityEggInfo var5 = (TFEntityEggInfo) var4.next();
+        for (TFEntityEggInfo var5 : TFCreatures.entityEggs.values()) {
             itemList.add(new ItemStack(item, 1, var5.spawnedID));
         }
     }

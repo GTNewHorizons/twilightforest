@@ -48,19 +48,12 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     public int getSpawnListIndexAt(int par1, int par2, int par3) {
         int highestFoundIndex = -1;
 
-        Iterator startIterator = this.structureMap.values().iterator();
-
-        while (startIterator.hasNext()) {
-            StructureStart start = (StructureStart) startIterator.next();
-
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(par1, par3, par1, par3)) {
-                Iterator<StructureComponent> componentIterator = start.getComponents().iterator();
 
-                while (componentIterator.hasNext()) {
-                    StructureComponent component = (StructureComponent) componentIterator.next();
-
-                    if (component != null && component.getBoundingBox() != null
-                            && component.getBoundingBox().isVecInside(par1, par2, par3)) {
+                for (StructureComponent component : start.getComponents()) {
+                    if (component != null && component.getBoundingBox() != null && component.getBoundingBox()
+                            .isVecInside(par1, par2, par3)) {
                         if (component instanceof StructureTFComponent) {
                             StructureTFComponent tfComponent = (StructureTFComponent) component;
 
@@ -89,17 +82,10 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     public StructureBoundingBox getSBBAt(int mapX, int mapY, int mapZ) {
         StructureBoundingBox boxFound = null;
 
-        Iterator<StructureStart> startIterator = this.structureMap.values().iterator();
-
-        while (startIterator.hasNext()) {
-            StructureStart start = (StructureStart) startIterator.next();
-
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
-                Iterator<StructureComponent> componentIterator = start.getComponents().iterator();
 
-                while (componentIterator.hasNext()) {
-                    StructureComponent component = (StructureComponent) componentIterator.next();
-
+                for (StructureComponent component : start.getComponents()) {
                     if (component.getBoundingBox().isVecInside(mapX, mapY, mapZ)) {
                         boxFound = component.getBoundingBox();
                     }
@@ -117,17 +103,10 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     public boolean isBlockProtectedAt(int mapX, int mapY, int mapZ) {
         boolean blockProtected = false;
 
-        Iterator<StructureStart> startIterator = this.structureMap.values().iterator();
-
-        while (startIterator.hasNext()) {
-            StructureStart start = (StructureStart) startIterator.next();
-
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
-                Iterator<StructureComponent> componentIterator = start.getComponents().iterator();
 
-                while (componentIterator.hasNext()) {
-                    StructureComponent component = (StructureComponent) componentIterator.next();
-
+                for (StructureComponent component : start.getComponents()) {
                     if (component.getBoundingBox().isVecInside(mapX, mapY, mapZ)) {
 
                         if (component instanceof StructureTFComponent) {
