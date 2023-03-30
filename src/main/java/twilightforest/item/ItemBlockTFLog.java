@@ -33,13 +33,12 @@ public class ItemBlockTFLog extends ItemBlock {
         if ((meta & 8) == 0) {
             // wood
             int i = MathHelper.clamp_int(meta, 0, 7);
-            return (new StringBuilder()).append(super.getUnlocalizedName()).append(".").append(woodNames[i]).toString();
+            return super.getUnlocalizedName() + "." + woodNames[i];
         } else {
             // log
             meta &= 7;
             int i = MathHelper.clamp_int(meta, 0, 7);
-            return (new StringBuilder()).append(super.getUnlocalizedName()).append(".").append(woodNames[i])
-                    .append(".log").toString();
+            return super.getUnlocalizedName() + "." + woodNames[i] + ".log";
         }
     }
 
