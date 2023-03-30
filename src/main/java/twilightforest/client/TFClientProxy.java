@@ -658,28 +658,20 @@ public class TFClientProxy extends TFCommonProxy {
             // check for particle max distance
             if (distX * distX + distY * distY + distZ * distZ < maxDist * maxDist) {
 
-                if (particleType.equals("largeflame")) {
-                    particle = new EntityTFLargeFlameFX(world, x, y, z, velX, velY, velZ);
-                } else if (particleType.equals("hugesmoke")) {
-                    particle = new EntitySmokeFX(world, x, y, z, velX, velY, velZ, 8.0f);
-                } else if (particleType.equals("leafrune")) {
-                    particle = new EntityTFLeafRuneFX(world, x, y, z, velX, velY, velZ);
-                } else if (particleType.equals("bosstear")) {
-                    particle = new EntityTFBossTearFX(world, x, y, z, velX, velY, velZ, Items.ghast_tear);
-                } else if (particleType.equals("ghasttrap")) {
-                    particle = new EntityTFGhastTrapFX(world, x, y, z, velX, velY, velZ);
-                } else if (particleType.equals("protection")) {
-                    particle = new EntityTFProtectionFX(world, x, y, z, velX, velY, velZ);
-                } else if (particleType.equals("snowstuff")) {
-                    particle = new EntityTFSnowFX(world, x, y, z, velX, velY, velZ);
-                } else if (particleType.equals("snowwarning")) {
-                    particle = new EntityTFSnowWarningFX(world, x, y, z, velX, velY, velZ, 1F);
-                } else if (particleType.equals("snowguardian")) {
-                    particle = new EntityTFSnowGuardianFX(world, x, y, z, velX, velY, velZ, 0.75F);
-                } else if (particleType.equals("icebeam")) {
-                    particle = new EntityTFIceBeamFX(world, x, y, z, velX, velY, velZ, 0.75F);
-                } else if (particleType.equals("annihilate")) {
-                    particle = new EntityTFAnnihilateFX(world, x, y, z, velX, velY, velZ, 0.75F);
+                switch (particleType) {
+                    case "largeflame" -> particle = new EntityTFLargeFlameFX(world, x, y, z, velX, velY, velZ);
+                    case "hugesmoke" -> particle = new EntitySmokeFX(world, x, y, z, velX, velY, velZ, 8.0f);
+                    case "leafrune" -> particle = new EntityTFLeafRuneFX(world, x, y, z, velX, velY, velZ);
+                    case "bosstear" ->
+                            particle = new EntityTFBossTearFX(world, x, y, z, velX, velY, velZ, Items.ghast_tear);
+                    case "ghasttrap" -> particle = new EntityTFGhastTrapFX(world, x, y, z, velX, velY, velZ);
+                    case "protection" -> particle = new EntityTFProtectionFX(world, x, y, z, velX, velY, velZ);
+                    case "snowstuff" -> particle = new EntityTFSnowFX(world, x, y, z, velX, velY, velZ);
+                    case "snowwarning" -> particle = new EntityTFSnowWarningFX(world, x, y, z, velX, velY, velZ, 1F);
+                    case "snowguardian" ->
+                            particle = new EntityTFSnowGuardianFX(world, x, y, z, velX, velY, velZ, 0.75F);
+                    case "icebeam" -> particle = new EntityTFIceBeamFX(world, x, y, z, velX, velY, velZ, 0.75F);
+                    case "annihilate" -> particle = new EntityTFAnnihilateFX(world, x, y, z, velX, velY, velZ, 0.75F);
                 }
 
                 // if we made a partcle, go ahead and add it
