@@ -237,7 +237,7 @@ public class ContainerTFUncrafting extends Container {
                 if (input.isItemEnchanted()) {
                     inputEnchantments = EnchantmentHelper.getEnchantments(input);
                     for (Object key : inputEnchantments.keySet()) {
-                        int enchID = ((Integer) key).intValue();
+                        int enchID = (Integer) key;
                         // int level = ((Integer)inputEnchantments.get(key)).intValue();
                         Enchantment ench = Enchantment.enchantmentsList[enchID];
 
@@ -269,8 +269,8 @@ public class ContainerTFUncrafting extends Container {
                 // finally, add any innate enchantments back onto the result
                 if (resultInnateEnchantments != null && resultInnateEnchantments.size() > 0) {
                     for (Object key : resultInnateEnchantments.keySet()) {
-                        int enchID = ((Integer) key).intValue();
-                        int level = ((Integer) resultInnateEnchantments.get(key)).intValue();
+                        int enchID = (Integer) key;
+                        int level = (Integer) resultInnateEnchantments.get(key);
                         Enchantment ench = Enchantment.enchantmentsList[enchID];
 
                         if (EnchantmentHelper.getEnchantmentLevel(enchID, result) > level) {
@@ -786,8 +786,7 @@ public class ContainerTFUncrafting extends Container {
      */
     public int getRecipeWidthOre(ShapedOreRecipe shaped) {
         try {
-            return ((Integer) (ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, shaped, 4)))
-                    .intValue();
+            return (Integer) (ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, shaped, 4));
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (SecurityException e) {
@@ -835,8 +834,7 @@ public class ContainerTFUncrafting extends Container {
      */
     public int getRecipeHeightOre(ShapedOreRecipe shaped) {
         try {
-            return ((Integer) (ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, shaped, 5)))
-                    .intValue();
+            return (Integer) (ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, shaped, 5));
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (SecurityException e) {
