@@ -1,5 +1,6 @@
 package twilightforest.client.renderer;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,9 +41,7 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
         this.textureLoc = par2TextureManager.getDynamicTextureLocation("map", this.bufferedImage);
         this.intArray = this.bufferedImage.getTextureData();
 
-        for (int i = 0; i < this.intArray.length; ++i) {
-            this.intArray[i] = 0;
-        }
+        Arrays.fill(this.intArray, 0);
     }
 
     /**

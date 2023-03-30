@@ -17,6 +17,8 @@ import net.minecraft.world.World;
 import twilightforest.entity.ai.EntityAITFGiantAttackOnCollide;
 import twilightforest.item.TFItems;
 
+import java.util.Arrays;
+
 public class EntityTFGiantMiner extends EntityMob {
 
     public EntityTFGiantMiner(World par1World) {
@@ -34,9 +36,7 @@ public class EntityTFGiantMiner extends EntityMob {
 
         this.setCurrentItemOrArmor(0, new ItemStack(Items.stone_pickaxe));
 
-        for (int i = 0; i < this.equipmentDropChances.length; ++i) {
-            this.equipmentDropChances[i] = 0F;
-        }
+        Arrays.fill(this.equipmentDropChances, 0F);
     }
 
     protected void applyEntityAttributes() {
