@@ -92,7 +92,7 @@ public class StructureTFMajorFeatureStart extends StructureStart {
         updateBoundingBox();
 
         if (firstComponent instanceof StructureStrongholdPieces.Stairs2) {
-            List var6 = ((StructureStrongholdPieces.Stairs2) firstComponent).field_75026_c;
+            List<StructureComponent> var6 = ((StructureStrongholdPieces.Stairs2) firstComponent).field_75026_c;
 
             while (!var6.isEmpty()) {
                 int var7 = rand.nextInt(var6.size());

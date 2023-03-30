@@ -3,6 +3,7 @@ package twilightforest.entity;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -163,7 +164,7 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
 
             if (this.isReturning()) {
                 // if we are returning, and are near enough to the player, then we are done
-                List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(
+                List<Entity> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(
                         this,
                         this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
 

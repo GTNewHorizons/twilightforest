@@ -268,7 +268,7 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
 
         // on the client, if we are not attached, assume we have just spawned, and attach to the player
         if (this.worldObj.isRemote && !this.isAttached) {
-            List nearbyEntities = this.worldObj.getEntitiesWithinAABBExcludingEntity(
+            List<Entity> nearbyEntities = this.worldObj.getEntitiesWithinAABBExcludingEntity(
                     this,
                     this.boundingBox.addCoord(-this.motionX, -this.motionY, -this.motionZ).expand(2.0D, 2.0D, 2.0D));
             for (Object nearbyEntity : nearbyEntities) {

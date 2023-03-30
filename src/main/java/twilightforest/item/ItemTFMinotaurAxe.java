@@ -110,7 +110,7 @@ public class ItemTFMinotaurAxe extends ItemAxe {
      * Gets a map of item attribute modifiers, used by ItemSword to increase hit damage.
      */
     public Multimap getItemAttributeModifiers() {
-        Multimap multimap = super.getItemAttributeModifiers();
+        Multimap<String, AttributeModifier> multimap = super.getItemAttributeModifiers();
         // remove old damage value
         multimap.removeAll(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName());
         // add new one
