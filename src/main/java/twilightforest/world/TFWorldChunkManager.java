@@ -62,8 +62,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
     /**
      * Gets the list of valid biomes for the player to spawn in.
      */
-    @SuppressWarnings("rawtypes")
-    public List getBiomesToSpawnIn() {
+    public List<BiomeGenBase> getBiomesToSpawnIn() {
         return myBiomesToSpawnIn;
     }
 

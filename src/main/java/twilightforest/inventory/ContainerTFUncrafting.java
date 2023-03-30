@@ -233,11 +233,11 @@ public class ContainerTFUncrafting extends Container {
                 }
 
                 // check if the input enchantments can even go onto the result item
-                Map inputEnchantments = null;
+                Map<Integer, Integer> inputEnchantments = null;
                 if (input.isItemEnchanted()) {
                     inputEnchantments = EnchantmentHelper.getEnchantments(input);
-                    for (Object key : inputEnchantments.keySet()) {
-                        int enchID = (Integer) key;
+                    for (Integer key : inputEnchantments.keySet()) {
+                        int enchID = key;
                         // int level = ((Integer)inputEnchantments.get(key)).intValue();
                         Enchantment ench = Enchantment.enchantmentsList[enchID];
 

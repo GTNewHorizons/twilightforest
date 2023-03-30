@@ -16,6 +16,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.ColorizerFoliage;
 import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenShrub;
 import net.minecraft.world.gen.feature.WorldGenTallGrass;
@@ -138,9 +139,8 @@ public class TFBiomeSwamp extends TFBiomeBase {
     /**
      * Returns the correspondent list of the EnumCreatureType informed.
      */
-    @SuppressWarnings("rawtypes")
     @Override
-    public List getSpawnableList(EnumCreatureType par1EnumCreatureType) {
+    public List<BiomeGenBase.SpawnListEntry> getSpawnableList(EnumCreatureType par1EnumCreatureType) {
         // if is is monster, then only give it the real list 1/MONSTER_SPAWN_RATE of the time
         if (par1EnumCreatureType == EnumCreatureType.monster) {
             return monsterRNG.nextInt(MONSTER_SPAWN_RATE) == 0 ? this.spawnableMonsterList : emptyList;

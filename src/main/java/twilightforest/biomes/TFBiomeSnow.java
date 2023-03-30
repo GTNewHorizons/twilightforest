@@ -13,6 +13,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.stats.Achievement;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
@@ -83,9 +84,8 @@ public class TFBiomeSnow extends TFBiomeBase {
     /**
      * Returns the correspondent list of the EnumCreatureType informed.
      */
-    @SuppressWarnings("rawtypes")
     @Override
-    public List getSpawnableList(EnumCreatureType par1EnumCreatureType) {
+    public List<BiomeGenBase.SpawnListEntry> getSpawnableList(EnumCreatureType par1EnumCreatureType) {
         // if is is monster, then only give it the real list 1/MONSTER_SPAWN_RATE of the time
         if (par1EnumCreatureType == EnumCreatureType.monster) {
             return monsterRNG.nextInt(MONSTER_SPAWN_RATE) == 0 ? this.spawnableMonsterList : emptyList;

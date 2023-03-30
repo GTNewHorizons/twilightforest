@@ -90,8 +90,7 @@ public class TFStrongholdPieces {
         return flag;
     }
 
-    @SuppressWarnings("rawtypes")
-    public StructureTFStrongholdComponent getNextComponent(StructureComponent parent, List list, Random random,
+    public StructureTFStrongholdComponent getNextComponent(StructureComponent parent, List<StructureComponent> list, Random random,
             int index, int facing, int x, int y, int z) {
         if (!hasMoreLimitedPieces()) {
             return null;
