@@ -32,44 +32,32 @@ public class MapGenTFHollowTree extends MapGenBase {
      * generation, the structure generator can avoid generating structures that intersect ones that have already been
      * placed.
      */
-    protected Map<Long, StructureStart> structureMap = new HashMap<Long, StructureStart>();
+    protected Map<Long, StructureStart> structureMap = new HashMap<>();
 
     /**
      * Generate recursively
      */
     protected void func_151538_a(World world, final int chunkX, final int chunkZ, int centerX, int centerZ,
             Block[] blockData) {
-        if (!this.structureMap.containsKey(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ)))) {
+        if (!this.structureMap.containsKey(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ))) {
             this.rand.nextInt();
 
             try {
                 if (this.canSpawnStructureAtCoords(chunkX, chunkZ)) {
                     StructureStart structurestart = this.getStructureStart(chunkX, chunkZ);
-                    this.structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ)), structurestart);
+                    this.structureMap.put(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ), structurestart);
                 }
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception preparing hollow tree");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Feature being prepared");
-                crashreportcategory.addCrashSectionCallable("Is feature chunk", new Callable() {
-
-                    public String call() {
-                        return MapGenTFHollowTree.this.canSpawnStructureAtCoords(chunkX, chunkZ) ? "True" : "False";
-                    }
-                });
+                crashreportcategory.addCrashSectionCallable("Is feature chunk",
+                        () -> MapGenTFHollowTree.this.canSpawnStructureAtCoords(chunkX, chunkZ) ? "True" : "False");
                 crashreportcategory
-                        .addCrashSection("Chunk location", String.format("%d,%d", new Object[] { chunkX, chunkZ }));
-                crashreportcategory.addCrashSectionCallable("Chunk pos hash", new Callable() {
-
-                    public String call() {
-                        return String.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ));
-                    }
-                });
-                crashreportcategory.addCrashSectionCallable("Structure type", new Callable() {
-
-                    public String call() {
-                        return MapGenTFHollowTree.this.getClass().getCanonicalName();
-                    }
-                });
+                        .addCrashSection("Chunk location", String.format("%d,%d", chunkX, chunkZ));
+                crashreportcategory.addCrashSectionCallable("Chunk pos hash",
+                        () -> String.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ)));
+                crashreportcategory.addCrashSectionCallable("Structure type",
+                        () -> MapGenTFHollowTree.this.getClass().getCanonicalName());
                 throw new ReportedException(crashreport);
             }
         }
@@ -99,9 +87,16 @@ public class MapGenTFHollowTree extends MapGenBase {
 
     /** A list of all the biomes twilight oaks can spawn in. */
     public static List<BiomeGenBase> oakSpawnBiomes = Arrays.asList(
-            new BiomeGenBase[] { TFBiomeBase.twilightForest, TFBiomeBase.twilightForest2, TFBiomeBase.mushrooms,
-                    TFBiomeBase.tfSwamp, TFBiomeBase.clearing, TFBiomeBase.oakSavanna, TFBiomeBase.fireflyForest,
-                    TFBiomeBase.deepMushrooms, TFBiomeBase.enchantedForest, TFBiomeBase.fireSwamp });
+            TFBiomeBase.twilightForest,
+            TFBiomeBase.twilightForest2,
+            TFBiomeBase.mushrooms,
+            TFBiomeBase.tfSwamp,
+            TFBiomeBase.clearing,
+            TFBiomeBase.oakSavanna,
+            TFBiomeBase.fireflyForest,
+            TFBiomeBase.deepMushrooms,
+            TFBiomeBase.enchantedForest,
+            TFBiomeBase.fireSwamp);
 
     protected boolean canSpawnStructureAtCoords(int chunkX, int chunkZ) {
         return rand.nextInt(TwilightForestMod.twilightOakChance) == 0
