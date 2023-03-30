@@ -26,10 +26,10 @@ public class EntityAITFFlockTarget extends EntityAITarget {
     @SuppressWarnings("unchecked")
     @Override
     public boolean shouldExecute() {
-        List<EntityLivingBase> flockList = this.flockCreature.worldObj.getEntitiesWithinAABB(
+        List<? extends EntityLivingBase> flockList = this.flockCreature.worldObj.getEntitiesWithinAABB(
                 this.flockCreature.getClass(),
                 this.flockCreature.boundingBox.expand(16.0D, 4.0D, 16.0D));
-        List<EntityLivingBase> targetList = new ArrayList<EntityLivingBase>();
+        List<EntityLivingBase> targetList = new ArrayList<>();
 
         for (EntityLivingBase flocker : flockList) {
             if (flocker.getAITarget() != null) {

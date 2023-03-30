@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
@@ -258,14 +258,13 @@ public class TFFeature {
     }
 
     // Add a monster to spawn list 0
-    public TFFeature addMonster(Class<? extends EntityLivingBase> monsterClass, int weight, int minGroup,
-            int maxGroup) {
+    public TFFeature addMonster(Class<? extends EntityLiving> monsterClass, int weight, int minGroup, int maxGroup) {
         this.addMonster(0, monsterClass, weight, minGroup, maxGroup);
         return this;
     }
 
     // Add a monster to a specific spawn list
-    public TFFeature addMonster(int listIndex, Class<? extends EntityLivingBase> monsterClass, int weight, int minGroup,
+    public TFFeature addMonster(int listIndex, Class<? extends EntityLiving> monsterClass, int weight, int minGroup,
             int maxGroup) {
         List<SpawnListEntry> monsterList;
         if (this.spawnableMonsterLists.size() > listIndex) {
@@ -280,7 +279,7 @@ public class TFFeature {
     }
 
     // Add a water creature
-    public TFFeature addWaterCreature(Class<? extends EntityLivingBase> monsterClass, int weight, int minGroup,
+    public TFFeature addWaterCreature(Class<? extends EntityLiving> monsterClass, int weight, int minGroup,
             int maxGroup) {
         this.waterCreatureList.add(new SpawnListEntry(monsterClass, weight, minGroup, maxGroup));
         return this;

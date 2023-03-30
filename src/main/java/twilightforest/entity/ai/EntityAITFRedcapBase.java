@@ -2,7 +2,6 @@ package twilightforest.entity.ai;
 
 import java.util.List;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityTNTPrimed;
@@ -69,7 +68,7 @@ public abstract class EntityAITFRedcapBase extends EntityAIBase {
     public boolean isLitTNTNearby(int range) {
         AxisAlignedBB expandedBox = entityObj.boundingBox.expand(range, range, range);
 
-        List<Entity> nearbyTNT = entityObj.worldObj.getEntitiesWithinAABB(EntityTNTPrimed.class, expandedBox);
+        List<EntityTNTPrimed> nearbyTNT = entityObj.worldObj.getEntitiesWithinAABB(EntityTNTPrimed.class, expandedBox);
 
         return nearbyTNT.size() > 0;
     }

@@ -639,7 +639,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     @SuppressWarnings("unchecked")
     protected void despawnClones() {
         List<EntityTFLich> nearbyLiches = worldObj.getEntitiesWithinAABB(
-                this.getClass(),
+                EntityTFLich.class,
                 AxisAlignedBB.getBoundingBox(posX, posY, posZ, posX + 1, posY + 1, posZ + 1)
                         .expand(32.0D, 16.0D, 32.0D));
 
