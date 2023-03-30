@@ -54,8 +54,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
                 for (StructureComponent component : start.getComponents()) {
                     if (component != null && component.getBoundingBox() != null && component.getBoundingBox()
                             .isVecInside(par1, par2, par3)) {
-                        if (component instanceof StructureTFComponent) {
-                            StructureTFComponent tfComponent = (StructureTFComponent) component;
+                        if (component instanceof StructureTFComponent tfComponent) {
 
                             // System.out.println("found a tfComponent at the specified coordinates. It's a " +
                             // tfComponent + ",
@@ -109,8 +108,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
                 for (StructureComponent component : start.getComponents()) {
                     if (component.getBoundingBox().isVecInside(mapX, mapY, mapZ)) {
 
-                        if (component instanceof StructureTFComponent) {
-                            StructureTFComponent tfComp = (StructureTFComponent) component;
+                        if (component instanceof StructureTFComponent tfComp) {
 
                             blockProtected = tfComp.isComponentProtected();
 
@@ -138,9 +136,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
 
         for (StructureStart start : (Collection<StructureStart>) this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
-                if (start instanceof StructureTFMajorFeatureStart) {
-
-                    StructureTFMajorFeatureStart featureStart = (StructureTFMajorFeatureStart) start;
+                if (start instanceof StructureTFMajorFeatureStart featureStart) {
 
                     // System.out.println("The data says that the conquered flag is " + featureStart.isConquered);
 

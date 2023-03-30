@@ -123,8 +123,7 @@ public class TFTickHandler {
         BiomeGenBase currentBiome = world
                 .getBiomeGenForCoords(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posZ));
 
-        if (currentBiome instanceof TFBiomeBase) {
-            TFBiomeBase tfBiome = (TFBiomeBase) currentBiome;
+        if (currentBiome instanceof TFBiomeBase tfBiome) {
 
             boolean dangerousBiome = !tfBiome.doesPlayerHaveRequiredAchievement(player);
             if (dangerousBiome) {

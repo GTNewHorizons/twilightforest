@@ -92,8 +92,7 @@ public class TFMagicMapData extends MapData {
             int worldX = (coord.centerX << this.scale - 1) + this.xCenter;
             int worldZ = (coord.centerZ << this.scale - 1) + this.zCenter;
 
-            if (world != null && world.getWorldChunkManager() instanceof TFWorldChunkManager) {
-                TFWorldChunkManager tfManager = (TFWorldChunkManager) world.getWorldChunkManager();
+            if (world != null && world.getWorldChunkManager() instanceof TFWorldChunkManager tfManager) {
                 coord.iconSize = (byte) tfManager.getFeatureID(worldX, worldZ, world);
 
                 if (coord.iconSize == 0) {

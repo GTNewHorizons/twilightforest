@@ -486,9 +486,8 @@ public class TFEventListener {
      */
     @SubscribeEvent
     public void livingDies(LivingDeathEvent event) {
-        if (event.entityLiving instanceof EntityPlayer
+        if (event.entityLiving instanceof EntityPlayer player
                 && !event.entityLiving.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
-            EntityPlayer player = (EntityPlayer) event.entityLiving;
 
             // TODO: Add support for keeping Bauble slot items on all tiers
             if (player.inventory.consumeInventoryItem(TFItems.charmOfKeeping3)) {
@@ -739,8 +738,7 @@ public class TFEventListener {
                                         && blockThere == event.block
                                         && metaThere == event.blockMetadata) {
                                     // try to break that block too!
-                                    if (event.getPlayer() instanceof EntityPlayerMP) {
-                                        EntityPlayerMP playerMP = (EntityPlayerMP) event.getPlayer();
+                                    if (event.getPlayer() instanceof EntityPlayerMP playerMP) {
 
                                         playerMP.theItemInWorldManager.tryHarvestBlock(bx + dx, by + dy, bz + dz);
                                     }

@@ -199,8 +199,7 @@ public class ItemTFMazeMap extends ItemMap {
         if (!par2World.isRemote) {
             TFMazeMapData mapData = this.getMapData(par1ItemStack, par2World);
 
-            if (par3Entity instanceof EntityPlayer) {
-                EntityPlayer player = (EntityPlayer) par3Entity;
+            if (par3Entity instanceof EntityPlayer player) {
                 mapData.updateVisiblePlayers(player, par1ItemStack);
 
                 int yProximity = MathHelper.floor_double(player.posY - mapData.yCenter);

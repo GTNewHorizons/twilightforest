@@ -35,8 +35,7 @@ public class RenderTFCharm extends Render {
      * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
      */
     public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9) {
-        if (par1Entity instanceof EntityTFCharmEffect) {
-            EntityTFCharmEffect charm = (EntityTFCharmEffect) par1Entity;
+        if (par1Entity instanceof EntityTFCharmEffect charm) {
             if (charm.getItemID() > 0) {
                 // this.itemIcon = Items.itemsList[charm.getItemID()].getIconFromDamage(0);
                 this.itemIcon = TFItems.charmOfKeeping1.getIconFromDamage(0);

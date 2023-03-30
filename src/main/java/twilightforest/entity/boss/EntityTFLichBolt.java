@@ -126,8 +126,7 @@ public class EntityTFLichBolt extends EntityThrowable {
         // only damage living things
         if (par1MovingObjectPosition.entityHit != null
                 && par1MovingObjectPosition.entityHit instanceof EntityLivingBase) {
-            if (par1MovingObjectPosition.entityHit instanceof EntityTFLich) {
-                EntityTFLich lich = (EntityTFLich) par1MovingObjectPosition.entityHit;
+            if (par1MovingObjectPosition.entityHit instanceof EntityTFLich lich) {
                 if (lich.isShadowClone()) {
                     passThrough = true;
                 }

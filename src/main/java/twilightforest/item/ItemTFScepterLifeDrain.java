@@ -131,8 +131,7 @@ public class ItemTFScepterLifeDrain extends ItemTF {
             // is the player looking at an entity
             Entity pointedEntity = getPlayerLookTarget(worldObj, player);
 
-            if (pointedEntity != null && pointedEntity instanceof EntityLivingBase) {
-                EntityLivingBase target = (EntityLivingBase) pointedEntity;
+            if (pointedEntity != null && pointedEntity instanceof EntityLivingBase target) {
 
                 if (target.getActivePotionEffect(Potion.moveSlowdown) != null || target.getHealth() < 1) {
 

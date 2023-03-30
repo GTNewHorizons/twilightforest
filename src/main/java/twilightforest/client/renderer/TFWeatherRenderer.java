@@ -813,9 +813,7 @@ public class TFWeatherRenderer extends IRenderHandler {
         for (int z = pz - range; z <= pz + range; ++z) {
             for (int x = px - range; x <= px + range; ++x) {
                 BiomeGenBase biomegenbase = world.getBiomeGenForCoords(x, z);
-                if (biomegenbase instanceof TFBiomeBase && viewEntity instanceof EntityPlayer) {
-                    TFBiomeBase tfBiome = (TFBiomeBase) biomegenbase;
-                    EntityPlayer player = (EntityPlayer) viewEntity;
+                if (biomegenbase instanceof TFBiomeBase tfBiome && viewEntity instanceof EntityPlayer player) {
                     if (!tfBiome.doesPlayerHaveRequiredAchievement(player)) {
                         return true;
                     }

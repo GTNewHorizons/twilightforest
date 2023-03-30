@@ -1092,8 +1092,7 @@ public class HydraHeadContainer {
      */
     public void faceEntity(Entity entity, float yawConstraint, float pitchConstraint) {
         double yTarget;
-        if (entity instanceof EntityLivingBase) {
-            EntityLivingBase entityliving = (EntityLivingBase) entity;
+        if (entity instanceof EntityLivingBase entityliving) {
             yTarget = entityliving.posY + entityliving.getEyeHeight();
         } else {
             yTarget = (entity.boundingBox.minY + entity.boundingBox.maxY) / 2D;

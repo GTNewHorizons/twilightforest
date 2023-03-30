@@ -67,8 +67,7 @@ public class EntitySeekerArrow extends EntityArrow {
                 double closestDot = 1;
 
                 for (Object thing : targets) {
-                    if (thing instanceof EntityLivingBase && !(thing instanceof EntityPlayer)) {
-                        EntityLivingBase living = (EntityLivingBase) thing;
+                    if (thing instanceof EntityLivingBase living && !(thing instanceof EntityPlayer)) {
 
                         // cpw.mods.fml.common.FMLLog.info("Possible target : " + living);
                         // cpw.mods.fml.common.FMLLog.info("Selection box = " + targetBB);

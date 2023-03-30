@@ -191,8 +191,7 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
         // go through list. if there are any same size towers within wingSize, return their xyz instead
 
         for (Object obj : list) {
-            if (obj instanceof ComponentTFTowerWing && !(obj instanceof ComponentTFMushroomTowerBridge)) {
-                ComponentTFTowerWing otherWing = (ComponentTFTowerWing) obj;
+            if (obj instanceof ComponentTFTowerWing otherWing && !(obj instanceof ComponentTFMushroomTowerBridge)) {
 
                 if (wingSize == otherWing.size
                         && otherWing.getBoundingBox().intersectsWith(x - 3, z - 3, x + 3, z + 3)) {
@@ -234,9 +233,8 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
         boxAbove.maxY = 256;
 
         for (Object obj : list) {
-            if (this != obj && obj instanceof ComponentTFTowerWing
+            if (this != obj && obj instanceof ComponentTFTowerWing otherWing
                     && !(obj instanceof ComponentTFMushroomTowerBridge)) {
-                ComponentTFTowerWing otherWing = (ComponentTFTowerWing) obj;
 
                 if (size == otherWing.size && otherWing.getBoundingBox().intersectsWith(boxAbove)) {
                     // System.out.println("This tower (" + boundingBox + ") is not the highest, there is " + otherWing +

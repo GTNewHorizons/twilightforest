@@ -103,8 +103,7 @@ public class EntityTFFallingIce extends Entity {
             ArrayList<Entity> nearby = new ArrayList<>(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox));
 
             for (Entity entity : nearby) {
-                if (entity instanceof EntityTFFallingIce) {
-                    EntityTFFallingIce otherIce = (EntityTFFallingIce) entity;
+                if (entity instanceof EntityTFFallingIce otherIce) {
 
                     if (otherIce.getFallTime() < this.fallTime) {
                         otherIce.setDead();

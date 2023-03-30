@@ -522,8 +522,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
                         .expand(32.0D, 16.0D, 32.0D));
 
         for (Entity entity : nearbyMobs) {
-            if (entity instanceof EntityLiving && canPop(entity) && canEntityBeSeen(entity)) {
-                EntityLiving mob = (EntityLiving) entity;
+            if (entity instanceof EntityLiving mob && canPop(entity) && canEntityBeSeen(entity)) {
 
                 if (!worldObj.isRemote) {
                     mob.setDead();

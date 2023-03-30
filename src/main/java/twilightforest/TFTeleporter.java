@@ -96,9 +96,7 @@ public class TFTeleporter extends Teleporter {
     boolean isSafeBiomeAt(int x, int z, Entity entity) {
         BiomeGenBase biomeAt = myWorld.getBiomeGenForCoords(x, z);
 
-        if (biomeAt instanceof TFBiomeBase && entity instanceof EntityPlayerMP) {
-            TFBiomeBase tfBiome = (TFBiomeBase) biomeAt;
-            EntityPlayerMP player = (EntityPlayerMP) entity;
+        if (biomeAt instanceof TFBiomeBase tfBiome && entity instanceof EntityPlayerMP player) {
 
             return tfBiome.doesPlayerHaveRequiredAchievement(player);
 

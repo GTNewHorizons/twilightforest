@@ -97,8 +97,7 @@ public class BlockTFUberousSoil extends Block implements IGrowable {
             world.setBlock(x, y, z, Blocks.dirt);
         }
 
-        if (above instanceof IPlantable) {
-            IPlantable plant = (IPlantable) above;
+        if (above instanceof IPlantable plant) {
             // revert to farmland or grass
             if (plant.getPlantType(world, x, y + 1, z) == EnumPlantType.Crop) {
                 world.setBlock(x, y, z, Blocks.farmland, 2, 2);

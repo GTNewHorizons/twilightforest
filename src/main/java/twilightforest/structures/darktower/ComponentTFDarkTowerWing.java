@@ -953,8 +953,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
         int dz = getZWithOffset(x, z);
         if (sbb.isVecInside(dx, dy, dz)) {
             TileEntity tileEntity = world.getTileEntity(dx, dy, dz);
-            if (tileEntity != null && tileEntity instanceof IInventory) {
-                IInventory inventory = (IInventory) tileEntity;
+            if (tileEntity != null && tileEntity instanceof IInventory inventory) {
 
                 // check to see if the item is there, also count empty slots
                 boolean alreadyPresent = false;

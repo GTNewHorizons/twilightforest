@@ -153,8 +153,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
             int smallTowers = 0;
 
             for (Object piece : list) {
-                if (piece instanceof ComponentTFDarkTowerWing) {
-                    ComponentTFDarkTowerWing wing = (ComponentTFDarkTowerWing) piece;
+                if (piece instanceof ComponentTFDarkTowerWing wing) {
 
                     if (wing.size == 9 && wing.getComponentType() == this.getComponentType()) {
                         // System.out.println("I found one of my small towers! Its type is " + wing.getComponentType() +

@@ -234,10 +234,9 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
     }
 
     public boolean isReturning() {
-        if (this.hasHitObstacle || this.getThrower() == null || !(this.getThrower() instanceof EntityPlayer)) {
+        if (this.hasHitObstacle || this.getThrower() == null || !(this.getThrower() instanceof EntityPlayer player)) {
             return true;
         } else {
-            EntityPlayer player = (EntityPlayer) this.getThrower();
 
             return !player.isUsingItem();
         }

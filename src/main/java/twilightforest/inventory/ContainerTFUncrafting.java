@@ -342,9 +342,8 @@ public class ContainerTFUncrafting extends Container {
             return true;
         }
 
-        if (inputStack.getItem() instanceof ItemArmor && resultStack.getItem() instanceof ItemArmor) {
-            ItemArmor inputArmor = (ItemArmor) inputStack.getItem();
-            ItemArmor resultArmor = (ItemArmor) resultStack.getItem();
+        if (inputStack.getItem() instanceof ItemArmor inputArmor
+                && resultStack.getItem() instanceof ItemArmor resultArmor) {
 
             return inputArmor.armorType == resultArmor.armorType;
         }

@@ -100,8 +100,7 @@ public class ItemTFTrophy extends ItemTF {
 
                 TileEntity tileEntity = world.getTileEntity(x, y, z);
 
-                if (tileEntity != null && tileEntity instanceof TileEntitySkull) {
-                    TileEntitySkull skull = ((TileEntitySkull) tileEntity);
+                if (tileEntity != null && tileEntity instanceof TileEntitySkull skull) {
 
                     // use NBT method to set skulltype in order to have 1.7.10 compatibility
                     NBTTagCompound tags = new NBTTagCompound();

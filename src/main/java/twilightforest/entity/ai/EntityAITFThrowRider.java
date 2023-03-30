@@ -52,8 +52,7 @@ public class EntityAITFThrowRider extends EntityAIBase {
         rider.addVelocity(throwVec.xCoord, throwVec.yCoord, throwVec.zCoord);
 
         // if we're throwing a player (probably!), send a packet with the velocity
-        if (rider instanceof EntityPlayerMP) {
-            EntityPlayerMP player = (EntityPlayerMP) rider;
+        if (rider instanceof EntityPlayerMP player) {
 
             FMLProxyPacket message = TFGenericPacketHandler
                     .makeThrowPlayerPacket((float) throwVec.xCoord, (float) throwVec.yCoord, (float) throwVec.zCoord);

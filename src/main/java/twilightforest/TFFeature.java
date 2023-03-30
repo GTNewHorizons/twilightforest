@@ -288,8 +288,7 @@ public class TFFeature {
     // @return The type of feature directly at the specified Chunk coordinates
     public static TFFeature getFeatureDirectlyAt(int chunkX, int chunkZ, World world) {
 
-        if (world != null && world.getWorldChunkManager() instanceof TFWorldChunkManager) {
-            TFWorldChunkManager tfManager = (TFWorldChunkManager) world.getWorldChunkManager();
+        if (world != null && world.getWorldChunkManager() instanceof TFWorldChunkManager tfManager) {
 
             if (tfManager.isInFeatureChunk(world, chunkX << 4, chunkZ << 4)) {
                 return tfManager.getFeatureAt(chunkX << 4, chunkZ << 4, world);
