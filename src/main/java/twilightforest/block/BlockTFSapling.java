@@ -68,37 +68,18 @@ public class BlockTFSapling extends BlockSapling {
         int var9 = 0;
         boolean largeTree = false;
 
-        switch (meta) {
-            case 1:
-                treeGenerator = new TFGenCanopyTree(true);
-                break;
-            case 2:
-                treeGenerator = new TFGenMangroveTree(true);
-                break;
-            case 3:
-                treeGenerator = new TFGenDarkCanopyTree(true);
-                break;
-            case 4:
-                treeGenerator = new TFGenHollowTree(true);
-                break;
-            case 5:
-                treeGenerator = new TFGenTreeOfTime(true);
-                break;
-            case 6:
-                treeGenerator = new TFGenTreeOfTransformation(true);
-                break;
-            case 7:
-                treeGenerator = new TFGenMinersTree(true);
-                break;
-            case 8:
-                treeGenerator = new TFGenSortingTree(true);
-                break;
-            case 9:
-                treeGenerator = rand.nextInt(7) == 0 ? new TFGenLargeRainboak(true) : new TFGenSmallRainboak(true);
-                break;
-            default:
-                treeGenerator = new TFGenSmallTwilightOak(true);
-        }
+        treeGenerator = switch (meta) {
+            case 1 -> new TFGenCanopyTree(true);
+            case 2 -> new TFGenMangroveTree(true);
+            case 3 -> new TFGenDarkCanopyTree(true);
+            case 4 -> new TFGenHollowTree(true);
+            case 5 -> new TFGenTreeOfTime(true);
+            case 6 -> new TFGenTreeOfTransformation(true);
+            case 7 -> new TFGenMinersTree(true);
+            case 8 -> new TFGenSortingTree(true);
+            case 9 -> rand.nextInt(7) == 0 ? new TFGenLargeRainboak(true) : new TFGenSmallRainboak(true);
+            default -> new TFGenSmallTwilightOak(true);
+        };
 
         if (largeTree) {
             world.setBlock(x + var8, y, z + var9, Blocks.air, 0, 4);

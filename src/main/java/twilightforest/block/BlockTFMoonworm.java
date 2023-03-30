@@ -31,27 +31,16 @@ public class BlockTFMoonworm extends BlockTFCritter {
         int facing = world.getBlockMetadata(x, y, z) & 7;
         float wide = 0.25F;
         switch (facing) {
-            case 1:
-                setBlockBounds(0.0F, 0.25F, 0.5F - wide, wide, 0.75F, 0.5F + wide);
-                break;
-            case 2:
-                setBlockBounds(1.0F - wide, 0.25F, 0.5F - wide, 1.0F, 0.75F, 0.5F + wide);
-                break;
-            case 3:
-                setBlockBounds(0.5F - wide, 0.25F, 0.0F, 0.5F + wide, 0.75F, wide);
-                break;
-            case 4:
-                setBlockBounds(0.5F - wide, 0.25F, 1.0F - wide, 0.5F + wide, 0.75F, 1.0F);
-                break;
-            case 5:
-                setBlockBounds(0.5F - wide, 0.0F, 0.25F, 0.5F + wide, wide, 0.75F);
-                break;
-            case 6:
-                setBlockBounds(0.5F - wide, 1.0F - wide, 0.25F, 0.5F + wide, 1.0F, 0.75F);
-                break;
-            default:
+            case 1 -> setBlockBounds(0.0F, 0.25F, 0.5F - wide, wide, 0.75F, 0.5F + wide);
+            case 2 -> setBlockBounds(1.0F - wide, 0.25F, 0.5F - wide, 1.0F, 0.75F, 0.5F + wide);
+            case 3 -> setBlockBounds(0.5F - wide, 0.25F, 0.0F, 0.5F + wide, 0.75F, wide);
+            case 4 -> setBlockBounds(0.5F - wide, 0.25F, 1.0F - wide, 0.5F + wide, 0.75F, 1.0F);
+            case 5 -> setBlockBounds(0.5F - wide, 0.0F, 0.25F, 0.5F + wide, wide, 0.75F);
+            case 6 -> setBlockBounds(0.5F - wide, 1.0F - wide, 0.25F, 0.5F + wide, 1.0F, 0.75F);
+            default -> {
                 float f1 = 0.1F;
                 setBlockBounds(0.5F - f1, 0.0F, 0.5F - f1, 0.5F + f1, 0.6F, 0.5F + f1);
+            }
         }
     }
 

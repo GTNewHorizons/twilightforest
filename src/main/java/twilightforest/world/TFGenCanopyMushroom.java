@@ -195,17 +195,10 @@ public class TFGenCanopyMushroom extends TFTreeGenerator {
     private void addFirefly(World world, int x, int y, int z, int height, double angle) {
         int iAngle = (int) (angle * 4.0);
         switch (iAngle) {
-            case 0:
-                setBlockAndMetadata(world, x + 1, y + height, z, TFBlocks.firefly, 0);
-                break;
-            case 1:
-                setBlockAndMetadata(world, x - 1, y + height, z, TFBlocks.firefly, 0);
-                break;
-            case 2:
-                setBlockAndMetadata(world, x, y + height, z + 1, TFBlocks.firefly, 0);
-                break;
-            case 3:
-                setBlockAndMetadata(world, x, y + height, z - 1, TFBlocks.firefly, 0);
+            case 0 -> setBlockAndMetadata(world, x + 1, y + height, z, TFBlocks.firefly, 0);
+            case 1 -> setBlockAndMetadata(world, x - 1, y + height, z, TFBlocks.firefly, 0);
+            case 2 -> setBlockAndMetadata(world, x, y + height, z + 1, TFBlocks.firefly, 0);
+            case 3 -> setBlockAndMetadata(world, x, y + height, z - 1, TFBlocks.firefly, 0);
         }
     }
 }

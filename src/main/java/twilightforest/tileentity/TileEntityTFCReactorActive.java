@@ -376,86 +376,62 @@ public class TileEntityTFCReactorActive extends TileEntity {
                     if (dist == rad && !(dx == 0 && dy == 0 && dz == 0)) {
                         // do eight at a time for easiness!
                         switch (fuzzX) {
-                            case 0:
-                                transformBlock(
-                                        sx + dx,
-                                        sy + dy,
-                                        sz + dz,
-                                        blockValue,
-                                        metaValue,
-                                        fuzzY,
-                                        netherTransform);
-                                break;
-                            case 1:
-                                transformBlock(
-                                        sx + dx,
-                                        sy + dy,
-                                        sz - dz,
-                                        blockValue,
-                                        metaValue,
-                                        fuzzY,
-                                        netherTransform);
-                                break;
-                            case 2:
-                                transformBlock(
-                                        sx - dx,
-                                        sy + dy,
-                                        sz + dz,
-                                        blockValue,
-                                        metaValue,
-                                        fuzzY,
-                                        netherTransform);
-                                break;
-                            case 3:
-                                transformBlock(
-                                        sx - dx,
-                                        sy + dy,
-                                        sz - dz,
-                                        blockValue,
-                                        metaValue,
-                                        fuzzY,
-                                        netherTransform);
-                                break;
-                            case 4:
-                                transformBlock(
-                                        sx + dx,
-                                        sy - dy,
-                                        sz + dz,
-                                        blockValue,
-                                        metaValue,
-                                        fuzzY,
-                                        netherTransform);
-                                break;
-                            case 5:
-                                transformBlock(
-                                        sx + dx,
-                                        sy - dy,
-                                        sz - dz,
-                                        blockValue,
-                                        metaValue,
-                                        fuzzY,
-                                        netherTransform);
-                                break;
-                            case 6:
-                                transformBlock(
-                                        sx - dx,
-                                        sy - dy,
-                                        sz + dz,
-                                        blockValue,
-                                        metaValue,
-                                        fuzzY,
-                                        netherTransform);
-                                break;
-                            case 7:
-                                transformBlock(
-                                        sx - dx,
-                                        sy - dy,
-                                        sz - dz,
-                                        blockValue,
-                                        metaValue,
-                                        fuzzY,
-                                        netherTransform);
-                                break;
+                            case 0 -> transformBlock(sx + dx,
+                                    sy + dy,
+                                    sz + dz,
+                                    blockValue,
+                                    metaValue,
+                                    fuzzY,
+                                    netherTransform);
+                            case 1 -> transformBlock(sx + dx,
+                                    sy + dy,
+                                    sz - dz,
+                                    blockValue,
+                                    metaValue,
+                                    fuzzY,
+                                    netherTransform);
+                            case 2 -> transformBlock(sx - dx,
+                                    sy + dy,
+                                    sz + dz,
+                                    blockValue,
+                                    metaValue,
+                                    fuzzY,
+                                    netherTransform);
+                            case 3 -> transformBlock(sx - dx,
+                                    sy + dy,
+                                    sz - dz,
+                                    blockValue,
+                                    metaValue,
+                                    fuzzY,
+                                    netherTransform);
+                            case 4 -> transformBlock(sx + dx,
+                                    sy - dy,
+                                    sz + dz,
+                                    blockValue,
+                                    metaValue,
+                                    fuzzY,
+                                    netherTransform);
+                            case 5 -> transformBlock(sx + dx,
+                                    sy - dy,
+                                    sz - dz,
+                                    blockValue,
+                                    metaValue,
+                                    fuzzY,
+                                    netherTransform);
+                            case 6 -> transformBlock(sx - dx,
+                                    sy - dy,
+                                    sz + dz,
+                                    blockValue,
+                                    metaValue,
+                                    fuzzY,
+                                    netherTransform);
+                            case 7 -> transformBlock(sx - dx,
+                                    sy - dy,
+                                    sz - dz,
+                                    blockValue,
+                                    metaValue,
+                                    fuzzY,
+                                    netherTransform);
                         }
                     }
                 }

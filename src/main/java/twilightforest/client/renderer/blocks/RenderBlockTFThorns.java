@@ -36,15 +36,11 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
         int metadata = world.getBlockMetadata(x, y, z);
         int type = metadata & 12;
 
-        switch (type) {
-            case 0:
-            default:
-                return this.renderCactusLikeY(block, x, y, z, f, f1, f2, metadata, world, renderer);
-            case 4:
-                return this.renderCactusLikeX(block, x, y, z, f, f1, f2, metadata, world, renderer);
-            case 8:
-                return this.renderCactusLikeZ(block, x, y, z, f, f1, f2, metadata, world, renderer);
-        }
+        return switch (type) {
+            default -> this.renderCactusLikeY(block, x, y, z, f, f1, f2, metadata, world, renderer);
+            case 4 -> this.renderCactusLikeX(block, x, y, z, f, f1, f2, metadata, world, renderer);
+            case 8 -> this.renderCactusLikeZ(block, x, y, z, f, f1, f2, metadata, world, renderer);
+        };
 
     }
 

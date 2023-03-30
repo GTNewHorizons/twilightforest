@@ -64,23 +64,24 @@ public class ComponentTFStrongholdFoundry extends StructureTFStrongholdComponent
         super.buildComponent(parent, list, random);
 
         switch (this.entranceLevel) {
-            case 1:
+            case 1 -> {
                 this.addDoor(4, 6, 0);
                 addNewComponent(parent, list, random, 1, -1, 13, 13);
                 addNewComponent(parent, list, random, 3, 18, 13, 4);
                 addNewComponent(parent, list, random, 0, 13, 20, 18);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 this.addDoor(4, 13, 0);
                 addNewComponent(parent, list, random, 1, -1, 6, 13);
                 addNewComponent(parent, list, random, 3, 18, 20, 4);
                 addNewComponent(parent, list, random, 0, 13, 13, 18);
-                break;
-            case 3:
+            }
+            case 3 -> {
                 this.addDoor(4, 20, 0);
                 addNewComponent(parent, list, random, 0, 13, 6, 18);
                 addNewComponent(parent, list, random, 1, -1, 13, 13);
                 addNewComponent(parent, list, random, 3, 18, 13, 4);
+            }
         }
 
     }

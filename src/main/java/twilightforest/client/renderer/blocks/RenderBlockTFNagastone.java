@@ -54,63 +54,63 @@ public class RenderBlockTFNagastone implements ISimpleBlockRenderingHandler {
         // heads
         if (type == 0) {
             switch (orient) {
-                case 0:
+                case 0 -> {
                     renderer.uvRotateTop = 1;
                     renderer.uvRotateBottom = 2;
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     renderer.uvRotateTop = 2;
                     renderer.uvRotateBottom = 1;
                     renderer.uvRotateSouth = 0;
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     renderer.uvRotateTop = 0;
                     renderer.uvRotateBottom = 3;
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     renderer.uvRotateTop = 3;
                     renderer.uvRotateBottom = 0;
-                    break;
+                }
             }
         } else if (type == 4 || type == 8) {
             switch (orient) {
-                case 0:
+                case 0 -> {
                     renderer.uvRotateTop = 2;
                     renderer.uvRotateBottom = 1;
                     renderer.uvRotateWest = 2;
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     renderer.uvRotateTop = 1;
                     renderer.uvRotateBottom = 2;
                     renderer.uvRotateEast = 2;
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     renderer.uvRotateTop = 3;
                     renderer.uvRotateBottom = 0;
                     renderer.uvRotateSouth = 2;
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     renderer.uvRotateTop = 0;
                     renderer.uvRotateBottom = 3;
                     renderer.uvRotateNorth = 2;
-                    break;
+                }
             }
         } else if (type == 12) {
             switch (orient) {
-                case 0:
+                case 0 -> {
                     renderer.uvRotateTop = 0;
                     renderer.uvRotateBottom = 0;
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     renderer.uvRotateTop = 1;
                     renderer.uvRotateBottom = 1;
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     renderer.uvRotateNorth = 2;
                     renderer.uvRotateSouth = 2;
                     renderer.uvRotateEast = 2;
                     renderer.uvRotateWest = 2;
-                    break;
+                }
             }
         }
     }

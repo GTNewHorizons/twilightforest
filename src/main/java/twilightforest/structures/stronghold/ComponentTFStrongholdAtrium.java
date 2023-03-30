@@ -146,27 +146,19 @@ public class ComponentTFStrongholdAtrium extends StructureTFStrongholdComponent 
             // grow a tree
             int minHeight = 8;
 
-            switch (treeNum) {
-                case 0:
-                default:
+            treeGen = switch (treeNum) {
+                default ->
                     // oak tree
-                    treeGen = new WorldGenTrees(true, minHeight, 0, 0, false);
-                    break;
-                case 1:
+                        new WorldGenTrees(true, minHeight, 0, 0, false);
+                case 1 ->
                     // jungle tree
-                    treeGen = new WorldGenTrees(true, minHeight, 3, 3, false);
-                    break;
-                case 2:
+                        new WorldGenTrees(true, minHeight, 3, 3, false);
+                case 2 ->
                     // birch
-                    treeGen = new WorldGenTrees(true, minHeight, 2, 2, false);
-                    break;
-                case 3:
-                    treeGen = new TFGenSmallTwilightOak(false, minHeight);
-                    break;
-                case 4:
-                    treeGen = new TFGenSmallRainboak(false);
-                    break;
-            }
+                        new WorldGenTrees(true, minHeight, 2, 2, false);
+                case 3 -> new TFGenSmallTwilightOak(false, minHeight);
+                case 4 -> new TFGenSmallRainboak(false);
+            };
 
             for (int i = 0; i < 100; i++) {
                 if (treeGen.generate(world, world.rand, dx, dy, dz)) {

@@ -429,16 +429,9 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
         if (isTop) {
             // there are a limited amount that can go at the top
             switch (decoRNG.nextInt(3)) {
-                default:
-                case 0:
-                    decorateAquarium(world, decoRNG, sbb, rotation, y);
-                    break;
-                case 1:
-                    decorateBotanical(world, decoRNG, sbb, rotation, y);
-                    break;
-                case 2:
-                    decorateNetherwart(world, decoRNG, sbb, rotation, y, isTop);
-                    break;
+                default -> decorateAquarium(world, decoRNG, sbb, rotation, y);
+                case 1 -> decorateBotanical(world, decoRNG, sbb, rotation, y);
+                case 2 -> decorateNetherwart(world, decoRNG, sbb, rotation, y, isTop);
             }
         } else if (isBottom) {
             // similarly some don't work on the bottom
@@ -657,7 +650,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
 
         // set some areas out of bounds and make the maze depending on where we start
         switch (rotation) {
-            case 0:
+            case 0 -> {
                 for (int x = 1; x < 6; x++) {
                     for (int z = 1; z < 6; z++) {
                         maze.putRaw(x, z, TFMaze.ROOM);
@@ -672,8 +665,8 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 maze.putRaw(7, 1, TFMaze.ROOM);
                 maze.putRaw(8, 1, TFMaze.DOOR);
                 maze.generateRecursiveBacktracker(0, 5);
-                break;
-            case 1:
+            }
+            case 1 -> {
                 for (int x = 7; x < 12; x++) {
                     for (int z = 1; z < 6; z++) {
                         maze.putRaw(x, z, TFMaze.ROOM);
@@ -688,8 +681,8 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 maze.putRaw(11, 7, TFMaze.ROOM);
                 maze.putRaw(11, 8, TFMaze.DOOR);
                 maze.generateRecursiveBacktracker(0, 0);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 for (int x = 7; x < 12; x++) {
                     for (int z = 7; z < 12; z++) {
                         maze.putRaw(x, z, TFMaze.ROOM);
@@ -704,8 +697,8 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 maze.putRaw(5, 11, TFMaze.ROOM);
                 maze.putRaw(4, 11, TFMaze.DOOR);
                 maze.generateRecursiveBacktracker(5, 0);
-                break;
-            case 3:
+            }
+            case 3 -> {
                 for (int x = 1; x < 6; x++) {
                     for (int z = 7; z < 12; z++) {
                         maze.putRaw(x, z, TFMaze.ROOM);
@@ -720,7 +713,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 maze.putRaw(1, 5, TFMaze.ROOM);
                 maze.putRaw(1, 4, TFMaze.DOOR);
                 maze.generateRecursiveBacktracker(5, 5);
-                break;
+            }
         }
 
         // copy the maze to us!
@@ -785,58 +778,54 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
         int z = mz * 3 + 1;
 
         switch (facing) {
-            case 0:
+            case 0 -> {
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 0, y + 1, z + 1, sbb);
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, y + 1, z + 1, sbb);
                 placeBlockAtCurrentPosition(world, Blocks.chest, 0, x + 0, y + 2, z + 1, sbb);
-                this.placeTreasureAtCurrentPosition(
-                        world,
+                this.placeTreasureAtCurrentPosition(world,
                         decoRNG,
                         x + 1,
                         y + 2,
                         z + 1,
                         TFTreasure.darktower_cache,
                         sbb);
-                break;
-            case 1:
+            }
+            case 1 -> {
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 0, y + 1, z + 0, sbb);
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 0, y + 1, z + 1, sbb);
                 placeBlockAtCurrentPosition(world, Blocks.chest, rotation, x + 0, y + 2, z + 0, sbb);
-                this.placeTreasureAtCurrentPosition(
-                        world,
+                this.placeTreasureAtCurrentPosition(world,
                         decoRNG,
                         x + 0,
                         y + 2,
                         z + 1,
                         TFTreasure.darktower_cache,
                         sbb);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 0, y + 1, z + 0, sbb);
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, y + 1, z + 0, sbb);
                 placeBlockAtCurrentPosition(world, Blocks.chest, rotation, x + 0, y + 2, z + 0, sbb);
-                this.placeTreasureAtCurrentPosition(
-                        world,
+                this.placeTreasureAtCurrentPosition(world,
                         decoRNG,
                         x + 1,
                         y + 2,
                         z + 0,
                         TFTreasure.darktower_cache,
                         sbb);
-                break;
-            case 3:
+            }
+            case 3 -> {
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, y + 1, z + 0, sbb);
                 placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, y + 1, z + 1, sbb);
                 placeBlockAtCurrentPosition(world, Blocks.chest, rotation, x + 1, y + 2, z + 0, sbb);
-                this.placeTreasureAtCurrentPosition(
-                        world,
+                this.placeTreasureAtCurrentPosition(world,
                         decoRNG,
                         x + 1,
                         y + 2,
                         z + 1,
                         TFTreasure.darktower_cache,
                         sbb);
-                break;
+            }
         }
 
     }
@@ -1375,18 +1364,10 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
         int sz = getZWithOffsetAsIfRotated(x, z, rotation);
 
         switch (stairMeta) {
-            case 0:
-                sx--;
-                break;
-            case 1:
-                sx++;
-                break;
-            case 2:
-                sz--;
-                break;
-            case 3:
-                sz++;
-                break;
+            case 0 -> sx--;
+            case 1 -> sx++;
+            case 2 -> sz--;
+            case 3 -> sz++;
         }
 
         if (sbb.isVecInside(sx, sy, sz)) {
@@ -1514,29 +1495,20 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
         int dy = getYWithOffset(y + 1);
         int dz = getZWithOffsetAsIfRotated(x, z, rotation);
         if (sbb.isVecInside(dx, dy, dz)) {
-            WorldGenerator treeGen;
-            // grow a tree
-            switch (treeNum) {
-                case 0:
-                default:
+            WorldGenerator treeGen = switch (treeNum) {
+                default ->
                     // oak tree
-                    treeGen = new WorldGenTrees(false);
-                    break;
-                case 1:
+                        new WorldGenTrees(false);
+                case 1 ->
                     // jungle tree
-                    treeGen = new WorldGenTrees(true, 3, 3, 3, false);
-                    break;
-                case 2:
+                        new WorldGenTrees(true, 3, 3, 3, false);
+                case 2 ->
                     // birch
-                    treeGen = new WorldGenForest(true, false);
-                    break;
-                case 3:
-                    treeGen = new TFGenSmallTwilightOak(false);
-                    break;
-                case 4:
-                    treeGen = new TFGenSmallRainboak(false);
-                    break;
-            }
+                        new WorldGenForest(true, false);
+                case 3 -> new TFGenSmallTwilightOak(false);
+                case 4 -> new TFGenSmallRainboak(false);
+            };
+            // grow a tree
 
             for (int i = 0; i < 100; i++) {
                 if (treeGen.generate(world, world.rand, dx, dy, dz)) {

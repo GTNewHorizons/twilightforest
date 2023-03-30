@@ -254,93 +254,56 @@ public class ComponentTFHollowHill extends StructureTFComponent {
      * @return
      */
     protected String getMobID(Random rand, int level) {
-        switch (level) {
-            case 1:
-                return getLevel1Mob(rand);
-            case 2:
-                return getLevel2Mob(rand);
-            case 3:
-                return getLevel3Mob(rand);
-            default:
+        return switch (level) {
+            case 1 -> getLevel1Mob(rand);
+            case 2 -> getLevel2Mob(rand);
+            case 3 -> getLevel3Mob(rand);
+            default ->
                 // aaah, default: spider!
-                return "Spider";
-        }
+                    "Spider";
+        };
     }
 
     /**
      * Returns a mob string appropriate for a level 1 hill
      */
     public String getLevel1Mob(Random rand) {
-        switch (rand.nextInt(10)) {
-            case 0:
-            case 1:
-            case 2:
-                return TFCreatures.getSpawnerNameFor("Swarm Spider");
-            case 3:
-            case 4:
-            case 5:
-                return "Spider";
-            case 6:
-            case 7:
-                return "Zombie";
-            case 8:
-                return "Silverfish";
-            case 9:
-                return TFCreatures.getSpawnerNameFor("Redcap");
-            default:
-                return TFCreatures.getSpawnerNameFor("Swarm Spider");
-        }
+        return switch (rand.nextInt(10)) {
+            case 0, 1, 2 -> TFCreatures.getSpawnerNameFor("Swarm Spider");
+            case 3, 4, 5 -> "Spider";
+            case 6, 7 -> "Zombie";
+            case 8 -> "Silverfish";
+            case 9 -> TFCreatures.getSpawnerNameFor("Redcap");
+            default -> TFCreatures.getSpawnerNameFor("Swarm Spider");
+        };
     }
 
     /**
      * Returns a mob string appropriate for a level 2 hill
      */
     public String getLevel2Mob(Random rand) {
-        switch (rand.nextInt(10)) {
-            case 0:
-            case 1:
-            case 2:
-                return TFCreatures.getSpawnerNameFor("Redcap");
-            case 3:
-            case 4:
-            case 5:
-                return "Zombie";
-            case 6:
-            case 7:
-                return "Skeleton";
-            case 8:
-                return TFCreatures.getSpawnerNameFor("Swarm Spider");
-            case 9:
-                return "CaveSpider";
-            default:
-                return TFCreatures.getSpawnerNameFor("Redcap");
-        }
+        return switch (rand.nextInt(10)) {
+            case 0, 1, 2 -> TFCreatures.getSpawnerNameFor("Redcap");
+            case 3, 4, 5 -> "Zombie";
+            case 6, 7 -> "Skeleton";
+            case 8 -> TFCreatures.getSpawnerNameFor("Swarm Spider");
+            case 9 -> "CaveSpider";
+            default -> TFCreatures.getSpawnerNameFor("Redcap");
+        };
     }
 
     /**
      * Returns a mob string appropriate for a level 3 hill. The level 3 also has 2 mid-air wraith spawners.
      */
     public String getLevel3Mob(Random rand) {
-        switch (rand.nextInt(11)) {
-            case 0:
-                return TFCreatures.getSpawnerNameFor("Slime Beetle");
-            case 1:
-                return TFCreatures.getSpawnerNameFor("Fire Beetle");
-            case 2:
-                return TFCreatures.getSpawnerNameFor("Pinch Beetle");
-            case 3:
-            case 4:
-            case 5:
-                return "Skeleton";
-            case 6:
-            case 7:
-            case 8:
-                return "CaveSpider";
-            case 9:
-                return "Creeper";
-            case 10:
-            default:
-                return TFCreatures.getSpawnerNameFor("Twilight Wraith");
-        }
+        return switch (rand.nextInt(11)) {
+            case 0 -> TFCreatures.getSpawnerNameFor("Slime Beetle");
+            case 1 -> TFCreatures.getSpawnerNameFor("Fire Beetle");
+            case 2 -> TFCreatures.getSpawnerNameFor("Pinch Beetle");
+            case 3, 4, 5 -> "Skeleton";
+            case 6, 7, 8 -> "CaveSpider";
+            case 9 -> "Creeper";
+            default -> TFCreatures.getSpawnerNameFor("Twilight Wraith");
+        };
     }
 }

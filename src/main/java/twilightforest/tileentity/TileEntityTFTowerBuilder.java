@@ -144,14 +144,18 @@ public class TileEntityTFTowerBuilder extends TileEntity {
                         & 3;
 
                 switch (direction) {
-                    case 0: // south
+                    case 0 -> { // south
                         return 3;
-                    case 1: // west
+                    }
+                    case 1 -> { // west
                         return 4;
-                    case 2: // north
+                    }
+                    case 2 -> { // north
                         return 2;
-                    case 3: // east
+                    }
+                    case 3 -> { // east
                         return 5;
+                    }
                 }
             }
         }

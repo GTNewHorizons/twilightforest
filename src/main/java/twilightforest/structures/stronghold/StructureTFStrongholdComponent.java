@@ -85,48 +85,38 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
      */
     public static StructureBoundingBox getComponentToAddBoundingBox(int x, int y, int z, int xOff, int yOff, int zOff,
             int xSize, int ySize, int zSize, int facing) {
-        switch (facing) {
-            case 0:
-                return new StructureBoundingBox(
-                        x + xOff,
-                        y + yOff,
-                        z + zOff,
-                        x + xSize - 1 + xOff,
-                        y + ySize - 1 + yOff,
-                        z + zSize - 1 + zOff);
-            case 1:
-                return new StructureBoundingBox(
-                        x - zSize + 1 + zOff,
-                        y + yOff,
-                        z + xOff,
-                        x + zOff,
-                        y + ySize - 1 + yOff,
-                        z + xSize - 1 + xOff);
-            case 2:
-                return new StructureBoundingBox(
-                        x - xSize + 1 - xOff,
-                        y + yOff,
-                        z - zSize + 1 + zOff,
-                        x - xOff,
-                        y + ySize - 1 + yOff,
-                        z + zOff);
-            case 3:
-                return new StructureBoundingBox(
-                        x + zOff,
-                        y + yOff,
-                        z - xSize + 1 - xOff,
-                        x + zSize - 1 + zOff,
-                        y + ySize - 1 + yOff,
-                        z - xOff);
-            default:
-                return new StructureBoundingBox(
-                        x + xOff,
-                        y + yOff,
-                        z + zOff,
-                        x + xSize - 1 + xOff,
-                        y + ySize - 1 + yOff,
-                        z + zSize - 1 + zOff);
-        }
+        return switch (facing) {
+            case 0 -> new StructureBoundingBox(x + xOff,
+                    y + yOff,
+                    z + zOff,
+                    x + xSize - 1 + xOff,
+                    y + ySize - 1 + yOff,
+                    z + zSize - 1 + zOff);
+            case 1 -> new StructureBoundingBox(x - zSize + 1 + zOff,
+                    y + yOff,
+                    z + xOff,
+                    x + zOff,
+                    y + ySize - 1 + yOff,
+                    z + xSize - 1 + xOff);
+            case 2 -> new StructureBoundingBox(x - xSize + 1 - xOff,
+                    y + yOff,
+                    z - zSize + 1 + zOff,
+                    x - xOff,
+                    y + ySize - 1 + yOff,
+                    z + zOff);
+            case 3 -> new StructureBoundingBox(x + zOff,
+                    y + yOff,
+                    z - xSize + 1 - xOff,
+                    x + zSize - 1 + zOff,
+                    y + ySize - 1 + yOff,
+                    z - xOff);
+            default -> new StructureBoundingBox(x + xOff,
+                    y + yOff,
+                    z + zOff,
+                    x + xSize - 1 + xOff,
+                    y + ySize - 1 + yOff,
+                    z + zSize - 1 + zOff);
+        };
     }
 
     @SuppressWarnings("rawtypes")
@@ -207,24 +197,13 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
         }
 
         // find a new component
-        switch (random.nextInt(5)) {
-            case 0:
-            default:
-                attempted = new ComponentTFStrongholdUpperTIntersection(index, nFacing, nx, ny, nz);
-                break;
-            case 1:
-                attempted = new ComponentTFStrongholdUpperLeftTurn(index, nFacing, nx, ny, nz);
-                break;
-            case 2:
-                attempted = new ComponentTFStrongholdUpperRightTurn(index, nFacing, nx, ny, nz);
-                break;
-            case 3:
-                attempted = new ComponentTFStrongholdUpperCorridor(index, nFacing, nx, ny, nz);
-                break;
-            case 4:
-                attempted = new ComponentTFStrongholdUpperAscender(index, nFacing, nx, ny, nz);
-                break;
-        }
+        attempted = switch (random.nextInt(5)) {
+            default -> new ComponentTFStrongholdUpperTIntersection(index, nFacing, nx, ny, nz);
+            case 1 -> new ComponentTFStrongholdUpperLeftTurn(index, nFacing, nx, ny, nz);
+            case 2 -> new ComponentTFStrongholdUpperRightTurn(index, nFacing, nx, ny, nz);
+            case 3 -> new ComponentTFStrongholdUpperCorridor(index, nFacing, nx, ny, nz);
+            case 4 -> new ComponentTFStrongholdUpperAscender(index, nFacing, nx, ny, nz);
+        };
 
         // is it clear?
         if (attempted != null && StructureComponent.findIntersecting(list, attempted.getBoundingBox()) == null) {
@@ -287,15 +266,10 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
     }
 
     protected int getXSize() {
-        switch (this.getCoordBaseMode()) {
-            default:
-            case 0:
-            case 2:
-                return this.boundingBox.getXSize() - 1;
-            case 1:
-            case 3:
-                return this.boundingBox.getZSize() - 1;
-        }
+        return switch (this.getCoordBaseMode()) {
+            default -> this.boundingBox.getXSize() - 1;
+            case 1, 3 -> this.boundingBox.getZSize() - 1;
+        };
     }
 
     /**
@@ -613,18 +587,10 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
      */
     public void addDoorwayTo(int dx, int dy, int dz, int facing) {
         switch (facing) {
-            case 0:
-                addDoor(dx, dy, dz - 1);
-                break;
-            case 1:
-                addDoor(dx + 1, dy, dz);
-                break;
-            case 2:
-                addDoor(dx, dy, dz + 1);
-                break;
-            case 3:
-                addDoor(dx - 1, dy, dz);
-                break;
+            case 0 -> addDoor(dx, dy, dz - 1);
+            case 1 -> addDoor(dx + 1, dy, dz);
+            case 2 -> addDoor(dx, dy, dz + 1);
+            case 3 -> addDoor(dx - 1, dy, dz);
         }
     }
 
@@ -653,17 +619,13 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
     protected int getRelativeX(int x, int z) {
         // this.getXWithOffset(x, z);
 
-        switch (getCoordBaseMode()) {
-            case 0:
-                return x - boundingBox.minX;
-            case 2:
-                return boundingBox.maxX - x;
-            case 1:
-                return z - boundingBox.minZ;
-            case 3:
-                return boundingBox.maxZ - z;
-        }
-        return x;
+        return switch (getCoordBaseMode()) {
+            case 0 -> x - boundingBox.minX;
+            case 2 -> boundingBox.maxX - x;
+            case 1 -> z - boundingBox.minZ;
+            case 3 -> boundingBox.maxZ - z;
+            default -> x;
+        };
     }
 
     protected int getRelativeY(int par1) {
@@ -671,17 +633,13 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
     }
 
     protected int getRelativeZ(int x, int z) {
-        switch (getCoordBaseMode()) {
-            case 0:
-                return z - boundingBox.minZ;
-            case 2:
-                return boundingBox.maxZ - z;
-            case 1:
-                return boundingBox.maxX - x;
-            case 3:
-                return x - boundingBox.minX;
-        }
-        return z;
+        return switch (getCoordBaseMode()) {
+            case 0 -> z - boundingBox.minZ;
+            case 2 -> boundingBox.maxZ - z;
+            case 1 -> boundingBox.maxX - x;
+            case 3 -> x - boundingBox.minX;
+            default -> z;
+        };
     }
 
     /**

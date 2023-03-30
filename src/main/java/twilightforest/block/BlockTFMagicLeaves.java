@@ -56,18 +56,13 @@ public class BlockTFMagicLeaves extends BlockLeaves {
      */
     @Override
     public int getRenderColor(int par1) {
-        switch (par1 & 3) {
-            case META_TIME:
-                return 106 << 16 | 156 << 8 | 23;
-            case META_TRANS:
-                return 108 << 16 | 204 << 8 | 234;
-            case META_MINE:
-                return 252 << 16 | 241 << 8 | 68;
-            case META_SORT:
-                return 54 << 16 | 76 << 8 | 3;
-            default:
-                return 16777215;
-        }
+        return switch (par1 & 3) {
+            case META_TIME -> 106 << 16 | 156 << 8 | 23;
+            case META_TRANS -> 108 << 16 | 204 << 8 | 234;
+            case META_MINE -> 252 << 16 | 241 << 8 | 68;
+            case META_SORT -> 54 << 16 | 76 << 8 | 3;
+            default -> 16777215;
+        };
     }
 
     /**
@@ -87,7 +82,7 @@ public class BlockTFMagicLeaves extends BlockLeaves {
         float fall;
 
         switch (leafType) {
-            case META_TIME:
+            case META_TIME -> {
                 fade = x * 16 + y * 16 + z * 16;
                 if ((fade & 256) != 0) {
                     fade = 255 - (fade & 255);
@@ -95,12 +90,11 @@ public class BlockTFMagicLeaves extends BlockLeaves {
                 fade &= 255;
                 spring = (255 - fade) / 255F;
                 fall = fade / 255F;
-
                 red = (int) (spring * 106 + fall * 251);
                 green = (int) (spring * 156 + fall * 108);
                 blue = (int) (spring * 23 + fall * 27);
-                break;
-            case META_TRANS:
+            }
+            case META_TRANS -> {
                 fade = x * 27 + y * 63 + z * 39;
                 if ((fade & 256) != 0) {
                     fade = 255 - (fade & 255);
@@ -108,12 +102,11 @@ public class BlockTFMagicLeaves extends BlockLeaves {
                 fade &= 255;
                 spring = (255 - fade) / 255F;
                 fall = fade / 255F;
-
                 red = (int) (spring * 108 + fall * 96);
                 green = (int) (spring * 204 + fall * 107);
                 blue = (int) (spring * 234 + fall * 121);
-                break;
-            case META_MINE:
+            }
+            case META_MINE -> {
                 fade = x * 31 + y * 33 + z * 32;
                 if ((fade & 256) != 0) {
                     fade = 255 - (fade & 255);
@@ -121,24 +114,22 @@ public class BlockTFMagicLeaves extends BlockLeaves {
                 fade &= 255;
                 spring = (255 - fade) / 255F;
                 fall = fade / 255F;
-
                 red = (int) (spring * 252 + fall * 237);
                 green = (int) (spring * 241 + fall * 172);
                 blue = (int) (spring * 68 + fall * 9);
-                break;
-            case META_SORT:
+            }
+            case META_SORT -> {
                 fade = x * 63 + y * 63 + z * 63;
                 if ((fade & 256) != 0) {
                     fade = 255 - (fade & 255);
                 }
                 fade &= 255;
-
                 spring = (255 - fade) / 255F;
                 fall = fade / 255F;
-
                 red = (int) (spring * 54 + fall * 168);
                 green = (int) (spring * 76 + fall * 199);
                 blue = (int) (spring * 3 + fall * 43);
+            }
         }
         return red << 16 | green << 8 | blue;
     }
@@ -167,23 +158,17 @@ public class BlockTFMagicLeaves extends BlockLeaves {
     @Override
     public IIcon getIcon(int side, int meta) {
         if (Blocks.leaves.isOpaqueCube()) {
-            switch (meta & 0x03) {
-                default:
-                    return SPR_TIMELEAVES_OPAQUE;
-                case 1:
-                    return SPR_TRANSLEAVES_OPAQUE;
-                case 3:
-                    return SPR_SORTLEAVES_OPAQUE;
-            }
+            return switch (meta & 0x03) {
+                default -> SPR_TIMELEAVES_OPAQUE;
+                case 1 -> SPR_TRANSLEAVES_OPAQUE;
+                case 3 -> SPR_SORTLEAVES_OPAQUE;
+            };
         } else {
-            switch (meta & 0x03) {
-                default:
-                    return SPR_TIMELEAVES;
-                case 1:
-                    return SPR_TRANSLEAVES;
-                case 3:
-                    return SPR_SORTLEAVES;
-            }
+            return switch (meta & 0x03) {
+                default -> SPR_TIMELEAVES;
+                case 1 -> SPR_TRANSLEAVES;
+                case 3 -> SPR_SORTLEAVES;
+            };
         }
     }
 

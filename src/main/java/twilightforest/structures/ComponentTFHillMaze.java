@@ -186,19 +186,11 @@ public class ComponentTFHillMaze extends StructureTFComponent {
         int rx = x + rand.nextInt(diameter) - (diameter / 2);
         int rz = z + rand.nextInt(diameter) - (diameter / 2);
 
-        String mobID;
-
-        switch (rand.nextInt(3)) {
-            case 1:
-                mobID = "Skeleton";
-                break;
-            case 2:
-                mobID = "Zombie";
-                break;
-            case 0:
-            default:
-                mobID = "Spider";
-        }
+        String mobID = switch (rand.nextInt(3)) {
+            case 1 -> "Skeleton";
+            case 2 -> "Zombie";
+            default -> "Spider";
+        };
 
         placeSpawnerAtCurrentPosition(world, rand, rx, FLOOR_LEVEL, rz, mobID, sbb);
     }

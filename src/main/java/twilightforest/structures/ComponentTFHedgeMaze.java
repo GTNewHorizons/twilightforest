@@ -174,19 +174,12 @@ public class ComponentTFHedgeMaze extends StructureTFComponent {
         int rx = x + rand.nextInt(diameter) - (diameter / 2);
         int rz = z + rand.nextInt(diameter) - (diameter / 2);
 
-        String mobID;
+        String mobID = switch (rand.nextInt(3)) {
+            case 1 -> TFCreatures.getSpawnerNameFor("Swarm Spider");
+            case 2 -> TFCreatures.getSpawnerNameFor("Hostile Wolf");
+            default -> TFCreatures.getSpawnerNameFor("Hedge Spider");
+        };
 
-        switch (rand.nextInt(3)) {
-            case 1:
-                mobID = TFCreatures.getSpawnerNameFor("Swarm Spider");
-                break;
-            case 2:
-                mobID = TFCreatures.getSpawnerNameFor("Hostile Wolf");
-                break;
-            case 0:
-            default:
-                mobID = TFCreatures.getSpawnerNameFor("Hedge Spider");
-        }
         placeSpawnerAtCurrentPosition(world, rand, rx, FLOOR_LEVEL, rz, mobID, sbb);
     }
 

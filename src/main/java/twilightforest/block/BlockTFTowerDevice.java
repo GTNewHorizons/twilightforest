@@ -94,28 +94,37 @@ public class BlockTFTowerDevice extends Block {
     @Override
     public IIcon getIcon(int side, int meta) {
         switch (meta) {
-            case META_REAPPEARING_INACTIVE:
-            default:
+            default -> {
                 return TEX_REAPPEARING_INACTIVE;
-            case META_REAPPEARING_ACTIVE:
+            }
+            case META_REAPPEARING_ACTIVE -> {
                 return TEX_REAPPEARING_ACTIVE;
-            case META_VANISH_INACTIVE:
+            }
+            case META_VANISH_INACTIVE -> {
                 return TEX_VANISH_INACTIVE;
-            case META_VANISH_ACTIVE:
+            }
+            case META_VANISH_ACTIVE -> {
                 return TEX_VANISH_ACTIVE;
-            case META_VANISH_LOCKED:
+            }
+            case META_VANISH_LOCKED -> {
                 return TEX_VANISH_LOCKED;
-            case META_VANISH_UNLOCKED:
+            }
+            case META_VANISH_UNLOCKED -> {
                 return TEX_VANISH_UNLOCKED;
-            case META_BUILDER_INACTIVE:
+            }
+            case META_BUILDER_INACTIVE -> {
                 return TEX_BUILDER_INACTIVE;
-            case META_BUILDER_TIMEOUT:
+            }
+            case META_BUILDER_TIMEOUT -> {
                 return TEX_BUILDER_TIMEOUT;
-            case META_BUILDER_ACTIVE:
+            }
+            case META_BUILDER_ACTIVE -> {
                 return TEX_BUILDER_ACTIVE;
-            case META_ANTIBUILDER:
+            }
+            case META_ANTIBUILDER -> {
                 return TEX_ANTIBUILDER;
-            case META_GHASTTRAP_INACTIVE:
+            }
+            case META_GHASTTRAP_INACTIVE -> {
                 if (side >= 2) {
                     return TEX_GHASTTRAP_INACTIVE;
                 } else if (side == 1) {
@@ -123,7 +132,8 @@ public class BlockTFTowerDevice extends Block {
                 } else {
                     return TFBlocks.towerWood.getIcon(side, 1);
                 }
-            case META_GHASTTRAP_ACTIVE:
+            }
+            case META_GHASTTRAP_ACTIVE -> {
                 if (side >= 2) {
                     return TEX_GHASTTRAP_ACTIVE;
                 } else if (side == 1) {
@@ -131,10 +141,13 @@ public class BlockTFTowerDevice extends Block {
                 } else {
                     return TFBlocks.towerWood.getIcon(side, 1);
                 }
-            case META_REACTOR_INACTIVE:
+            }
+            case META_REACTOR_INACTIVE -> {
                 return TEX_REACTOR_INACTIVE;
-            case META_REACTOR_ACTIVE:
+            }
+            case META_REACTOR_ACTIVE -> {
                 return TEX_REACTOR_ACTIVE;
+            }
         }
     }
 
@@ -261,16 +274,11 @@ public class BlockTFTowerDevice extends Block {
         // most vanish blocks can't be broken
         int meta = world.getBlockMetadata(x, y, z);
 
-        switch (meta) {
-            case META_REAPPEARING_ACTIVE:
-            case META_VANISH_INACTIVE:
-            case META_VANISH_ACTIVE:
-            case META_VANISH_LOCKED:
-            case META_VANISH_UNLOCKED:
-                return -1;
-            default:
-                return super.getBlockHardness(world, x, y, z);
-        }
+        return switch (meta) {
+            case META_REAPPEARING_ACTIVE, META_VANISH_INACTIVE, META_VANISH_ACTIVE, META_VANISH_LOCKED, META_VANISH_UNLOCKED ->
+                    -1;
+            default -> super.getBlockHardness(world, x, y, z);
+        };
     }
 
     /**
@@ -603,19 +611,12 @@ public class BlockTFTowerDevice extends Block {
             return 0;
         }
 
-        switch (meta) {
-            case META_BUILDER_ACTIVE:
-            case META_VANISH_ACTIVE:
-            case META_REAPPEARING_ACTIVE:
-                return 4;
-            case META_ANTIBUILDER:
-                return 10;
-            case META_GHASTTRAP_ACTIVE:
-            case META_REACTOR_ACTIVE:
-                return 15;
-            default:
-                return 0;
-        }
+        return switch (meta) {
+            case META_BUILDER_ACTIVE, META_VANISH_ACTIVE, META_REAPPEARING_ACTIVE -> 4;
+            case META_ANTIBUILDER -> 10;
+            case META_GHASTTRAP_ACTIVE, META_REACTOR_ACTIVE -> 15;
+            default -> 0;
+        };
     }
 
     /**
@@ -657,12 +658,10 @@ public class BlockTFTowerDevice extends Block {
      */
     @Override
     public Item getItemDropped(int meta, Random par2Random, int par3) {
-        switch (meta) {
-            case META_ANTIBUILDER:
-                return null;
-            default:
-                return Item.getItemFromBlock(this);
-        }
+        return switch (meta) {
+            case META_ANTIBUILDER -> null;
+            default -> Item.getItemFromBlock(this);
+        };
     }
 
     /**
@@ -670,21 +669,14 @@ public class BlockTFTowerDevice extends Block {
      */
     @Override
     public int damageDropped(int meta) {
-        switch (meta) {
-            case META_REAPPEARING_ACTIVE:
-                return META_REAPPEARING_INACTIVE;
-            case META_BUILDER_ACTIVE:
-            case META_BUILDER_TIMEOUT:
-                return META_BUILDER_INACTIVE;
-            case META_VANISH_ACTIVE:
-                return META_VANISH_INACTIVE;
-            case META_GHASTTRAP_ACTIVE:
-                return META_GHASTTRAP_INACTIVE;
-            case META_REACTOR_ACTIVE:
-                return META_REACTOR_INACTIVE;
-            default:
-                return meta;
-        }
+        return switch (meta) {
+            case META_REAPPEARING_ACTIVE -> META_REAPPEARING_INACTIVE;
+            case META_BUILDER_ACTIVE, META_BUILDER_TIMEOUT -> META_BUILDER_INACTIVE;
+            case META_VANISH_ACTIVE -> META_VANISH_INACTIVE;
+            case META_GHASTTRAP_ACTIVE -> META_GHASTTRAP_INACTIVE;
+            case META_REACTOR_ACTIVE -> META_REACTOR_INACTIVE;
+            default -> meta;
+        };
     }
 
     // @Override

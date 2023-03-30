@@ -52,38 +52,24 @@ public class GenLayerTF7x7Preset extends GenLayer {
     }
 
     protected BiomeGenBase getBiomeFor(char c) {
-        switch (c) {
-            default:
-                return BiomeGenBase.ocean;
+        return switch (c) {
+            default -> BiomeGenBase.ocean;
             // case 'P' :
             // return BiomeGenBase.plains;
-            case 'F':
-                return TFBiomeBase.twilightForest;
-            case 'f':
-                return TFBiomeBase.twilightForest2;
-            case 'E':
-                return TFBiomeBase.enchantedForest;
-            case 'm':
-                return TFBiomeBase.mushrooms;
-            case 'M':
-                return TFBiomeBase.deepMushrooms;
-            case 'C':
-                return TFBiomeBase.clearing;
-            case 'S':
-                return TFBiomeBase.tfSwamp;
-            case 'Y':
-                return TFBiomeBase.fireSwamp;
-            case 'D':
-                return TFBiomeBase.darkForest;
-            case 'L':
-                return TFBiomeBase.tfLake;
-            case 'O':
-                return TFBiomeBase.tfSnow;
-            case 'G':
-                return TFBiomeBase.glacier;
-            case 'H':
-                return TFBiomeBase.highlands;
-        }
+            case 'F' -> TFBiomeBase.twilightForest;
+            case 'f' -> TFBiomeBase.twilightForest2;
+            case 'E' -> TFBiomeBase.enchantedForest;
+            case 'm' -> TFBiomeBase.mushrooms;
+            case 'M' -> TFBiomeBase.deepMushrooms;
+            case 'C' -> TFBiomeBase.clearing;
+            case 'S' -> TFBiomeBase.tfSwamp;
+            case 'Y' -> TFBiomeBase.fireSwamp;
+            case 'D' -> TFBiomeBase.darkForest;
+            case 'L' -> TFBiomeBase.tfLake;
+            case 'O' -> TFBiomeBase.tfSnow;
+            case 'G' -> TFBiomeBase.glacier;
+            case 'H' -> TFBiomeBase.highlands;
+        };
     }
 
 }

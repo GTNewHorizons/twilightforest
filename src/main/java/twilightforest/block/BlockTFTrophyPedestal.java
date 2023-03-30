@@ -66,14 +66,18 @@ public class BlockTFTrophyPedestal extends Block {
             int rotatedSide = ((side - 2) + rotate) % 4;
 
             switch (rotatedSide) {
-                case 0:
+                case 0 -> {
                     return meta > 7 ? sprNagaActive : sprNaga;
-                case 1:
+                }
+                case 1 -> {
                     return meta > 7 ? sprLichActive : sprLich;
-                case 2:
+                }
+                case 2 -> {
                     return meta > 7 ? sprHydraActive : sprHydra;
-                case 3:
+                }
+                case 3 -> {
                     return meta > 7 ? sprUrghastActive : sprUrghast;
+                }
             }
 
         }

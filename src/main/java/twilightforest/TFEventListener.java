@@ -93,21 +93,11 @@ public class TFEventListener {
                 // trophy gives kill achievement
             } else if (item == TFItems.trophy) {
                 switch (event.item.getEntityItem().getItemDamage()) {
-                    case 0:
-                        event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillHydra);
-                        break;
-                    case 1:
-                        event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillNaga);
-                        break;
-                    case 2:
-                        event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillLich);
-                        break;
-                    case 3:
-                        event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
-                        break;
-                    case 4:
-                        event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
-                        break;
+                    case 0 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillHydra);
+                    case 1 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillNaga);
+                    case 2 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillLich);
+                    case 3 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
+                    case 4 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
                 }
                 // mazebreaker
             } else if (item == TFItems.mazebreakerPick) {

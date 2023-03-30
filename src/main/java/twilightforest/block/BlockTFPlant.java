@@ -127,21 +127,15 @@ public class BlockTFPlant extends BlockBush implements IShearable {
         // System.out.println("Can block stay? meta is " + meta);
         Block soil = world.getBlock(x, y - 1, z);
 
-        switch (meta) {
-            case META_TORCHBERRY:
-            case META_ROOT_STRAND:
-                return BlockTFPlant.canPlaceRootBelow(world, x, y + 1, z);
-            case 0: // let's make this happen
-            case META_FORESTGRASS:
-            case META_DEADBUSH:
-                return (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, this));
-            case META_MUSHGLOOM:
-            case META_MOSSPATCH:
-                return soil != null && soil.isSideSolid(world, x, y, z, ForgeDirection.UP);
-            default:
-                return (world.getFullBlockLightValue(x, y, z) >= 3 || world.canBlockSeeTheSky(x, y, z))
-                        && (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, this));
-        }
+        return switch (meta) {
+            case META_TORCHBERRY, META_ROOT_STRAND ->
+                    BlockTFPlant.canPlaceRootBelow(world, x, y + 1, z); // let's make this happen
+            case 0, META_FORESTGRASS, META_DEADBUSH ->
+                    (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, this));
+            case META_MUSHGLOOM, META_MOSSPATCH -> soil != null && soil.isSideSolid(world, x, y, z, ForgeDirection.UP);
+            default -> (world.getFullBlockLightValue(x, y, z) >= 3 || world.canBlockSeeTheSky(x, y, z)) && (soil != null
+                    && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, this));
+        };
     }
 
     /**
@@ -458,13 +452,10 @@ public class BlockTFPlant extends BlockBush implements IShearable {
     public EnumPlantType getPlantType(IBlockAccess world, int x, int y, int z) {
         int meta = world.getBlockMetadata(x, y, z);
 
-        switch (meta) {
-            case META_MOSSPATCH:
-            case META_MUSHGLOOM:
-                return EnumPlantType.Cave;
-            default:
-                return EnumPlantType.Plains;
-        }
+        return switch (meta) {
+            case META_MOSSPATCH, META_MUSHGLOOM -> EnumPlantType.Cave;
+            default -> EnumPlantType.Plains;
+        };
     }
 
     @Override

@@ -28,17 +28,12 @@ public class RenderTFTinyBird extends RenderTFBird {
      */
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         if (par1Entity instanceof EntityTFTinyBird) {
-            switch (((EntityTFTinyBird) par1Entity).getBirdType()) {
-                default:
-                case 0:
-                    return textureLocSparrow;
-                case 1:
-                    return textureLocBluebird;
-                case 2:
-                    return textureLocCardinal;
-                case 3:
-                    return textureLocFinch;
-            }
+            return switch (((EntityTFTinyBird) par1Entity).getBirdType()) {
+                default -> textureLocSparrow;
+                case 1 -> textureLocBluebird;
+                case 2 -> textureLocCardinal;
+                case 3 -> textureLocFinch;
+            };
         }
 
         // fallback

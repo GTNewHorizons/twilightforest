@@ -56,16 +56,15 @@ public class BlockTFRoots extends Block {
      */
     @Override
     public Item getItemDropped(int meta, Random random, int j) {
-        switch (meta) {
-            case ROOT_META:
+        return switch (meta) {
+            case ROOT_META ->
                 // roots drop sticks
-                return Items.stick;
-            case OREROOT_META:
+                    Items.stick;
+            case OREROOT_META ->
                 // oreroots drop liveroot
-                return TFItems.liveRoot;
-            default:
-                return Item.getItemFromBlock(this);
-        }
+                    TFItems.liveRoot;
+            default -> Item.getItemFromBlock(this);
+        };
     }
 
     /**
@@ -73,17 +72,17 @@ public class BlockTFRoots extends Block {
      */
     @Override
     public int damageDropped(int meta) {
-        switch (meta) {
-            case ROOT_META:
+        return switch (meta) {
+            case ROOT_META ->
                 // roots drop sticks, no meta
-                return 0;
-            case OREROOT_META:
+                    0;
+            case OREROOT_META ->
                 // oreroots drop liveroot, no meta
-                return 0;
-            default:
+                    0;
+            default ->
                 // set log flag on wood blocks
-                return meta | 8;
-        }
+                    meta | 8;
+        };
     }
 
     /**
@@ -96,13 +95,12 @@ public class BlockTFRoots extends Block {
      */
     @Override
     public int quantityDropped(int meta, int fortune, Random random) {
-        switch (meta) {
-            case ROOT_META:
+        return switch (meta) {
+            case ROOT_META ->
                 // roots drop several sticks
-                return 3 + random.nextInt(2);
-            default:
-                return super.quantityDropped(meta, fortune, random);
-        }
+                    3 + random.nextInt(2);
+            default -> super.quantityDropped(meta, fortune, random);
+        };
     }
 
     /**

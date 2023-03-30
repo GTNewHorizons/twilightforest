@@ -70,21 +70,15 @@ public class BlockTFGiantLeaves extends BlockTFGiantBlock {
      */
     @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) {
-        switch (side) {
-            case 0:
-                return (y & 3) == 3;
-            case 1:
-                return (y & 3) == 0;
-            case 2:
-                return (z & 3) == 3;
-            case 3:
-                return (z & 3) == 0;
-            case 4:
-                return (x & 3) == 3;
-            case 5:
-                return (x & 3) == 0;
-        }
+        return switch (side) {
+            case 0 -> (y & 3) == 3;
+            case 1 -> (y & 3) == 0;
+            case 2 -> (z & 3) == 3;
+            case 3 -> (z & 3) == 0;
+            case 4 -> (x & 3) == 3;
+            case 5 -> (x & 3) == 0;
+            default -> super.shouldSideBeRendered(world, x, y, z, side);
+        };
 
-        return super.shouldSideBeRendered(world, x, y, z, side);
     }
 }

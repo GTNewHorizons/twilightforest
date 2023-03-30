@@ -51,22 +51,15 @@ public class BlockTFBossSpawner extends BlockContainer {
      */
     @Override
     public TileEntity createTileEntity(World world, int meta) {
-        switch (meta) {
-            case 0:
-                return new TileEntityTFNagaSpawner();
-            case 1:
-                return new TileEntityTFLichSpawner();
-            case 2:
-                return new TileEntityTFHydraSpawner();
-            case 3:
-                return new TileEntityTFTowerBossSpawner();
-            case 4:
-                return new TileEntityTFKnightPhantomsSpawner();
-            case 5:
-                return new TileEntityTFSnowQueenSpawner();
-            default:
-                return null;
-        }
+        return switch (meta) {
+            case 0 -> new TileEntityTFNagaSpawner();
+            case 1 -> new TileEntityTFLichSpawner();
+            case 2 -> new TileEntityTFHydraSpawner();
+            case 3 -> new TileEntityTFTowerBossSpawner();
+            case 4 -> new TileEntityTFKnightPhantomsSpawner();
+            case 5 -> new TileEntityTFSnowQueenSpawner();
+            default -> null;
+        };
     }
 
     @Override

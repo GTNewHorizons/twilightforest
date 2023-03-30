@@ -59,37 +59,35 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
         if (orient == 12) {
             // off blocks
-            switch (woodType) {
-                default:
-                case META_TIME:
-                    return (side == 1 || side == 0) ? SPR_TIMETOP : SPR_TIMECLOCKOFF;
-                case META_TRANS:
-                    return (side == 1 || side == 0) ? SPR_TRANSTOP : SPR_TRANSHEARTOFF;
-                case META_MINE:
-                    return (side == 1 || side == 0) ? SPR_MINETOP : SPR_MINEGEMOFF;
-                case META_SORT:
-                    return (side == 1 || side == 0) ? SPR_SORTTOP : SPR_SORTEYEOFF;
-            }
+            return switch (woodType) {
+                default -> (side == 1 || side == 0) ? SPR_TIMETOP : SPR_TIMECLOCKOFF;
+                case META_TRANS -> (side == 1 || side == 0) ? SPR_TRANSTOP : SPR_TRANSHEARTOFF;
+                case META_MINE -> (side == 1 || side == 0) ? SPR_MINETOP : SPR_MINEGEMOFF;
+                case META_SORT -> (side == 1 || side == 0) ? SPR_SORTTOP : SPR_SORTEYEOFF;
+            };
         } else {
-            switch (woodType) {
-                default:
-                case META_TIME:
-                    return orient == 0 && (side == 1 || side == 0) ? SPR_TIMETOP
-                            : (orient == 4 && (side == 5 || side == 4) ? SPR_TIMETOP
-                                    : (orient == 8 && (side == 2 || side == 3) ? SPR_TIMETOP : SPR_TIMECLOCK));
-                case META_TRANS:
-                    return orient == 0 && (side == 1 || side == 0) ? SPR_TRANSTOP
-                            : (orient == 4 && (side == 5 || side == 4) ? SPR_TRANSTOP
-                                    : (orient == 8 && (side == 2 || side == 3) ? SPR_TRANSTOP : SPR_TRANSHEART));
-                case META_MINE:
-                    return orient == 0 && (side == 1 || side == 0) ? SPR_MINETOP
-                            : (orient == 4 && (side == 5 || side == 4) ? SPR_MINETOP
-                                    : (orient == 8 && (side == 2 || side == 3) ? SPR_MINETOP : SPR_MINEGEM));
-                case META_SORT:
-                    return orient == 0 && (side == 1 || side == 0) ? SPR_SORTTOP
-                            : (orient == 4 && (side == 5 || side == 4) ? SPR_SORTTOP
-                                    : (orient == 8 && (side == 2 || side == 3) ? SPR_SORTTOP : SPR_SORTEYE));
-            }
+            return switch (woodType) {
+                default -> orient == 0 && (side == 1 || side == 0)
+                        ? SPR_TIMETOP
+                        : (orient == 4 && (side == 5 || side == 4)
+                                ? SPR_TIMETOP
+                                : (orient == 8 && (side == 2 || side == 3) ? SPR_TIMETOP : SPR_TIMECLOCK));
+                case META_TRANS -> orient == 0 && (side == 1 || side == 0)
+                        ? SPR_TRANSTOP
+                        : (orient == 4 && (side == 5 || side == 4)
+                                ? SPR_TRANSTOP
+                                : (orient == 8 && (side == 2 || side == 3) ? SPR_TRANSTOP : SPR_TRANSHEART));
+                case META_MINE -> orient == 0 && (side == 1 || side == 0)
+                        ? SPR_MINETOP
+                        : (orient == 4 && (side == 5 || side == 4)
+                                ? SPR_MINETOP
+                                : (orient == 8 && (side == 2 || side == 3) ? SPR_MINETOP : SPR_MINEGEM));
+                case META_SORT -> orient == 0 && (side == 1 || side == 0)
+                        ? SPR_SORTTOP
+                        : (orient == 4 && (side == 5 || side == 4)
+                                ? SPR_SORTTOP
+                                : (orient == 8 && (side == 2 || side == 3) ? SPR_SORTTOP : SPR_SORTEYE));
+            };
         }
     }
 
@@ -103,22 +101,20 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         }
         if (!world.isRemote) {
             switch (meta & 3) {
-                case 0:
+                case 0 -> {
                     // tree of time effect
                     world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.click", 0.1F, 0.5F);
                     doTreeOfTimeEffect(world, x, y, z, rand);
-                    break;
-                case 1:
+                }
+                case 1 ->
                     // tree of transformation effect
-                    doTreeOfTransformationEffect(world, x, y, z, rand);
-                    break;
-                case 2:
+                        doTreeOfTransformationEffect(world, x, y, z, rand);
+                case 2 ->
                     // miner's tree effect
-                    doMinersTreeEffect(world, x, y, z, rand);
-                    break;
-                case 3:
+                        doMinersTreeEffect(world, x, y, z, rand);
+                case 3 ->
                     // sorting tree effect
-                    doSortingTreeEffect(world, x, y, z, rand);
+                        doSortingTreeEffect(world, x, y, z, rand);
             }
         }
         world.scheduleBlockUpdate(x, y, z, this, this.tickRate(world));

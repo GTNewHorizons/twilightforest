@@ -123,18 +123,10 @@ public class TFGenThorns extends TFGenerator {
     }
 
     private int getMetaFor(ForgeDirection dir) {
-        switch (dir) {
-            case UNKNOWN:
-            default:
-            case UP:
-            case DOWN:
-                return 0;
-            case EAST:
-            case WEST:
-                return 4;
-            case NORTH:
-            case SOUTH:
-                return 8;
-        }
+        return switch (dir) {
+            default -> 0;
+            case EAST, WEST -> 4;
+            case NORTH, SOUTH -> 8;
+        };
     }
 }

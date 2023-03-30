@@ -141,36 +141,22 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     private void dropScepter() {
         int scepterType = rand.nextInt(3);
         switch (scepterType) {
-            case 0:
-                this.entityDropItem(new ItemStack(TFItems.scepterZombie), 0);
-                break;
-            case 1:
-                this.entityDropItem(new ItemStack(TFItems.scepterLifeDrain), 0);
-                break;
-            default:
-                this.entityDropItem(new ItemStack(TFItems.scepterTwilight), 0);
+            case 0 -> this.entityDropItem(new ItemStack(TFItems.scepterZombie), 0);
+            case 1 -> this.entityDropItem(new ItemStack(TFItems.scepterLifeDrain), 0);
+            default -> this.entityDropItem(new ItemStack(TFItems.scepterTwilight), 0);
         }
     }
 
     private void dropGoldThing() {
         ItemStack goldThing;
         int thingType = rand.nextInt(5);
-        switch (thingType) {
-            case 0:
-                goldThing = new ItemStack(Items.golden_sword);
-                break;
-            case 1:
-                goldThing = new ItemStack(Items.golden_helmet);
-                break;
-            case 2:
-                goldThing = new ItemStack(Items.golden_chestplate);
-                break;
-            case 3:
-                goldThing = new ItemStack(Items.golden_leggings);
-                break;
-            default:
-                goldThing = new ItemStack(Items.golden_boots);
-        }
+        goldThing = switch (thingType) {
+            case 0 -> new ItemStack(Items.golden_sword);
+            case 1 -> new ItemStack(Items.golden_helmet);
+            case 2 -> new ItemStack(Items.golden_chestplate);
+            case 3 -> new ItemStack(Items.golden_leggings);
+            default -> new ItemStack(Items.golden_boots);
+        };
         // enchant!
         EnchantmentHelper.addRandomEnchantment(rand, goldThing, 10 + rand.nextInt(30));
         this.entityDropItem(goldThing, 0);

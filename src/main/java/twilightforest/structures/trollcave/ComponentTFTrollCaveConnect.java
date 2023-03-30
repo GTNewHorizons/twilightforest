@@ -440,31 +440,41 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
                     return meta;
                 case 1:
                     switch (meta) {
-                        case 1:
+                        case 1 -> {
                             return 3;
-                        case 2:
+                        }
+                        case 2 -> {
                             return 6;
-                        case 4:
+                        }
+                        case 4 -> {
                             return 2;
-                        case 7:
+                        }
+                        case 7 -> {
                             return 1;
-                        case 8:
+                        }
+                        case 8 -> {
                             return 4;
+                        }
                     }
                 case 2:
                     return 10 - (meta % 10);
                 case 3:
                     switch (meta) {
-                        case 1:
+                        case 1 -> {
                             return 7;
-                        case 2:
+                        }
+                        case 2 -> {
                             return 4;
-                        case 4:
+                        }
+                        case 4 -> {
                             return 8;
-                        case 7:
+                        }
+                        case 7 -> {
                             return 9;
-                        case 8:
+                        }
+                        case 8 -> {
                             return 6;
+                        }
                     }
                 default:
                     return 15;

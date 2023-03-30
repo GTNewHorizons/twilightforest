@@ -466,23 +466,12 @@ public class ContainerTFUncrafting extends Container {
     }
 
     public int getWeightModifier(Enchantment ench) {
-        switch (ench.getWeight()) {
-            case 1:
-                return 8;
-            case 2:
-                return 4;
-            case 3:
-            case 4:
-            case 5:
-                return 2;
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            default:
-            case 10:
-                return 1;
-        }
+        return switch (ench.getWeight()) {
+            case 1 -> 8;
+            case 2 -> 4;
+            case 3, 4, 5 -> 2;
+            default -> 1;
+        };
     }
 
     /**

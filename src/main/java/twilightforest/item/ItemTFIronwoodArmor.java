@@ -49,16 +49,9 @@ public class ItemTFIronwoodArmor extends ItemArmor {
     public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList) {
         ItemStack istack = new ItemStack(item, 1, 0);
         switch (this.armorType) {
-            case 0:
-                istack.addEnchantment(Enchantment.aquaAffinity, 1);
-                break;
-            case 1:
-            case 2:
-                istack.addEnchantment(Enchantment.protection, 1);
-                break;
-            case 3:
-                istack.addEnchantment(Enchantment.featherFalling, 1);
-                break;
+            case 0 -> istack.addEnchantment(Enchantment.aquaAffinity, 1);
+            case 1, 2 -> istack.addEnchantment(Enchantment.protection, 1);
+            case 3 -> istack.addEnchantment(Enchantment.featherFalling, 1);
         }
         itemList.add(istack);
     }

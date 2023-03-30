@@ -55,14 +55,13 @@ public class RenderBlockTFMagicLeaves implements ISimpleBlockRenderingHandler {
         int type = meta & 3;
 
         switch (type) {
-            case 0:
+            case 0 -> {
                 renderer.uvRotateEast = 3;
                 renderer.uvRotateBottom = 0;
-
                 renderer.uvRotateNorth = 2;
                 renderer.uvRotateSouth = 2;
-                break;
-            case 1:
+            }
+            case 1 -> {
                 // bottom and top are semi-random
                 renderer.uvRotateBottom = (x + y + z) & 3;
                 renderer.uvRotateTop = (x + y + z) & 3;
@@ -70,11 +69,10 @@ public class RenderBlockTFMagicLeaves implements ISimpleBlockRenderingHandler {
                 // sides flow down
                 renderer.uvRotateEast = 1;
                 renderer.uvRotateWest = 2;
-
                 renderer.uvRotateNorth = 2;
                 renderer.uvRotateSouth = 1;
-                break;
-            case 2:
+            }
+            case 2 -> {
                 // bottom and top are semi-random
                 renderer.uvRotateBottom = (x + y + z) & 3;
                 renderer.uvRotateTop = (x + y + z) & 3;
@@ -82,20 +80,22 @@ public class RenderBlockTFMagicLeaves implements ISimpleBlockRenderingHandler {
                 // sides flow up
                 renderer.uvRotateEast = 2;
                 renderer.uvRotateWest = 1;
-
                 renderer.uvRotateNorth = 1;
                 renderer.uvRotateSouth = 2;
-                break;
-            case 3:
+            }
+            case 3 -> {
                 // all semi-random
                 renderer.uvRotateBottom = (x + y + z) & 3;
                 renderer.uvRotateTop = (x + y + z) & 3;
-
-                renderer.uvRotateEast = (x + y + z) & 3;;
-                renderer.uvRotateWest = (x + y + z) & 3;;
-
-                renderer.uvRotateNorth = (x + y + z) & 3;;
-                renderer.uvRotateSouth = (x + y + z) & 3;;
+                renderer.uvRotateEast = (x + y + z) & 3;
+                ;
+                renderer.uvRotateWest = (x + y + z) & 3;
+                ;
+                renderer.uvRotateNorth = (x + y + z) & 3;
+                ;
+                renderer.uvRotateSouth = (x + y + z) & 3;
+                ;
+            }
         }
     }
 

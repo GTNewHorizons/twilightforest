@@ -53,17 +53,12 @@ public class BlockTFCastleBlock extends Block {
      */
     @Override
     public IIcon getIcon(int side, int meta) {
-        switch (meta) {
-            case 0:
-            default:
-                return brickIcon;
-            case 1:
-                return fadedIcon;
-            case 2:
-                return crackIcon;
-            case 3:
-                return roofIcon;
-        }
+        return switch (meta) {
+            default -> brickIcon;
+            case 1 -> fadedIcon;
+            case 2 -> crackIcon;
+            case 3 -> roofIcon;
+        };
     }
 
     @Override

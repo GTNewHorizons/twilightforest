@@ -41,25 +41,28 @@ public class BlockTFLog extends BlockLog {
         int orient = meta & 12;
         int woodType = meta & 3;
 
-        switch (woodType) {
-            default:
-            case 0:
-                return orient == 0 && (side == 1 || side == 0) ? sprOakTop
-                        : (orient == 4 && (side == 5 || side == 4) ? sprOakTop
-                                : (orient == 8 && (side == 2 || side == 3) ? sprOakTop : sprOakSide));
-            case 1:
-                return orient == 0 && (side == 1 || side == 0) ? sprCanopyTop
-                        : (orient == 4 && (side == 5 || side == 4) ? sprCanopyTop
-                                : (orient == 8 && (side == 2 || side == 3) ? sprCanopyTop : sprCanopySide));
-            case 2:
-                return orient == 0 && (side == 1 || side == 0) ? sprMangroveTop
-                        : (orient == 4 && (side == 5 || side == 4) ? sprMangroveTop
-                                : (orient == 8 && (side == 2 || side == 3) ? sprMangroveTop : sprMangroveSide));
-            case 3:
-                return orient == 0 && (side == 1 || side == 0) ? sprDarkwoodTop
-                        : (orient == 4 && (side == 5 || side == 4) ? sprDarkwoodTop
-                                : (orient == 8 && (side == 2 || side == 3) ? sprDarkwoodTop : sprDarkwoodSide));
-        }
+        return switch (woodType) {
+            default -> orient == 0 && (side == 1 || side == 0)
+                    ? sprOakTop
+                    : (orient == 4 && (side == 5 || side == 4)
+                            ? sprOakTop
+                            : (orient == 8 && (side == 2 || side == 3) ? sprOakTop : sprOakSide));
+            case 1 -> orient == 0 && (side == 1 || side == 0)
+                    ? sprCanopyTop
+                    : (orient == 4 && (side == 5 || side == 4)
+                            ? sprCanopyTop
+                            : (orient == 8 && (side == 2 || side == 3) ? sprCanopyTop : sprCanopySide));
+            case 2 -> orient == 0 && (side == 1 || side == 0)
+                    ? sprMangroveTop
+                    : (orient == 4 && (side == 5 || side == 4)
+                            ? sprMangroveTop
+                            : (orient == 8 && (side == 2 || side == 3) ? sprMangroveTop : sprMangroveSide));
+            case 3 -> orient == 0 && (side == 1 || side == 0)
+                    ? sprDarkwoodTop
+                    : (orient == 4 && (side == 5 || side == 4)
+                            ? sprDarkwoodTop
+                            : (orient == 8 && (side == 2 || side == 3) ? sprDarkwoodTop : sprDarkwoodSide));
+        };
     }
 
     @Override

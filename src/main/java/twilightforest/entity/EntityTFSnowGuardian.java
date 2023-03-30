@@ -90,69 +90,42 @@ public class EntityTFSnowGuardian extends EntityMob {
     }
 
     protected Item makeItemForSlot(int slot, int type) {
-        switch (slot) {
-            case 0: // sword
-            default:
-                switch (type) {
-                    case 0:
-                    default:
-                        return TFItems.ironwoodSword;
-                    case 1:
-                        return TFItems.steeleafSword;
-                    case 2:
-                        return TFItems.knightlySword;
-                    case 3:
-                        return TFItems.knightlySword;
-                }
-            case 1: // boots
-                switch (type) {
-                    case 0:
-                    default:
-                        return TFItems.ironwoodBoots;
-                    case 1:
-                        return TFItems.steeleafBoots;
-                    case 2:
-                        return TFItems.knightlyBoots;
-                    case 3:
-                        return TFItems.arcticBoots;
-                }
-            case 2: // legs
-                switch (type) {
-                    case 0:
-                    default:
-                        return TFItems.ironwoodLegs;
-                    case 1:
-                        return TFItems.steeleafLegs;
-                    case 2:
-                        return TFItems.knightlyLegs;
-                    case 3:
-                        return TFItems.arcticLegs;
-                }
-            case 3: // chest
-                switch (type) {
-                    case 0:
-                    default:
-                        return TFItems.ironwoodPlate;
-                    case 1:
-                        return TFItems.steeleafPlate;
-                    case 2:
-                        return TFItems.knightlyPlate;
-                    case 3:
-                        return TFItems.arcticPlate;
-                }
-            case 4: // helm
-                switch (type) {
-                    case 0:
-                    default:
-                        return TFItems.ironwoodHelm;
-                    case 1:
-                        return TFItems.steeleafHelm;
-                    case 2:
-                        return TFItems.knightlyHelm;
-                    case 3:
-                        return TFItems.arcticHelm;
-                }
-        }
+        return switch (slot) { // sword
+            default -> switch (type) {
+                default -> TFItems.ironwoodSword;
+                case 1 -> TFItems.steeleafSword;
+                case 2 -> TFItems.knightlySword;
+                case 3 -> TFItems.knightlySword;
+            };
+            case 1 -> // boots
+                    switch (type) {
+                        default -> TFItems.ironwoodBoots;
+                        case 1 -> TFItems.steeleafBoots;
+                        case 2 -> TFItems.knightlyBoots;
+                        case 3 -> TFItems.arcticBoots;
+                    };
+            case 2 -> // legs
+                    switch (type) {
+                        default -> TFItems.ironwoodLegs;
+                        case 1 -> TFItems.steeleafLegs;
+                        case 2 -> TFItems.knightlyLegs;
+                        case 3 -> TFItems.arcticLegs;
+                    };
+            case 3 -> // chest
+                    switch (type) {
+                        default -> TFItems.ironwoodPlate;
+                        case 1 -> TFItems.steeleafPlate;
+                        case 2 -> TFItems.knightlyPlate;
+                        case 3 -> TFItems.arcticPlate;
+                    };
+            case 4 -> // helm
+                    switch (type) {
+                        default -> TFItems.ironwoodHelm;
+                        case 1 -> TFItems.steeleafHelm;
+                        case 2 -> TFItems.knightlyHelm;
+                        case 3 -> TFItems.arcticHelm;
+                    };
+        };
     }
 
     /**

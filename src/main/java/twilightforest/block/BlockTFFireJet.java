@@ -57,18 +57,12 @@ public class BlockTFFireJet extends Block {
      */
     @Override
     public int damageDropped(int meta) {
-        switch (meta) {
-            default:
-                return meta;
-            case META_ENCASED_SMOKER_ON:
-                return META_ENCASED_SMOKER_OFF;
-            case META_ENCASED_JET_POPPING:
-            case META_ENCASED_JET_FLAME:
-                return META_ENCASED_JET_IDLE;
-            case META_JET_POPPING:
-            case META_JET_FLAME:
-                return META_JET_IDLE;
-        }
+        return switch (meta) {
+            default -> meta;
+            case META_ENCASED_SMOKER_ON -> META_ENCASED_SMOKER_OFF;
+            case META_ENCASED_JET_POPPING, META_ENCASED_JET_FLAME -> META_ENCASED_JET_IDLE;
+            case META_JET_POPPING, META_JET_FLAME -> META_JET_IDLE;
+        };
 
     }
 
@@ -178,14 +172,10 @@ public class BlockTFFireJet extends Block {
         if (world.getBlock(x, y, z) == this) {
             int meta = world.getBlockMetadata(x, y, z);
 
-            switch (meta) {
-                case META_SMOKER:
-                default:
-                    return 0;
-                case META_JET_FLAME:
-                case META_ENCASED_JET_FLAME:
-                    return 15;
-            }
+            return switch (meta) {
+                default -> 0;
+                case META_JET_FLAME, META_ENCASED_JET_FLAME -> 15;
+            };
         } else {
             return 0;
         }
@@ -286,17 +276,11 @@ public class BlockTFFireJet extends Block {
      */
     @Override
     public boolean hasTileEntity(int meta) {
-        switch (meta) {
-            case META_SMOKER:
-            case META_ENCASED_SMOKER_ON:
-            case META_JET_POPPING:
-            case META_JET_FLAME:
-            case META_ENCASED_JET_POPPING:
-            case META_ENCASED_JET_FLAME:
-                return true;
-            default:
-                return false;
-        }
+        return switch (meta) {
+            case META_SMOKER, META_ENCASED_SMOKER_ON, META_JET_POPPING, META_JET_FLAME, META_ENCASED_JET_POPPING, META_ENCASED_JET_FLAME ->
+                    true;
+            default -> false;
+        };
     }
 
     /**
@@ -308,21 +292,14 @@ public class BlockTFFireJet extends Block {
      */
     @Override
     public TileEntity createTileEntity(World world, int metadata) {
-        switch (metadata) {
-            case META_SMOKER:
-            case META_ENCASED_SMOKER_ON:
-                return new TileEntityTFSmoker();
-            case META_JET_POPPING:
-                return new TileEntityTFPoppingJet(META_JET_FLAME);
-            case META_JET_FLAME:
-                return new TileEntityTFFlameJet(META_JET_IDLE);
-            case META_ENCASED_JET_POPPING:
-                return new TileEntityTFPoppingJet(META_ENCASED_JET_FLAME);
-            case META_ENCASED_JET_FLAME:
-                return new TileEntityTFFlameJet(META_ENCASED_JET_IDLE);
-            default:
-                return null;
-        }
+        return switch (metadata) {
+            case META_SMOKER, META_ENCASED_SMOKER_ON -> new TileEntityTFSmoker();
+            case META_JET_POPPING -> new TileEntityTFPoppingJet(META_JET_FLAME);
+            case META_JET_FLAME -> new TileEntityTFFlameJet(META_JET_IDLE);
+            case META_ENCASED_JET_POPPING -> new TileEntityTFPoppingJet(META_ENCASED_JET_FLAME);
+            case META_ENCASED_JET_FLAME -> new TileEntityTFFlameJet(META_ENCASED_JET_IDLE);
+            default -> null;
+        };
     }
 
     /**

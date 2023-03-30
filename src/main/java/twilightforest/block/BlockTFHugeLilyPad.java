@@ -97,17 +97,12 @@ public class BlockTFHugeLilyPad extends BlockBush {
 
         int display = (piece + orient) % 4;
 
-        switch (display) {
-            case 0:
-            default:
-                return this.blockIcon;
-            case 1:
-                return this.pad1;
-            case 2:
-                return this.pad2;
-            case 3:
-                return this.pad3;
-        }
+        return switch (display) {
+            default -> this.blockIcon;
+            case 1 -> this.pad1;
+            case 2 -> this.pad2;
+            case 3 -> this.pad3;
+        };
     }
 
     @Override

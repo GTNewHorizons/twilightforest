@@ -44,16 +44,10 @@ public class ItemTFArcticArmor extends ItemArmor {
      * @return Path of texture to bind, or null to use default
      */
     public String getArmorTexture(ItemStack itemstack, Entity entity, int slot, String layer) {
-        switch (slot) {
-            case 0:
-            case 1:
-            case 3:
-            default:
-                return TwilightForestMod.ARMOR_DIR + "arcticarmor_1.png";
-            case 2:
-                return TwilightForestMod.ARMOR_DIR + "arcticarmor_2.png";
-
-        }
+        return switch (slot) {
+            default -> TwilightForestMod.ARMOR_DIR + "arcticarmor_1.png";
+            case 2 -> TwilightForestMod.ARMOR_DIR + "arcticarmor_2.png";
+        };
     }
 
     /**

@@ -507,18 +507,10 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
         int dz = getZWithOffset(x, z);
 
         switch (direction) {
-            case 0:
-                dx += howFar;
-                break;
-            case 1:
-                dz += howFar;
-                break;
-            case 2:
-                dx -= howFar;
-                break;
-            case 3:
-                dz -= howFar;
-                break;
+            case 0 -> dx += howFar;
+            case 1 -> dz += howFar;
+            case 2 -> dx -= howFar;
+            case 3 -> dz -= howFar;
         }
         // ugh?
         return new ChunkCoordinates(dx, dy, dz);

@@ -28,54 +28,55 @@ public class ModelTFTowerBoss extends ModelTFGhast {
         this.tentacles[num].addBox(-1.5F, 0.0F, -1.5F, 3, length, 3);
 
         switch (num) {
-            case 0:
+            case 0 -> {
                 this.tentacles[0].rotationPointX = 4.5F;
                 this.tentacles[0].rotationPointZ = 4.5F;
                 this.tentacles[0].rotationPointY = (float) (23 + yOffset);
-                break;
-            case 1:
+            }
+            case 1 -> {
                 this.tentacles[1].rotationPointX = -4.5F;
                 this.tentacles[1].rotationPointZ = 4.5F;
                 this.tentacles[1].rotationPointY = (float) (23 + yOffset);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 this.tentacles[2].rotationPointX = 0F;
                 this.tentacles[2].rotationPointZ = 0F;
                 this.tentacles[2].rotationPointY = (float) (23 + yOffset);
-                break;
-            case 3:
+            }
+            case 3 -> {
                 this.tentacles[3].rotationPointX = 5.5F;
                 this.tentacles[3].rotationPointZ = -4.5F;
                 this.tentacles[3].rotationPointY = (float) (23 + yOffset);
-                break;
-            case 4:
+            }
+            case 4 -> {
                 this.tentacles[4].rotationPointX = -5.5F;
                 this.tentacles[4].rotationPointZ = -4.5F;
                 this.tentacles[4].rotationPointY = (float) (23 + yOffset);
-                break;
-            case 5:
+            }
+            case 5 -> {
                 this.tentacles[5].rotationPointX = -7.5F;
                 this.tentacles[5].rotationPointY = 3.5F;
                 this.tentacles[5].rotationPointZ = -1F;
                 this.tentacles[5].rotateAngleZ = (float) Math.PI / 4.0F;
-                break;
-            case 6:
+            }
+            case 6 -> {
                 this.tentacles[6].rotationPointX = -7.5F;
                 this.tentacles[6].rotationPointY = -1.5F;
                 this.tentacles[6].rotationPointZ = 3.5F;
                 this.tentacles[6].rotateAngleZ = (float) Math.PI / 3.0F;
-                break;
-            case 7:
+            }
+            case 7 -> {
                 this.tentacles[7].rotationPointX = 7.5F;
                 this.tentacles[7].rotationPointY = 3.5F;
                 this.tentacles[7].rotationPointZ = -1F;
                 this.tentacles[7].rotateAngleZ = -(float) Math.PI / 4.0F;
-                break;
-            case 8:
+            }
+            case 8 -> {
                 this.tentacles[8].rotationPointX = 7.5F;
                 this.tentacles[8].rotationPointY = -1.5F;
                 this.tentacles[8].rotationPointZ = 3.5F;
                 this.tentacles[8].rotateAngleZ = -(float) Math.PI / 3.0F;
+            }
         }
 
         // goofy mid-method initializer

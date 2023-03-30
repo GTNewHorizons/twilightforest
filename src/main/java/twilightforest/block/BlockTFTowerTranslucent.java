@@ -136,17 +136,10 @@ public class BlockTFTowerTranslucent extends Block {
     public boolean getBlocksMovement(IBlockAccess par1IBlockAccess, int par2, int par3, int par4) {
         int meta = par1IBlockAccess.getBlockMetadata(par2, par3, par4);
 
-        switch (meta) {
-            case META_REAPPEARING_INACTIVE:
-            case META_REAPPEARING_ACTIVE:
-            default:
-                return false;
-            case META_BUILT_INACTIVE:
-            case META_BUILT_ACTIVE:
-            case META_REVERTER_REPLACEMENT:
-            case META_REACTOR_DEBRIS:
-                return true;
-        }
+        return switch (meta) {
+            default -> false;
+            case META_BUILT_INACTIVE, META_BUILT_ACTIVE, META_REVERTER_REPLACEMENT, META_REACTOR_DEBRIS -> true;
+        };
     }
 
     /**
@@ -155,25 +148,33 @@ public class BlockTFTowerTranslucent extends Block {
     @Override
     public IIcon getIcon(int side, int meta) {
         switch (meta) {
-            case META_REAPPEARING_INACTIVE:
-            default:
+            default -> {
                 return TEX_REAPPEARING_INACTIVE;
-            case META_REAPPEARING_ACTIVE:
+            }
+            case META_REAPPEARING_ACTIVE -> {
                 return TEX_REAPPEARING_ACTIVE;
-            case META_BUILT_INACTIVE:
+            }
+            case META_BUILT_INACTIVE -> {
                 return TEX_BUILT_INACTIVE;
-            case META_BUILT_ACTIVE:
+            }
+            case META_BUILT_ACTIVE -> {
                 return TEX_BUILT_ACTIVE;
-            case META_REVERTER_REPLACEMENT:
+            }
+            case META_REVERTER_REPLACEMENT -> {
                 return TEX_REVERTER_REPLACEMENT;
-            case META_REACTOR_DEBRIS:
-                Block toMimic = sideRNG.nextBoolean() ? (sideRNG.nextBoolean() ? Blocks.portal : Blocks.netherrack)
+            }
+            case META_REACTOR_DEBRIS -> {
+                Block toMimic = sideRNG.nextBoolean()
+                        ? (sideRNG.nextBoolean() ? Blocks.portal : Blocks.netherrack)
                         : (sideRNG.nextBoolean() ? Blocks.bedrock : Blocks.obsidian);
                 return toMimic.getIcon(side, meta);
-            case META_FAKE_GOLD:
+            }
+            case META_FAKE_GOLD -> {
                 return Blocks.gold_block.getIcon(side, meta);
-            case META_FAKE_DIAMOND:
+            }
+            case META_FAKE_DIAMOND -> {
                 return Blocks.diamond_block.getIcon(side, meta);
+            }
         }
     }
 

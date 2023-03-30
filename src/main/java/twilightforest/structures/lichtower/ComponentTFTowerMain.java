@@ -105,24 +105,24 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         int rz = 0;
 
         switch (rotation) {
-            case 0:
+            case 0 -> {
                 // for directions 0 or 2, the wall lies along the z axis
                 rx = size - 1;
                 rz = 6 + rand.nextInt(8);
-                break;
-            case 1:
+            }
+            case 1 -> {
                 // for directions 1 or 3, the wall lies along the x axis
                 rx = 1 + rand.nextInt(11);
                 rz = size - 1;
-                break;
-            case 2:
+            }
+            case 2 -> {
                 rx = 0;
                 rz = 1 + rand.nextInt(8);
-                break;
-            case 3:
+            }
+            case 3 -> {
                 rx = 3 + rand.nextInt(11);
                 rz = 0;
-                break;
+            }
         }
 
         return new int[] { rx, ry, rz };
@@ -261,19 +261,12 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         placeBlockAtCurrentPosition(world, Blocks.fence, 0, 9, floorLevel, 3, sbb);
 
         // place spawner in the middle
-        String mobID = "Skeleton";
-        switch (rand.nextInt(4)) {
-            case 0:
-            case 1:
-                mobID = "Skeleton";
-                break;
-            case 2:
-                mobID = "Zombie";
-                break;
-            case 3:
-                mobID = TFCreatures.getSpawnerNameFor("Swarm Spider");
-                break;
-        }
+        String mobID = switch (rand.nextInt(4)) {
+            case 0, 1 -> "Skeleton";
+            case 2 -> "Zombie";
+            case 3 -> TFCreatures.getSpawnerNameFor("Swarm Spider");
+            default -> "Skeleton";
+        };
         placeSpawnerAtCurrentPosition(world, rand, 7, floorLevel + 2, 7, mobID, sbb);
 
         // make a fence arch support for the spawner
@@ -476,18 +469,10 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
             // offset to see where the fence should be
             ChunkCoordinates tCoords = new ChunkCoordinates(wCoords);
             switch (direction) {
-                case 0:
-                    tCoords.posZ++;
-                    break;
-                case 1:
-                    tCoords.posX--;
-                    break;
-                case 2:
-                    tCoords.posZ--;
-                    break;
-                case 3:
-                    tCoords.posX++;
-                    break;
+                case 0 -> tCoords.posZ++;
+                case 1 -> tCoords.posX--;
+                case 2 -> tCoords.posZ--;
+                case 3 -> tCoords.posX++;
             }
 
             // is there a painting or another torch there?

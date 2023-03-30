@@ -28,40 +28,30 @@ public class ItemTFMeta extends Item {
 
     @Override
     public String getUnlocalizedName(ItemStack stack) {
-        switch (stack.getItemDamage()) {
-            case 0:
-                return "item.adherentFragment";
-            case 1:
-                return "item.harbingerFragment";
-            default:
-                return "unusedMeta";
-        }
+        return switch (stack.getItemDamage()) {
+            case 0 -> "item.adherentFragment";
+            case 1 -> "item.harbingerFragment";
+            default -> "unusedMeta";
+        };
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public EnumRarity getRarity(ItemStack stack) {
-        switch (stack.getItemDamage()) {
-            case 0:
-            case 1:
-                return EnumRarity.uncommon;
+        return switch (stack.getItemDamage()) {
+            case 0, 1 -> EnumRarity.uncommon;
 
             // return EnumRarity.rare;
-            default:
-                return EnumRarity.common;
-        }
+            default -> EnumRarity.common;
+        };
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean par4) {
         switch (stack.getItemDamage()) {
-            case 0:
-                list.add(StatCollector.translateToLocal("tooltip.tf.adherent"));
-                break;
-            case 1:
-                list.add(StatCollector.translateToLocal("tooltip.tf.harbinger"));
-                break;
+            case 0 -> list.add(StatCollector.translateToLocal("tooltip.tf.adherent"));
+            case 1 -> list.add(StatCollector.translateToLocal("tooltip.tf.harbinger"));
         }
     }
 

@@ -81,18 +81,9 @@ public class BlockTFTrophy extends BlockContainer {
         if (trophy != null && trophy.func_145904_a() == 0) {
             // hydra bounds
             switch (meta) {
-                case 1:
-                default:
-                    this.setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.5F, 0.75F);
-                    break;
-                case 2:
-                case 3:
-                    this.setBlockBounds(0.25F, 0.25F, 0.0F, 0.75F, 0.75F, 1.0F);
-                    break;
-                case 4:
-                case 5:
-                    this.setBlockBounds(0.0F, 0.25F, 0.25F, 1.0F, 0.75F, 0.75F);
-                    break;
+                default -> this.setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.5F, 0.75F);
+                case 2, 3 -> this.setBlockBounds(0.25F, 0.25F, 0.0F, 0.75F, 0.75F, 1.0F);
+                case 4, 5 -> this.setBlockBounds(0.0F, 0.25F, 0.25F, 1.0F, 0.75F, 0.75F);
             }
         } else if (trophy != null && trophy.func_145904_a() == 3) {
             // urghast bounds
@@ -100,21 +91,11 @@ public class BlockTFTrophy extends BlockContainer {
         } else {
             // normal skull bounds
             switch (meta) {
-                case 1:
-                default:
-                    this.setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.5F, 0.75F);
-                    break;
-                case 2:
-                    this.setBlockBounds(0.25F, 0.25F, 0.5F, 0.75F, 0.75F, 1.0F);
-                    break;
-                case 3:
-                    this.setBlockBounds(0.25F, 0.25F, 0.0F, 0.75F, 0.75F, 0.5F);
-                    break;
-                case 4:
-                    this.setBlockBounds(0.5F, 0.25F, 0.25F, 1.0F, 0.75F, 0.75F);
-                    break;
-                case 5:
-                    this.setBlockBounds(0.0F, 0.25F, 0.25F, 0.5F, 0.75F, 0.75F);
+                default -> this.setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.5F, 0.75F);
+                case 2 -> this.setBlockBounds(0.25F, 0.25F, 0.5F, 0.75F, 0.75F, 1.0F);
+                case 3 -> this.setBlockBounds(0.25F, 0.25F, 0.0F, 0.75F, 0.75F, 0.5F);
+                case 4 -> this.setBlockBounds(0.5F, 0.25F, 0.25F, 1.0F, 0.75F, 0.75F);
+                case 5 -> this.setBlockBounds(0.0F, 0.25F, 0.25F, 0.5F, 0.75F, 0.75F);
             }
         }
     }

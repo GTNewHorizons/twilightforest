@@ -166,43 +166,25 @@ public class BlockTFNagastone extends Block {
         int orient = 0;
         if (type == 0) {
             // head!
-            switch (side) {
-                case 0:
-                case 1:
-                default:
+            orient = switch (side) {
+                default ->
                     // don't know
-                    orient = 1;
-                    break;
-                case 2:
-                    orient = 0;
-                    break;
-                case 3:
-                    orient = 1;
-                    break;
-                case 4:
-                    orient = 2;
-                    break;
-                case 5:
-                    orient = 3;
-                    break;
-            }
+                        1;
+                case 2 -> 0;
+                case 3 -> 1;
+                case 4 -> 2;
+                case 5 -> 3;
+            };
         }
         if (type == 12) {
             // straight
-            switch (side) {
-                case 0:
-                case 1:
-                    orient = 2; // u/d
-                    break;
-                case 2:
-                case 3:
-                    orient = 1; // e/w
-                    break;
-                case 4:
-                case 5:
-                    orient = 0; // n/s
-                    break;
-            }
+            // n/s
+            orient = switch (side) {
+                case 0, 1 -> 2; // u/d
+                case 2, 3 -> 1; // e/w
+                case 4, 5 -> 0;
+                default -> orient;
+            };
         }
 
         return type | orient;
@@ -294,18 +276,22 @@ public class BlockTFNagastone extends Block {
             // if the first connection is n/s/e/w, and the second connection is not, we win!
             // System.out.println("Got a perfect head fit : " + connect);
             switch (connect) {
-                case 0:
+                case 0 -> {
                     world.setBlock(x, y, z, this, 1, 3);
                     return true;
-                case 1:
+                }
+                case 1 -> {
                     world.setBlock(x, y, z, this, 0, 3);
                     return true;
-                case 2:
+                }
+                case 2 -> {
                     world.setBlock(x, y, z, this, 3, 3);
                     return true;
-                case 3:
+                }
+                case 3 -> {
                     world.setBlock(x, y, z, this, 2, 3);
                     return true;
+                }
             }
             return false; // this is impossible
         } else {
@@ -360,22 +346,17 @@ public class BlockTFNagastone extends Block {
      * Is there nagastone in the following direction? 0 = n, 1 = s, 2 = w, 3 = e, 4 = u, 5 = d;
      */
     public boolean isNagaStoneInDirection(World par1World, int x, int y, int z, int direction) {
-        switch (direction) {
-            case 0:
-                return par1World.getBlock(x, y, z - 1) == this;
-            case 1:
-                return par1World.getBlock(x, y, z + 1) == this;
-            case 2:
-                return par1World.getBlock(x - 1, y, z) == this;
-            case 3:
-                return par1World.getBlock(x + 1, y, z) == this;
-            case 4:
-                return par1World.getBlock(x, y - 1, z) == this;
-            case 5:
-                return par1World.getBlock(x, y + 1, z) == this;
-        }
-        // welp,
-        return false;
+        return switch (direction) {
+            case 0 -> par1World.getBlock(x, y, z - 1) == this;
+            case 1 -> par1World.getBlock(x, y, z + 1) == this;
+            case 2 -> par1World.getBlock(x - 1, y, z) == this;
+            case 3 -> par1World.getBlock(x + 1, y, z) == this;
+            case 4 -> par1World.getBlock(x, y - 1, z) == this;
+            case 5 -> par1World.getBlock(x, y + 1, z) == this;
+            default ->
+                // welp,
+                    false;
+        };
     }
 
     /**
@@ -404,63 +385,87 @@ public class BlockTFNagastone extends Block {
             if (orient == 0) {
                 // north
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_TIP;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_TIP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return FACE_FRONT;
-                    case 3:
+                    }
+                    case 3 -> {
                         return CROSS_SECTION;
-                    case 4:
+                    }
+                    case 4 -> {
                         return FACE_LEFT;
-                    case 5:
+                    }
+                    case 5 -> {
                         return FACE_RIGHT;
+                    }
                 }
             } else if (orient == 1) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_TIP;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_TIP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return CROSS_SECTION;
-                    case 3:
+                    }
+                    case 3 -> {
                         return FACE_FRONT;
-                    case 4:
+                    }
+                    case 4 -> {
                         return FACE_RIGHT;
-                    case 5:
+                    }
+                    case 5 -> {
                         return FACE_LEFT;
+                    }
                 }
             } else if (orient == 2) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_TIP;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_TIP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return FACE_RIGHT;
-                    case 3:
+                    }
+                    case 3 -> {
                         return FACE_LEFT;
-                    case 4:
+                    }
+                    case 4 -> {
                         return FACE_FRONT;
-                    case 5:
+                    }
+                    case 5 -> {
                         return CROSS_SECTION;
+                    }
                 }
             } else if (orient == 3) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_TIP;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_TIP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return FACE_LEFT;
-                    case 3:
+                    }
+                    case 3 -> {
                         return FACE_RIGHT;
-                    case 4:
+                    }
+                    case 4 -> {
                         return CROSS_SECTION;
-                    case 5:
+                    }
+                    case 5 -> {
                         return FACE_FRONT;
+                    }
                 }
             }
         }
@@ -470,63 +475,87 @@ public class BlockTFNagastone extends Block {
             if (orient == 0) {
                 // north
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return CROSS_SECTION;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_TIP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return CROSS_SECTION;
-                    case 3:
+                    }
+                    case 3 -> {
                         return TIP_RIGHT;
-                    case 4:
+                    }
+                    case 4 -> {
                         return LEFT_DOWN;
-                    case 5:
+                    }
+                    case 5 -> {
                         return RIGHT_DOWN;
+                    }
                 }
             } else if (orient == 1) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return CROSS_SECTION;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_TIP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return TIP_LEFT;
-                    case 3:
+                    }
+                    case 3 -> {
                         return CROSS_SECTION;
-                    case 4:
+                    }
+                    case 4 -> {
                         return RIGHT_DOWN;
-                    case 5:
+                    }
+                    case 5 -> {
                         return LEFT_DOWN;
+                    }
                 }
             } else if (orient == 2) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return CROSS_SECTION;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_TIP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return RIGHT_DOWN;
-                    case 3:
+                    }
+                    case 3 -> {
                         return LEFT_DOWN;
-                    case 4:
+                    }
+                    case 4 -> {
                         return CROSS_SECTION;
-                    case 5:
+                    }
+                    case 5 -> {
                         return TIP_LEFT;
+                    }
                 }
             } else if (orient == 3) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return CROSS_SECTION;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_TIP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return LEFT_DOWN;
-                    case 3:
+                    }
+                    case 3 -> {
                         return RIGHT_DOWN;
-                    case 4:
+                    }
+                    case 4 -> {
                         return TIP_RIGHT;
-                    case 5:
+                    }
+                    case 5 -> {
                         return CROSS_SECTION;
+                    }
                 }
             }
 
@@ -537,63 +566,87 @@ public class BlockTFNagastone extends Block {
             if (orient == 0) {
                 // north
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_TIP;
-                    case 1:
+                    }
+                    case 1 -> {
                         return CROSS_SECTION;
-                    case 2:
+                    }
+                    case 2 -> {
                         return CROSS_SECTION;
-                    case 3:
+                    }
+                    case 3 -> {
                         return TIP_LEFT;
-                    case 4:
+                    }
+                    case 4 -> {
                         return LEFT_UP;
-                    case 5:
+                    }
+                    case 5 -> {
                         return RIGHT_UP;
+                    }
                 }
             } else if (orient == 1) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_TIP;
-                    case 1:
+                    }
+                    case 1 -> {
                         return CROSS_SECTION;
-                    case 2:
+                    }
+                    case 2 -> {
                         return TIP_RIGHT;
-                    case 3:
+                    }
+                    case 3 -> {
                         return CROSS_SECTION;
-                    case 4:
+                    }
+                    case 4 -> {
                         return RIGHT_UP;
-                    case 5:
+                    }
+                    case 5 -> {
                         return LEFT_UP;
+                    }
                 }
             } else if (orient == 2) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_TIP;
-                    case 1:
+                    }
+                    case 1 -> {
                         return CROSS_SECTION;
-                    case 2:
+                    }
+                    case 2 -> {
                         return RIGHT_UP;
-                    case 3:
+                    }
+                    case 3 -> {
                         return LEFT_UP;
-                    case 4:
+                    }
+                    case 4 -> {
                         return CROSS_SECTION;
-                    case 5:
+                    }
+                    case 5 -> {
                         return TIP_RIGHT;
+                    }
                 }
             } else if (orient == 3) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_TIP;
-                    case 1:
+                    }
+                    case 1 -> {
                         return CROSS_SECTION;
-                    case 2:
+                    }
+                    case 2 -> {
                         return LEFT_UP;
-                    case 3:
+                    }
+                    case 3 -> {
                         return RIGHT_UP;
-                    case 4:
+                    }
+                    case 4 -> {
                         return TIP_LEFT;
-                    case 5:
+                    }
+                    case 5 -> {
                         return CROSS_SECTION;
+                    }
                 }
             }
 
@@ -603,63 +656,87 @@ public class BlockTFNagastone extends Block {
             if (orient == 0) {
                 // north
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_LONG;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_LONG;
-                    case 2:
+                    }
+                    case 2 -> {
                         return LONG_SIDE;
-                    case 3:
+                    }
+                    case 3 -> {
                         return LONG_SIDE;
-                    case 4:
+                    }
+                    case 4 -> {
                         return CROSS_SECTION;
-                    case 5:
+                    }
+                    case 5 -> {
                         return CROSS_SECTION;
+                    }
                 }
             } else if (orient == 1) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return BOTTOM_LONG;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TOP_LONG;
-                    case 2:
+                    }
+                    case 2 -> {
                         return CROSS_SECTION;
-                    case 3:
+                    }
+                    case 3 -> {
                         return CROSS_SECTION;
-                    case 4:
+                    }
+                    case 4 -> {
                         return LONG_SIDE;
-                    case 5:
+                    }
+                    case 5 -> {
                         return LONG_SIDE;
+                    }
                 }
             } else if (orient == 2) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return CROSS_SECTION;
-                    case 1:
+                    }
+                    case 1 -> {
                         return CROSS_SECTION;
-                    case 2:
+                    }
+                    case 2 -> {
                         return LONG_SIDE;
-                    case 3:
+                    }
+                    case 3 -> {
                         return LONG_SIDE;
-                    case 4:
+                    }
+                    case 4 -> {
                         return LONG_SIDE;
-                    case 5:
+                    }
+                    case 5 -> {
                         return LONG_SIDE;
+                    }
                 }
             } else if (orient == 3) {
                 switch (side) {
-                    case 0:
+                    case 0 -> {
                         return CROSS_SECTION;
-                    case 1:
+                    }
+                    case 1 -> {
                         return TURN_TOP;
-                    case 2:
+                    }
+                    case 2 -> {
                         return LONG_SIDE;
-                    case 3:
+                    }
+                    case 3 -> {
                         return LONG_SIDE;
-                    case 4:
+                    }
+                    case 4 -> {
                         return LONG_SIDE;
-                    case 5:
+                    }
+                    case 5 -> {
                         return LONG_SIDE;
+                    }
                 }
             }
 

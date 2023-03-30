@@ -11,7 +11,7 @@ public class ModelTFFieryArmor extends ModelBiped {
         super(expand);
 
         switch (part) {
-            case 0: // helmet
+            case 0 -> { // helmet
                 this.bipedHead.showModel = true;
                 this.bipedHeadwear.showModel = false;
                 this.bipedBody.showModel = false;
@@ -19,8 +19,8 @@ public class ModelTFFieryArmor extends ModelBiped {
                 this.bipedLeftArm.showModel = false;
                 this.bipedRightLeg.showModel = false;
                 this.bipedLeftLeg.showModel = false;
-                break;
-            case 1: // chest
+            }
+            case 1 -> { // chest
                 this.bipedHead.showModel = false;
                 this.bipedHeadwear.showModel = false;
                 this.bipedBody.showModel = true;
@@ -28,8 +28,8 @@ public class ModelTFFieryArmor extends ModelBiped {
                 this.bipedLeftArm.showModel = true;
                 this.bipedRightLeg.showModel = false;
                 this.bipedLeftLeg.showModel = false;
-                break;
-            case 2: // pants
+            }
+            case 2 -> { // pants
                 this.bipedHead.showModel = false;
                 this.bipedHeadwear.showModel = false;
                 this.bipedBody.showModel = true;
@@ -37,8 +37,8 @@ public class ModelTFFieryArmor extends ModelBiped {
                 this.bipedLeftArm.showModel = false;
                 this.bipedRightLeg.showModel = true;
                 this.bipedLeftLeg.showModel = true;
-                break;
-            case 3: // boots
+            }
+            case 3 -> { // boots
                 this.bipedHead.showModel = false;
                 this.bipedHeadwear.showModel = false;
                 this.bipedBody.showModel = false;
@@ -46,8 +46,7 @@ public class ModelTFFieryArmor extends ModelBiped {
                 this.bipedLeftArm.showModel = false;
                 this.bipedRightLeg.showModel = true;
                 this.bipedLeftLeg.showModel = true;
-                break;
-
+            }
         }
     }
 

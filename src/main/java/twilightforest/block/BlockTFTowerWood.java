@@ -75,19 +75,13 @@ public class BlockTFTowerWood extends Block {
      */
     @Override
     public IIcon getIcon(int side, int meta) {
-        switch (meta) {
-            case 0:
-            default:
-                return TEX_PLAIN;
-            case 1:
-                return TEX_ENCASED;
-            case 2:
-                return TEX_CRACKED;
-            case 3:
-                return TEX_MOSSY;
-            case META_INFESTED:
-                return TEX_INFESTED;
-        }
+        return switch (meta) {
+            default -> TEX_PLAIN;
+            case 1 -> TEX_ENCASED;
+            case 2 -> TEX_CRACKED;
+            case 3 -> TEX_MOSSY;
+            case META_INFESTED -> TEX_INFESTED;
+        };
     }
 
     @Override

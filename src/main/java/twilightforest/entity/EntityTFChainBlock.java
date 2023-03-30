@@ -112,36 +112,36 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
                     this.velZ *= bounce;
 
                     switch (mop.sideHit) {
-                        case 0:
+                        case 0 -> {
                             if (this.velY > 0) {
                                 this.velY *= -bounce;
                             }
-                            break;
-                        case 1:
+                        }
+                        case 1 -> {
                             if (this.velY < 0) {
                                 this.velY *= -bounce;
                             }
-                            break;
-                        case 2:
+                        }
+                        case 2 -> {
                             if (this.velZ > 0) {
                                 this.velZ *= -bounce;
                             }
-                            break;
-                        case 3:
+                        }
+                        case 3 -> {
                             if (this.velZ < 0) {
                                 this.velZ *= -bounce;
                             }
-                            break;
-                        case 4:
+                        }
+                        case 4 -> {
                             if (this.velX > 0) {
                                 this.velX *= -bounce;
                             }
-                            break;
-                        case 5:
+                        }
+                        case 5 -> {
                             if (this.velX < 0) {
                                 this.velX *= -bounce;
                             }
-                            break;
+                        }
                     }
                 }
 

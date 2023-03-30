@@ -56,42 +56,30 @@ public class TileEntityTFTrophyRenderer extends TileEntitySpecialRenderer {
         // wall mounted?
         if (meta != 1) {
             switch (meta) {
-                case 2:
-                    onGround = false;
-                    break;
-                case 3:
+                case 2 -> onGround = false;
+                case 3 -> {
                     onGround = false;
                     rotation = 180.0F;
-                    break;
-                case 4:
+                }
+                case 4 -> {
                     onGround = false;
                     rotation = 270.0F;
-                    break;
-                case 5:
-                default:
+                }
+                default -> {
                     onGround = false;
                     rotation = 90.0F;
+                }
             }
         }
 
         GL11.glTranslatef((float) x + 0.5F, (float) y + 0.5F, (float) z + 0.5F);
 
         switch (trophy.func_145904_a()) {
-            case 0:
-                renderHydraHead(rotation, onGround);
-                break;
-            case 1:
-                renderNagaHead(rotation, onGround);
-                break;
-            case 2:
-                renderLichHead(rotation, onGround);
-                break;
-            case 3:
-                renderUrGhastHead(trophy, rotation, onGround, partialTime);
-                break;
-            case 4:
-                renderSnowQueenHead(rotation, onGround);
-                break;
+            case 0 -> renderHydraHead(rotation, onGround);
+            case 1 -> renderNagaHead(rotation, onGround);
+            case 2 -> renderLichHead(rotation, onGround);
+            case 3 -> renderUrGhastHead(trophy, rotation, onGround, partialTime);
+            case 4 -> renderSnowQueenHead(rotation, onGround);
         }
 
         GL11.glPopMatrix();

@@ -52,25 +52,26 @@ public class ComponentTFFinalCastleFoundation13Thorns extends ComponentTFFinalCa
             this.placeBlockRotated(world, TFBlocks.thorns, 0, x, y, z, rotation, sbb);
             // twist vines around the center block
             switch (twist) {
-                case 0:
+                case 0 -> {
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x + 1, y, z, rotation, sbb);
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x, y, z + 1, rotation, sbb);
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x + 1, y, z + 1, rotation, sbb);
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x + 1, y, z, rotation, sbb);
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x, y, z - 1, rotation, sbb);
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x + 1, y, z - 1, rotation, sbb);
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x - 1, y, z, rotation, sbb);
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x, y, z - 1, rotation, sbb);
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x - 1, y, z - 1, rotation, sbb);
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x - 1, y, z, rotation, sbb);
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x, y, z + 1, rotation, sbb);
                     this.placeBlockRotated(world, TFBlocks.thorns, 0, x - 1, y, z + 1, rotation, sbb);
+                }
             }
 
             if (Math.abs(y % twistMod) == 1) {
@@ -98,17 +99,10 @@ public class ComponentTFFinalCastleFoundation13Thorns extends ComponentTFFinalCa
         int dz = 0;
 
         switch (dir) {
-            case 0:
-                dx = +1;
-                break;
-            case 1:
-                dz = +1;
-                break;
-            case 2:
-                dx = -1;
-                break;
-            case 3:
-                dz = -1;
+            case 0 -> dx = +1;
+            case 1 -> dz = +1;
+            case 2 -> dx = -1;
+            case 3 -> dz = -1;
         }
 
         // how far do we branch?

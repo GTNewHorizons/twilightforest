@@ -27,17 +27,11 @@ public class RenderTFMiniGhast extends RenderLiving {
      */
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         if (par1Entity instanceof EntityTFTowerGhast) {
-            switch (((EntityTFTowerGhast) par1Entity).getAttackStatus()) {
-                default:
-                case 0:
-                    return textureLocClosed;
-
-                case 1:
-                    return textureLocOpen;
-
-                case 2:
-                    return textureLocAttack;
-            }
+            return switch (((EntityTFTowerGhast) par1Entity).getAttackStatus()) {
+                default -> textureLocClosed;
+                case 1 -> textureLocOpen;
+                case 2 -> textureLocAttack;
+            };
         }
 
         // fallback

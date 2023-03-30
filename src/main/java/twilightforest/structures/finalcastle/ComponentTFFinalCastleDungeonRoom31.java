@@ -138,29 +138,20 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
             offset += this.size;
         }
 
-        switch (rotation) {
-            default:
-            case 0:
-                return new ChunkCoordinates(
-                        this.boundingBox.maxX + 9,
-                        this.boundingBox.minY,
-                        this.boundingBox.minZ + offset);
-            case 1:
-                return new ChunkCoordinates(
-                        this.boundingBox.minX + offset,
-                        this.boundingBox.minY,
-                        this.boundingBox.maxZ + 9);
-            case 2:
-                return new ChunkCoordinates(
-                        this.boundingBox.minX - 9,
-                        this.boundingBox.minY,
-                        this.boundingBox.minZ + offset);
-            case 3:
-                return new ChunkCoordinates(
-                        this.boundingBox.minX + offset,
-                        this.boundingBox.minY,
-                        this.boundingBox.minZ - 9);
-        }
+        return switch (rotation) {
+            default -> new ChunkCoordinates(this.boundingBox.maxX + 9,
+                    this.boundingBox.minY,
+                    this.boundingBox.minZ + offset);
+            case 1 -> new ChunkCoordinates(this.boundingBox.minX + offset,
+                    this.boundingBox.minY,
+                    this.boundingBox.maxZ + 9);
+            case 2 -> new ChunkCoordinates(this.boundingBox.minX - 9,
+                    this.boundingBox.minY,
+                    this.boundingBox.minZ + offset);
+            case 3 -> new ChunkCoordinates(this.boundingBox.minX + offset,
+                    this.boundingBox.minY,
+                    this.boundingBox.minZ - 9);
+        };
     }
 
     @Override

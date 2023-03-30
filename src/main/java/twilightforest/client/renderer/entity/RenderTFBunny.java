@@ -27,18 +27,11 @@ public class RenderTFBunny extends RenderLiving {
      */
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         if (par1Entity instanceof EntityTFBunny) {
-            switch (((EntityTFBunny) par1Entity).getBunnyType()) {
-                default:
-                case 0:
-                case 1:
-                    return textureLocDutch;
-
-                case 2:
-                    return textureLocWhite;
-
-                case 3:
-                    return textureLocBrown;
-            }
+            return switch (((EntityTFBunny) par1Entity).getBunnyType()) {
+                default -> textureLocDutch;
+                case 2 -> textureLocWhite;
+                case 3 -> textureLocBrown;
+            };
         }
 
         // fallback

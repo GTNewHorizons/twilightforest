@@ -47,16 +47,10 @@ public class ItemTFYetiArmor extends ItemArmor {
      * @return Path of texture to bind, or null to use default
      */
     public String getArmorTexture(ItemStack itemstack, Entity entity, int slot, String layer) {
-        switch (slot) {
-            case 0:
-            case 3:
-            default:
-                return TwilightForestMod.ARMOR_DIR + "yetiarmor_1.png";
-            case 1:
-            case 2:
-                return TwilightForestMod.ARMOR_DIR + "yetiarmor_2.png";
-
-        }
+        return switch (slot) {
+            default -> TwilightForestMod.ARMOR_DIR + "yetiarmor_1.png";
+            case 1, 2 -> TwilightForestMod.ARMOR_DIR + "yetiarmor_2.png";
+        };
     }
 
     /**
@@ -67,15 +61,11 @@ public class ItemTFYetiArmor extends ItemArmor {
     public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList) {
         ItemStack istack = new ItemStack(item, 1, 0);
         switch (this.armorType) {
-            case 0:
-            case 1:
-            case 2:
-                istack.addEnchantment(Enchantment.protection, 2);
-                break;
-            case 3:
+            case 0, 1, 2 -> istack.addEnchantment(Enchantment.protection, 2);
+            case 3 -> {
                 istack.addEnchantment(Enchantment.protection, 2);
                 istack.addEnchantment(Enchantment.featherFalling, 4);
-                break;
+            }
         }
         itemList.add(istack);
     }

@@ -41,18 +41,10 @@ public class ComponentTFFinalCastleDungeonSteps extends StructureTFComponent {
         int sz = 17;
 
         switch (rotation) {
-            case 0:
-                sz -= 5;
-                break;
-            case 1:
-                sx -= 5;
-                break;
-            case 2:
-                sz += 5;
-                break;
-            case 3:
-                sx += 6;
-                break;
+            case 0 -> sz -= 5;
+            case 1 -> sx -= 5;
+            case 2 -> sz += 5;
+            case 3 -> sx += 6;
         }
 
         // find center of landing

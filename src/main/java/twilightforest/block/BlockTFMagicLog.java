@@ -52,25 +52,28 @@ public class BlockTFMagicLog extends BlockLog {
         int orient = meta & 12;
         int woodType = meta & 3;
 
-        switch (woodType) {
-            default:
-            case META_TIME:
-                return orient == 0 && (side == 1 || side == 0) ? SPR_TIMETOP
-                        : (orient == 4 && (side == 5 || side == 4) ? SPR_TIMETOP
-                                : (orient == 8 && (side == 2 || side == 3) ? SPR_TIMETOP : SPR_TIMESIDE));
-            case META_TRANS:
-                return orient == 0 && (side == 1 || side == 0) ? SPR_TRANSTOP
-                        : (orient == 4 && (side == 5 || side == 4) ? SPR_TRANSTOP
-                                : (orient == 8 && (side == 2 || side == 3) ? SPR_TRANSTOP : SPR_TRANSSIDE));
-            case META_MINE:
-                return orient == 0 && (side == 1 || side == 0) ? SPR_MINETOP
-                        : (orient == 4 && (side == 5 || side == 4) ? SPR_MINETOP
-                                : (orient == 8 && (side == 2 || side == 3) ? SPR_MINETOP : SPR_MINESIDE));
-            case META_SORT:
-                return orient == 0 && (side == 1 || side == 0) ? SPR_SORTTOP
-                        : (orient == 4 && (side == 5 || side == 4) ? SPR_SORTTOP
-                                : (orient == 8 && (side == 2 || side == 3) ? SPR_SORTTOP : SPR_SORTSIDE));
-        }
+        return switch (woodType) {
+            default -> orient == 0 && (side == 1 || side == 0)
+                    ? SPR_TIMETOP
+                    : (orient == 4 && (side == 5 || side == 4)
+                            ? SPR_TIMETOP
+                            : (orient == 8 && (side == 2 || side == 3) ? SPR_TIMETOP : SPR_TIMESIDE));
+            case META_TRANS -> orient == 0 && (side == 1 || side == 0)
+                    ? SPR_TRANSTOP
+                    : (orient == 4 && (side == 5 || side == 4)
+                            ? SPR_TRANSTOP
+                            : (orient == 8 && (side == 2 || side == 3) ? SPR_TRANSTOP : SPR_TRANSSIDE));
+            case META_MINE -> orient == 0 && (side == 1 || side == 0)
+                    ? SPR_MINETOP
+                    : (orient == 4 && (side == 5 || side == 4)
+                            ? SPR_MINETOP
+                            : (orient == 8 && (side == 2 || side == 3) ? SPR_MINETOP : SPR_MINESIDE));
+            case META_SORT -> orient == 0 && (side == 1 || side == 0)
+                    ? SPR_SORTTOP
+                    : (orient == 4 && (side == 5 || side == 4)
+                            ? SPR_SORTTOP
+                            : (orient == 8 && (side == 2 || side == 3) ? SPR_SORTTOP : SPR_SORTSIDE));
+        };
 
     }
 

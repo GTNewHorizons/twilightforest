@@ -243,18 +243,13 @@ public class ComponentTFTrollCaveMain extends StructureTFComponent {
         int dy = getYWithOffset(y);
         int dz = getZWithOffset(x, z);
 
-        switch (direction) {
-            case 0:
-                return new ChunkCoordinates(dx - 1, dy - 1, dz - towerSize / 2);
-            case 1:
-                return new ChunkCoordinates(dx + towerSize / 2, dy - 1, dz - 1);
-            case 2:
-                return new ChunkCoordinates(dx + 1, dy - 1, dz + towerSize / 2);
-            case 3:
-                return new ChunkCoordinates(dx - towerSize / 2, dy - 1, dz + 1);
-            default:
-                return new ChunkCoordinates(x, y, z);
-        }
+        return switch (direction) {
+            case 0 -> new ChunkCoordinates(dx - 1, dy - 1, dz - towerSize / 2);
+            case 1 -> new ChunkCoordinates(dx + towerSize / 2, dy - 1, dz - 1);
+            case 2 -> new ChunkCoordinates(dx + 1, dy - 1, dz + towerSize / 2);
+            case 3 -> new ChunkCoordinates(dx - towerSize / 2, dy - 1, dz + 1);
+            default -> new ChunkCoordinates(x, y, z);
+        };
     }
 
     public boolean isBoundingBoxOutOfHighlands(World world, StructureBoundingBox sbb) {

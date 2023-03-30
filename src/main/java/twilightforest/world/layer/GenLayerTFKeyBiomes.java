@@ -72,16 +72,11 @@ public class GenLayerTFKeyBiomes extends GenLayer {
 
         // do we need to shuffle this better?
         // the current version just "rotates" the 4 key biomes
-        switch ((index + offset) % 4) {
-            case 0:
-            default:
-                return TFBiomeBase.glacier.biomeID;
-            case 1:
-                return TFBiomeBase.fireSwamp.biomeID;
-            case 2:
-                return TFBiomeBase.darkForestCenter.biomeID;
-            case 3:
-                return TFBiomeBase.highlandsCenter.biomeID;
-        }
+        return switch ((index + offset) % 4) {
+            default -> TFBiomeBase.glacier.biomeID;
+            case 1 -> TFBiomeBase.fireSwamp.biomeID;
+            case 2 -> TFBiomeBase.darkForestCenter.biomeID;
+            case 3 -> TFBiomeBase.highlandsCenter.biomeID;
+        };
     }
 }

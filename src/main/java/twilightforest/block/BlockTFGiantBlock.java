@@ -45,20 +45,13 @@ public abstract class BlockTFGiantBlock extends Block {
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side) {
         // return an icon from the icon matrix!
-        switch (side) {
-            default:
-            case 0:
-            case 1:
-                return this.giantIcon[x & 3][z & 3][side];
-            case 2:
-                return this.giantIcon[3 - (x & 3)][3 - (y & 3)][side];
-            case 3:
-                return this.giantIcon[x & 3][3 - (y & 3)][side];
-            case 4:
-                return this.giantIcon[z & 3][3 - (y & 3)][side];
-            case 5:
-                return this.giantIcon[3 - (z & 3)][3 - (y & 3)][side];
-        }
+        return switch (side) {
+            default -> this.giantIcon[x & 3][z & 3][side];
+            case 2 -> this.giantIcon[3 - (x & 3)][3 - (y & 3)][side];
+            case 3 -> this.giantIcon[x & 3][3 - (y & 3)][side];
+            case 4 -> this.giantIcon[z & 3][3 - (y & 3)][side];
+            case 5 -> this.giantIcon[3 - (z & 3)][3 - (y & 3)][side];
+        };
     }
 
     // Gets the block's texture. Args: side, meta

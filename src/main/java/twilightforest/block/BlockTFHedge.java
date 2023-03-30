@@ -51,12 +51,13 @@ public class BlockTFHedge extends BlockLeavesBase {
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
         int meta = world.getBlockMetadata(x, y, z);
         switch (meta) {
-            case 0:
+            case 0 -> {
                 float f = 0.0625F;
                 return AxisAlignedBB.getBoundingBox(x, y, z, x + 1, y + 1 - f, z + 1);
-            default:
-            case 1:
+            }
+            default -> {
                 return AxisAlignedBB.getBoundingBox(x, y, z, x + 1, y + 1, z + 1);
+            }
         }
 
     }
@@ -106,13 +107,10 @@ public class BlockTFHedge extends BlockLeavesBase {
      */
     @Override
     public IIcon getIcon(int side, int meta) {
-        switch (meta) {
-            case 1:
-                return BlockTFHedge.sprDarkwoodLeaves;
-            default:
-            case 0:
-                return BlockTFHedge.sprHedge;
-        }
+        return switch (meta) {
+            case 1 -> BlockTFHedge.sprDarkwoodLeaves;
+            default -> BlockTFHedge.sprHedge;
+        };
     }
 
     @Override

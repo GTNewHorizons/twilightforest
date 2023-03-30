@@ -203,14 +203,18 @@ public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
                     // otherWing.getBoundingBox().minZ + " other.maxZ = " + otherWing.getBoundingBox().maxZ);
 
                     switch (direction) {
-                        case 0:
+                        case 0 -> {
                             return new int[] { otherWing.getBoundingBox().minX, y, otherWing.getBoundingBox().minZ };
-                        case 1:
+                        }
+                        case 1 -> {
                             return new int[] { otherWing.getBoundingBox().maxX, y, otherWing.getBoundingBox().minZ };
-                        case 2:
+                        }
+                        case 2 -> {
                             return new int[] { otherWing.getBoundingBox().maxX, y, otherWing.getBoundingBox().maxZ };
-                        case 3:
+                        }
+                        case 3 -> {
                             return new int[] { otherWing.getBoundingBox().minX, y, otherWing.getBoundingBox().maxZ };
+                        }
                     }
                 }
             }

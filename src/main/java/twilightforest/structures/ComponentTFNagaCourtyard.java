@@ -65,84 +65,74 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
 
             // make nagastone pattern!
             switch (fx % 23) {
-                case 2:
+                case 2 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 7, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 7, fx, 3, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 11, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 11, fx, 1, 0, sbb);
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 3, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 3, fx, 3, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 12, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 12, fx, 1, 0, sbb);
-                    break;
-                case 4:
-                case 8:
-                case 16:
-                case 20:
+                }
+                case 4, 8, 16, 20 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 12, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 12, fx, 1, 0, sbb);
-                    break;
-                case 5:
-                case 9:
-                case 17:
+                }
+                case 5, 9, 17 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 7, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 7, fx, 3, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 10, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 10, fx, 1, 0, sbb);
-                    break;
-                case 6:
-                case 10:
-                case 14:
-                case 18:
+                }
+                case 6, 10, 14, 18 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 12, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 12, fx, 3, 0, sbb);
-                    break;
-                case 7:
-                case 15:
-                case 19:
+                }
+                case 7, 15, 19 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 6, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 6, fx, 3, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 11, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 11, fx, 1, 0, sbb);
-                    break;
-                case 11:
+                }
+                case 11 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 6, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 6, fx, 3, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 1, 0, sbb);
-                    break;
-                case 13:
+                }
+                case 13 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 7, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 7, fx, 3, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 1, 0, sbb);
-                    break;
-                case 21:
+                }
+                case 21 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 2, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 2, fx, 3, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 12, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 12, fx, 1, 0, sbb);
-                    break;
-                case 22:
+                }
+                case 22 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 6, fx, 3, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 6, fx, 3, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, fx, 2, 0, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 10, fx, 1, DIAMETER, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 10, fx, 1, 0, sbb);
-                    break;
+                }
             }
 
             // if (fx % 2 == 0) {
@@ -170,84 +160,74 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
 
             // make nagastone pattern!
             switch (fz % 23) {
-                case 2:
+                case 2 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 5, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 5, 0, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, DIAMETER, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, 0, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 9, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 9, 0, 1, fz, sbb);
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, 0, 1, fz, sbb);
-                    break;
-                case 4:
-                case 8:
-                case 16:
-                case 20:
+                }
+                case 4, 8, 16, 20 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, 0, 1, fz, sbb);
-                    break;
-                case 5:
-                case 9:
-                case 17:
+                }
+                case 5, 9, 17 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 5, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 5, 0, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, DIAMETER, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, 0, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 8, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 8, 0, 1, fz, sbb);
-                    break;
-                case 6:
-                case 10:
-                case 14:
-                case 18:
+                }
+                case 6, 10, 14, 18 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, 0, 3, fz, sbb);
-                    break;
-                case 7:
-                case 15:
-                case 19:
+                }
+                case 7, 15, 19 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 4, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 4, 0, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, DIAMETER, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, 0, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 9, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 9, 0, 1, fz, sbb);
-                    break;
-                case 11:
+                }
+                case 11 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 4, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 4, 0, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, DIAMETER, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, 0, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, 0, 1, fz, sbb);
-                    break;
-                case 13:
+                }
+                case 13 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 5, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 5, 0, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, DIAMETER, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, 0, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, 0, 1, fz, sbb);
-                    break;
-                case 21:
+                }
+                case 21 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, 0, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, 0, 1, fz, sbb);
-                    break;
-                case 22:
+                }
+                case 22 -> {
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 4, DIAMETER, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 4, 0, 3, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, DIAMETER, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 14, 0, 2, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 8, DIAMETER, 1, fz, sbb);
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 8, 0, 1, fz, sbb);
-                    break;
+                }
             }
 
             // if (fz % 2 == 0) {
@@ -301,34 +281,18 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
             if (i > 0 && rand.nextInt(2) == 0) {
                 // vines?
                 switch (rand.nextInt(4)) {
-                    case 0:
-                        placeBlockAtCurrentPosition(world, Blocks.vine, 8, x - 1, y + i, z + 0, sbb);
-                        break;
-                    case 1:
-                        placeBlockAtCurrentPosition(world, Blocks.vine, 2, x + 1, y + i, z + 0, sbb);
-                        break;
-                    case 2:
-                        placeBlockAtCurrentPosition(world, Blocks.vine, 4, x + 0, y + i, z + 1, sbb);
-                        break;
-                    case 3:
-                        placeBlockAtCurrentPosition(world, Blocks.vine, 1, x + 0, y + i, z - 1, sbb);
-                        break;
+                    case 0 -> placeBlockAtCurrentPosition(world, Blocks.vine, 8, x - 1, y + i, z + 0, sbb);
+                    case 1 -> placeBlockAtCurrentPosition(world, Blocks.vine, 2, x + 1, y + i, z + 0, sbb);
+                    case 2 -> placeBlockAtCurrentPosition(world, Blocks.vine, 4, x + 0, y + i, z + 1, sbb);
+                    case 3 -> placeBlockAtCurrentPosition(world, Blocks.vine, 1, x + 0, y + i, z - 1, sbb);
                 }
             } else if (i > 0 && rand.nextInt(4) == 0) {
                 // fireflies!
                 switch (rand.nextInt(4)) {
-                    case 0:
-                        placeBlockAtCurrentPosition(world, TFBlocks.firefly, 0, x - 1, y + i, z + 0, sbb);
-                        break;
-                    case 1:
-                        placeBlockAtCurrentPosition(world, TFBlocks.firefly, 0, x + 1, y + i, z + 0, sbb);
-                        break;
-                    case 2:
-                        placeBlockAtCurrentPosition(world, TFBlocks.firefly, 0, x + 0, y + i, z + 1, sbb);
-                        break;
-                    case 3:
-                        placeBlockAtCurrentPosition(world, TFBlocks.firefly, 0, x + 0, y + i, z - 1, sbb);
-                        break;
+                    case 0 -> placeBlockAtCurrentPosition(world, TFBlocks.firefly, 0, x - 1, y + i, z + 0, sbb);
+                    case 1 -> placeBlockAtCurrentPosition(world, TFBlocks.firefly, 0, x + 1, y + i, z + 0, sbb);
+                    case 2 -> placeBlockAtCurrentPosition(world, TFBlocks.firefly, 0, x + 0, y + i, z + 1, sbb);
+                    case 3 -> placeBlockAtCurrentPosition(world, TFBlocks.firefly, 0, x + 0, y + i, z - 1, sbb);
                 }
             }
         }

@@ -59,47 +59,34 @@ public class CommandTFProgress extends CommandBase {
 
         // give achievements
         switch (bossIndex) {
-            case 0:
-            default:
-                break;
-            case 1:
+            case 1 -> {
                 player.triggerAchievement(TFAchievementPage.twilightPortal);
                 player.triggerAchievement(TFAchievementPage.twilightArrival);
                 player.triggerAchievement(TFAchievementPage.twilightHunter);
                 player.triggerAchievement(TFAchievementPage.twilightKillNaga);
                 player.triggerAchievement(TFAchievementPage.twilightProgressNaga);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 player.triggerAchievement(TFAchievementPage.twilightKillLich);
                 player.triggerAchievement(TFAchievementPage.twilightProgressLich);
-                break;
-            case 3:
-                player.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
-                break;
-            case 4:
+            }
+            case 3 -> player.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
+            case 4 -> {
                 player.triggerAchievement(TFAchievementPage.twilightKillHydra);
                 player.triggerAchievement(TFAchievementPage.twilightProgressHydra);
-                break;
-            case 5:
+            }
+            case 5 -> {
                 player.triggerAchievement(TFAchievementPage.twilightProgressTrophyPedestal);
                 player.triggerAchievement(TFAchievementPage.twilightProgressKnights);
-                break;
-            case 6:
-                player.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
-                break;
-            case 7:
-                player.triggerAchievement(TFAchievementPage.twilightProgressYeti);
-                break;
-            case 8:
-                player.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
-                break;
-            case 9:
-                player.triggerAchievement(TFAchievementPage.twilightProgressTroll);
-                break;
-            case 10:
+            }
+            case 6 -> player.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
+            case 7 -> player.triggerAchievement(TFAchievementPage.twilightProgressYeti);
+            case 8 -> player.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
+            case 9 -> player.triggerAchievement(TFAchievementPage.twilightProgressTroll);
+            case 10 -> {
                 player.triggerAchievement(TFAchievementPage.twilightProgressThorns);
                 player.triggerAchievement(TFAchievementPage.twilightProgressCastle);
-                break;
+            }
         }
     }
 

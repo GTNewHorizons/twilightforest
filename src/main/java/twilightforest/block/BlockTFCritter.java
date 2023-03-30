@@ -39,27 +39,16 @@ public abstract class BlockTFCritter extends Block {
         int facing = world.getBlockMetadata(x, y, z) & 7;
         float wide = 0.15F;
         switch (facing) {
-            case 1:
-                setBlockBounds(0.0F, 0.2F, 0.5F - wide, wide * 2.0F, 0.8F, 0.5F + wide);
-                break;
-            case 2:
-                setBlockBounds(1.0F - wide * 2.0F, 0.2F, 0.5F - wide, 1.0F, 0.8F, 0.5F + wide);
-                break;
-            case 3:
-                setBlockBounds(0.5F - wide, 0.2F, 0.0F, 0.5F + wide, 0.8F, wide * 2.0F);
-                break;
-            case 4:
-                setBlockBounds(0.5F - wide, 0.2F, 1.0F - wide * 2.0F, 0.5F + wide, 0.8F, 1.0F);
-                break;
-            case 5:
-                setBlockBounds(0.5F - wide, 0.0F, 0.2F, 0.5F + wide, wide * 2.0F, 0.8F);
-                break;
-            case 6:
-                setBlockBounds(0.5F - wide, 1.0F - wide * 2.0F, 0.2F, 0.5F + wide, 1.0F, 0.8F);
-                break;
-            default:
+            case 1 -> setBlockBounds(0.0F, 0.2F, 0.5F - wide, wide * 2.0F, 0.8F, 0.5F + wide);
+            case 2 -> setBlockBounds(1.0F - wide * 2.0F, 0.2F, 0.5F - wide, 1.0F, 0.8F, 0.5F + wide);
+            case 3 -> setBlockBounds(0.5F - wide, 0.2F, 0.0F, 0.5F + wide, 0.8F, wide * 2.0F);
+            case 4 -> setBlockBounds(0.5F - wide, 0.2F, 1.0F - wide * 2.0F, 0.5F + wide, 0.8F, 1.0F);
+            case 5 -> setBlockBounds(0.5F - wide, 0.0F, 0.2F, 0.5F + wide, wide * 2.0F, 0.8F);
+            case 6 -> setBlockBounds(0.5F - wide, 1.0F - wide * 2.0F, 0.2F, 0.5F + wide, 1.0F, 0.8F);
+            default -> {
                 float f1 = 0.1F;
                 setBlockBounds(0.5F - f1, 0.0F, 0.5F - f1, 0.5F + f1, 0.6F, 0.5F + f1);
+            }
         }
     }
 
@@ -107,35 +96,36 @@ public abstract class BlockTFCritter extends Block {
     public int onBlockPlaced(World world, int x, int y, int z, int placementFacing, float par6, float par7, float par8,
             int meta) {
         switch (placementFacing) {
-            case 0:
+            case 0 -> {
                 if (this.canPlaceAt(world, x, y + 1, z)) {
                     meta = 6;
                 }
-                break;
-            case 1:
+            }
+            case 1 -> {
                 if (this.canPlaceAt(world, x, y - 1, z)) {
                     meta = 5;
                 }
-                break;
-            case 2:
+            }
+            case 2 -> {
                 if (world.isSideSolid(x, y, z + 1, NORTH, true)) {
                     meta = 4;
                 }
-                break;
-            case 3:
+            }
+            case 3 -> {
                 if (world.isSideSolid(x, y, z - 1, SOUTH, true)) {
                     meta = 3;
                 }
-                break;
-            case 4:
+            }
+            case 4 -> {
                 if (world.isSideSolid(x + 1, y, z, WEST, true)) {
                     meta = 2;
                 }
-                break;
-            case 5:
+            }
+            case 5 -> {
                 if (world.isSideSolid(x - 1, y, z, EAST, true)) {
                     meta = 1;
                 }
+            }
         }
         return meta;
     }
@@ -189,35 +179,36 @@ public abstract class BlockTFCritter extends Block {
             boolean flag = false;
 
             switch (facing) {
-                case 1:
+                case 1 -> {
                     if (!canPlaceAt(world, x - 1, y, z)) {
                         flag = true;
                     }
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     if (!canPlaceAt(world, x + 1, y, z)) {
                         flag = true;
                     }
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     if (!canPlaceAt(world, x, y, z - 1)) {
                         flag = true;
                     }
-                    break;
-                case 4:
+                }
+                case 4 -> {
                     if (!canPlaceAt(world, x, y, z + 1)) {
                         flag = true;
                     }
-                    break;
-                case 5:
+                }
+                case 5 -> {
                     if (!canPlaceAt(world, x, y - 1, z)) {
                         flag = true;
                     }
-                    break;
-                case 6:
+                }
+                case 6 -> {
                     if (!canPlaceAt(world, x, y + 1, z)) {
                         flag = true;
                     }
+                }
             }
 
             if (flag) {

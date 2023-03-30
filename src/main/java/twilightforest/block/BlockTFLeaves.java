@@ -72,36 +72,37 @@ public class BlockTFLeaves extends BlockLeaves {
         int normalColor = (red / 9 & 0xFF) << 16 | (green / 9 & 0xFF) << 8 | blue / 9 & 0xFF;
 
         switch (meta & 3) {
-            case 1:
+            case 1 -> {
                 // canopy colorizer
                 return ((normalColor & 0xFEFEFE) + 0x469A66) / 2;
+            }
             // return ((normalColor & 0xFEFEFE) + 0x009822) / 2;
-            case 2:
+            case 2 -> {
                 // mangrove colors
                 return ((normalColor & 0xFEFEFE) + 0xC0E694) / 2;
-            case 3:
+            }
+            case 3 -> {
                 // RAINBOW!
                 red = x * 32 + y * 16;
                 if ((red & 256) != 0) {
                     red = 255 - (red & 255);
                 }
                 red &= 255;
-
                 blue = y * 32 + z * 16;
                 if ((blue & 256) != 0) {
                     blue = 255 - (blue & 255);
                 }
                 blue ^= 255;
-
                 green = x * 16 + z * 32;
                 if ((green & 256) != 0) {
                     green = 255 - (green & 255);
                 }
                 green &= 255;
-
                 return red << 16 | blue << 8 | green;
-            default:
+            }
+            default -> {
                 return normalColor;
+            }
         }
     }
 
