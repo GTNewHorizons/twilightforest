@@ -140,11 +140,8 @@ public class TFWeatherRenderer extends IRenderHandler {
                         }
 
                         float f8 = 1.0F;
-                        int j2 = k1;
 
-                        if (k1 < k) {
-                            j2 = k;
-                        }
+                        int j2 = Math.max(k1, k);
 
                         if (l1 != i2) {
                             this.random.setSeed((long) (i1 * i1 * 3121 + i1 * 45238971 ^ l * l * 418711 + l * 13761));
@@ -332,11 +329,8 @@ public class TFWeatherRenderer extends IRenderHandler {
                         }
 
                         float one = 1.0F;
-                        int rainFloor = rainHeight;
 
-                        if (rainHeight < floorY) {
-                            rainFloor = floorY;
-                        }
+                        int rainFloor = Math.max(rainHeight, floorY);
 
                         if (rainMin != rainMax) {
                             this.random
