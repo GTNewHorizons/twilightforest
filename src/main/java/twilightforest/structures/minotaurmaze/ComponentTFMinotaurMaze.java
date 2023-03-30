@@ -17,7 +17,7 @@ public class ComponentTFMinotaurMaze extends StructureTFComponent {
 
     private static final int FLOOR_LEVEL = 1;
     TFMaze maze;
-    int rcoords[];
+    int[] rcoords;
     private int level;
 
     public ComponentTFMinotaurMaze() {

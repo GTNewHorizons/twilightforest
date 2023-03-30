@@ -10,7 +10,7 @@ import twilightforest.block.TFBlocks;
 
 public class ItemBlockTFLog extends ItemBlock {
 
-    public static final String woodNames[] = { "oak", "canopy", "mangrove", "darkwood", "x", "root", "oreroot",
+    public static final String[] woodNames = { "oak", "canopy", "mangrove", "darkwood", "x", "root", "oreroot",
             "rotten" };
 
     public ItemBlockTFLog(Block log) {

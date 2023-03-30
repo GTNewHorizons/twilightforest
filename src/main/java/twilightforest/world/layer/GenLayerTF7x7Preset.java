@@ -8,7 +8,7 @@ import twilightforest.biomes.TFBiomeBase;
 
 public class GenLayerTF7x7Preset extends GenLayer {
 
-    BiomeGenBase preset[][] = new BiomeGenBase[9][9];
+    BiomeGenBase[][] preset = new BiomeGenBase[9][9];
 
     public GenLayerTF7x7Preset(long par1) {
         super(par1);
@@ -17,7 +17,7 @@ public class GenLayerTF7x7Preset extends GenLayer {
 
     @Override
     public int[] getInts(int x, int z, int width, int depth) {
-        int dest[] = IntCache.getIntCache(width * depth);
+        int[] dest = IntCache.getIntCache(width * depth);
         for (int dz = 0; dz < depth; dz++) {
             for (int dx = 0; dx < width; dx++) {
                 int sx = x + dx + 4;

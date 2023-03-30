@@ -21,8 +21,8 @@ public class GenLayerTFThornBorder extends GenLayer {
         int nz = z - 1;
         int nwidth = width + 2;
         int ndepth = depth + 2;
-        int input[] = parent.getInts(nx, nz, nwidth, ndepth);
-        int output[] = IntCache.getIntCache(width * depth);
+        int[] input = parent.getInts(nx, nz, nwidth, ndepth);
+        int[] output = IntCache.getIntCache(width * depth);
         for (int dz = 0; dz < depth; dz++) {
             for (int dx = 0; dx < width; dx++) {
                 int right = input[dx + 0 + (dz + 1) * nwidth];

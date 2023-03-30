@@ -15,9 +15,9 @@ import twilightforest.biomes.TFBiomeBase;
 public class GenLayerTFBiomes1Point7 extends GenLayer {
 
     private static final int RARE_BIOME_CHANCE = 15;
-    protected BiomeGenBase commonBiomes[] = (new BiomeGenBase[] { TFBiomeBase.twilightForest,
+    protected BiomeGenBase[] commonBiomes = (new BiomeGenBase[] { TFBiomeBase.twilightForest,
             TFBiomeBase.twilightForest2, TFBiomeBase.mushrooms, TFBiomeBase.oakSavanna, TFBiomeBase.fireflyForest });
-    protected BiomeGenBase rareBiomes[] = (new BiomeGenBase[] { TFBiomeBase.tfLake, TFBiomeBase.deepMushrooms,
+    protected BiomeGenBase[] rareBiomes = (new BiomeGenBase[] { TFBiomeBase.tfLake, TFBiomeBase.deepMushrooms,
             TFBiomeBase.enchantedForest, TFBiomeBase.clearing });
 
     public GenLayerTFBiomes1Point7(long l, GenLayer genlayer) {
@@ -31,7 +31,7 @@ public class GenLayerTFBiomes1Point7 extends GenLayer {
 
     @Override
     public int[] getInts(int x, int z, int width, int depth) {
-        int dest[] = IntCache.getIntCache(width * depth);
+        int[] dest = IntCache.getIntCache(width * depth);
         for (int dz = 0; dz < depth; dz++) {
             for (int dx = 0; dx < width; dx++) {
                 initChunkSeed(dx + x, dz + z);

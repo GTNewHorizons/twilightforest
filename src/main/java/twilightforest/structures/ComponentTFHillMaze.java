@@ -77,7 +77,7 @@ public class ComponentTFHillMaze extends StructureTFComponent {
         maze.setSeed(world.getSeed() + this.boundingBox.minX * this.boundingBox.minZ);
 
         int nrooms = getMazeSize() / 3;
-        int rcoords[] = new int[nrooms * 2];
+        int[] rcoords = new int[nrooms * 2];
 
         // add rooms, trying to keep them separate from existing rooms
         for (int i = 0; i < nrooms; i++) {

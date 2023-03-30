@@ -23,8 +23,8 @@ public class GenLayerTFKeyBiomes extends GenLayer {
     }
 
     public int[] getInts(int x, int z, int width, int depth) {
-        int src[] = this.parent.getInts(x, z, width, depth);
-        int dest[] = IntCache.getIntCache(width * depth);
+        int[] src = this.parent.getInts(x, z, width, depth);
+        int[] dest = IntCache.getIntCache(width * depth);
         for (int dz = 0; dz < depth; dz++) {
             for (int dx = 0; dx < width; dx++) {
                 // get offsets

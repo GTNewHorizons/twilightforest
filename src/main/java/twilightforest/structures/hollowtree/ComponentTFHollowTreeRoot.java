@@ -79,7 +79,7 @@ public class ComponentTFHollowTreeRoot extends ComponentTFHollowTreeMedBranch {
      */
     protected void drawRootLine(World world, StructureBoundingBox sbb, int x1, int y1, int z1, int x2, int y2, int z2,
             Block blockValue, int metaValue) {
-        ChunkCoordinates lineCoords[] = TFGenerator.getBresehnamArrayCoords(x1, y1, z1, x2, y2, z2);
+        ChunkCoordinates[] lineCoords = TFGenerator.getBresehnamArrayCoords(x1, y1, z1, x2, y2, z2);
 
         for (ChunkCoordinates coords : lineCoords) {
             Block block = this.getBlockAtCurrentPosition(world, coords.posX, coords.posY, coords.posZ, sbb);

@@ -29,8 +29,8 @@ public class BlockTFThorns extends BlockRotatedPillar {
     private static final float THORN_DAMAGE = 4.0F;
 
     private String[] names;
-    private IIcon sideIcons[];
-    private IIcon topIcons[];
+    private IIcon[] sideIcons;
+    private IIcon[] topIcons;
 
     protected BlockTFThorns() {
         super(Material.wood);

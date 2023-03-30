@@ -46,7 +46,7 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
     private static final int DATA_SPAWNHEADS = 17;
     private static final int DATA_BOSSHEALTH = 18;
 
-    public Entity partArray[];
+    public Entity[] partArray;
     public EntityDragonPart body;
 
     public HydraHeadContainer[] hc;

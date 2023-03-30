@@ -66,7 +66,7 @@ public class ComponentTFHedgeMaze extends StructureTFComponent {
         placeBlockAtCurrentPosition(world, Blocks.lit_pumpkin, 0, 29, FLOOR_LEVEL, 50, sbb);
 
         int nrooms = MSIZE / 3;
-        int rcoords[] = new int[nrooms * 2];
+        int[] rcoords = new int[nrooms * 2];
 
         for (int i = 0; i < nrooms; i++) {
             int rx, rz;

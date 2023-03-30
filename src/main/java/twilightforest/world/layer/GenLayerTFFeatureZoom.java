@@ -15,8 +15,8 @@ public class GenLayerTFFeatureZoom extends GenLayer {
         int sz = z >> 1;
         int swidth = (width >> 1) + 3;
         int sdepth = (depth >> 1) + 3;
-        int src[] = parent.getInts(sx, sz, swidth, sdepth);
-        int dest[] = IntCache.getIntCache(swidth * 2 * (sdepth * 2));
+        int[] src = parent.getInts(sx, sz, swidth, sdepth);
+        int[] dest = IntCache.getIntCache(swidth * 2 * (sdepth * 2));
         int doubleWidth = swidth << 1;
         for (int dz = 0; dz < sdepth - 1; dz++) {
             for (int dx = 0; dx < swidth - 1; dx++) {
@@ -27,7 +27,7 @@ public class GenLayerTFFeatureZoom extends GenLayer {
             }
         }
 
-        int output[] = IntCache.getIntCache(width * depth);
+        int[] output = IntCache.getIntCache(width * depth);
         for (int copyZ = 0; copyZ < depth; copyZ++) {
             System.arraycopy(dest, (copyZ + (z & 1)) * (swidth << 1) + (x & 1), output, copyZ * width, width);
         }

@@ -19,8 +19,8 @@ public class GenLayerTFBiomeStabilize extends GenLayer {
         int nz = z - 1;
         int nwidth = width + 2;
         int ndepth = depth + 2;
-        int input[] = parent.getInts(nx, nz, nwidth, ndepth);
-        int output[] = IntCache.getIntCache(width * depth);
+        int[] input = parent.getInts(nx, nz, nwidth, ndepth);
+        int[] output = IntCache.getIntCache(width * depth);
 
         int offX = x & 3;
         int offZ = z & 3;

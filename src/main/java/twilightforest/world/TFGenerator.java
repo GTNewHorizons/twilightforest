@@ -87,7 +87,7 @@ public abstract class TFGenerator extends WorldGenerator {
         int i, dx, dy, dz, l, m, n, x_inc, y_inc, z_inc, err_1, err_2, dx2, dy2, dz2;
 
         ChunkCoordinates pixel = new ChunkCoordinates(x1, y1, z1);
-        ChunkCoordinates lineArray[];
+        ChunkCoordinates[] lineArray;
 
         dx = x2 - x1;
         dy = y2 - y1;

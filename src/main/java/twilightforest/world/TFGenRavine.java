@@ -13,13 +13,13 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenRavine extends MapGenBase {
 
-    private float field_35627_a[];
+    private float[] field_35627_a;
 
     public TFGenRavine() {
         field_35627_a = new float[1024];
     }
 
-    protected void generateRavine(long l, int i, int j, Block blockStorage[], double d, double d1, double d2, float f,
+    protected void generateRavine(long l, int i, int j, Block[] blockStorage, double d, double d1, double d2, float f,
             float f1, float f2, int k, int i1, double d3) {
         Random random = new Random(l);
         double d4 = i * 16 + 8;
@@ -163,7 +163,7 @@ public class TFGenRavine extends MapGenBase {
     }
 
     protected void func_151538_a(World world, int centerChunkX, int centerChunkZ, int currentChunkX, int currentChunkZ,
-            Block shortStorage[]) {
+            Block[] shortStorage) {
         if (rand.nextInt(127) != 0) {
             return;
         }

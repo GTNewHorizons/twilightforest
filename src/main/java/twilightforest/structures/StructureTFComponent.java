@@ -273,7 +273,7 @@ public abstract class StructureTFComponent extends StructureComponent {
         };
     }
 
-    public int[] getOffsetAsIfRotated(int src[], int rotation) {
+    public int[] getOffsetAsIfRotated(int[] src, int rotation) {
         int temp = this.getCoordBaseMode();
         int[] dest = new int[3];
         this.setCoordBaseMode(rotation);

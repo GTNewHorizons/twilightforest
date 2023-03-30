@@ -45,7 +45,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
 
     EntityTFLich masterLich;
 
-    private static final ItemStack heldItems[] = { new ItemStack(TFItems.scepterTwilight, 1),
+    private static final ItemStack[] heldItems = { new ItemStack(TFItems.scepterTwilight, 1),
             new ItemStack(TFItems.scepterZombie, 1), new ItemStack(Items.golden_sword, 1) };
     public static final int MAX_SHADOW_CLONES = 2;
     public static final int INITIAL_SHIELD_STRENGTH = 5;

@@ -44,7 +44,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
 
     public TFWorldChunkManager(long par1, WorldType par3WorldType) {
         this();
-        GenLayer agenlayer[];
+        GenLayer[] agenlayer;
         // new world gen!
         if (TwilightForestMod.oldMapGen) {
             agenlayer = GenLayerTF.makeTheWorldOldMapGen(par1);
@@ -86,14 +86,14 @@ public class TFWorldChunkManager extends WorldChunkManager {
     /**
      * Returns a list of rainfall values for the specified blocks. Args: listToReuse, x, z, width, length.
      */
-    public float[] getRainfall(float par1ArrayOfFloat[], int par2, int par3, int par4, int par5) {
+    public float[] getRainfall(float[] par1ArrayOfFloat, int par2, int par3, int par4, int par5) {
         IntCache.resetIntCache();
 
         if (par1ArrayOfFloat == null || par1ArrayOfFloat.length < par4 * par5) {
             par1ArrayOfFloat = new float[par4 * par5];
         }
 
-        int ai[] = zoomedBiomes.getInts(par2, par3, par4, par5);
+        int[] ai = zoomedBiomes.getInts(par2, par3, par4, par5);
 
         for (int i = 0; i < par4 * par5; i++) {
             // this keeps NPEing, I wonder why
@@ -123,7 +123,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
     /**
      * Returns an array of biomes for the location input.
      */
-    public BiomeGenBase[] getBiomesForGeneration(BiomeGenBase par1ArrayOfBiomeGenBase[], int x, int z, int length,
+    public BiomeGenBase[] getBiomesForGeneration(BiomeGenBase[] par1ArrayOfBiomeGenBase, int x, int z, int length,
             int width) {
         IntCache.resetIntCache();
 
@@ -131,7 +131,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
             par1ArrayOfBiomeGenBase = new BiomeGenBase[length * width];
         }
 
-        int arrayOfInts[] = unzoomedBiomes.getInts(x, z, length, width);
+        int[] arrayOfInts = unzoomedBiomes.getInts(x, z, length, width);
 
         for (int i = 0; i < length * width; i++) {
             // biome validity check
@@ -150,7 +150,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
      * Returns biomes to use for the blocks and loads the other data like temperature and humidity onto the
      * WorldChunkManager Args: oldBiomeList, x, z, width, depth
      */
-    public BiomeGenBase[] loadBlockGeneratorData(BiomeGenBase par1ArrayOfBiomeGenBase[], int par2, int par3, int par4,
+    public BiomeGenBase[] loadBlockGeneratorData(BiomeGenBase[] par1ArrayOfBiomeGenBase, int par2, int par3, int par4,
             int par5) {
         return getBiomeGenAt(par1ArrayOfBiomeGenBase, par2, par3, par4, par5, true);
     }
@@ -159,7 +159,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
      * Return a list of biomes for the specified blocks. Args: listToReuse, x, y, width, length, cacheFlag (if false,
      * don't check biomeCache to avoid infinite loop in BiomeCacheBlock)
      */
-    public BiomeGenBase[] getBiomeGenAt(BiomeGenBase par1ArrayOfBiomeGenBase[], int x, int y, int width, int length,
+    public BiomeGenBase[] getBiomeGenAt(BiomeGenBase[] par1ArrayOfBiomeGenBase, int x, int y, int width, int length,
             boolean cacheFlag) {
         IntCache.resetIntCache();
 
@@ -168,12 +168,12 @@ public class TFWorldChunkManager extends WorldChunkManager {
         }
 
         if (cacheFlag && width == 16 && length == 16 && (x & 0xf) == 0 && (y & 0xf) == 0) {
-            BiomeGenBase abiomegenbase[] = myBiomeCache.getCachedBiomes(x, y);
+            BiomeGenBase[] abiomegenbase = myBiomeCache.getCachedBiomes(x, y);
             System.arraycopy(abiomegenbase, 0, par1ArrayOfBiomeGenBase, 0, width * length);
             return par1ArrayOfBiomeGenBase;
         }
 
-        int ai[] = zoomedBiomes.getInts(x, y, width, length);
+        int[] ai = zoomedBiomes.getInts(x, y, width, length);
 
         for (int i = 0; i < width * length; i++) {
             // biome validity check
@@ -199,7 +199,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
         int l = par2 + par3 >> 2;
         int i1 = (k - i) + 1;
         int j1 = (l - j) + 1;
-        int ai[] = unzoomedBiomes.getInts(i, j, i1, j1);
+        int[] ai = unzoomedBiomes.getInts(i, j, i1, j1);
 
         for (int k1 = 0; k1 < i1 * j1; k1++) {
             BiomeGenBase biomegenbase = BiomeGenBase.getBiome(ai[k1]);
@@ -223,7 +223,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
         int l = par2 + par3 >> 2;
         int i1 = (k - i) + 1;
         int j1 = (l - j) + 1;
-        int ai[] = unzoomedBiomes.getInts(i, j, i1, j1);
+        int[] ai = unzoomedBiomes.getInts(i, j, i1, j1);
         ChunkPosition chunkposition = null;
         int k1 = 0;
 

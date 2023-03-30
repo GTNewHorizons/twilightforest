@@ -53,17 +53,17 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
     public NoiseGeneratorOctaves noiseGen6;
     public NoiseGeneratorOctaves mobSpawnerNoise;
     private World worldObj;
-    private double stoneNoise[];
+    private double[] stoneNoise;
     private TFGenCaves caveGenerator;
     private TFGenRavine ravineGenerator;
-    private BiomeGenBase biomesForGeneration[];
-    double noise3[];
-    double noise1[];
-    double noise2[];
-    double noise5[];
-    double noise6[];
-    float squareTable[];
-    int unusedIntArray32x32[][];
+    private BiomeGenBase[] biomesForGeneration;
+    double[] noise3;
+    double[] noise1;
+    double[] noise2;
+    double[] noise5;
+    double[] noise6;
+    float[] squareTable;
+    int[][] unusedIntArray32x32;
 
     private WorldType field_147435_p;
 
@@ -123,8 +123,8 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
     @Override
     public Chunk provideChunk(int cx, int cz) {
         rand.setSeed(cx * 0x4f9939f508L + cz * 0x1ef1565bd5L);
-        Block blockStorage[] = new Block[16 * 16 * TFWorld.CHUNKHEIGHT];
-        byte metaStorage[] = new byte[16 * 16 * TFWorld.CHUNKHEIGHT];
+        Block[] blockStorage = new Block[16 * 16 * TFWorld.CHUNKHEIGHT];
+        byte[] metaStorage = new byte[16 * 16 * TFWorld.CHUNKHEIGHT];
         generateTerrain2(cx, cz, blockStorage);
 
         squishTerrain(blockStorage);
@@ -781,7 +781,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
      * @param chunkZ
      * @param blocks
      */
-    public void addGlaciers(int chunkX, int chunkZ, Block blocks[], byte meta[], BiomeGenBase biomes[]) {
+    public void addGlaciers(int chunkX, int chunkZ, Block[] blocks, byte[] meta, BiomeGenBase[] biomes) {
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
                 BiomeGenBase biome = biomes[x & 15 | (z & 15) << 4];
@@ -817,7 +817,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
      * Adds dark forest canopy. This version uses the "unzoomed" array of biomes used in land generation to determine
      * how many of the nearby blocks are dark forest
      */
-    public void addDarkForestCanopy2(int chunkX, int chunkZ, Block blocks[], byte meta[]) {
+    public void addDarkForestCanopy2(int chunkX, int chunkZ, Block[] blocks, byte[] meta) {
 
         int[] thicks = new int[5 * 5];
 

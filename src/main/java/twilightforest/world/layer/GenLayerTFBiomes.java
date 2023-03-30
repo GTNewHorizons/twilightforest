@@ -14,10 +14,10 @@ import twilightforest.biomes.TFBiomeBase;
  */
 public class GenLayerTFBiomes extends GenLayer {
 
-    protected BiomeGenBase commonBiomes[] = (new BiomeGenBase[] { TFBiomeBase.twilightForest,
+    protected BiomeGenBase[] commonBiomes = (new BiomeGenBase[] { TFBiomeBase.twilightForest,
             TFBiomeBase.twilightForest2, TFBiomeBase.highlands, TFBiomeBase.mushrooms, TFBiomeBase.tfSwamp,
             TFBiomeBase.clearing, TFBiomeBase.darkForest });
-    protected BiomeGenBase rareBiomes[] = (new BiomeGenBase[] { TFBiomeBase.tfLake, TFBiomeBase.glacier,
+    protected BiomeGenBase[] rareBiomes = (new BiomeGenBase[] { TFBiomeBase.tfLake, TFBiomeBase.glacier,
             TFBiomeBase.deepMushrooms, TFBiomeBase.enchantedForest, TFBiomeBase.fireSwamp });
 
     public GenLayerTFBiomes(long l, GenLayer genlayer) {
@@ -30,7 +30,7 @@ public class GenLayerTFBiomes extends GenLayer {
     }
 
     public int[] getInts(int x, int z, int width, int depth) {
-        int dest[] = IntCache.getIntCache(width * depth);
+        int[] dest = IntCache.getIntCache(width * depth);
         for (int dz = 0; dz < depth; dz++) {
             for (int dx = 0; dx < width; dx++) {
                 initChunkSeed(dx + x, dz + z);

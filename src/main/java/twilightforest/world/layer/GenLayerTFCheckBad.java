@@ -17,7 +17,7 @@ public class GenLayerTFCheckBad extends GenLayer {
 
     @Override
     public int[] getInts(int x, int z, int width, int depth) {
-        int input[] = parent.getInts(x, z, width, depth);
+        int[] input = parent.getInts(x, z, width, depth);
 
         for (int i = 0; i < width * depth; i++) {
             if (input[i] < 0 || input[i] > TFBiomeBase.fireSwamp.biomeID) {
