@@ -29,31 +29,30 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
      * Initiates construction of the Structure Component picked, at the current Location of StructGen
      */
     @Override
-    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random random) {
-        super.buildComponent(parent, list, random);
+    public void buildComponent(StructureComponent parent, List<StructureComponent> pieceList, Random random) {
+        super.buildComponent(parent, pieceList, random);
 
         // make a random component in each direction
         lowerPieces.prepareStructurePieces();
-        addNewComponent(parent, list, random, 0, 4, 1, 18);
+        addNewComponent(parent, pieceList, random, 0, 4, 1, 18);
         lowerPieces.prepareStructurePieces();
-        if (listContainsBossRoom(list)) {
+        if (listContainsBossRoom(pieceList)) {
             lowerPieces.markBossRoomUsed();
         }
-        addNewComponent(parent, list, random, 1, -1, 1, 13);
+        addNewComponent(parent, pieceList, random, 1, -1, 1, 13);
         lowerPieces.prepareStructurePieces();
-        if (listContainsBossRoom(list)) {
+        if (listContainsBossRoom(pieceList)) {
             lowerPieces.markBossRoomUsed();
         }
-        addNewComponent(parent, list, random, 2, 13, 1, -1);
+        addNewComponent(parent, pieceList, random, 2, 13, 1, -1);
         lowerPieces.prepareStructurePieces();
-        if (listContainsBossRoom(list)) {
+        if (listContainsBossRoom(pieceList)) {
             lowerPieces.markBossRoomUsed();
         }
-        addNewComponent(parent, list, random, 3, 18, 1, 4);
-        if (!listContainsBossRoom(list)) {
+        addNewComponent(parent, pieceList, random, 3, 18, 1, 4);
+        if (!listContainsBossRoom(pieceList)) {
             FMLLog.fine("[TwilightForest]  Did not find boss room from exit 3 - EPIC FAIL");
         }
-        List<StructureTFStrongholdComponent> pieceList = (List<StructureTFStrongholdComponent>) list;
         StructureBoundingBox shieldBox = new StructureBoundingBox(this.boundingBox);
 
         int tStairs = 0;
@@ -63,7 +62,7 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
         int bossRooms = 0;
 
         // compute and generate MEGASHIELD
-        for (StructureTFStrongholdComponent component : pieceList) {
+        for (StructureComponent component : pieceList) {
             shieldBox.expandTo(component.getBoundingBox());
 
             if (component instanceof ComponentTFStrongholdSmallStairs
@@ -102,8 +101,8 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
                 boundingBox.minX + 8,
                 boundingBox.minY + 7,
                 boundingBox.minZ + 4);
-        list.add(accessChamber);
-        accessChamber.buildComponent(this, list, random);
+        pieceList.add(accessChamber);
+        accessChamber.buildComponent(this, pieceList, random);
 
     }
 
