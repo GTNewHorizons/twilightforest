@@ -57,8 +57,8 @@ public class ContainerTFCinderFurnace extends Container {
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
 
-        for (int i = 0; i < this.crafters.size(); ++i) {
-            ICrafting icrafting = (ICrafting) this.crafters.get(i);
+        for (ICrafting crafter : this.crafters) {
+            ICrafting icrafting = (ICrafting) crafter;
 
             if (this.lastCookTime != this.tileFurnace.furnaceCookTime) {
                 icrafting.sendProgressBarUpdate(this, 0, this.tileFurnace.furnaceCookTime);

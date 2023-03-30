@@ -230,8 +230,8 @@ public class EntityTFBlockGoblin extends EntityMob implements IEntityMultiPart {
                 collider.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
 
         if (list != null && !list.isEmpty()) {
-            for (int i = 0; i < list.size(); ++i) {
-                Entity entity = (Entity) list.get(i);
+            for (Entity value : list) {
+                Entity entity = (Entity) value;
 
                 if (entity.canBePushed()) {
                     applyBlockCollision(collider, entity);

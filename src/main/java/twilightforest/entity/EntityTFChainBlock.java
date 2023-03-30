@@ -271,8 +271,8 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
             List nearbyEntities = this.worldObj.getEntitiesWithinAABBExcludingEntity(
                     this,
                     this.boundingBox.addCoord(-this.motionX, -this.motionY, -this.motionZ).expand(2.0D, 2.0D, 2.0D));
-            for (int i = 0; i < nearbyEntities.size(); ++i) {
-                Entity nearby = (Entity) nearbyEntities.get(i);
+            for (Object nearbyEntity : nearbyEntities) {
+                Entity nearby = (Entity) nearbyEntity;
 
                 // attach? should we check for closest player?
                 if (nearby instanceof EntityPlayer) {

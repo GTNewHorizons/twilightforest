@@ -183,8 +183,8 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
 
     private int countExits() {
         int count = 0;
-        for (int i = 0; i < this.openingTowards.length; i++) {
-            if (this.openingTowards[i] == true) {
+        for (boolean openingToward : this.openingTowards) {
+            if (openingToward == true) {
                 count++;
             }
         }

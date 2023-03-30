@@ -276,9 +276,9 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
         // move bodies
         moveSegments();
 
-        for (int i = 0; i < body.length; i++) {
-            if (!body[i].addedToChunk && !worldObj.isRemote) {
-                worldObj.spawnEntityInWorld(body[i]);
+        for (EntityTFNagaSegment entityTFNagaSegment : body) {
+            if (!entityTFNagaSegment.addedToChunk && !worldObj.isRemote) {
+                worldObj.spawnEntityInWorld(entityTFNagaSegment);
             }
         }
     }

@@ -182,7 +182,7 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
 
         // during drop phase, all the ice blocks should make particles
         if (this.getCurrentPhase() == Phase.DROP) {
-            for (int i = 0; i < this.iceArray.length; i++) {
+            for (Entity entity : this.iceArray) {
                 float px = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.5F;
                 float py = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.5F;
                 float pz = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.5F;
@@ -190,9 +190,9 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
                 TwilightForestMod.proxy.spawnParticle(
                         this.worldObj,
                         "snowwarning",
-                        this.iceArray[i].lastTickPosX + px,
-                        this.iceArray[i].lastTickPosY + py,
-                        this.iceArray[i].lastTickPosZ + pz,
+                        entity.lastTickPosX + px,
+                        entity.lastTickPosY + py,
+                        entity.lastTickPosZ + pz,
                         0,
                         0,
                         0);

@@ -43,7 +43,7 @@ public class ModelTFIceCrystal extends ModelBase {
         setRotationAngles(f, f1, f2, f3, f4, f5, entity);
         // this.bipedHead.render(f5);
 
-        for (int i = 0; i < spikes.length; i++) {
+        for (ModelRenderer spike : spikes) {
 
             if (entity.isEntityAlive()) {
                 GL11.glEnable(GL11.GL_BLEND);
@@ -52,7 +52,7 @@ public class ModelTFIceCrystal extends ModelBase {
                 GL11.glColor4f(1F, 1F, 1F, 0.6F);
             }
 
-            this.spikes[i].render(f5);
+            spike.render(f5);
 
             GL11.glDisable(GL11.GL_BLEND);
 
