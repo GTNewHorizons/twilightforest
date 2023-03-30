@@ -30,7 +30,6 @@ public class EntityAITFPanicOnFlockDeath extends EntityAIBase {
     /**
      * Returns whether the EntityAIBase should begin execution.
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean shouldExecute() {
         boolean yikes = fleeTimer > 0;

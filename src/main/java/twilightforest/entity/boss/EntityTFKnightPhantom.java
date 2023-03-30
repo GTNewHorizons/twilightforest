@@ -508,7 +508,6 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private List<EntityTFKnightPhantom> getNearbyKnights() {
         List<EntityTFKnightPhantom> nearbyKnights = worldObj.getEntitiesWithinAABB(
                 EntityTFKnightPhantom.class,

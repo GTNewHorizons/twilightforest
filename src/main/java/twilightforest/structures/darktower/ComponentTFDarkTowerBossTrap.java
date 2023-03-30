@@ -26,7 +26,6 @@ public class ComponentTFDarkTowerBossTrap extends ComponentTFDarkTowerWing {
         this.spawnListIndex = -1;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {

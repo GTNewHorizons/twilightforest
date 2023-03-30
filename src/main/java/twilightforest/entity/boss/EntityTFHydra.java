@@ -110,7 +110,6 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.28D); // movement speed
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onLivingUpdate() {
         if (hc[0].headEntity == null || hc[1].headEntity == null || hc[2].headEntity == null) {
@@ -630,7 +629,6 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
      * 
      * Right now just finds the closest living entity that is not exluded by our criteria
      */
-    @SuppressWarnings("unchecked")
     public EntityLivingBase findSecondaryTarget(double range) {
         double closestRange = -1.0D;
         EntityLivingBase closestEntity = null;

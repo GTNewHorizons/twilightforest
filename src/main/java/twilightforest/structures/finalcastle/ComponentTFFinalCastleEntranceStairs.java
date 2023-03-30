@@ -19,7 +19,6 @@ public class ComponentTFFinalCastleEntranceStairs extends StructureTFComponent {
         this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox2(x, y, z, 0, -1, -5, 12, 0, 12, direction);
     }
 
-    @SuppressWarnings({ "rawtypes" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {

@@ -307,7 +307,6 @@ public class BlockTFTrophyPedestal extends Block {
         world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "mob.zombie.infect", 4.0F, 0.1F);
     }
 
-    @SuppressWarnings("unchecked")
     private void rewardNearbyPlayers(World world, int x, int y, int z) {
         // scan for players nearby to give the achievement
         List<EntityPlayer> nearbyPlayers = world.getEntitiesWithinAABB(

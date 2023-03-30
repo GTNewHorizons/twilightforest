@@ -18,7 +18,6 @@ public class ComponentTFIceTowerStairs extends ComponentTFTowerWing {
         super(index, x, y, z, size, height, direction);
     }
 
-    @SuppressWarnings({ "rawtypes" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {

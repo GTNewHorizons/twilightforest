@@ -98,7 +98,6 @@ public class EntityTFHydraMortar extends EntityThrowable {
         return var6;
     }
 
-    @SuppressWarnings("unchecked")
     protected void detonate() {
         // this.worldObj.playAuxSFX(2004, (int)Math.round(this.posX), (int)Math.round(this.posY),
         // (int)Math.round(this.posZ), 32764);

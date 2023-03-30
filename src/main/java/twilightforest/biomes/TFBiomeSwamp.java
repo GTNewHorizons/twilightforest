@@ -41,7 +41,6 @@ public class TFBiomeSwamp extends TFBiomeBase {
     WorldGenerator hugeLilyPadGen = new TFGenHugeLilyPad();
     WorldGenerator hugeWaterLilyGen = new TFGenHugeWaterLily();
 
-    @SuppressWarnings("unchecked")
     public TFBiomeSwamp(int i) {
         super(i);
 

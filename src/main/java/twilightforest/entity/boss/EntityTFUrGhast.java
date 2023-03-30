@@ -290,7 +290,6 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     /**
      * Altered Ghast AI
      */
-    @SuppressWarnings("unchecked")
     protected void updateEntityActionState() {
         if (!this.worldObj.isRemote && this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
             this.setDead();
@@ -432,7 +431,6 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void doTantrumDamageEffects() {
         // harm player below
         AxisAlignedBB below = this.boundingBox.getOffsetBoundingBox(0, -16, 0).expand(0, 16, 0);
@@ -553,7 +551,6 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     /**
      * Check if there are at least 4 ghasts near at least 2 traps. Return false if not.
      */
-    @SuppressWarnings("unchecked")
     private boolean checkGhastsAtTraps() {
         int trapsWithEnoughGhasts = 0;
 

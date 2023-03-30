@@ -26,7 +26,6 @@ public class ComponentTFDarkTowerBridge extends ComponentTFTowerWing {
         this.dHeight = pHeight;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {

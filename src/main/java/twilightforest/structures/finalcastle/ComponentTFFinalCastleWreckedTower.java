@@ -17,7 +17,6 @@ public class ComponentTFFinalCastleWreckedTower extends ComponentTFFinalCastleDa
         super(rand, i, x, y, z, direction);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {

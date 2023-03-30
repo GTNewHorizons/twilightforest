@@ -514,7 +514,6 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     /**
      * Check the surrounding area for weaker monsters, and if we find any, magically destroy them.
      */
-    @SuppressWarnings("unchecked")
     protected void popNearbyMob() {
         List<Entity> nearbyMobs = worldObj.getEntitiesWithinAABBExcludingEntity(
                 this,
@@ -578,7 +577,6 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected int countMyClones() {
         // check if there are enough clones. we check a 32x16x32 area
         List<EntityTFLich> nearbyLiches = worldObj.getEntitiesWithinAABB(
@@ -621,7 +619,6 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     /**
      * Despawn neaby clones
      */
-    @SuppressWarnings("unchecked")
     protected void despawnClones() {
         List<EntityTFLich> nearbyLiches = worldObj.getEntitiesWithinAABB(
                 EntityTFLich.class,
@@ -648,7 +645,6 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
         // if there's no minions left to summon, we should move into phase 3 naturally
     }
 
-    @SuppressWarnings("unchecked")
     protected int countMyMinions() {
         // check if there are enough clones. we check a 32x16x32 area
         List<EntityTFLichMinion> nearbyMinons = worldObj.getEntitiesWithinAABB(
@@ -722,7 +718,6 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     /**
      * Find a new master for this clone
      */
-    @SuppressWarnings("unchecked")
     private void findNewMaster() {
         List<EntityTFLich> nearbyLiches = worldObj.getEntitiesWithinAABB(
                 EntityTFLich.class,

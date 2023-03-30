@@ -45,7 +45,6 @@ public class ComponentTFFinalCastleMain extends StructureTFComponent {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         // add foundation

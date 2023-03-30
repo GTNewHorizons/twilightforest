@@ -44,7 +44,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     /**
      * Returns true if the structure generator has generated a structure located at the given position tuple.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public int getSpawnListIndexAt(int par1, int par2, int par3) {
         int highestFoundIndex = -1;
 
@@ -77,7 +76,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     /**
      * Get the structure bounding box, if any, at the specified position
      */
-    @SuppressWarnings("unchecked")
     public StructureBoundingBox getSBBAt(int mapX, int mapY, int mapZ) {
         StructureBoundingBox boxFound = null;
 
@@ -98,7 +96,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     /**
      * Is the block at the coordinates given a protected one?
      */
-    @SuppressWarnings("unchecked")
     public boolean isBlockProtectedAt(int mapX, int mapY, int mapZ) {
         boolean blockProtected = false;
 
@@ -131,7 +128,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
      * 
      * @return
      */
-    @SuppressWarnings("unchecked")
     public void setStructureConquered(int mapX, int mapY, int mapZ, boolean flag) {
 
         for (StructureStart start : this.structureMap.values()) {
@@ -159,7 +155,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public boolean isStructureConquered(int mapX, int mapY, int mapZ) {
 
         boolean conquered = false;
@@ -179,7 +174,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     /**
      * Check the lock at the specified lockIndex for the structure at the specified coords
      */
-    @SuppressWarnings("unchecked")
     public boolean isStructureLocked(int mapX, int mapY, int mapZ, int lockIndex) {
 
         boolean locked = false;
@@ -199,7 +193,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     /**
      * Do the specified x & z coordinates intersect the full structure?
      */
-    @SuppressWarnings("unchecked")
     public boolean isBlockInFullStructure(int mapX, int mapZ) {
         for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
@@ -212,7 +205,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     /**
      * Are the specified x & z coordinates close to a full structure?
      */
-    @SuppressWarnings("unchecked")
     public boolean isBlockNearFullStructure(int mapX, int mapZ, int range) {
         StructureBoundingBox rangeBB = new StructureBoundingBox(mapX - range, mapZ - range, mapX + range, mapZ + range);
         for (StructureStart start : this.structureMap.values()) {
@@ -226,7 +218,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     /**
      * Get full structure bounding box at the specified x, z coordinates.
      */
-    @SuppressWarnings("unchecked")
     public StructureBoundingBox getFullSBBAt(int mapX, int mapZ) {
         for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
@@ -236,7 +227,6 @@ public class MapGenTFMajorFeature extends MapGenStructure {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public StructureBoundingBox getFullSBBNear(int mapX, int mapZ, int range) {
         StructureBoundingBox rangeBB = new StructureBoundingBox(mapX - range, mapZ - range, mapX + range, mapZ + range);
         for (StructureStart start : this.structureMap.values()) {

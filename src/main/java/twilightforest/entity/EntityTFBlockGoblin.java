@@ -223,7 +223,6 @@ public class EntityTFBlockGoblin extends EntityMob implements IEntityMultiPart {
     /**
      * Check if the block is colliding with any nearby entities
      */
-    @SuppressWarnings("unchecked")
     protected void applyBlockCollisions(Entity collider) {
         List<Entity> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(
                 collider,

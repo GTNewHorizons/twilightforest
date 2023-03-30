@@ -29,7 +29,6 @@ public class ComponentTFFinalCastleBossGazebo extends StructureTFComponent {
                 keep.getBoundingBox().maxZ - 14);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         this.deco = new StructureTFDecoratorCastle();

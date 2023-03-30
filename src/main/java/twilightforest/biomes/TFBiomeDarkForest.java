@@ -35,7 +35,6 @@ public class TFBiomeDarkForest extends TFBiomeBase {
     Random monsterRNG;
     ArrayList<SpawnListEntry> emptyList = new ArrayList<>();
 
-    @SuppressWarnings("unchecked")
     public TFBiomeDarkForest(int i) {
         super(i);
 

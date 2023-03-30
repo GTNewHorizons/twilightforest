@@ -34,7 +34,6 @@ public class EntityAITFEatLoose extends EntityAIBase {
     /**
      * Returns whether the EntityAIBase should begin execution.
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean shouldExecute() {
         if (this.delayTemptCounter > 0) {

@@ -1032,7 +1032,6 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
      * 
      * Twilight Forest varient! First check features, then only if we're not in a feature, check the biome.
      */
-    @SuppressWarnings("unchecked")
     @Override
     public List<SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, int mapX, int mapY, int mapZ) {
         // are the specified coordinates precicely in a feature?

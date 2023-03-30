@@ -64,7 +64,6 @@ public class EntityTFFallingIce extends Entity {
     /**
      * Called to update the entity's position/logic.
      */
-    @SuppressWarnings("unchecked")
     public void onUpdate() {
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
@@ -130,7 +129,6 @@ public class EntityTFFallingIce extends Entity {
     /**
      * Called when the mob is falling. Calculates and applies fall damage.
      */
-    @SuppressWarnings({ "unchecked" })
     protected void fall(float par1) {
         int distance = MathHelper.ceiling_float_int(par1 - 1.0F);
 

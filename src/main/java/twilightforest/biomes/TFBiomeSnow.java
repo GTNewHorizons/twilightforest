@@ -37,7 +37,6 @@ public class TFBiomeSnow extends TFBiomeBase {
     /**
      * @param i
      */
-    @SuppressWarnings("unchecked")
     public TFBiomeSnow(int i) {
         super(i);
 

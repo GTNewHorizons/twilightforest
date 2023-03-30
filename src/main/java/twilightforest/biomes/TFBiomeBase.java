@@ -94,7 +94,6 @@ public abstract class TFBiomeBase extends BiomeGenBase {
      */
     protected List<SpawnListEntry> undergroundMonsterList;
 
-    @SuppressWarnings("unchecked")
     public TFBiomeBase(int i) {
         super(i);
 

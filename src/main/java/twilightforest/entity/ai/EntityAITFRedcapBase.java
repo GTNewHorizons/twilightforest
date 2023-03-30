@@ -64,7 +64,6 @@ public abstract class EntityAITFRedcapBase extends EntityAIBase {
      * @param range
      * @return
      */
-    @SuppressWarnings("unchecked")
     public boolean isLitTNTNearby(int range) {
         AxisAlignedBB expandedBox = entityObj.boundingBox.expand(range, range, range);
 

@@ -102,7 +102,6 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void renderMap(EntityPlayer par1EntityPlayer, TextureManager par2TextureManager,
             TFMagicMapData par3MapData) {
         TFMagicMapData magicMapData = par3MapData;

@@ -22,7 +22,6 @@ public class ComponentTFDarkTowerBalcony extends ComponentTFTowerWing {
         super(i, x, y, z, 5, 5, direction);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {

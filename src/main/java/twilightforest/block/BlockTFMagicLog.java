@@ -103,7 +103,6 @@ public class BlockTFMagicLog extends BlockLog {
         return Item.getItemFromBlock(this); // hey that's my block ID!
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
         itemList.add(new ItemStack(item, 1, 0));

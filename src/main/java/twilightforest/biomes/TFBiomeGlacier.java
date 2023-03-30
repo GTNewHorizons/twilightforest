@@ -28,7 +28,6 @@ public class TFBiomeGlacier extends TFBiomeBase {
     /**
      * @param i
      */
-    @SuppressWarnings("unchecked")
     public TFBiomeGlacier(int i) {
         super(i);
 

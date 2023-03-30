@@ -300,7 +300,6 @@ public class ContainerTFUncrafting extends Container {
      * @param inputStack
      * @return
      */
-    @SuppressWarnings("unchecked")
     public IRecipe getRecipeFor(ItemStack inputStack) {
         if (inputStack != null) {
             for (IRecipe recipe : CraftingManager.getInstance().getRecipeList()) {

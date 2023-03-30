@@ -53,7 +53,6 @@ public class ComponentTFIceTowerMain extends ComponentTFIceTowerWing {
         this.hasBossWing = par1NBTTagCompound.getBoolean("hasBossWing");
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         super.buildComponent(parent, list, rand);

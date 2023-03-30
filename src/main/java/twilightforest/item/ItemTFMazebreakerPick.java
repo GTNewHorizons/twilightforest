@@ -25,7 +25,6 @@ public class ItemTFMazebreakerPick extends ItemPickaxe {
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> par3List) {
         ItemStack istack = new ItemStack(par1, 1, 0);

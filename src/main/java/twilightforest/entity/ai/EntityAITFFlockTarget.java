@@ -23,7 +23,6 @@ public class EntityAITFFlockTarget extends EntityAITarget {
     /**
      * Returns whether the EntityAIBase should begin execution.
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean shouldExecute() {
         List<? extends EntityLivingBase> flockList = this.flockCreature.worldObj.getEntitiesWithinAABB(

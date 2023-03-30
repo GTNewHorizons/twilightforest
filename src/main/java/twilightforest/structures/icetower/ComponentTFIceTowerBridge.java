@@ -46,7 +46,6 @@ public class ComponentTFIceTowerBridge extends StructureTFComponent {
         this.length = par1NBTTagCompound.getInteger("bridgeLength");
     }
 
-    @SuppressWarnings({ "rawtypes" })
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {

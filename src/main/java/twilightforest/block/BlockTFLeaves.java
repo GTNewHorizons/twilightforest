@@ -121,7 +121,6 @@ public class BlockTFLeaves extends BlockLeaves {
         return Blocks.leaves.shouldSideBeRendered(world, x, y, z, side);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
         itemList.add(new ItemStack(item, 1, 0));

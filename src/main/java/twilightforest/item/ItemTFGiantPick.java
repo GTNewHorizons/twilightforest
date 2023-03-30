@@ -87,7 +87,6 @@ public class ItemTFGiantPick extends ItemPickaxe {
     /**
      * allows items to add custom lines of information to the mouseover description
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List<String> par3List, boolean par4) {

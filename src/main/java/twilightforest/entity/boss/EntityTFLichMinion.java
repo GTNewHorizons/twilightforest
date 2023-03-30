@@ -74,7 +74,6 @@ public class EntityTFLichMinion extends EntityZombie {
         super.onLivingUpdate();
     }
 
-    @SuppressWarnings("unchecked")
     private void findNewMaster() {
         List<EntityTFLich> nearbyLiches = worldObj.getEntitiesWithinAABB(
                 EntityTFLich.class,
