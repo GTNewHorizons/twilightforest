@@ -252,9 +252,9 @@ public class ItemTFMagicMap extends ItemMap {
 
     // Add the map number to the tooltip
     public String getItemStackDisplayName(ItemStack itemStack) {
-        return (String.valueOf(
-                StatCollector.translateToLocal(this.getUnlocalizedNameInefficiently(itemStack) + ".name") + " #"
-                        + itemStack.getItemDamage())).trim();
+        return (StatCollector.translateToLocal(this.getUnlocalizedNameInefficiently(itemStack) + ".name")
+                + " #"
+                + itemStack.getItemDamage()).trim();
     }
 
     // Properly register icon source
