@@ -48,7 +48,7 @@ public class ItemTFMagicBeans extends ItemTF {
 
         if (world.provider instanceof WorldProviderTwilightForest) {
             // WorldProviderTwilightForest has this method on both server and client
-            return ((WorldProviderTwilightForest) world.provider).getCloudHeight();
+            return world.provider.getCloudHeight();
         } else {
             // are we on a dedicated server
             // TODO: don't use exceptions for program flow?

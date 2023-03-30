@@ -89,10 +89,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                             : block.getMixedBrightnessForBlock(renderer.blockAccess, x - 1, y, z));
             tessellator.setColorOpaque_F(bRed, bGreen, bBlue);
             renderer.renderFaceXNeg(
-                    block,
-                    (double) x,
-                    (double) y,
-                    (double) z,
+                    block, x, y, z,
                     renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 4));
         }
 
@@ -102,10 +99,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                             : block.getMixedBrightnessForBlock(renderer.blockAccess, x + 1, y, z));
             tessellator.setColorOpaque_F(tRed, tGreen, tBlue);
             renderer.renderFaceXPos(
-                    block,
-                    (double) x,
-                    (double) y,
-                    (double) z,
+                    block, x, y, z,
                     renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 5));
         }
 
@@ -245,10 +239,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                             : block.getMixedBrightnessForBlock(world, x, y - 1, z));
             tessellator.setColorOpaque_F(bRed, bGreen, bBlue);
             renderer.renderFaceYNeg(
-                    block,
-                    (double) x,
-                    (double) y,
-                    (double) z,
+                    block, x, y, z,
                     renderer.getBlockIcon(block, world, x, y, z, 0));
         }
 
@@ -258,10 +249,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                             : block.getMixedBrightnessForBlock(world, x, y + 1, z));
             tessellator.setColorOpaque_F(tRed, tGreen, tBlue);
             renderer.renderFaceYPos(
-                    block,
-                    (double) x,
-                    (double) y,
-                    (double) z,
+                    block, x, y, z,
                     renderer.getBlockIcon(block, world, x, y, z, 1));
         }
 
@@ -403,10 +391,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                             : block.getMixedBrightnessForBlock(renderer.blockAccess, x, y, z - 1));
             tessellator.setColorOpaque_F(bRed, bGreen, bBlue);
             renderer.renderFaceZNeg(
-                    block,
-                    (double) x,
-                    (double) y,
-                    (double) z,
+                    block, x, y, z,
                     renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 2));
         }
 
@@ -416,10 +401,7 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
                             : block.getMixedBrightnessForBlock(renderer.blockAccess, x, y, z + 1));
             tessellator.setColorOpaque_F(tRed, tGreen, tBlue);
             renderer.renderFaceZPos(
-                    block,
-                    (double) x,
-                    (double) y,
-                    (double) z,
+                    block, x, y, z,
                     renderer.getBlockIcon(block, renderer.blockAccess, x, y, z, 3));
         }
 
@@ -533,17 +515,17 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
         tessellator.setBrightness(l);
         tessellator.setColorOpaque_F(zRed, zGreen, zBlue);
         tessellator.addTranslation(0.0F, 0.0F, onePixel);
-        renderer.renderFaceZNeg(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceZNeg(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(0.0F, 0.0F, -onePixel);
         tessellator.addTranslation(0.0F, 0.0F, -onePixel);
-        renderer.renderFaceZPos(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceZPos(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(0.0F, 0.0F, onePixel);
         tessellator.setColorOpaque_F(xRed, xGreen, xBlue);
         tessellator.addTranslation(0.0F, onePixel, 0.0F);
-        renderer.renderFaceYNeg(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceYNeg(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(0.0F, -onePixel, 0.0F);
         tessellator.addTranslation(0.0F, -onePixel, 0.0F);
-        renderer.renderFaceYPos(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceYPos(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(0.0F, onePixel, 0.0F);
     }
 
@@ -554,17 +536,17 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
         tessellator.setBrightness(blockBrightness);
         tessellator.setColorOpaque_F(zRed, zGreen, zBlue);
         tessellator.addTranslation(0.0F, 0.0F, onePixel);
-        renderer.renderFaceZNeg(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceZNeg(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(0.0F, 0.0F, -onePixel);
         tessellator.addTranslation(0.0F, 0.0F, -onePixel);
-        renderer.renderFaceZPos(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceZPos(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(0.0F, 0.0F, onePixel);
         tessellator.setColorOpaque_F(xRed, xGreen, xBlue);
         tessellator.addTranslation(onePixel, 0.0F, 0.0F);
-        renderer.renderFaceXNeg(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceXNeg(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(-onePixel, 0.0F, 0.0F);
         tessellator.addTranslation(-onePixel, 0.0F, 0.0F);
-        renderer.renderFaceXPos(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceXPos(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(onePixel, 0.0F, 0.0F);
     }
 
@@ -575,17 +557,17 @@ public class RenderBlockTFThorns implements ISimpleBlockRenderingHandler {
         tessellator.setBrightness(blockBrightness);
         tessellator.setColorOpaque_F(xRed, xGreen, xBlue);
         tessellator.addTranslation(onePixel, 0.0F, 0.0F);
-        renderer.renderFaceXNeg(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceXNeg(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(-onePixel, 0.0F, 0.0F);
         tessellator.addTranslation(-onePixel, 0.0F, 0.0F);
-        renderer.renderFaceXPos(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceXPos(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(onePixel, 0.0F, 0.0F);
         tessellator.setColorOpaque_F(zRed, zGreen, zBlue);
         tessellator.addTranslation(0.0F, onePixel, 0.0F);
-        renderer.renderFaceYNeg(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceYNeg(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(0.0F, -onePixel, 0.0F);
         tessellator.addTranslation(0.0F, -onePixel, 0.0F);
-        renderer.renderFaceYPos(block, (double) x, (double) y, (double) z, getSideIcon(block, metadata));
+        renderer.renderFaceYPos(block, x, y, z, getSideIcon(block, metadata));
         tessellator.addTranslation(0.0F, onePixel, 0.0F);
     }
 

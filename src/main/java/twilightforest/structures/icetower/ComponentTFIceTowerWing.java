@@ -157,7 +157,7 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
         // System.out.println("Making tower, index = " + index + ", list.size() = " + list.size());
 
         // stop if out of range
-        if (isOutOfRange((StructureComponent) list.get(0), dx[0], dx[1], dx[2], RANGE)) {
+        if (isOutOfRange(list.get(0), dx[0], dx[1], dx[2], RANGE)) {
             return false;
         }
 

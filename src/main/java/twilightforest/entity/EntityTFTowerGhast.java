@@ -183,7 +183,7 @@ public class EntityTFTowerGhast extends EntityGhast {
         if (this.targetedEntity == null && this.wanderFactor > 0) {
             if (this.courseChangeCooldown-- <= 0) {
                 this.courseChangeCooldown += this.rand.nextInt(20) + 20;
-                distanceDesired = (double) MathHelper.sqrt_double(distanceDesired);
+                distanceDesired = MathHelper.sqrt_double(distanceDesired);
 
                 if (!this.isWithinHomeDistance(
                         MathHelper.floor_double(waypointX),
@@ -238,7 +238,7 @@ public class EntityTFTowerGhast extends EntityGhast {
             if (this.isAggressive) {
                 if (this.attackCounter == 10) {
                     this.worldObj.playAuxSFXAtEntity(
-                            (EntityPlayer) null,
+                            null,
                             1007,
                             (int) this.posX,
                             (int) this.posY,
@@ -300,7 +300,7 @@ public class EntityTFTowerGhast extends EntityGhast {
 
         // fireball sound effect
         this.worldObj
-                .playAuxSFXAtEntity((EntityPlayer) null, 1008, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
+                .playAuxSFXAtEntity(null, 1008, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
 
         EntityLargeFireball entityFireball = new EntityLargeFireball(this.worldObj, this, offsetX, offsetY, offsetZ);
         // var17.field_92012_e = this.explosionPower;

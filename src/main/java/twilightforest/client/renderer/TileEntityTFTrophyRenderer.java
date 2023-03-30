@@ -107,7 +107,7 @@ public class TileEntityTFTrophyRenderer extends TileEntitySpecialRenderer {
         hydraHeadModel.openMouthForTrophy(onGround ? 0F : 0.25F);
 
         // render the hydra head
-        hydraHeadModel.render((Entity) null, 0.0F, 0.0F, 0.0F, rotation, 0.0F, 0.0625F);
+        hydraHeadModel.render(null, 0.0F, 0.0F, 0.0F, rotation, 0.0F, 0.0625F);
     }
 
     private void renderNagaHead(float rotation, boolean onGround) {
@@ -127,7 +127,7 @@ public class TileEntityTFTrophyRenderer extends TileEntitySpecialRenderer {
         GL11.glTranslatef(0, onGround ? 1F : -0F, onGround ? 0F : 1F);
 
         // render the naga head
-        nagaHeadModel.render((Entity) null, 0.0F, 0.0F, 0.0F, rotation, 0.0F, 0.0625F);
+        nagaHeadModel.render(null, 0.0F, 0.0F, 0.0F, rotation, 0.0F, 0.0625F);
     }
 
     private void renderLichHead(float rotation, boolean onGround) {
@@ -168,7 +168,7 @@ public class TileEntityTFTrophyRenderer extends TileEntitySpecialRenderer {
         GL11.glTranslatef(0, onGround ? 1F : 1F, onGround ? 0F : 0F);
 
         // render the naga head
-        urGhastModel.render((Entity) null, 0.0F, 0, trophy.ticksExisted + partialTime, 0, 0.0F, 0.0625F);
+        urGhastModel.render(null, 0.0F, 0, trophy.ticksExisted + partialTime, 0, 0.0F, 0.0625F);
     }
 
     private void renderSnowQueenHead(float rotation, boolean onGround) {

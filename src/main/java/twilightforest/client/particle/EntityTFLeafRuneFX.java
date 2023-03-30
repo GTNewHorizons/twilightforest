@@ -24,7 +24,7 @@ public class EntityTFLeafRuneFX extends EntityEnchantmentTableParticleFX {
         this.prevPosZ = this.posZ;
 
         this.moveEntity(this.motionX, this.motionY, this.motionZ);
-        this.motionY -= (double) this.particleGravity;
+        this.motionY -= this.particleGravity;
 
         if (this.particleAge++ >= this.particleMaxAge) {
             this.setDead();

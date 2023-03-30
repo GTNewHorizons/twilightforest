@@ -45,9 +45,9 @@ public class BlockTFTrollSteinn extends Block {
         int threshhold = LIGHT_THRESHHOLD;
 
         for (int side = 0; side < 6; ++side) {
-            double rx = (double) ((float) x + random.nextFloat());
-            double ry = (double) ((float) y + random.nextFloat());
-            double rz = (double) ((float) z + random.nextFloat());
+            double rx = (float) x + random.nextFloat();
+            double ry = (float) y + random.nextFloat();
+            double rz = (float) z + random.nextFloat();
 
             if (side == 0 && !world.getBlock(x, y - 1, z).isOpaqueCube()
                     && world.getBlockLightValue(x, y - 1, z) <= threshhold) {

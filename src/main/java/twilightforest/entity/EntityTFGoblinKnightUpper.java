@@ -99,7 +99,7 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
         if (flag) {
             dataWatcher.updateObject(DATA_EQUIP, (byte) (otherFlags | 1));
         } else {
-            dataWatcher.updateObject(DATA_EQUIP, (byte) otherFlags);
+            dataWatcher.updateObject(DATA_EQUIP, otherFlags);
         }
     }
 
@@ -114,7 +114,7 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
         if (flag) {
             dataWatcher.updateObject(DATA_EQUIP, (byte) (otherFlags | 2));
         } else {
-            dataWatcher.updateObject(DATA_EQUIP, (byte) otherFlags);
+            dataWatcher.updateObject(DATA_EQUIP, otherFlags);
         }
     }
 

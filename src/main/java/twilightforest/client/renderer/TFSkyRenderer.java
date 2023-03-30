@@ -48,10 +48,10 @@ public class TFSkyRenderer extends IRenderHandler {
         for (var9 = -var7 * var8; var9 <= var7 * var8; var9 += var7) {
             for (var10 = -var7 * var8; var10 <= var7 * var8; var10 += var7) {
                 var5.startDrawingQuads();
-                var5.addVertex((double) (var9 + 0), (double) var6, (double) (var10 + 0));
-                var5.addVertex((double) (var9 + var7), (double) var6, (double) (var10 + 0));
-                var5.addVertex((double) (var9 + var7), (double) var6, (double) (var10 + var7));
-                var5.addVertex((double) (var9 + 0), (double) var6, (double) (var10 + var7));
+                var5.addVertex(var9 + 0, var6, var10 + 0);
+                var5.addVertex(var9 + var7, var6, var10 + 0);
+                var5.addVertex(var9 + var7, var6, var10 + var7);
+                var5.addVertex(var9 + 0, var6, var10 + var7);
                 var5.draw();
             }
         }
@@ -64,10 +64,10 @@ public class TFSkyRenderer extends IRenderHandler {
 
         for (var9 = -var7 * var8; var9 <= var7 * var8; var9 += var7) {
             for (var10 = -var7 * var8; var10 <= var7 * var8; var10 += var7) {
-                var5.addVertex((double) (var9 + var7), (double) var6, (double) (var10 + 0));
-                var5.addVertex((double) (var9 + 0), (double) var6, (double) (var10 + 0));
-                var5.addVertex((double) (var9 + 0), (double) var6, (double) (var10 + var7));
-                var5.addVertex((double) (var9 + var7), (double) var6, (double) (var10 + var7));
+                var5.addVertex(var9 + var7, var6, var10 + 0);
+                var5.addVertex(var9 + 0, var6, var10 + 0);
+                var5.addVertex(var9 + 0, var6, var10 + var7);
+                var5.addVertex(var9 + var7, var6, var10 + var7);
             }
         }
 
@@ -217,26 +217,26 @@ public class TFSkyRenderer extends IRenderHandler {
             var12 = -var10;
             var23.startDrawingQuads();
             var23.setColorRGBA_I(0, 255);
-            var23.addVertex((double) (-var10), (double) var11, (double) var10);
-            var23.addVertex((double) var10, (double) var11, (double) var10);
-            var23.addVertex((double) var10, (double) var12, (double) var10);
-            var23.addVertex((double) (-var10), (double) var12, (double) var10);
-            var23.addVertex((double) (-var10), (double) var12, (double) (-var10));
-            var23.addVertex((double) var10, (double) var12, (double) (-var10));
-            var23.addVertex((double) var10, (double) var11, (double) (-var10));
-            var23.addVertex((double) (-var10), (double) var11, (double) (-var10));
-            var23.addVertex((double) var10, (double) var12, (double) (-var10));
-            var23.addVertex((double) var10, (double) var12, (double) var10);
-            var23.addVertex((double) var10, (double) var11, (double) var10);
-            var23.addVertex((double) var10, (double) var11, (double) (-var10));
-            var23.addVertex((double) (-var10), (double) var11, (double) (-var10));
-            var23.addVertex((double) (-var10), (double) var11, (double) var10);
-            var23.addVertex((double) (-var10), (double) var12, (double) var10);
-            var23.addVertex((double) (-var10), (double) var12, (double) (-var10));
-            var23.addVertex((double) (-var10), (double) var12, (double) (-var10));
-            var23.addVertex((double) (-var10), (double) var12, (double) var10);
-            var23.addVertex((double) var10, (double) var12, (double) var10);
-            var23.addVertex((double) var10, (double) var12, (double) (-var10));
+            var23.addVertex(-var10, var11, var10);
+            var23.addVertex(var10, var11, var10);
+            var23.addVertex(var10, var12, var10);
+            var23.addVertex(-var10, var12, var10);
+            var23.addVertex(-var10, var12, -var10);
+            var23.addVertex(var10, var12, -var10);
+            var23.addVertex(var10, var11, -var10);
+            var23.addVertex(-var10, var11, -var10);
+            var23.addVertex(var10, var12, -var10);
+            var23.addVertex(var10, var12, var10);
+            var23.addVertex(var10, var11, var10);
+            var23.addVertex(var10, var11, -var10);
+            var23.addVertex(-var10, var11, -var10);
+            var23.addVertex(-var10, var11, var10);
+            var23.addVertex(-var10, var12, var10);
+            var23.addVertex(-var10, var12, -var10);
+            var23.addVertex(-var10, var12, -var10);
+            var23.addVertex(-var10, var12, var10);
+            var23.addVertex(var10, var12, var10);
+            var23.addVertex(var10, var12, -var10);
             var23.draw();
         }
 
@@ -288,10 +288,10 @@ public class TFSkyRenderer extends IRenderHandler {
         var2.startDrawingQuads();
 
         for (int var3 = 0; var3 < 3000; ++var3) {
-            double var4 = (double) (var1.nextFloat() * 2.0F - 1.0F);
-            double var6 = (double) (var1.nextFloat() * 2.0F - 1.0F);
-            double var8 = (double) (var1.nextFloat() * 2.0F - 1.0F);
-            double size = (double) (0.10F + var1.nextFloat() * 0.25F);
+            double var4 = var1.nextFloat() * 2.0F - 1.0F;
+            double var6 = var1.nextFloat() * 2.0F - 1.0F;
+            double var8 = var1.nextFloat() * 2.0F - 1.0F;
+            double size = 0.10F + var1.nextFloat() * 0.25F;
             double var12 = var4 * var4 + var6 * var6 + var8 * var8;
 
             if (var12 < 1.0D && var12 > 0.01D) {

@@ -142,27 +142,27 @@ public class RenderBlockTFCastleMagic implements ISimpleBlockRenderingHandler {
 
         if (renderer.renderAllFaces
                 || block.shouldSideBeRendered(world, x, y - 1, z, 0) && world.isAirBlock(x, y - 1, z)) {
-            renderer.renderFaceYNeg(block, (double) x, (double) y - pixel, (double) z, renderer.overrideBlockTexture);
+            renderer.renderFaceYNeg(block, x, (double) y - pixel, z, renderer.overrideBlockTexture);
         }
         if (renderer.renderAllFaces
                 || block.shouldSideBeRendered(world, x, y + 1, z, 1) && world.isAirBlock(x, y + 1, z)) {
-            renderer.renderFaceYPos(block, (double) x, (double) y + pixel, (double) z, renderer.overrideBlockTexture);
+            renderer.renderFaceYPos(block, x, (double) y + pixel, z, renderer.overrideBlockTexture);
         }
         if (renderer.renderAllFaces
                 || block.shouldSideBeRendered(world, x, y, z - 1, 2) && world.isAirBlock(x, y, z - 1)) {
-            renderer.renderFaceZNeg(block, (double) x, (double) y, (double) z - pixel, renderer.overrideBlockTexture);
+            renderer.renderFaceZNeg(block, x, y, (double) z - pixel, renderer.overrideBlockTexture);
         }
         if (renderer.renderAllFaces
                 || block.shouldSideBeRendered(world, x, y, z + 1, 3) && world.isAirBlock(x, y, z + 1)) {
-            renderer.renderFaceZPos(block, (double) x, (double) y, (double) z + pixel, renderer.overrideBlockTexture);
+            renderer.renderFaceZPos(block, x, y, (double) z + pixel, renderer.overrideBlockTexture);
         }
         if (renderer.renderAllFaces
                 || block.shouldSideBeRendered(world, x - 1, y, z, 4) && world.isAirBlock(x - 1, y, z)) {
-            renderer.renderFaceXNeg(block, (double) x - pixel, (double) y, (double) z, renderer.overrideBlockTexture);
+            renderer.renderFaceXNeg(block, (double) x - pixel, y, z, renderer.overrideBlockTexture);
         }
         if (renderer.renderAllFaces
                 || block.shouldSideBeRendered(world, x + 1, y, z, 5) && world.isAirBlock(x + 1, y, z)) {
-            renderer.renderFaceXPos(block, (double) x + pixel, (double) y, (double) z, renderer.overrideBlockTexture);
+            renderer.renderFaceXPos(block, (double) x + pixel, y, z, renderer.overrideBlockTexture);
         }
 
         renderer.clearOverrideBlockTexture();

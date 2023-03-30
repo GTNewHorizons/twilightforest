@@ -108,8 +108,8 @@ public class TFGenLargeRainboak extends TFTreeGenerator {
                     if (this.checkBlockLine(var17, var18) == -1) {
                         int[] var19 = new int[] { this.basePos[0], this.basePos[1], this.basePos[2] };
                         double var20 = Math.sqrt(
-                                Math.pow((double) Math.abs(this.basePos[0] - var17[0]), 2.0D)
-                                        + Math.pow((double) Math.abs(this.basePos[2] - var17[2]), 2.0D));
+                                Math.pow(Math.abs(this.basePos[0] - var17[0]), 2.0D)
+                                        + Math.pow(Math.abs(this.basePos[2] - var17[2]), 2.0D));
                         double var22 = var20 * this.branchSlope;
 
                         if ((double) var17[1] - var22 > (double) var5) {
@@ -189,7 +189,7 @@ public class TFGenLargeRainboak extends TFTreeGenerator {
                 var4 = 0.0F;
             } else {
                 var4 = (float) Math
-                        .sqrt(Math.pow((double) Math.abs(var2), 2.0D) - Math.pow((double) Math.abs(var3), 2.0D));
+                        .sqrt(Math.pow(Math.abs(var2), 2.0D) - Math.pow(Math.abs(var3), 2.0D));
             }
 
             var4 *= 0.5F;

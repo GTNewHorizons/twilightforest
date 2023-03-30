@@ -58,7 +58,7 @@ public class ContainerTFCinderFurnace extends Container {
         super.detectAndSendChanges();
 
         for (ICrafting crafter : this.crafters) {
-            ICrafting icrafting = (ICrafting) crafter;
+            ICrafting icrafting = crafter;
 
             if (this.lastCookTime != this.tileFurnace.furnaceCookTime) {
                 icrafting.sendProgressBarUpdate(this, 0, this.tileFurnace.furnaceCookTime);
@@ -102,7 +102,7 @@ public class ContainerTFCinderFurnace extends Container {
      */
     public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_) {
         ItemStack itemstack = null;
-        Slot slot = (Slot) this.inventorySlots.get(p_82846_2_);
+        Slot slot = this.inventorySlots.get(p_82846_2_);
 
         if (slot != null && slot.getHasStack()) {
             ItemStack itemstack1 = slot.getStack();
@@ -135,7 +135,7 @@ public class ContainerTFCinderFurnace extends Container {
             }
 
             if (itemstack1.stackSize == 0) {
-                slot.putStack((ItemStack) null);
+                slot.putStack(null);
             } else {
                 slot.onSlotChanged();
             }

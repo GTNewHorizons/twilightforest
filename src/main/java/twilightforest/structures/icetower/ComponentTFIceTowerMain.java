@@ -61,7 +61,7 @@ public class ComponentTFIceTowerMain extends ComponentTFIceTowerWing {
         // add entrance tower
         StructureBoundingBox towerBB = StructureBoundingBox.getNewBoundingBox();
 
-        for (StructureComponent structurecomponent : (List<StructureComponent>) list) {
+        for (StructureComponent structurecomponent : list) {
             towerBB.expandTo(structurecomponent.getBoundingBox());
         }
 

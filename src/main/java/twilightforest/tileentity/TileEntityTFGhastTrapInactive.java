@@ -37,13 +37,12 @@ public class TileEntityTFGhastTrapInactive extends TileEntity {
     @Override
     public void updateEntity() {
         // check to see if there are any dying mini ghasts within our scan range
-        AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(
-                (double) this.xCoord,
-                (double) this.yCoord,
-                (double) this.zCoord,
-                (double) (this.xCoord + 1),
-                (double) (this.yCoord + 1),
-                (double) (this.zCoord + 1)).expand(10D, 16D, 10D);
+        AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(this.xCoord,
+                this.yCoord,
+                this.zCoord,
+                this.xCoord + 1,
+                this.yCoord + 1,
+                this.zCoord + 1).expand(10D, 16D, 10D);
 
         List<EntityTFMiniGhast> nearbyGhasts = worldObj.getEntitiesWithinAABB(EntityTFMiniGhast.class, aabb);
 

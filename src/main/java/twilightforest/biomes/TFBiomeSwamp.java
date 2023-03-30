@@ -121,8 +121,8 @@ public class TFBiomeSwamp extends TFBiomeBase {
      */
     @Override
     public int getBiomeGrassColor(int x, int y, int z) {
-        double var1 = (double) MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
-        double var3 = (double) MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
+        double var1 = MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
+        double var3 = MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
         return ((ColorizerGrass.getGrassColor(var1, var3) & 0xFEFEFE) + 0x4E0E4E) / 2;
     }
 
@@ -131,8 +131,8 @@ public class TFBiomeSwamp extends TFBiomeBase {
      */
     @Override
     public int getBiomeFoliageColor(int x, int y, int z) {
-        double var1 = (double) MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
-        double var3 = (double) MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
+        double var1 = MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
+        double var3 = MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
         return ((ColorizerFoliage.getFoliageColor(var1, var3) & 0xFEFEFE) + 0x4E0E4E) / 2;
     }
 

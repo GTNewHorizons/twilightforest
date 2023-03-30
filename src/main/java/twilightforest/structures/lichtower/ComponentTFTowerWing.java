@@ -1558,7 +1558,7 @@ public class ComponentTFTowerWing extends StructureTFComponent {
             int wx = getXWithOffset(cx, cz);
             int wy = getYWithOffset(2);
             int wz = getZWithOffset(cx, cz);
-            ((BlockMushroom) planterBlock).updateTick(world, wx, wy, wz, world.rand);
+            planterBlock.updateTick(world, wx, wy, wz, world.rand);
         }
 
         // otherwise, place the block into a flowerpot

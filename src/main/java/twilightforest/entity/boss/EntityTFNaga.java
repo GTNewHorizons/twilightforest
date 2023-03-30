@@ -1010,7 +1010,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
             body[i].motionY = f * diff.yCoord;
             body[i].motionZ = f * diff.zCoord;
 
-            double distance = (double) MathHelper.sqrt_double(diff.xCoord * diff.xCoord + diff.zCoord * diff.zCoord);
+            double distance = MathHelper.sqrt_double(diff.xCoord * diff.xCoord + diff.zCoord * diff.zCoord);
 
             if (i == 0) {
                 diff.yCoord -= 0.15D;

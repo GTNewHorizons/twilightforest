@@ -222,7 +222,7 @@ public class EntityTFTinyBird extends EntityTFBird {
                     MathHelper.floor_double(this.posZ))) {
                 this.setIsBirdLanded(false);
                 this.worldObj.playAuxSFXAtEntity(
-                        (EntityPlayer) null,
+                        null,
                         1015,
                         (int) this.posX,
                         (int) this.posY,
@@ -235,7 +235,7 @@ public class EntityTFTinyBird extends EntityTFBird {
                     this.setIsBirdLanded(false);
                     this.motionY = 0.4;
                     this.worldObj.playAuxSFXAtEntity(
-                            (EntityPlayer) null,
+                            null,
                             1015,
                             (int) this.posX,
                             (int) this.posY,

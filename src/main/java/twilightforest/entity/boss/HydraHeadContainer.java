@@ -797,7 +797,7 @@ public class HydraHeadContainer {
                 }
 
                 headEntity.worldObj.playAuxSFXAtEntity(
-                        (EntityPlayer) null,
+                        null,
                         1008,
                         (int) headEntity.posX,
                         (int) headEntity.posY,
@@ -875,7 +875,7 @@ public class HydraHeadContainer {
                     && possibleEntity != neckc) {
                 float borderSize = possibleEntity.getCollisionBorderSize();
                 AxisAlignedBB collisionBB = possibleEntity.boundingBox
-                        .expand((double) borderSize, (double) borderSize, (double) borderSize);
+                        .expand(borderSize, borderSize, borderSize);
                 MovingObjectPosition interceptPos = collisionBB.calculateIntercept(srcVec, destVec);
 
                 if (collisionBB.isVecInside(srcVec)) {

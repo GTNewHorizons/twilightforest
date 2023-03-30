@@ -82,7 +82,7 @@ public class EntityTFGoblinKnightLower extends EntityMob {
         if (flag) {
             dataWatcher.updateObject(DATA_EQUIP, (byte) (otherFlags | 1));
         } else {
-            dataWatcher.updateObject(DATA_EQUIP, (byte) otherFlags);
+            dataWatcher.updateObject(DATA_EQUIP, otherFlags);
         }
     }
 
@@ -111,7 +111,7 @@ public class EntityTFGoblinKnightLower extends EntityMob {
         // we start with the upper guy riding us
         EntityTFGoblinKnightUpper upper = new EntityTFGoblinKnightUpper(this.worldObj);
         upper.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-        upper.onSpawnWithEgg((IEntityLivingData) null);
+        upper.onSpawnWithEgg(null);
         this.worldObj.spawnEntityInWorld(upper);
         upper.mountEntity(this);
     }
@@ -125,7 +125,7 @@ public class EntityTFGoblinKnightLower extends EntityMob {
         // we start with the upper guy riding us
         EntityTFGoblinKnightUpper upper = new EntityTFGoblinKnightUpper(this.worldObj);
         upper.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-        upper.onSpawnWithEgg((IEntityLivingData) null);
+        upper.onSpawnWithEgg(null);
         this.worldObj.spawnEntityInWorld(upper);
         upper.mountEntity(this);
 

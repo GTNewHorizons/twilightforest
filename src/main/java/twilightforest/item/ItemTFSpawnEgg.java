@@ -38,7 +38,7 @@ public class ItemTFSpawnEgg extends ItemMonsterPlacer {
     @SideOnly(Side.CLIENT)
     @Override
     public int getColorFromItemStack(ItemStack itemStack, int par2) {
-        TFEntityEggInfo info = (TFEntityEggInfo) TFCreatures.entityEggs.get(itemStack.getItemDamage());
+        TFEntityEggInfo info = TFCreatures.entityEggs.get(itemStack.getItemDamage());
         return info != null ? (par2 == 0 ? info.primaryColor : info.secondaryColor) : 16777215;
     }
 
@@ -113,7 +113,7 @@ public class ItemTFSpawnEgg extends ItemMonsterPlacer {
                 EntityLiving entityliving = (EntityLiving) entityToSpawn;
 
                 entityToSpawn.setLocationAndAngles(par2, par4, par6, world.rand.nextFloat() * 360.0F, 0.0F);
-                entityliving.onSpawnWithEgg((IEntityLivingData) null);
+                entityliving.onSpawnWithEgg(null);
                 world.spawnEntityInWorld(entityToSpawn);
                 ((EntityLiving) entityToSpawn).playLivingSound();
             }

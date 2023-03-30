@@ -27,7 +27,7 @@ public class EntityTFRavenLookHelper extends EntityLookHelper {
         this.posX = par1Entity.posX;
 
         if (par1Entity instanceof EntityLiving) {
-            this.posY = par1Entity.posY + (double) ((EntityLiving) par1Entity).getEyeHeight();
+            this.posY = par1Entity.posY + (double) par1Entity.getEyeHeight();
         } else {
             this.posY = (par1Entity.boundingBox.minY + par1Entity.boundingBox.maxY) / 2.0D;
         }

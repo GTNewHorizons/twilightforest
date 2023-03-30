@@ -91,7 +91,7 @@ public class ModelTFIceExploder extends ModelBiped {
                     + MathHelper.sin((par1EntityLiving.ticksExisted + time) / (float) i) * 3F;
             this.spikes[i].rotationPointZ = MathHelper.sin((par1EntityLiving.ticksExisted + time) / (float) i) * 3F;
 
-            ((ModelRenderer) this.spikes[i].childModels.get(0)).rotationPointY = 10
+            this.spikes[i].childModels.get(0).rotationPointY = 10
                     + MathHelper.sin((i + par1EntityLiving.ticksExisted + time) / i) * 3F;
 
         }

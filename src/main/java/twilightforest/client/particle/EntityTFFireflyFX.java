@@ -63,30 +63,26 @@ public class EntityTFFireflyFX extends EntityFX {
                 this.particleGreen * f14,
                 this.particleBlue * f14,
                 this.particleAlpha);
-        par1Tessellator.addVertexWithUV(
-                (double) (f11 - par3 * f10 - par6 * f10),
-                (double) (f12 - par4 * f10),
-                (double) (f13 - par5 * f10 - par7 * f10),
-                (double) f7,
-                (double) f9);
-        par1Tessellator.addVertexWithUV(
-                (double) (f11 - par3 * f10 + par6 * f10),
-                (double) (f12 + par4 * f10),
-                (double) (f13 - par5 * f10 + par7 * f10),
-                (double) f7,
-                (double) f8);
-        par1Tessellator.addVertexWithUV(
-                (double) (f11 + par3 * f10 + par6 * f10),
-                (double) (f12 + par4 * f10),
-                (double) (f13 + par5 * f10 + par7 * f10),
-                (double) f6,
-                (double) f8);
-        par1Tessellator.addVertexWithUV(
-                (double) (f11 + par3 * f10 - par6 * f10),
-                (double) (f12 - par4 * f10),
-                (double) (f13 + par5 * f10 - par7 * f10),
-                (double) f6,
-                (double) f9);
+        par1Tessellator.addVertexWithUV(f11 - par3 * f10 - par6 * f10,
+                f12 - par4 * f10,
+                f13 - par5 * f10 - par7 * f10,
+                f7,
+                f9);
+        par1Tessellator.addVertexWithUV(f11 - par3 * f10 + par6 * f10,
+                f12 + par4 * f10,
+                f13 - par5 * f10 + par7 * f10,
+                f7,
+                f8);
+        par1Tessellator.addVertexWithUV(f11 + par3 * f10 + par6 * f10,
+                f12 + par4 * f10,
+                f13 + par5 * f10 + par7 * f10,
+                f6,
+                f8);
+        par1Tessellator.addVertexWithUV(f11 + par3 * f10 - par6 * f10,
+                f12 - par4 * f10,
+                f13 + par5 * f10 - par7 * f10,
+                f6,
+                f9);
 
         GL11.glDisable(3042 /* GL_BLEND */);
         GL11.glEnable(3008 /* GL_ALPHA_TEST */);

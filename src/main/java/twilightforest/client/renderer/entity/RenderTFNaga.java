@@ -34,7 +34,7 @@ public class RenderTFNaga extends RenderLiving {
         // BossStatus.setBossStatus((EntityTFNagaOld)entity, false);
         // }
 
-        if (entity instanceof EntityTFNaga naga && ((EntityTFNaga) entity).getParts() != null) {
+        if (entity instanceof EntityTFNaga naga && entity.getParts() != null) {
 
             for (int i = 0; i < naga.getParts().length; i++) {
                 if (!naga.getParts()[i].isDead) {

@@ -303,8 +303,8 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                 }
 
                 ++noiseIndex;
-                double heightCalc = (double) totalHeight;
-                double variationCalc = (double) totalVariation;
+                double heightCalc = totalHeight;
+                double variationCalc = totalVariation;
                 heightCalc += terrainNoise * 0.2D;
                 heightCalc = heightCalc * 8.5D / 8.0D;
                 double d5 = 8.5D + heightCalc * 4.0D;
@@ -322,7 +322,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                     double terrainCalc = MathHelper.denormalizeClamp(d7, d8, d9) - d6;
 
                     if (ay > 29) {
-                        double d11 = (double) ((float) (ay - 29) / 3.0F);
+                        double d11 = (float) (ay - 29) / 3.0F;
                         terrainCalc = terrainCalc * (1.0D - d11) + -10.0D * d11;
                     }
 
@@ -371,9 +371,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
 
         double d0 = 0.03125D;
         this.stoneNoise = this.field_147430_m.func_151599_a(
-                this.stoneNoise,
-                (double) (chunkX * 16),
-                (double) (chunkZ * 16),
+                this.stoneNoise, chunkX * 16, chunkZ * 16,
                 16,
                 16,
                 d0 * 2.0D,
@@ -1119,8 +1117,8 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
 
     @Override
     public void recreateStructures(int var1, int var2) {
-        majorFeatureGenerator.func_151539_a(this, worldObj, var1, var2, (Block[]) null);
-        hollowTreeGenerator.func_151539_a(this, worldObj, var1, var2, (Block[]) null);
+        majorFeatureGenerator.func_151539_a(this, worldObj, var1, var2, null);
+        hollowTreeGenerator.func_151539_a(this, worldObj, var1, var2, null);
     }
 
     @Override

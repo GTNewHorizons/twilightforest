@@ -124,7 +124,7 @@ public class ItemTFKnightlyAxe extends ItemAxe {
         // add new one
         multimap.put(
                 SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(),
-                new AttributeModifier(field_111210_e, "Tool modifier", (double) this.damageVsEntity, 0));
+                new AttributeModifier(field_111210_e, "Tool modifier", this.damageVsEntity, 0));
         return multimap;
     }
 }

@@ -97,7 +97,7 @@ public class EntityTFKingSpider extends EntitySpider {
         // always a spider jockey
         EntityTFSkeletonDruid druid = new EntityTFSkeletonDruid(this.worldObj);
         druid.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-        druid.onSpawnWithEgg((IEntityLivingData) null);
+        druid.onSpawnWithEgg(null);
         this.worldObj.spawnEntityInWorld(druid);
         druid.mountEntity(this);
 

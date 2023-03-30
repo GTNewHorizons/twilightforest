@@ -130,17 +130,17 @@ public class BlockTFCinderFurnace extends BlockContainer {
             int l = random.nextInt(4) + 2;
 
             if (l == 4) {
-                world.spawnParticle("smoke", (double) (f - f3), (double) f1, (double) (f2 + f4), 0.0D, 0.0D, 0.0D);
-                world.spawnParticle("flame", (double) (f - f3), (double) f1, (double) (f2 + f4), 0.0D, 0.0D, 0.0D);
+                world.spawnParticle("smoke", f - f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
+                world.spawnParticle("flame", f - f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
             } else if (l == 5) {
-                world.spawnParticle("smoke", (double) (f + f3), (double) f1, (double) (f2 + f4), 0.0D, 0.0D, 0.0D);
-                world.spawnParticle("flame", (double) (f + f3), (double) f1, (double) (f2 + f4), 0.0D, 0.0D, 0.0D);
+                world.spawnParticle("smoke", f + f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
+                world.spawnParticle("flame", f + f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
             } else if (l == 2) {
-                world.spawnParticle("smoke", (double) (f + f4), (double) f1, (double) (f2 - f3), 0.0D, 0.0D, 0.0D);
-                world.spawnParticle("flame", (double) (f + f4), (double) f1, (double) (f2 - f3), 0.0D, 0.0D, 0.0D);
+                world.spawnParticle("smoke", f + f4, f1, f2 - f3, 0.0D, 0.0D, 0.0D);
+                world.spawnParticle("flame", f + f4, f1, f2 - f3, 0.0D, 0.0D, 0.0D);
             } else if (l == 3) {
-                world.spawnParticle("smoke", (double) (f + f4), (double) f1, (double) (f2 + f3), 0.0D, 0.0D, 0.0D);
-                world.spawnParticle("flame", (double) (f + f4), (double) f1, (double) (f2 + f3), 0.0D, 0.0D, 0.0D);
+                world.spawnParticle("smoke", f + f4, f1, f2 + f3, 0.0D, 0.0D, 0.0D);
+                world.spawnParticle("flame", f + f4, f1, f2 + f3, 0.0D, 0.0D, 0.0D);
             }
         }
     }
@@ -170,10 +170,7 @@ public class BlockTFCinderFurnace extends BlockContainer {
 
                             itemstack.stackSize -= j1;
                             EntityItem entityitem = new EntityItem(
-                                    world,
-                                    (double) ((float) x + dx),
-                                    (double) ((float) y + dy),
-                                    (double) ((float) z + dz),
+                                    world, (float) x + dx, (float) y + dy, (float) z + dz,
                                     new ItemStack(itemstack.getItem(), j1, itemstack.getItemDamage()));
 
                             if (itemstack.hasTagCompound()) {
@@ -182,10 +179,10 @@ public class BlockTFCinderFurnace extends BlockContainer {
                             }
 
                             float pointFive = 0.05F;
-                            entityitem.motionX = (double) ((float) this.furnaceRandom.nextGaussian() * pointFive);
-                            entityitem.motionY = (double) ((float) this.furnaceRandom.nextGaussian() * pointFive
-                                    + 0.2F);
-                            entityitem.motionZ = (double) ((float) this.furnaceRandom.nextGaussian() * pointFive);
+                            entityitem.motionX = (float) this.furnaceRandom.nextGaussian() * pointFive;
+                            entityitem.motionY = (float) this.furnaceRandom.nextGaussian() * pointFive
+                                    + 0.2F;
+                            entityitem.motionZ = (float) this.furnaceRandom.nextGaussian() * pointFive;
                             world.spawnEntityInWorld(entityitem);
                         }
                     }

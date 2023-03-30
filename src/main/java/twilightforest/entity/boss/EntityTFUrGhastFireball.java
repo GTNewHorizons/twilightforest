@@ -24,7 +24,7 @@ public class EntityTFUrGhastFireball extends EntityLargeFireball {
             }
 
             this.worldObj.newExplosion(
-                    (Entity) null,
+                    null,
                     this.posX,
                     this.posY,
                     this.posZ,

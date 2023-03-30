@@ -112,8 +112,8 @@ public class EntityAITFCollideAttackFixed extends EntityAIBase {
 
         double distanceToAttacker = this.attacker
                 .getDistanceSq(entitylivingbase.posX, entitylivingbase.boundingBox.minY, entitylivingbase.posZ);
-        double attackRange = (double) (this.attacker.width * 2.0F * this.attacker.width * 2.0F
-                + entitylivingbase.width);
+        double attackRange = this.attacker.width * 2.0F * this.attacker.width * 2.0F
+                + entitylivingbase.width;
 
         --this.delayTicks;
 

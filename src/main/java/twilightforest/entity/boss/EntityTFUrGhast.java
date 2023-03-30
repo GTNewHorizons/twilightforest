@@ -375,7 +375,7 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
         // move?
         if (this.courseChangeCooldown-- <= 0) {
             this.courseChangeCooldown += this.rand.nextInt(5) + 0;
-            distanceToWaypoint = (double) MathHelper.sqrt_double(distanceToWaypoint);
+            distanceToWaypoint = MathHelper.sqrt_double(distanceToWaypoint);
 
             double speed = 0.05D;
             this.motionX += offsetX / distanceToWaypoint * speed;
@@ -627,7 +627,7 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
 
         // fireball sound effect
         this.worldObj
-                .playAuxSFXAtEntity((EntityPlayer) null, 1008, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
+                .playAuxSFXAtEntity(null, 1008, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
 
         EntityTFUrGhastFireball entityFireball = new EntityTFUrGhastFireball(
                 this.worldObj,

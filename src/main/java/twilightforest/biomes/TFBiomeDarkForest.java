@@ -93,8 +93,8 @@ public class TFBiomeDarkForest extends TFBiomeBase {
      */
     @Override
     public int getBiomeGrassColor(int x, int y, int z) {
-        double var1 = (double) MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
-        double var3 = (double) MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
+        double var1 = MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
+        double var3 = MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
         return ((ColorizerGrass.getGrassColor(var1, var3) & 0xFEFEFE) + 0x1E0E4E) / 2;
 
         // return 0x554114;
@@ -105,8 +105,8 @@ public class TFBiomeDarkForest extends TFBiomeBase {
      */
     @Override
     public int getBiomeFoliageColor(int x, int y, int z) {
-        double var1 = (double) MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
-        double var3 = (double) MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
+        double var1 = MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
+        double var3 = MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
         return ((ColorizerFoliage.getFoliageColor(var1, var3) & 0xFEFEFE) + 0x1E0E4E) / 2;
     }
 

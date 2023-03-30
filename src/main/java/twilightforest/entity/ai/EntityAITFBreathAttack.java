@@ -133,7 +133,7 @@ public class EntityAITFBreathAttack extends EntityAIBase {
             if (possibleEntity.canBeCollidedWith() && possibleEntity != this.entityHost) {
                 float borderSize = possibleEntity.getCollisionBorderSize();
                 AxisAlignedBB collisionBB = possibleEntity.boundingBox
-                        .expand((double) borderSize, (double) borderSize, (double) borderSize);
+                        .expand(borderSize, borderSize, borderSize);
                 MovingObjectPosition interceptPos = collisionBB.calculateIntercept(srcVec, destVec);
 
                 if (collisionBB.isVecInside(srcVec)) {

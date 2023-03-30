@@ -90,10 +90,10 @@ public class TFMazeMapRenderer implements IItemRenderer {
         Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
         byte b0 = 7;
-        tessellator.addVertexWithUV((double) (0 - b0), (double) (128 + b0), 0.0D, 0.0D, 1.0D);
-        tessellator.addVertexWithUV((double) (128 + b0), (double) (128 + b0), 0.0D, 1.0D, 1.0D);
-        tessellator.addVertexWithUV((double) (128 + b0), (double) (0 - b0), 0.0D, 1.0D, 0.0D);
-        tessellator.addVertexWithUV((double) (0 - b0), (double) (0 - b0), 0.0D, 0.0D, 0.0D);
+        tessellator.addVertexWithUV(0 - b0, 128 + b0, 0.0D, 0.0D, 1.0D);
+        tessellator.addVertexWithUV(128 + b0, 128 + b0, 0.0D, 1.0D, 1.0D);
+        tessellator.addVertexWithUV(128 + b0, 0 - b0, 0.0D, 1.0D, 0.0D);
+        tessellator.addVertexWithUV(0 - b0, 0 - b0, 0.0D, 0.0D, 0.0D);
         tessellator.draw();
 
         // push map texture slightly off background

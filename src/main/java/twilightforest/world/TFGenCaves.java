@@ -46,8 +46,8 @@ public class TFGenCaves extends MapGenCaves {
     protected void generateCaveNode(long caveSeed, int centerX, int centerZ, Block[] blockStorage, double randX,
             double randY, double randZ, float caveSize, float randPI, float angleToGenerate, int loopOne, int loopEnd,
             double yScale, boolean isHighlands) {
-        double offsetCenterX = (double) (centerX * 16 + 8);
-        double offsetCenterZ = (double) (centerZ * 16 + 8);
+        double offsetCenterX = centerX * 16 + 8;
+        double offsetCenterZ = centerZ * 16 + 8;
         float var23 = 0.0F;
         float var24 = 0.0F;
         Random caveRNG = new Random(caveSeed);
@@ -82,9 +82,9 @@ public class TFGenCaves extends MapGenCaves {
             double scaledSize = sizeVar * yScale;
             float cosAngle = MathHelper.cos(angleToGenerate);
             float sinAngle = MathHelper.sin(angleToGenerate);
-            randX += (double) (MathHelper.cos(randPI) * cosAngle);
-            randY += (double) sinAngle;
-            randZ += (double) (MathHelper.sin(randPI) * cosAngle);
+            randX += MathHelper.cos(randPI) * cosAngle;
+            randY += sinAngle;
+            randZ += MathHelper.sin(randPI) * cosAngle;
 
             if (var28) {
                 angleToGenerate *= 0.92F;
@@ -136,8 +136,8 @@ public class TFGenCaves extends MapGenCaves {
             if (shouldStop || caveRNG.nextInt(4) != 0) {
                 double distX = randX - offsetCenterX;
                 double distZ = randZ - offsetCenterZ;
-                double var39 = (double) (loopEnd - loopOne);
-                double sizeSixteen = (double) (caveSize + 2.0F + 16.0F);
+                double var39 = loopEnd - loopOne;
+                double sizeSixteen = caveSize + 2.0F + 16.0F;
 
                 if (distX * distX + distZ * distZ - var39 * var39 > sizeSixteen * sizeSixteen) {
                     return;
@@ -272,9 +272,9 @@ public class TFGenCaves extends MapGenCaves {
         }
 
         for (int i = 0; i < numberOfCaves; ++i) {
-            double randX = (double) (genX * 16 + this.rand.nextInt(16));
-            double randY = (double) this.rand.nextInt(this.rand.nextInt(120) + 8);
-            double randZ = (double) (genZ * 16 + this.rand.nextInt(16));
+            double randX = genX * 16 + this.rand.nextInt(16);
+            double randY = this.rand.nextInt(this.rand.nextInt(120) + 8);
+            double randZ = genZ * 16 + this.rand.nextInt(16);
             int numberOfNormalNodes = 1;
 
             if (this.rand.nextInt(4) == 0) {

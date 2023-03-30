@@ -134,7 +134,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     @SuppressWarnings("unchecked")
     public void setStructureConquered(int mapX, int mapY, int mapZ, boolean flag) {
 
-        for (StructureStart start : (Collection<StructureStart>) this.structureMap.values()) {
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
                 if (start instanceof StructureTFMajorFeatureStart featureStart) {
 
@@ -164,7 +164,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
 
         boolean conquered = false;
 
-        for (StructureStart start : (Collection<StructureStart>) this.structureMap.values()) {
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
                 if (start instanceof StructureTFMajorFeatureStart) {
 
@@ -184,7 +184,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
 
         boolean locked = false;
 
-        for (StructureStart start : (Collection<StructureStart>) this.structureMap.values()) {
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
                 if (start instanceof StructureTFMajorFeatureStart) {
 
@@ -201,7 +201,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
      */
     @SuppressWarnings("unchecked")
     public boolean isBlockInFullStructure(int mapX, int mapZ) {
-        for (StructureStart start : (Collection<StructureStart>) this.structureMap.values()) {
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
                 return true;
             }
@@ -215,7 +215,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     @SuppressWarnings("unchecked")
     public boolean isBlockNearFullStructure(int mapX, int mapZ, int range) {
         StructureBoundingBox rangeBB = new StructureBoundingBox(mapX - range, mapZ - range, mapX + range, mapZ + range);
-        for (StructureStart start : (Collection<StructureStart>) this.structureMap.values()) {
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(rangeBB)) {
                 return true;
             }
@@ -228,7 +228,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
      */
     @SuppressWarnings("unchecked")
     public StructureBoundingBox getFullSBBAt(int mapX, int mapZ) {
-        for (StructureStart start : (Collection<StructureStart>) this.structureMap.values()) {
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(mapX, mapZ, mapX, mapZ)) {
                 return start.getBoundingBox();
             }
@@ -239,7 +239,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     @SuppressWarnings("unchecked")
     public StructureBoundingBox getFullSBBNear(int mapX, int mapZ, int range) {
         StructureBoundingBox rangeBB = new StructureBoundingBox(mapX - range, mapZ - range, mapX + range, mapZ + range);
-        for (StructureStart start : (Collection<StructureStart>) this.structureMap.values()) {
+        for (StructureStart start : this.structureMap.values()) {
             if (start.isSizeableStructure() && start.getBoundingBox().intersectsWith(rangeBB)) {
                 return start.getBoundingBox();
             }

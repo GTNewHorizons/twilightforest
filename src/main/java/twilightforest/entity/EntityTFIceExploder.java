@@ -132,8 +132,7 @@ public class EntityTFIceExploder extends EntityMob {
                     this,
                     this.posX,
                     this.posY,
-                    this.posZ,
-                    (float) EntityTFIceExploder.EXPLOSION_RADIUS,
+                    this.posZ, EntityTFIceExploder.EXPLOSION_RADIUS,
                     flag);
 
             if (flag) {

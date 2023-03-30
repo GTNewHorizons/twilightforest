@@ -46,9 +46,9 @@ public class TileEntityTFReverter extends TileEntity {
             this.tickCount++;
 
             if (this.worldObj.isRemote) {
-                double var1 = (double) ((float) this.xCoord + this.worldObj.rand.nextFloat());
-                double var3 = (double) ((float) this.yCoord + this.worldObj.rand.nextFloat());
-                double var5 = (double) ((float) this.zCoord + this.worldObj.rand.nextFloat());
+                double var1 = (float) this.xCoord + this.worldObj.rand.nextFloat();
+                double var3 = (float) this.yCoord + this.worldObj.rand.nextFloat();
+                double var5 = (float) this.zCoord + this.worldObj.rand.nextFloat();
                 // this.worldObj.spawnParticle("smoke", var1, var3, var5, 0.0D, 0.0D, 0.0D);
                 this.worldObj.spawnParticle("reddust", var1, var3, var5, 0.0D, 0.0D, 0.0D);
 
@@ -327,7 +327,6 @@ public class TileEntityTFReverter extends TileEntity {
         return this.worldObj.getClosestPlayer(
                 (double) this.xCoord + 0.5D,
                 (double) this.yCoord + 0.5D,
-                (double) this.zCoord + 0.5D,
-                (double) this.requiredPlayerRange) != null;
+                (double) this.zCoord + 0.5D, this.requiredPlayerRange) != null;
     }
 }

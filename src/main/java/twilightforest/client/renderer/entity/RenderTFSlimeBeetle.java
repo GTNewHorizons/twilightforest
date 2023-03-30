@@ -27,7 +27,7 @@ public class RenderTFSlimeBeetle extends RenderLiving {
      * Queries whether should render the specified pass or not.
      */
     protected int shouldRenderPass(EntityLivingBase par1EntityLiving, int par2, float par3) {
-        return this.shouldSlimeRenderPass((EntityLivingBase) par1EntityLiving, par2, par3);
+        return this.shouldSlimeRenderPass(par1EntityLiving, par2, par3);
     }
 
     /**

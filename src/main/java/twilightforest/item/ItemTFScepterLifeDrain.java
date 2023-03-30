@@ -95,7 +95,7 @@ public class ItemTFScepterLifeDrain extends ItemTF {
             if (possibleEntity.canBeCollidedWith()) {
                 float borderSize = possibleEntity.getCollisionBorderSize();
                 AxisAlignedBB collisionBB = possibleEntity.boundingBox
-                        .expand((double) borderSize, (double) borderSize, (double) borderSize);
+                        .expand(borderSize, borderSize, borderSize);
                 MovingObjectPosition interceptPos = collisionBB.calculateIntercept(srcVec, destVec);
 
                 if (collisionBB.isVecInside(srcVec)) {
@@ -154,7 +154,7 @@ public class ItemTFScepterLifeDrain extends ItemTF {
                                 "game.player.hurt.fall.big",
                                 1.0F,
                                 ((itemRand.nextFloat() - itemRand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                        animateTargetShatter(worldObj, (EntityLivingBase) target);
+                        animateTargetShatter(worldObj, target);
                         if (!worldObj.isRemote) {
                             target.setDead();
                             target.onDeath(DamageSource.causeIndirectMagicDamage(player, player));

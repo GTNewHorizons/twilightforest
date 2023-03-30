@@ -113,7 +113,7 @@ public class EntityAITFGiantAttackOnCollide extends EntityAIBase {
         double distanceToAttacker = this.attacker
                 .getDistanceSq(entitylivingbase.posX, entitylivingbase.boundingBox.minY, entitylivingbase.posZ);
         // lower attack range
-        double attackRange = (double) (this.attacker.width * this.attacker.height);
+        double attackRange = this.attacker.width * this.attacker.height;
 
         --this.delayTicks;
 

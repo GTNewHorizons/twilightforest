@@ -96,7 +96,7 @@ public class StructureTFMajorFeatureStart extends StructureStart {
 
             while (!var6.isEmpty()) {
                 int var7 = rand.nextInt(var6.size());
-                StructureComponent var8 = (StructureComponent) var6.remove(var7);
+                StructureComponent var8 = var6.remove(var7);
                 var8.buildComponent(firstComponent, this.components, rand);
             }
 
@@ -106,7 +106,7 @@ public class StructureTFMajorFeatureStart extends StructureStart {
 
             boundingBox.offset(0, offY, 0);
 
-            for (StructureComponent com : (LinkedList<StructureComponent>) getComponents()) {
+            for (StructureComponent com : getComponents()) {
                 com.getBoundingBox().offset(0, offY, 0);
             }
 
@@ -201,7 +201,7 @@ public class StructureTFMajorFeatureStart extends StructureStart {
 
                 boundingBox.offset(0, offY, 0);
 
-                for (StructureComponent com : (LinkedList<StructureComponent>) getComponents()) {
+                for (StructureComponent com : getComponents()) {
                     com.getBoundingBox().offset(0, offY, 0);
                 }
             }

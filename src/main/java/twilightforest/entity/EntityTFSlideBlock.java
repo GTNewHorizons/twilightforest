@@ -228,7 +228,7 @@ public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawn
                     this.setDead();
 
                     if (this.worldObj
-                            .canPlaceEntityOnSide(this.myBlock, bx, by, bz, true, 1, (Entity) null, (ItemStack) null)
+                            .canPlaceEntityOnSide(this.myBlock, bx, by, bz, true, 1, null, null)
                             && this.worldObj.setBlock(bx, by, bz, this.myBlock, this.myMeta, 3)) {
                         // successfully set block
                     } else if (this.canDropItem) {

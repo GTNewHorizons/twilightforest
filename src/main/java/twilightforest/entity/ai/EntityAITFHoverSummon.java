@@ -127,7 +127,7 @@ public class EntityAITFHoverSummon extends EntityAIBase {
 
         double distanceDesired = offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ;
 
-        distanceDesired = (double) MathHelper.sqrt_double(distanceDesired);
+        distanceDesired = MathHelper.sqrt_double(distanceDesired);
 
         // add velocity
         double velX = offsetX / distanceDesired * 0.05D;
