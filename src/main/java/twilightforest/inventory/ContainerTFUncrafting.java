@@ -738,9 +738,7 @@ public class ContainerTFUncrafting extends Container {
             }
 
             return items;
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
             e.printStackTrace();
         }
         return null;
@@ -787,9 +785,7 @@ public class ContainerTFUncrafting extends Container {
     public int getRecipeWidthOre(ShapedOreRecipe shaped) {
         try {
             return (Integer) (ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, shaped, 4));
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
             e.printStackTrace();
         }
         return 0;
@@ -835,9 +831,7 @@ public class ContainerTFUncrafting extends Container {
     public int getRecipeHeightOre(ShapedOreRecipe shaped) {
         try {
             return (Integer) (ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, shaped, 5));
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
             e.printStackTrace();
         }
         return 0;

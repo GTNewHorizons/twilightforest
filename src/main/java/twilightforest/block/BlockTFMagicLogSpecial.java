@@ -393,9 +393,7 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     private Object getCreativeTab(Item item) {
         try {
             return ObfuscationReflectionHelper.getPrivateValue(Item.class, item, 0);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
             e.printStackTrace();
         }
         return null;
