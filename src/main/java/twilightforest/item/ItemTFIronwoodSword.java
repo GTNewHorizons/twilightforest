@@ -24,7 +24,7 @@ public class ItemTFIronwoodSword extends ItemSword {
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
     @Override
-    public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
+    public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> par3List) {
         ItemStack istack = new ItemStack(par1, 1, 0);
         istack.addEnchantment(Enchantment.knockback, 1);
         par3List.add(istack);

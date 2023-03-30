@@ -27,7 +27,7 @@ public class ItemTFMazebreakerPick extends ItemPickaxe {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
+    public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> par3List) {
         ItemStack istack = new ItemStack(par1, 1, 0);
         istack.addEnchantment(Enchantment.efficiency, 4);
         istack.addEnchantment(Enchantment.unbreaking, 3);

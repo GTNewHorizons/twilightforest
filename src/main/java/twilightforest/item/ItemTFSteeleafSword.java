@@ -25,7 +25,7 @@ public class ItemTFSteeleafSword extends ItemSword {
      */
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
+    public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> par3List) {
         ItemStack istack = new ItemStack(par1, 1, 0);
         istack.addEnchantment(Enchantment.looting, 2);
         par3List.add(istack);

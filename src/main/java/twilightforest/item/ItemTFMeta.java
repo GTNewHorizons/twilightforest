@@ -71,7 +71,7 @@ public class ItemTFMeta extends Item {
     }
 
     @Override
-    public void getSubItems(Item id, CreativeTabs tab, List list) {
+    public void getSubItems(Item id, CreativeTabs tab, List<ItemStack> list) {
         for (int i = 0; i < textureNames.length; i++) list.add(new ItemStack(id, 1, i));
     }
 
