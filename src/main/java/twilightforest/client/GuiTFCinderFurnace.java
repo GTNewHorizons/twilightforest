@@ -34,10 +34,10 @@ public class GuiTFCinderFurnace extends GuiContainer {
      */
     protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
         String s = this.tileFurnace.hasCustomInventoryName() ? this.tileFurnace.getInventoryName()
-                : I18n.format(this.tileFurnace.getInventoryName(), new Object[0]);
+                : I18n.format(this.tileFurnace.getInventoryName());
         this.fontRendererObj.drawString(s, this.xSize / 2 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);
         this.fontRendererObj
-                .drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 2, 4210752);
+                .drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
     }
 
     protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_) {

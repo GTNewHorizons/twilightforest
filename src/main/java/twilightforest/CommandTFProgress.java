@@ -33,7 +33,7 @@ public class CommandTFProgress extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length < 2) {
-            throw new WrongUsageException("tfprogress <player> <boss>", new Object[0]);
+            throw new WrongUsageException("tfprogress <player> <boss>");
         } else {
             EntityPlayerMP player = getPlayer(sender, args[0]);
             int bossIndex = getBossIndex(args[1]);
@@ -41,8 +41,7 @@ public class CommandTFProgress extends CommandBase {
             func_152373_a(
                     sender,
                     this,
-                    "Setting player %s progress to past boss %s.",
-                    new Object[] { player.getCommandSenderName(), bosses[bossIndex] });
+                    "Setting player %s progress to past boss %s.", player.getCommandSenderName(), bosses[bossIndex]);
 
             setProgress(player, bossIndex);
         }

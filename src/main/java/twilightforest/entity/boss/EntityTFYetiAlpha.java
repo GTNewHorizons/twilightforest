@@ -526,7 +526,7 @@ public class EntityTFYetiAlpha extends EntityMob implements IRangedAttackMob {
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         ChunkCoordinates home = this.getHomePosition();
-        nbttagcompound.setTag("Home", newDoubleNBTList(new double[] { home.posX, home.posY, home.posZ }));
+        nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
         super.writeEntityToNBT(nbttagcompound);
     }

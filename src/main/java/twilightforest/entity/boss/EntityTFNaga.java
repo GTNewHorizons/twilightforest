@@ -1038,7 +1038,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         ChunkCoordinates home = this.getHomePosition();
-        nbttagcompound.setTag("Home", newDoubleNBTList(new double[] { home.posX, home.posY, home.posZ }));
+        nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
         super.writeEntityToNBT(nbttagcompound);
     }

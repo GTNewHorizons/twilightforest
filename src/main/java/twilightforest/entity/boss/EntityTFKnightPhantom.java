@@ -796,7 +796,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         super.writeEntityToNBT(nbttagcompound);
         ChunkCoordinates home = this.getHomePosition();
-        nbttagcompound.setTag("Home", newDoubleNBTList(new double[] { home.posX, home.posY, home.posZ }));
+        nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
         nbttagcompound.setInteger("MyNumber", this.getNumber());
         nbttagcompound.setInteger("Formation", this.getFormationAsNumber());
