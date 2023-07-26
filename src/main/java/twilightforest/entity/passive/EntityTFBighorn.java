@@ -34,7 +34,7 @@ public class EntityTFBighorn extends EntitySheep {
         if (random.nextInt(2) == 0) {
             return 12;
         } else {
-            return random.nextInt(15);
+            return random.nextInt(16);
         }
     }
 
