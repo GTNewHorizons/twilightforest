@@ -31,11 +31,7 @@ public class EntityTFBighorn extends EntitySheep {
      * @return
      */
     public static int getRandomFleeceColor(Random random) {
-        if (random.nextInt(2) == 0) {
-            return 12;
-        } else {
-            return random.nextInt(16);
-        }
+        return random.nextInt(16);
     }
 
     /**
