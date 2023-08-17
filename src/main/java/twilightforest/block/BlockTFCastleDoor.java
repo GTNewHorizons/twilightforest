@@ -1,11 +1,15 @@
 package twilightforest.block;
 
+import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
@@ -24,7 +28,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class BlockTFCastleDoor extends Block {
 
     private IIcon activeIcon;
-    private boolean isVanished;
+    private final boolean isVanished;
 
     public BlockTFCastleDoor(boolean isVanished) {
         super(isVanished ? Material.glass : Material.rock);
@@ -32,7 +36,10 @@ public class BlockTFCastleDoor extends Block {
         this.isVanished = isVanished;
         this.lightOpacity = isVanished ? 0 : 255;
 
-        this.setCreativeTab(TFItems.creativeTab);
+        this.setHardness(1);
+        if (!isVanished) {
+            this.setCreativeTab(TFItems.creativeTab);
+        }
     }
 
     @SideOnly(Side.CLIENT)
@@ -163,6 +170,26 @@ public class BlockTFCastleDoor extends Block {
     @Override
     public int getRenderType() {
         return TwilightForestMod.proxy.getCastleMagicBlockRenderID();
+    }
+
+    @Override
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+        list.add(new ItemStack(itemIn, 1, 0));
+        list.add(new ItemStack(itemIn, 1, 1));
+        list.add(new ItemStack(itemIn, 1, 2));
+        list.add(new ItemStack(itemIn, 1, 3));
+    }
+
+    @Override
+    public Item getItemDropped(int meta, Random random, int fortune) {
+        // always drop the non-vanished version of the block
+        return Item.getItemFromBlock(TFBlocks.castleDoor);
+    }
+
+    @Override
+    public int damageDropped(int meta) {
+        // do not drop the activated variant
+        return meta & 7;
     }
 
     /**
