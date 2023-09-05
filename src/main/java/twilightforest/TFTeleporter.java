@@ -14,10 +14,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 
+import cpw.mods.fml.common.FMLLog;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.TFBlocks;
 import twilightforest.world.TFWorld;
-import cpw.mods.fml.common.FMLLog;
 
 public class TFTeleporter extends Teleporter {
 

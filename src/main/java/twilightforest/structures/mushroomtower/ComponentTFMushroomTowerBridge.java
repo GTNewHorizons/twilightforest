@@ -8,8 +8,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 
-import twilightforest.structures.StructureTFComponent;
 import cpw.mods.fml.common.FMLLog;
+import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFMushroomTowerBridge extends ComponentTFMushroomTowerWing {
 

@@ -20,6 +20,7 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 
+import cpw.mods.fml.common.FMLLog;
 import twilightforest.TFTreasure;
 import twilightforest.block.BlockTFTowerDevice;
 import twilightforest.block.TFBlocks;
@@ -30,7 +31,6 @@ import twilightforest.structures.StructureTFDecorator;
 import twilightforest.structures.TFMaze;
 import twilightforest.world.TFGenSmallRainboak;
 import twilightforest.world.TFGenSmallTwilightOak;
-import cpw.mods.fml.common.FMLLog;
 
 public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
 

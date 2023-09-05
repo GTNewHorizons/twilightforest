@@ -14,12 +14,11 @@ import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 
-import twilightforest.TwilightForestMod;
-
 import com.google.common.collect.Multimap;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TwilightForestMod;
 
 public class ItemTFKnightlyPick extends ItemPickaxe {
 

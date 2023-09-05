@@ -19,16 +19,16 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 
-import twilightforest.TFGenericPacketHandler;
-import twilightforest.TwilightForestMod;
-import twilightforest.biomes.TFBiomeBase;
-import twilightforest.item.ItemTFOreMagnet;
-import twilightforest.item.TFItems;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TFGenericPacketHandler;
+import twilightforest.TwilightForestMod;
+import twilightforest.biomes.TFBiomeBase;
+import twilightforest.item.ItemTFOreMagnet;
+import twilightforest.item.TFItems;
 
 public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 

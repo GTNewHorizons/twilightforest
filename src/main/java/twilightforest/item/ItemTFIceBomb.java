@@ -6,10 +6,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
-import twilightforest.TwilightForestMod;
-import twilightforest.entity.boss.EntityTFIceBomb;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TwilightForestMod;
+import twilightforest.entity.boss.EntityTFIceBomb;
 
 public class ItemTFIceBomb extends ItemTF {
 

@@ -7,8 +7,8 @@ import net.minecraft.world.IBlockAccess;
 
 import org.lwjgl.opengl.GL11;
 
-import twilightforest.block.BlockTFFireflyJar;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
+import twilightforest.block.BlockTFFireflyJar;
 
 public class RenderBlockTFFireflyJar implements ISimpleBlockRenderingHandler {
 

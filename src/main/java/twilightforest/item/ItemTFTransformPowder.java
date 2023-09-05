@@ -23,6 +23,8 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
 import twilightforest.entity.EntityTFHedgeSpider;
 import twilightforest.entity.EntityTFHostileWolf;
@@ -36,8 +38,6 @@ import twilightforest.entity.passive.EntityTFBoar;
 import twilightforest.entity.passive.EntityTFDeer;
 import twilightforest.entity.passive.EntityTFPenguin;
 import twilightforest.entity.passive.EntityTFRaven;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemTFTransformPowder extends ItemTF {
 

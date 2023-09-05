@@ -24,12 +24,12 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-import twilightforest.TFAchievementPage;
-import twilightforest.TFTeleporter;
-import twilightforest.TwilightForestMod;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TFAchievementPage;
+import twilightforest.TFTeleporter;
+import twilightforest.TwilightForestMod;
 
 public class BlockTFPortal extends BlockBreakable {
 

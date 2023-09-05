@@ -21,11 +21,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraftforge.oredict.OreDictionary;
 
-import twilightforest.block.BlockTFCinderFurnace;
-import twilightforest.block.TFBlocks;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.block.BlockTFCinderFurnace;
+import twilightforest.block.TFBlocks;
 
 public class TileEntityTFCinderFurnace extends TileEntity implements ISidedInventory {
 

@@ -29,11 +29,11 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.ChunkProviderEvent;
 
+import cpw.mods.fml.common.FMLLog;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import twilightforest.TFFeature;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.TFBlocks;
-import cpw.mods.fml.common.FMLLog;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 // Referenced classes of package net.minecraft.src:
 // IChunkProvider, MapGenCaves, MapGenStronghold, MapGenVillage,

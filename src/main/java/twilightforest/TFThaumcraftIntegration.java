@@ -5,12 +5,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
+import cpw.mods.fml.common.FMLLog;
 import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import twilightforest.block.TFBlocks;
 import twilightforest.item.TFItems;
-import cpw.mods.fml.common.FMLLog;
 
 /**
  * Provides methods to register Thaumcraft integration. Kept in a separate class to prevent crashes when thaumcraft is

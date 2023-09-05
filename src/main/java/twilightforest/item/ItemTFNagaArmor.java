@@ -5,9 +5,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 
-import twilightforest.TwilightForestMod;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TwilightForestMod;
 
 public class ItemTFNagaArmor extends ItemArmor {
 

@@ -9,10 +9,10 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 
-import twilightforest.block.TFBlocks;
-import twilightforest.item.TFItems;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.block.TFBlocks;
+import twilightforest.item.TFItems;
 
 public class EntityTFMoonwormShot extends EntityThrowable {
 

@@ -6,10 +6,10 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.StructureStart;
 
+import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import twilightforest.TFFeature;
 import twilightforest.structures.StructureTFComponent;
 import twilightforest.structures.StructureTFMajorFeatureStart;
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 
 public class MapGenTFMajorFeature extends MapGenStructure {
 

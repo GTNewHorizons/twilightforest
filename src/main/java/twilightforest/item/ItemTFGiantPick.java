@@ -15,13 +15,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 
-import twilightforest.block.BlockTFGiantBlock;
-import twilightforest.block.TFBlocks;
-
 import com.google.common.collect.Multimap;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.block.BlockTFGiantBlock;
+import twilightforest.block.TFBlocks;
 
 public class ItemTFGiantPick extends ItemPickaxe {
 

@@ -7,8 +7,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S34PacketMaps;
 
-import twilightforest.item.ItemTFMagicMap;
-import twilightforest.item.ItemTFMazeMap;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -17,6 +15,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler.Sharable;
+import twilightforest.item.ItemTFMagicMap;
+import twilightforest.item.ItemTFMazeMap;
 
 @Sharable
 public class TFMapPacketHandler {

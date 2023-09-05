@@ -10,9 +10,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 
+import cpw.mods.fml.common.Loader;
 import twilightforest.block.TFBlocks;
 import twilightforest.item.TFItems;
-import cpw.mods.fml.common.Loader;
 
 public class TFTreasure {
 

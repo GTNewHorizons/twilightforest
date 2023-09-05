@@ -13,9 +13,9 @@ import net.minecraftforge.client.IRenderHandler;
 
 import org.lwjgl.opengl.GL11;
 
-import twilightforest.world.TFWorld;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.world.TFWorld;
 
 public class TFSkyRenderer extends IRenderHandler {
 

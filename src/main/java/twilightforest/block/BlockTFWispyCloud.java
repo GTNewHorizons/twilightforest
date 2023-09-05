@@ -6,10 +6,10 @@ import net.minecraft.block.BlockBreakable;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 
-import twilightforest.TwilightForestMod;
-import twilightforest.item.TFItems;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TwilightForestMod;
+import twilightforest.item.TFItems;
 
 public class BlockTFWispyCloud extends BlockBreakable {
 

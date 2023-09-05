@@ -6,9 +6,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 
-import twilightforest.client.renderer.TFWeatherRenderer;
-import twilightforest.entity.EntityTFProtectionBox;
-import twilightforest.world.WorldProviderTwilightForest;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -16,6 +13,9 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import twilightforest.client.renderer.TFWeatherRenderer;
+import twilightforest.entity.EntityTFProtectionBox;
+import twilightforest.world.WorldProviderTwilightForest;
 
 public class TFGenericPacketHandler {
 

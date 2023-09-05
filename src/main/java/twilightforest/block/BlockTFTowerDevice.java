@@ -18,6 +18,8 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
 import twilightforest.item.TFItems;
 import twilightforest.tileentity.TileEntityTFCReactorActive;
@@ -25,8 +27,6 @@ import twilightforest.tileentity.TileEntityTFGhastTrapActive;
 import twilightforest.tileentity.TileEntityTFGhastTrapInactive;
 import twilightforest.tileentity.TileEntityTFReverter;
 import twilightforest.tileentity.TileEntityTFTowerBuilder;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 

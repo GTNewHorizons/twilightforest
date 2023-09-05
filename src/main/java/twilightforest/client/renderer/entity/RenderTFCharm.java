@@ -10,10 +10,10 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import twilightforest.entity.EntityTFCharmEffect;
-import twilightforest.item.TFItems;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.entity.EntityTFCharmEffect;
+import twilightforest.item.TFItems;
 
 @SideOnly(Side.CLIENT)
 public class RenderTFCharm extends Render {

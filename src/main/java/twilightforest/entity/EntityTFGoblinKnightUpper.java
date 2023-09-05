@@ -25,10 +25,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import twilightforest.entity.ai.EntityAITFHeavySpearAttack;
-import twilightforest.item.TFItems;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.entity.ai.EntityAITFHeavySpearAttack;
+import twilightforest.item.TFItems;
 
 public class EntityTFGoblinKnightUpper extends EntityMob {
 

@@ -4,8 +4,8 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.world.IBlockAccess;
 
-import twilightforest.block.BlockTFPlant;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
+import twilightforest.block.BlockTFPlant;
 
 public class RenderBlockTFPlants implements ISimpleBlockRenderingHandler {
 

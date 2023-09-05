@@ -14,13 +14,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
-import twilightforest.TwilightForestMod;
-import twilightforest.entity.EntityTFChainBlock;
-
 import com.google.common.collect.Sets;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TwilightForestMod;
+import twilightforest.entity.EntityTFChainBlock;
 
 public class ItemTFChainBlock extends ItemTool {
 

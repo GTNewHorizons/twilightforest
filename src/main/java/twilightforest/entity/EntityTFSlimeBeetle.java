@@ -18,10 +18,10 @@ import net.minecraft.item.Item;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
-import twilightforest.TFAchievementPage;
-import twilightforest.entity.ai.EntityAITFMagicAttack;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TFAchievementPage;
+import twilightforest.entity.ai.EntityAITFMagicAttack;
 
 public class EntityTFSlimeBeetle extends EntityMob {
 

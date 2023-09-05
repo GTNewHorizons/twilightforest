@@ -17,11 +17,11 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData.MapCoord;
 import net.minecraft.world.storage.MapData.MapInfo;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TFMapPacketHandler;
 import twilightforest.TFMazeMapData;
 import twilightforest.TwilightForestMod;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemTFMazeMap extends ItemMap {
 

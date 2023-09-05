@@ -13,10 +13,10 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-import twilightforest.TwilightForestMod;
-import twilightforest.item.TFItems;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TwilightForestMod;
+import twilightforest.item.TFItems;
 
 public class BlockTFNagastone extends Block {
 

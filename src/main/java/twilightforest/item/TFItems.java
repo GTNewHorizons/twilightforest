@@ -5,8 +5,8 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.potion.Potion;
 import net.minecraftforge.common.util.EnumHelper;
 
-import twilightforest.TwilightForestMod;
 import cpw.mods.fml.common.registry.GameRegistry;
+import twilightforest.TwilightForestMod;
 
 public class TFItems {
 

@@ -7,9 +7,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 
+import cpw.mods.fml.common.FMLLog;
 import twilightforest.block.TFBlocks;
 import twilightforest.world.TFGenCanopyTree;
-import cpw.mods.fml.common.FMLLog;
 
 /**
  * This is a maze of cells and walls.

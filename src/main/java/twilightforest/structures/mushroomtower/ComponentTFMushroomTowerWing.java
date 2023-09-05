@@ -9,10 +9,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 
+import cpw.mods.fml.common.FMLLog;
 import twilightforest.structures.StructureTFComponent;
 import twilightforest.structures.lichtower.ComponentTFTowerRoof;
 import twilightforest.structures.lichtower.ComponentTFTowerWing;
-import cpw.mods.fml.common.FMLLog;
 
 public class ComponentTFMushroomTowerWing extends ComponentTFTowerWing {
 

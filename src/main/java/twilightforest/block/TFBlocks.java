@@ -5,9 +5,9 @@ import net.minecraft.block.BlockSlab;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 
+import cpw.mods.fml.common.registry.GameRegistry;
 import twilightforest.TwilightForestMod;
 import twilightforest.item.ItemBlockTFMeta;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 public class TFBlocks {
 

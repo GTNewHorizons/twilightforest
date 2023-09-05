@@ -18,6 +18,7 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
 
+import cpw.mods.fml.common.FMLLog;
 import twilightforest.TFAchievementPage;
 import twilightforest.TFFeature;
 import twilightforest.TFTreasure;
@@ -29,7 +30,6 @@ import twilightforest.entity.EntityTFTowerGhast;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;
 import twilightforest.world.WorldProviderTwilightForest;
-import cpw.mods.fml.common.FMLLog;
 
 public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayData {
 

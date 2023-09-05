@@ -14,8 +14,8 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 
 import org.lwjgl.opengl.GL11;
 
-import twilightforest.item.ItemTFBowBase;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import twilightforest.item.ItemTFBowBase;
 
 public class TFClientEvents {
 

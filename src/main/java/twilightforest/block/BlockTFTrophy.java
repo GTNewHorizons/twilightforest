@@ -19,10 +19,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-import twilightforest.item.TFItems;
-import twilightforest.tileentity.TileEntityTFTrophy;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.item.TFItems;
+import twilightforest.tileentity.TileEntityTFTrophy;
 
 /**
  * Head trophy similar to (and based partially on) BlockSkull

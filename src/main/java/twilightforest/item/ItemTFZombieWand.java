@@ -13,11 +13,11 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import twilightforest.TwilightForestMod;
-import twilightforest.entity.EntityTFLoyalZombie;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.TwilightForestMod;
+import twilightforest.entity.EntityTFLoyalZombie;
 
 public class ItemTFZombieWand extends ItemTF {
 

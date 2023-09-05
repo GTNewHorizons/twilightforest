@@ -6,9 +6,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
+import cpw.mods.fml.common.FMLLog;
 import twilightforest.block.BlockTFRoots;
 import twilightforest.block.TFBlocks;
-import cpw.mods.fml.common.FMLLog;
 
 /**
  * Makes large trees with flat leaf ovals that provide a canopy for the forest

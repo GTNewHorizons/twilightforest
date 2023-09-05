@@ -10,12 +10,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.RecipeSorter;
 
+import cpw.mods.fml.common.registry.GameRegistry;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.BlockTFFireJet;
 import twilightforest.block.BlockTFPlant;
 import twilightforest.block.BlockTFTowerDevice;
 import twilightforest.block.TFBlocks;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 public class TFRecipes {
 

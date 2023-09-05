@@ -13,11 +13,11 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-import twilightforest.TwilightForestMod;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
+import twilightforest.TwilightForestMod;
 
 public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawnData {
 

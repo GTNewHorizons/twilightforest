@@ -8,10 +8,10 @@ import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
 
-import twilightforest.inventory.ContainerTFCinderFurnace;
-import twilightforest.tileentity.TileEntityTFCinderFurnace;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.inventory.ContainerTFCinderFurnace;
+import twilightforest.tileentity.TileEntityTFCinderFurnace;
 
 @SideOnly(Side.CLIENT)
 public class GuiTFCinderFurnace extends GuiContainer {

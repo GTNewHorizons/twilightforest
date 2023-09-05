@@ -6,9 +6,9 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 
+import cpw.mods.fml.common.FMLLog;
 import twilightforest.block.BlockTFTowerTranslucent;
 import twilightforest.block.TFBlocks;
-import cpw.mods.fml.common.FMLLog;
 
 public class TileEntityTFReverter extends TileEntity {
 

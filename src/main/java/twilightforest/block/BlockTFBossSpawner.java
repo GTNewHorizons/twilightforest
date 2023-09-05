@@ -14,14 +14,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.tileentity.TileEntityTFHydraSpawner;
 import twilightforest.tileentity.TileEntityTFKnightPhantomsSpawner;
 import twilightforest.tileentity.TileEntityTFLichSpawner;
 import twilightforest.tileentity.TileEntityTFNagaSpawner;
 import twilightforest.tileentity.TileEntityTFSnowQueenSpawner;
 import twilightforest.tileentity.TileEntityTFTowerBossSpawner;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockTFBossSpawner extends BlockContainer {
 

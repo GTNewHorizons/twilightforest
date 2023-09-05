@@ -32,10 +32,10 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
 
+import cpw.mods.fml.common.FMLLog;
 import twilightforest.TwilightForestMod;
 import twilightforest.entity.EntityTFKobold;
 import twilightforest.entity.passive.EntityTFMobileFirefly;
-import cpw.mods.fml.common.FMLLog;
 
 public abstract class TFBiomeBase extends BiomeGenBase {
 

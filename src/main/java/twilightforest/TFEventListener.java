@@ -40,16 +40,6 @@ import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
-import twilightforest.biomes.TFBiomeBase;
-import twilightforest.block.TFBlocks;
-import twilightforest.enchantment.TFEnchantment;
-import twilightforest.entity.EntityTFCharmEffect;
-import twilightforest.entity.EntityTFPinchBeetle;
-import twilightforest.entity.EntityTFYeti;
-import twilightforest.item.TFItems;
-import twilightforest.world.ChunkProviderTwilightForest;
-import twilightforest.world.TFWorldChunkManager;
-import twilightforest.world.WorldProviderTwilightForest;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -62,6 +52,16 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.biomes.TFBiomeBase;
+import twilightforest.block.TFBlocks;
+import twilightforest.enchantment.TFEnchantment;
+import twilightforest.entity.EntityTFCharmEffect;
+import twilightforest.entity.EntityTFPinchBeetle;
+import twilightforest.entity.EntityTFYeti;
+import twilightforest.item.TFItems;
+import twilightforest.world.ChunkProviderTwilightForest;
+import twilightforest.world.TFWorldChunkManager;
+import twilightforest.world.WorldProviderTwilightForest;
 
 /**
  * So much of the mod logic in this one class

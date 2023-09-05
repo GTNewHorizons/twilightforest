@@ -8,8 +8,8 @@ import net.minecraft.world.IBlockAccess;
 
 import org.lwjgl.opengl.GL11;
 
-import twilightforest.block.BlockTFCastleMagic;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
+import twilightforest.block.BlockTFCastleMagic;
 
 public class RenderBlockTFCastleMagic implements ISimpleBlockRenderingHandler {
 

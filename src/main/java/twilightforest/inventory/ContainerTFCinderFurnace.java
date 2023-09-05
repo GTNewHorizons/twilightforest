@@ -11,9 +11,9 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.world.World;
 
-import twilightforest.tileentity.TileEntityTFCinderFurnace;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.tileentity.TileEntityTFCinderFurnace;
 
 public class ContainerTFCinderFurnace extends Container {
 
