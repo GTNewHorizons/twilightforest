@@ -45,7 +45,7 @@ public class TFBiomeHighlands extends TFBiomeBase {
         this.temperature = 0.4F;
         this.rainfall = 0.7F;
 
-        ((TFBiomeDecorator) theBiomeDecorator).canopyPerChunk = -999;
+        this.getTFBiomeDecorator().canopyPerChunk = -999;
 
         this.theBiomeDecorator.grassPerChunk = 7;
         this.theBiomeDecorator.deadBushPerChunk = 1;
