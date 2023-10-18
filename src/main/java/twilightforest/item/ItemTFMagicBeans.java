@@ -20,6 +20,7 @@ public class ItemTFMagicBeans extends ItemTF {
      * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
+    @Override
     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer player, World world, int x, int y, int z, int side,
             float hitX, float hitY, float hitZ) {
         Block blockAt = world.getBlock(x, y, z);
@@ -40,25 +41,12 @@ public class ItemTFMagicBeans extends ItemTF {
 
     /**
      * Try to find the given world's cloud height
-     * 
-     * @param world
-     * @return
      */
     private float getCloudHeight(World world) {
-
         if (world.provider instanceof WorldProviderTwilightForest) {
-            // WorldProviderTwilightForest has this method on both server and client
-            return world.provider.getCloudHeight();
-        } else {
-            // are we on a dedicated server
-            // TODO: don't use exceptions for program flow?
-            try {
-                return world.provider.getCloudHeight();
-            } catch (NoSuchMethodError nsme) {
-                // this method exists even on a dedicated server
-                return world.provider.terrainType.getCloudHeight();
-            }
+            return WorldProviderTwilightForest.CLOUD_HEIGHT;
         }
+        return world.provider.terrainType.getCloudHeight();
     }
 
     private void makeHugeStalk(World world, int x, int z, int minY, int maxY) {

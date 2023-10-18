@@ -24,6 +24,8 @@ import twilightforest.client.renderer.TFWeatherRenderer;
  */
 public class WorldProviderTwilightForest extends WorldProviderSurface {
 
+    public static final float CLOUD_HEIGHT = 161.0F;
+
     public final String saveFolder;
     public ChunkProviderTwilightForest chunkProvider;
 
@@ -64,6 +66,7 @@ public class WorldProviderTwilightForest extends WorldProviderSurface {
     /**
      * Calculates the angle of sun and moon in the sky relative to a specified time (usually worldTime)
      */
+    @Override
     public float calculateCelestialAngle(long par1, float par3) {
         // return super.calculateCelestialAngle(par1, par3);
         return 0.225f;
@@ -78,6 +81,7 @@ public class WorldProviderTwilightForest extends WorldProviderSurface {
     /**
      * Returns a new chunk provider which generates chunks for this world
      */
+    @Override
     public IChunkProvider createChunkGenerator() {
         // save chunk generator?
         if (this.chunkProvider == null) {
@@ -106,13 +110,7 @@ public class WorldProviderTwilightForest extends WorldProviderSurface {
         return false;
     }
 
-    //
-    // @Override
-    // public float getCloudHeight()
-    // {
-    // return 64F;
-    // }
-
+    @Override
     public int getAverageGroundLevel() {
         return 30;
     }
@@ -225,6 +223,7 @@ public class WorldProviderTwilightForest extends WorldProviderSurface {
         // }
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
     public IRenderHandler getSkyRenderer() {
         if (super.getSkyRenderer() == null) {
@@ -234,6 +233,7 @@ public class WorldProviderTwilightForest extends WorldProviderSurface {
         return super.getSkyRenderer();
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
     public IRenderHandler getWeatherRenderer() {
         if (super.getWeatherRenderer() == null) {
@@ -246,8 +246,8 @@ public class WorldProviderTwilightForest extends WorldProviderSurface {
     /**
      * the y level at which clouds are rendered.
      */
-    // @SideOnly(Side.CLIENT) // need for magic beans, even on server
+    @Override
     public float getCloudHeight() {
-        return 161.0F;
+        return CLOUD_HEIGHT;
     }
 }
