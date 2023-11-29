@@ -53,6 +53,7 @@ import twilightforest.tileentity.TileEntityTFSnowQueenSpawner;
 import twilightforest.tileentity.TileEntityTFTowerBossSpawner;
 import twilightforest.tileentity.TileEntityTFTowerBuilder;
 import twilightforest.tileentity.TileEntityTFTrophy;
+import twilightforest.world.TFGenCaveStalactite;
 import twilightforest.world.WorldProviderTwilightForest;
 
 @Mod(modid = TwilightForestMod.ID, name = "The Twilight Forest", version = TwilightForestMod.VERSION)
@@ -88,6 +89,16 @@ public class TwilightForestMod {
     // performance
     public static float canopyCoverage;
     public static int twilightOakChance;
+
+    // Balance
+    public static boolean diamondOreStal;
+    public static boolean lapisOreStal;
+    public static boolean emeraldOreStal;
+    public static boolean goldOreStal;
+    public static boolean redstoneOreStal;
+    public static boolean ironOreStal;
+    public static boolean coalOreStal;
+    public static boolean glowstoneStal;
 
     public static int idMobWildBoar;
     public static int idMobBighornSheep;
@@ -925,6 +936,18 @@ public class TwilightForestMod {
                 "Performance",
                 "TwilightOakChance",
                 48).comment = "Chance that a chunk in the Twilight Forest will contain a twilight oak tree.  Higher numbers reduce the number of trees, increasing performance.";
+
+        // Ore in Stalactites
+        diamondOreStal = configFile.get("Balance", "Diamond Ore Stalactites", true).getBoolean(true);
+        lapisOreStal = configFile.get("Balance", "Lapis Ore Stalactites", true).getBoolean(true);
+        emeraldOreStal = configFile.get("Balance", "Emerald Ore Stalactites", true).getBoolean(true);
+        goldOreStal = configFile.get("Balance", "Gold Ore Stalactites", true).getBoolean(true);
+        redstoneOreStal = configFile.get("Balance", "Redstone Ore Stalactites", true).getBoolean(true);
+        ironOreStal = configFile.get("Balance", "Iron Ore Stalactites", true).getBoolean(true);
+        coalOreStal = configFile.get("Balance", "Coal Ore Stalactites", true).getBoolean(true);
+        glowstoneStal = configFile.get("Balance", "Glowstone Stalactites", true).getBoolean(true);
+
+        TFGenCaveStalactite.configStalactites();
 
         // fixed values, don't even read the config
         idMobWildBoar = 177;

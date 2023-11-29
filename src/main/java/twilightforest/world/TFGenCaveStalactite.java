@@ -7,6 +7,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
+import twilightforest.TwilightForestMod;
+
 public class TFGenCaveStalactite extends TFGenerator {
 
     public static TFGenCaveStalactite diamond = new TFGenCaveStalactite(Blocks.diamond_ore, 0.5F, 4, 16);
@@ -186,6 +188,41 @@ public class TFGenCaveStalactite extends TFGenerator {
         }
 
         return true;
+    }
+
+    public static void configStalactites() {
+
+        if (!TwilightForestMod.diamondOreStal) {
+            diamond.blockID = Blocks.stone;
+        }
+        if (!TwilightForestMod.lapisOreStal) {
+            lapis.blockID = Blocks.stone;
+        }
+
+        if (!TwilightForestMod.emeraldOreStal) {
+            emerald.blockID = Blocks.stone;
+        }
+
+        if (!TwilightForestMod.goldOreStal) {
+            gold.blockID = Blocks.stone;
+        }
+
+        if (!TwilightForestMod.redstoneOreStal) {
+            redstone.blockID = Blocks.stone;
+        }
+
+        if (!TwilightForestMod.ironOreStal) {
+            iron.blockID = Blocks.stone;
+        }
+
+        if (!TwilightForestMod.coalOreStal) {
+            coal.blockID = Blocks.stone;
+        }
+
+        if (!TwilightForestMod.glowstoneStal) {
+            glowstone.blockID = Blocks.stone;
+        }
+
     }
 
 }
