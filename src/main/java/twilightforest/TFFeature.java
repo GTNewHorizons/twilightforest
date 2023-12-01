@@ -379,12 +379,11 @@ public class TFFeature {
 
     public static TFFeature generateFeatureFor1Point7(int chunkX, int chunkZ, World world) {
 
-
         // get random value
         Random hillRNG = new Random(world.getSeed() + chunkX * 25117L + chunkZ * 151121L);
 
-        //Balance major features chance
-        if(!getRandom(hillRNG , TwilightForestMod.majorFeatureGenChance)){
+        // Balance major features chance
+        if (!getRandom(hillRNG, TwilightForestMod.majorFeatureGenChance)) {
             return nothing;
         }
 
@@ -398,7 +397,6 @@ public class TFFeature {
 
         // what biome is at the center of the chunk?
         BiomeGenBase biomeAt = world.getBiomeGenForCoords((chunkX << 4) + 8, (chunkZ << 4) + 8);
-
 
         int randnum = hillRNG.nextInt(16);
 
@@ -903,8 +901,7 @@ public class TFFeature {
         return book;
     }
 
-
-    public static boolean getRandom(Random r , double chanceMul) {
+    public static boolean getRandom(Random r, double chanceMul) {
         return ((r.nextDouble() * 100d) < chanceMul);
 
     }
