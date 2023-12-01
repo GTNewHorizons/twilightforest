@@ -100,6 +100,10 @@ public class TwilightForestMod {
     public static boolean coalOreStal;
     public static boolean glowstoneStal;
 
+    //Major feature spawn chance
+    public static double majorFeatureGenChance = 100;
+    public static double minorFeatureGenChance = 100;
+
     public static int idMobWildBoar;
     public static int idMobBighornSheep;
     public static int idMobWildDeer;
@@ -948,6 +952,11 @@ public class TwilightForestMod {
         glowstoneStal = configFile.get("Balance", "Glowstone Stalactites", true).getBoolean(true);
 
         TFGenCaveStalactite.configStalactites();
+        //Gen chance
+        majorFeatureGenChance =  configFile.get("WorldGen", " Major Feature Generation Chance", 100).getDouble(100);
+        minorFeatureGenChance =  configFile.get("WorldGen", " Minor Feature Generation Chance", 100).getDouble(100);
+
+
 
         // fixed values, don't even read the config
         idMobWildBoar = 177;

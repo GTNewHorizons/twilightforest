@@ -378,6 +378,16 @@ public class TFFeature {
     }
 
     public static TFFeature generateFeatureFor1Point7(int chunkX, int chunkZ, World world) {
+
+
+        // get random value
+        Random hillRNG = new Random(world.getSeed() + chunkX * 25117L + chunkZ * 151121L);
+
+        //Balance major features chance
+        if(!getRandom(hillRNG , TwilightForestMod.majorFeatureGenChance)){
+            return nothing;
+        }
+
         if (TwilightForestMod.oldMapGen) {
             return generateFeatureForOldMapGen(chunkX, chunkZ, world);
         }
@@ -389,8 +399,7 @@ public class TFFeature {
         // what biome is at the center of the chunk?
         BiomeGenBase biomeAt = world.getBiomeGenForCoords((chunkX << 4) + 8, (chunkZ << 4) + 8);
 
-        // get random value
-        Random hillRNG = new Random(world.getSeed() + chunkX * 25117L + chunkZ * 151121L);
+
         int randnum = hillRNG.nextInt(16);
 
         // glaciers have ice towers
@@ -547,7 +556,6 @@ public class TFFeature {
      * 
      * @param cx
      * @param cz
-     * @param seed
      * @return
      */
     public static int[] getNearestCenter(int cx, int cz, World world) {
@@ -895,4 +903,9 @@ public class TFFeature {
         return book;
     }
 
+
+    public static boolean getRandom(Random r , double chanceMul) {
+        return ((r.nextDouble() * 100d) < chanceMul);
+
+    }
 }
