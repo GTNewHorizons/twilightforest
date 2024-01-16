@@ -35,7 +35,7 @@ public class TFGenSmallTwilightOak extends TFTreeGenerator {
         int height = rand.nextInt(3) + this.minTreeHeight;
         boolean allClear = true;
 
-        if (y >= 1 && y + height + 1 <= 256) {
+        if (y >= 1 && y + height + 1 <= world.getHeight()) {
             int cy;
             byte width;
             int cz;
@@ -77,7 +77,7 @@ public class TFGenSmallTwilightOak extends TFTreeGenerator {
             } else {
                 Block blockUsing = world.getBlock(x, y - 1, z);
 
-                if ((blockUsing == Blocks.grass || blockUsing == Blocks.dirt) && y < 256 - height - 1) {
+                if ((blockUsing == Blocks.grass || blockUsing == Blocks.dirt) && y < world.getHeight() - height - 1) {
                     this.setBlock(world, x, y - 1, z, Blocks.dirt);
                     width = 3;
                     byte var18 = 0;
