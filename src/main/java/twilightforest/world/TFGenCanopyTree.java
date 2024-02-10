@@ -43,7 +43,7 @@ public class TFGenCanopyTree extends TFTreeGenerator {
 
         // check if we're on dirt or grass
         Material materialUnder = world.getBlock(x, y - 1, z).getMaterial();
-        if ((materialUnder != Material.grass && materialUnder != Material.ground) || y >= TFWorld.MAXHEIGHT - 12) {
+        if ((materialUnder != Material.grass && materialUnder != Material.ground) || y >= world.getHeight() - 12) {
             return false;
         }
 

@@ -40,7 +40,7 @@ public class TFGenLargeWinter extends TFTreeGenerator {
 
         // check if we're on dirt or grass
         Block blockUnder = world.getBlock(x, y - 1, z);
-        if (blockUnder != Blocks.grass && blockUnder != Blocks.dirt || y >= TFWorld.MAXHEIGHT - treeHeight) {
+        if (blockUnder != Blocks.grass && blockUnder != Blocks.dirt || y >= world.getHeight() - treeHeight) {
             return false;
         }
 

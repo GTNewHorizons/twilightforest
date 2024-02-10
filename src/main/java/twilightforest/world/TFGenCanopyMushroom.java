@@ -45,7 +45,7 @@ public class TFGenCanopyMushroom extends TFTreeGenerator {
         // check if we're on dirt or grass
         Block blockUnder = world.getBlock(x, y - 1, z);
         if (blockUnder != Blocks.grass && blockUnder != Blocks.dirt && blockUnder != Blocks.mycelium
-                || y >= 256 - treeHeight - 1) {
+                || y >= world.getHeight() - treeHeight - 1) {
             return false;
         }
 
