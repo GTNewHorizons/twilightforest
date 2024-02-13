@@ -12,8 +12,8 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
 import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.registry.GameRegistry;
 import mantle.world.WorldHelper;
 import tconstruct.TConstruct;
 import tconstruct.library.TConstructRegistry;
@@ -414,34 +414,34 @@ public class TFTinkerConstructIntegration {
 
         for (int meta = 0; meta < TinkerTools.patternOutputs.length; meta++) {
             if (TinkerTools.patternOutputs[meta] != null) {
-            	TConstructRegistry.addPartMapping(
+                TConstructRegistry.addPartMapping(
                         TinkerTools.woodPattern,
                         meta + 1,
                         MaterialID.NagaScale,
                         new ItemStack(TinkerTools.patternOutputs[meta], 1, MaterialID.NagaScale));
-            	TConstructRegistry.addPartMapping(
+                TConstructRegistry.addPartMapping(
                         TinkerTools.woodPattern,
                         meta + 1,
                         MaterialID.Steeleaf,
                         new ItemStack(TinkerTools.patternOutputs[meta], 1, MaterialID.Steeleaf));
             }
         }
-        
+
         // Twilight Forest weaponry toolparts
         if (TConstruct.pulsar.isPulseLoaded("Tinkers' Weaponry")) {
             for (int m = 0; m < TinkerWeaponry.patternOutputs.length; m++) {
-            	TConstructRegistry.addPartMapping(
+                TConstructRegistry.addPartMapping(
                         TinkerWeaponry.woodPattern,
                         m,
                         MaterialID.NagaScale,
                         new ItemStack(TinkerWeaponry.patternOutputs[m], 1, MaterialID.NagaScale));
-            	TConstructRegistry.addPartMapping(
+                TConstructRegistry.addPartMapping(
                         TinkerWeaponry.woodPattern,
                         m,
                         MaterialID.Steeleaf,
                         new ItemStack(TinkerWeaponry.patternOutputs[m], 1, MaterialID.Steeleaf));
             }
-            
+
             TConstructRegistry.addPartMapping(
                     TinkerTools.woodPattern,
                     25,
@@ -452,40 +452,36 @@ public class TFTinkerConstructIntegration {
                     25,
                     MaterialID.Steeleaf,
                     new ItemStack(TinkerWeaponry.arrowhead, 1, MaterialID.Steeleaf));
-            
+
             TConstructRegistry.addBowMaterial(MaterialID.NagaScale, 35, 4.75f);
             TConstructRegistry.addArrowMaterial(MaterialID.NagaScale, 1.8F, 0.5F);
 
             TConstructRegistry.addCustomMaterial(
-                    ArrowShaftMaterial.createMaterial(
-                            4,
-                            TinkerTools.toolRod,
-                            MaterialID.NagaScale,
-                            1.0f,
-                            1.0f,
-                            0.15f,
-                            0x866526));
-            
+                    ArrowShaftMaterial
+                            .createMaterial(4, TinkerTools.toolRod, MaterialID.NagaScale, 1.0f, 1.0f, 0.15f, 0x866526));
+
             TConstructRegistry.addBowMaterial(MaterialID.Steeleaf, 35, 4.75f);
             TConstructRegistry.addArrowMaterial(MaterialID.Steeleaf, 1.8F, 0.5F);
 
             TConstructRegistry.addCustomMaterial(
-                    ArrowShaftMaterial.createMaterial(
-                            5,
-                            TinkerTools.toolRod,
-                            MaterialID.Steeleaf,
-                            1.0f,
-                            1.0f,
-                            0.15f,
-                            0x866526));
+                    ArrowShaftMaterial
+                            .createMaterial(5, TinkerTools.toolRod, MaterialID.Steeleaf, 1.0f, 1.0f, 0.15f, 0x866526));
 
             // Arrow Fletching Materials
             fletching = new TFFletching().setUnlocalizedName("tconstruct.Fletching");
             GameRegistry.registerItem(fletching, "fletching");
 
-            TConstructRegistry.addToolRecipe(TinkerWeaponry.arrowAmmo, TinkerWeaponry.arrowhead, TinkerWeaponry.partArrowShaft, fletching);
-            TConstructRegistry.addToolRecipe(TinkerWeaponry.boltAmmo, TinkerWeaponry.partBolt, TinkerWeaponry.partBolt, fletching);
-            
+            TConstructRegistry.addToolRecipe(
+                    TinkerWeaponry.arrowAmmo,
+                    TinkerWeaponry.arrowhead,
+                    TinkerWeaponry.partArrowShaft,
+                    fletching);
+            TConstructRegistry.addToolRecipe(
+                    TinkerWeaponry.boltAmmo,
+                    TinkerWeaponry.partBolt,
+                    TinkerWeaponry.partBolt,
+                    fletching);
+
             TConstructRegistry.addFletchingMaterial(
                     5,
                     2,
@@ -505,11 +501,12 @@ public class TFTinkerConstructIntegration {
                     0.05F,
                     1.0f,
                     0xffffff); // Steeleaf
-            
+
             ToolCore arrow = TinkerWeaponry.arrowAmmo;
             String pre = Reference.resource(arrow.getDefaultFolder()) + "/";
 
-            String[] shaft = { "wood", "bone", "reed", "blaze", "nagascale", "steeleaf", TinkerSmeltery.smeltery == null? null : "fierymetal" };
+            String[] shaft = { "wood", "bone", "reed", "blaze", "nagascale", "steeleaf",
+                    TinkerSmeltery.smeltery == null ? null : "fierymetal" };
             String[] fletching = { "feather", "leaf", "slime", "blueslime", "slimeleaf", "raven_feather", "steeleaf" };
 
             // we register different textures for the different parts per index
@@ -527,10 +524,10 @@ public class TFTinkerConstructIntegration {
                 TinkerWeaponry.boltAmmo.registerAlternatePartPaths(i, new String[] { null, null, null, acctex });
             }
         }
-        
+
         TConstructRegistry.addDefaultToolPartMaterial(MaterialID.NagaScale);
         TConstructRegistry.addDefaultShardMaterial(MaterialID.NagaScale);
-        
+
         TConstructRegistry.addDefaultToolPartMaterial(MaterialID.Steeleaf);
         TConstructRegistry.addDefaultShardMaterial(MaterialID.Steeleaf);
 
