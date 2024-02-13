@@ -1,4 +1,4 @@
-package twilightforest;
+package twilightforest.integration;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 
 import baubles.common.container.InventoryBaubles;
 import baubles.common.lib.PlayerHandler;
+import twilightforest.TwilightForestMod;
 
 public class TFBaublesIntegration {
 
