@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.AchievementPage;
 import net.minecraftforge.common.DimensionManager;
@@ -29,6 +30,8 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.TFBlocks;
 import twilightforest.entity.TFCreatures;
+import twilightforest.integration.TFNeiIntegration;
+import twilightforest.integration.TFThaumcraftIntegration;
 import twilightforest.item.BehaviorTFMobEggDispense;
 import twilightforest.item.ItemTFMagicMap;
 import twilightforest.item.ItemTFMazeMap;
@@ -92,6 +95,7 @@ public class TwilightForestMod {
     // integration
     public static boolean isSkinportLoaded = false;
     public static boolean areBaublesLoaded = false;
+    public static boolean isNeiLoaded = false;
 
     // performance
     public static float canopyCoverage;
@@ -236,6 +240,7 @@ public class TwilightForestMod {
 
         // check if various integrations are required
         isSkinportLoaded = Loader.isModLoaded("skinport");
+        isNeiLoaded = Loader.isModLoaded("NotEnoughItems");
         if (Loader.isModLoaded("Baubles")) {
             areBaublesLoaded = BaubleType.values().length > 3;
         } else {
@@ -329,11 +334,23 @@ public class TwilightForestMod {
             TwilightForestMod.dimensionID = TwilightForestMod.backupdimensionID;
         }
 
-        // thaumcraft integration
+        // Thaumcraft integration
         if (Loader.isModLoaded("Thaumcraft")) {
             TFThaumcraftIntegration.registerThaumcraftIntegration();
         } else {
             FMLLog.info("[TwilightForest] Did not find Thaumcraft, did not load ThaumcraftApi integration.");
+        }
+
+        // Remove certain things from NEI
+        if (isNeiLoaded) {
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorCanopy));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorDarkwood));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorMangrove));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorMine));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorSort));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTime));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTrans));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTwilight));
         }
 
         // final check for biome ID conflicts
