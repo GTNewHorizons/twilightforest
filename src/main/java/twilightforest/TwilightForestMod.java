@@ -32,6 +32,7 @@ import twilightforest.block.TFBlocks;
 import twilightforest.entity.TFCreatures;
 import twilightforest.integration.TFNeiIntegration;
 import twilightforest.integration.TFThaumcraftIntegration;
+import twilightforest.integration.TFTinkerConstructIntegration;
 import twilightforest.item.BehaviorTFMobEggDispense;
 import twilightforest.item.ItemTFMagicMap;
 import twilightforest.item.ItemTFMazeMap;
@@ -339,6 +340,13 @@ public class TwilightForestMod {
             TFThaumcraftIntegration.registerThaumcraftIntegration();
         } else {
             FMLLog.info("[TwilightForest] Did not find Thaumcraft, did not load ThaumcraftApi integration.");
+        }
+
+        // Tinkers Construct integration
+        if (Loader.isModLoaded("TConstruct")) {
+            TFTinkerConstructIntegration.registerTinkersConstructIntegration();
+        } else {
+            FMLLog.info("[TwilightForest] Did not find Tinkers Construct, did not load Tinkers Construct integration.");
         }
 
         // Remove certain things from NEI

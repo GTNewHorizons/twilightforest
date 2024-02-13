@@ -60,6 +60,7 @@ import twilightforest.enchantment.TFEnchantment;
 import twilightforest.entity.EntityTFCharmEffect;
 import twilightforest.entity.EntityTFPinchBeetle;
 import twilightforest.entity.EntityTFYeti;
+import twilightforest.integration.TFBaublesIntegration;
 import twilightforest.item.TFItems;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;

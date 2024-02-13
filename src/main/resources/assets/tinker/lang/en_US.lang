@@ -1,0 +1,14 @@
+item.tconstruct.Fletching.raven_feather.name=Raven's Feather Fletching
+item.tconstruct.Fletching.steeleaf.name=Steeleaf Fletching
+
+material.fierymetal=Fiery Metal
+material.fierymetal.display=Fiery
+
+material.knightmetal=Knightmetal
+material.knightmetal.display=Knightly
+
+material.nagascale=Naga Scale
+material.nagascale.display=Naga Scale
+
+material.steeleaf=Steeleaf
+material.steeleaf.display=Steeleaf
