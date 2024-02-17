@@ -1,6 +1,8 @@
 item.tconstruct.Fletching.raven_feather.name=Raven's Feather Fletching
 item.tconstruct.Fletching.steeleaf.name=Steeleaf Fletching
 
+material.twilit.ability=Twilit
+
 material.fierymetal=Fiery Metal
 material.fierymetal.display=Fiery
 material.fierymetal.ability=
