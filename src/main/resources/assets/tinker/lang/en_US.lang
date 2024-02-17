@@ -3,12 +3,16 @@ item.tconstruct.Fletching.steeleaf.name=Steeleaf Fletching
 
 material.fierymetal=Fiery Metal
 material.fierymetal.display=Fiery
+material.fierymetal.ability=
 
 material.knightmetal=Knightmetal
 material.knightmetal.display=Knightly
+material.knightmetal.ability=Stalwart
 
 material.nagascale=Naga Scale
 material.nagascale.display=Naga Scale
+material.nagascale.ability=Precipitate
 
 material.steeleaf=Steeleaf
 material.steeleaf.display=Steeleaf
+material.steeleaf.ability=Synergy

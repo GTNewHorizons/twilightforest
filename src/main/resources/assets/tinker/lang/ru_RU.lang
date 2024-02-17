@@ -1,6 +1,8 @@
 item.tconstruct.Fletching.raven_feather.name=Оперение из вороньих перьев
 item.tconstruct.Fletching.steeleaf.name=Сталелиственное оперение
 
+material.twilit.ability=Сумеречный
+
 material.fierymetal=Огненный металл
 material.fierymetal.ability=
 material.fierymetal.display=Огненная
@@ -65,7 +67,7 @@ toolpart.BowLimb.fierymetal=Огненное плечо лука
 toolpart.Bolt.fierymetal=Огненный болт
 
 material.knightmetal=Рыцарский металл
-material.knightmetal.ability=
+material.knightmetal.ability=Храбрость
 material.knightmetal.display=Рыцарская
 
 tool.pickaxe.knightmetal=Рыцарская кирка
@@ -128,7 +130,7 @@ toolpart.BowLimb.knightmetal=Рыцарское плечо лука
 toolpart.Bolt.knightmetal=Рыцарский болт
 
 material.nagascale=Чешуя Наги
-material.nagascale.ability=
+material.nagascale.ability=Безрассудство
 material.nagascale.display=Нага-
 
 tool.pickaxe.nagascale=Кирка из чешуи наги
@@ -193,7 +195,7 @@ toolpart.Bolt.nagascale=Болт из чешуи наги
 
 
 material.steeleaf=Сталелист
-material.steeleaf.ability=
+material.steeleaf.ability=Синергия
 material.steeleaf.display=Сталелиственная
 
 tool.pickaxe.steeleaf=Сталелиственная кирка
