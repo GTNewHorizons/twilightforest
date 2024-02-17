@@ -1,16 +1,20 @@
 package twilightforest.integration;
 
-import static net.minecraft.util.EnumChatFormatting.WHITE;
+import static net.minecraft.util.EnumChatFormatting.DARK_GREEN;
+import static net.minecraft.util.EnumChatFormatting.GOLD;
+import static net.minecraft.util.EnumChatFormatting.GREEN;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -26,6 +30,8 @@ import tconstruct.library.tools.ToolCore;
 import tconstruct.library.util.IPattern;
 import tconstruct.library.weaponry.ArrowShaftMaterial;
 import tconstruct.smeltery.TinkerSmeltery;
+import tconstruct.tools.TFActiveToolMod;
+import tconstruct.tools.TFToolEvents;
 import tconstruct.tools.TinkerTools;
 import tconstruct.tools.items.TFFletching;
 import tconstruct.util.Reference;
@@ -57,6 +63,11 @@ public class TFTinkerConstructIntegration {
     }
 
     public static void registerTinkersConstructIntegration() {
+        TFToolEvents toolEvents = new TFToolEvents();
+        MinecraftForge.EVENT_BUS.register(toolEvents);
+        FMLCommonHandler.instance().bus().register(toolEvents);
+
+        TConstructRegistry.registerActiveToolMod(new TFActiveToolMod());
 
         // Adding materials requiring smeltery
         if (TinkerSmeltery.smeltery != null) {
@@ -82,7 +93,7 @@ public class TFTinkerConstructIntegration {
                     1.3F,
                     1,
                     0f,
-                    WHITE.toString(),
+                    GOLD.toString(),
                     0xDADADA);
             PatternBuilder.instance.registerFullMaterial(
                     new ItemStack((Item) materialItem, 1, 0),
@@ -115,7 +126,7 @@ public class TFTinkerConstructIntegration {
                     1.3F,
                     1,
                     0f,
-                    WHITE.toString(),
+                    GREEN.toString(),
                     0xDADADA);
             PatternBuilder.instance.registerFullMaterial(
                     new ItemStack((Item) materialItem, 1, 0),
@@ -379,7 +390,7 @@ public class TFTinkerConstructIntegration {
                 1.3F,
                 1,
                 0f,
-                WHITE.toString(),
+                DARK_GREEN.toString(),
                 0xDADADA);
         PatternBuilder.instance.registerFullMaterial(
                 new ItemStack((Item) materialItem, 1, 0),
@@ -402,7 +413,7 @@ public class TFTinkerConstructIntegration {
                 1.3F,
                 1,
                 0f,
-                WHITE.toString(),
+                DARK_GREEN.toString(),
                 0xDADADA);
         PatternBuilder.instance.registerFullMaterial(
                 new ItemStack((Item) materialItem, 1, 0),
