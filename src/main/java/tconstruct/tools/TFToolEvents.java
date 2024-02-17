@@ -60,6 +60,12 @@ public class TFToolEvents {
                 || toolTag.getInteger("Extra") == MaterialID.NagaScale) {
             toolTag.setInteger("PrecipitateSpeed", toolTag.getInteger("MiningSpeed"));
         }
+
+        if (toolTag.getInteger("Head") == MaterialID.Steeleaf || toolTag.getInteger("Handle") == MaterialID.Steeleaf
+                || toolTag.getInteger("Accessory") == MaterialID.Steeleaf
+                || toolTag.getInteger("Extra") == MaterialID.Steeleaf) {
+            toolTag.setBoolean("Synergy", true);
+        }
     }
 
     @SubscribeEvent
