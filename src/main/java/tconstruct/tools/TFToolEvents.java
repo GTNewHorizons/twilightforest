@@ -54,6 +54,12 @@ public class TFToolEvents {
             toolTag.setInteger("MiningSpeed", toolTag.getInteger("MiningSpeed") + 200);
             toolTag.setInteger("TwilitID", twilitID);
         }
+
+        if (toolTag.getInteger("Head") == MaterialID.NagaScale || toolTag.getInteger("Handle") == MaterialID.NagaScale
+                || toolTag.getInteger("Accessory") == MaterialID.NagaScale
+                || toolTag.getInteger("Extra") == MaterialID.NagaScale) {
+            toolTag.setInteger("PrecipitateSpeed", toolTag.getInteger("MiningSpeed"));
+        }
     }
 
     @SubscribeEvent

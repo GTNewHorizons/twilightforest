@@ -91,7 +91,7 @@ public class TFTinkerConstructIntegration {
                     600,
                     2,
                     1.3F,
-                    1,
+                    0,
                     0f,
                     GOLD.toString(),
                     0xDADADA);
@@ -124,7 +124,7 @@ public class TFTinkerConstructIntegration {
                     600,
                     2,
                     1.3F,
-                    1,
+                    0,
                     0f,
                     GREEN.toString(),
                     0xDADADA);
@@ -388,7 +388,7 @@ public class TFTinkerConstructIntegration {
                 600,
                 2,
                 1.3F,
-                1,
+                0,
                 0f,
                 DARK_GREEN.toString(),
                 0xDADADA);
@@ -411,7 +411,7 @@ public class TFTinkerConstructIntegration {
                 600,
                 2,
                 1.3F,
-                1,
+                0,
                 0f,
                 DARK_GREEN.toString(),
                 0xDADADA);

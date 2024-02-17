@@ -6,7 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import tconstruct.library.ActiveToolMod;
@@ -25,6 +24,7 @@ public class TFActiveToolMod extends ActiveToolMod {
                 && stack.getTagCompound() != null) {
             NBTTagCompound tags = stack.getTagCompound().getCompoundTag("InfiTool");
             twilit(tool, stack, (EntityLivingBase) entity, tags);
+            precipitate(tool, stack, (EntityLivingBase) entity, tags);
         }
     }
 
@@ -43,9 +43,16 @@ public class TFActiveToolMod extends ActiveToolMod {
                     tags.setInteger("BaseAttack", tags.getInteger("BaseAttack") + 2);
                 }
                 tags.setBoolean("IsInTF", isInTF);
-
-                StatCollector.translateToLocal("material.twilit.ability");
             }
+        }
+    }
+
+    private void precipitate(ToolCore tool, ItemStack stack, EntityLivingBase entity, NBTTagCompound tags) {
+        if (tags.hasKey("PrecipitateSpeed")) {
+            int baseSpeed = tags.getInteger("PrecipitateSpeed");
+            float health = entity.getHealth();
+            float maxHealth = entity.getMaxHealth();
+            tags.setInteger("MiningSpeed", (int) (baseSpeed * (1 + (maxHealth - health) / maxHealth / 2)));
         }
     }
 
