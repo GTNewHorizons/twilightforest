@@ -66,6 +66,13 @@ public class TFToolEvents {
                 || toolTag.getInteger("Extra") == MaterialID.Steeleaf) {
             toolTag.setBoolean("Synergy", true);
         }
+
+        if (toolTag.getInteger("Head") == MaterialID.Knightmetal
+                || toolTag.getInteger("Handle") == MaterialID.Knightmetal
+                || toolTag.getInteger("Accessory") == MaterialID.Knightmetal
+                || toolTag.getInteger("Extra") == MaterialID.Knightmetal) {
+            toolTag.setBoolean("Stalwart", true);
+        }
     }
 
     @SubscribeEvent
