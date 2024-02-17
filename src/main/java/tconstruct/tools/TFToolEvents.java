@@ -3,15 +3,22 @@ package tconstruct.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import tconstruct.library.entity.ProjectileBase;
 import tconstruct.library.event.ToolCraftEvent;
 import tconstruct.library.weaponry.AmmoItem;
+import tconstruct.weaponry.ammo.ArrowAmmo;
+import tconstruct.weaponry.ammo.BoltAmmo;
+import tconstruct.weaponry.entity.ArrowEntity;
+import tconstruct.weaponry.entity.BoltEntity;
 import twilightforest.integration.TFTinkerConstructIntegration.MaterialID;
 
 public class TFToolEvents {
@@ -87,6 +94,10 @@ public class TFToolEvents {
                 1,
                 "" + colorFromID(event.itemStack.getTagCompound().getCompoundTag("InfiTool").getInteger("TwilitID"))
                         + StatCollector.translateToLocal("material.twilit.ability"));
+        if (event.itemStack.getItem() instanceof ArrowAmmo || event.itemStack.getItem() instanceof BoltAmmo)
+            event.toolTip.add(
+                    2,
+                    "" + ChatFormatting.DARK_GRAY + StatCollector.translateToLocal("material.raven_feather.ability"));
     }
 
     private ChatFormatting colorFromID(int materialID) {
@@ -107,6 +118,19 @@ public class TFToolEvents {
                 break;
         }
         return cf;
+    }
+
+    @SubscribeEvent
+    public void onArrowSpawn(EntityJoinWorldEvent event) {
+        if (event.entity instanceof ArrowEntity || event.entity instanceof BoltEntity) {
+            ProjectileBase entity = (ProjectileBase) event.entity;
+            ItemStack entityItem = entity.getEntityItem();
+            int accessory = entityItem.getTagCompound().getCompoundTag("InfiTool").getInteger("Accessory");
+            if (accessory == 5) {
+                entity.setInvisible(true);
+                entity.renderDistanceWeight = 0;
+            }
+        }
     }
 
 }
