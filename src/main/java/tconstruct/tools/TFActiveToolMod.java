@@ -64,11 +64,11 @@ public class TFActiveToolMod extends ActiveToolMod {
 
     private void synergy(ToolCore tool, ItemStack stack, EntityLivingBase entity, NBTTagCompound tags) {
         if (tags.hasKey("Synergy") && entity instanceof EntityPlayer) {
-        	InventoryPlayer inventory = ((EntityPlayer)entity).inventory;
+            InventoryPlayer inventory = ((EntityPlayer) entity).inventory;
             int chance = 0;
             for (int i = 0; i < 10; i++)
-            	if (inventory.mainInventory[i] != null && inventory.mainInventory[i].getItem() == TFItems.steeleafIngot)
-            		chance += inventory.mainInventory[i].stackSize;
+                if (inventory.mainInventory[i] != null && inventory.mainInventory[i].getItem() == TFItems.steeleafIngot)
+                    chance += inventory.mainInventory[i].stackSize;
             int check = 1150; // Will probably change later
             // REGROWING AMMO :OOoo
             if (tool instanceof IAmmo && random.nextInt(check * 3) < chance) // ammo regenerates at a much slower
