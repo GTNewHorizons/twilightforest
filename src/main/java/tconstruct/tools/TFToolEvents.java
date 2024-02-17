@@ -80,6 +80,14 @@ public class TFToolEvents {
                 || toolTag.getInteger("Extra") == MaterialID.Knightmetal) {
             toolTag.setBoolean("Stalwart", true);
         }
+
+        if (toolTag.getInteger("Head") == MaterialID.FieryMetal || toolTag.getInteger("Handle") == MaterialID.FieryMetal
+                || toolTag.getInteger("Accessory") == MaterialID.FieryMetal
+                || toolTag.getInteger("Extra") == MaterialID.FieryMetal) {
+            toolTag.setBoolean("Lava", true);
+            toolTag.setBoolean("TFFiery", true);
+            toolTag.setInteger("Fiery", 1);
+        }
     }
 
     @SubscribeEvent
@@ -95,9 +103,16 @@ public class TFToolEvents {
                 "" + colorFromID(event.itemStack.getTagCompound().getCompoundTag("InfiTool").getInteger("TwilitID"))
                         + StatCollector.translateToLocal("material.twilit.ability"));
         if (event.itemStack.getItem() instanceof ArrowAmmo || event.itemStack.getItem() instanceof BoltAmmo)
-            event.toolTip.add(
-                    2,
-                    "" + ChatFormatting.DARK_GRAY + StatCollector.translateToLocal("material.raven_feather.ability"));
+            if (event.itemStack.getTagCompound().getCompoundTag("InfiTool").getInteger("Accessory") == 5)
+                event.toolTip.add(
+                        2,
+                        "" + ChatFormatting.DARK_GRAY
+                                + StatCollector.translateToLocal("material.raven_feather.ability"));
+        if (event.itemStack.getTagCompound().getCompoundTag("InfiTool").hasKey("TFFiery")) {
+            event.toolTip
+                    .add(2, "" + ChatFormatting.GOLD + StatCollector.translateToLocal("modifier.tooltip.Auto-Smelt"));
+            event.toolTip.add(3, "" + ChatFormatting.GOLD + StatCollector.translateToLocal("modifier.tooltip.Fiery"));
+        }
     }
 
     private ChatFormatting colorFromID(int materialID) {
