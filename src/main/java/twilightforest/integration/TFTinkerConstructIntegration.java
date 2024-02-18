@@ -5,6 +5,8 @@ import static net.minecraft.util.EnumChatFormatting.GOLD;
 import static net.minecraft.util.EnumChatFormatting.GREEN;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -12,6 +14,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -20,6 +23,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import mantle.world.WorldHelper;
 import tconstruct.TConstruct;
+import tconstruct.blocks.TFFieryEssence;
 import tconstruct.library.TConstructRegistry;
 import tconstruct.library.client.TConstructClientRegistry;
 import tconstruct.library.crafting.FluidType;
@@ -44,10 +48,10 @@ public class TFTinkerConstructIntegration {
 
     public static Item fletching;
 
-    public static Fluid fieryLiquidFluid;
+    public static Fluid fieryEssenceFluid;
     public static Fluid moltenFieryMetalFluid;
     public static Fluid moltenKnightmetalFluid;
-    public static Block fieryLiquid;
+    public static Block fieryEssence;
     public static Block moltenFieryMetal;
     public static Block moltenKnightmetal;
     // public static Fluid[] fluids = new Fluid[2];
@@ -72,13 +76,18 @@ public class TFTinkerConstructIntegration {
         // Adding materials requiring smeltery
         if (TinkerSmeltery.smeltery != null) {
             // Fiery liquid (blood, sweat and tears)
-            fieryLiquidFluid = TinkerSmeltery.registerFluid("fieryliquid");
-            fieryLiquid = fieryLiquidFluid.getBlock();
-            FluidType.registerFluidType("FieryLiquid", fieryLiquid, 0, 600, fieryLiquidFluid, false);
+            fieryEssenceFluid = new Fluid("fiery_essence");
+            if (!FluidRegistry.registerFluid(fieryEssenceFluid))
+                fieryEssenceFluid = FluidRegistry.getFluid("fiery_essence");
+            fieryEssence = new TFFieryEssence(fieryEssenceFluid, Material.water)
+                    .setCreativeTab(TConstructRegistry.blockTab).setBlockName("fiery_essence");
+            GameRegistry.registerBlock(fieryEssence, "fiery_essence");
+            fieryEssenceFluid.setBlock(fieryEssence);
+            FluidType.registerFluidType("FieryEssence", fieryEssence, 0, 1000, fieryEssenceFluid, false);
 
             // Fiery metal
             moltenFieryMetalFluid = TinkerSmeltery.registerFluid("fierymetal");
-            moltenFieryMetal = moltenFieryMetalFluid.getBlock();
+            moltenFieryMetal = moltenFieryMetalFluid.getBlock().setCreativeTab(TConstructRegistry.blockTab);
             FluidType.registerFluidType("FieryMetal", TFBlocks.fieryMetalStorage, 0, 600, moltenFieryMetalFluid, true);
 
             Item materialItem = TFItems.fieryIngot;
@@ -105,7 +114,7 @@ public class TFTinkerConstructIntegration {
 
             // Knightmetal
             moltenKnightmetalFluid = TinkerSmeltery.registerFluid("knightmetal");
-            moltenKnightmetal = moltenKnightmetalFluid.getBlock();
+            moltenKnightmetal = moltenKnightmetalFluid.getBlock().setCreativeTab(TConstructRegistry.blockTab);
             FluidType.registerFluidType(
                     "Knightmetal",
                     TFBlocks.knightmetalStorage,
@@ -150,10 +159,14 @@ public class TFTinkerConstructIntegration {
                     600,
                     new FluidStack(moltenKnightmetalFluid, TConstruct.blockLiquidValue));
 
+            FluidType fieryEssence = FluidType.getFluidType(fieryEssenceFluid);
             FluidType fieryMetal = FluidType.getFluidType(moltenFieryMetalFluid);
             FluidType knightmetal = FluidType.getFluidType(moltenKnightmetalFluid);
 
             // Melting ingots
+            Smeltery.addMelting(fieryEssence, new ItemStack(TFItems.fieryTears), -1000, TConstruct.ingotLiquidValue);
+            Smeltery.addMelting(fieryEssence, new ItemStack(TFItems.fieryBlood), -1000, TConstruct.ingotLiquidValue);
+
             Smeltery.addMelting(fieryMetal, new ItemStack(TFItems.fieryIngot), 0, TConstruct.ingotLiquidValue);
 
             Smeltery.addMelting(knightmetal, new ItemStack(TFItems.knightMetal), 0, TConstruct.ingotLiquidValue);
@@ -231,6 +244,12 @@ public class TFTinkerConstructIntegration {
                     0,
                     TConstruct.ingotLiquidValue * 16);
 
+            // Alloy recipes
+            Smeltery.addAlloyMixing(
+                    new FluidStack(moltenFieryMetalFluid, 1),
+                    new FluidStack(fieryEssenceFluid, 1),
+                    new FluidStack(TinkerSmeltery.moltenIronFluid, 1));
+
             // Metal toolpart casting
             liquids = new FluidStack[] { new FluidStack(moltenFieryMetalFluid, 1),
                     new FluidStack(moltenKnightmetalFluid, 1) };
@@ -244,12 +263,12 @@ public class TFTinkerConstructIntegration {
                 if (TinkerTools.patternOutputs[iter] != null) {
                     ItemStack cast = new ItemStack(TinkerSmeltery.metalPattern, 1, iter + 1);
                     ItemStack clay_cast = new ItemStack(TinkerSmeltery.clayPattern, 1, iter + 1);
+                    fluidAmount = ((IPattern) TinkerSmeltery.metalPattern).getPatternCost(cast)
+                            * TConstruct.ingotLiquidValue
+                            / 2;
 
                     for (int iterTwo = 0; iterTwo < liquids.length; iterTwo++) {
                         fs = liquids[iterTwo].getFluid();
-                        fluidAmount = ((IPattern) TinkerSmeltery.metalPattern).getPatternCost(cast)
-                                * TConstruct.ingotLiquidValue
-                                / 2;
                         ItemStack metalCast = new ItemStack(TinkerTools.patternOutputs[iter], 1, liquidDamage[iterTwo]);
                         tableCasting.addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), cast, 50);
                         if (isValidClayCast(iter)) {
@@ -258,6 +277,13 @@ public class TFTinkerConstructIntegration {
                         }
                         Smeltery.addMelting(FluidType.getFluidType(fs), metalCast, 0, fluidAmount);
                     }
+
+                    tableCasting.addCastingRecipe(
+                            new ItemStack(TinkerTools.patternOutputs[iter], 1, MaterialID.FieryMetal),
+                            new FluidStack(fieryEssenceFluid, fluidAmount),
+                            new ItemStack(TinkerTools.patternOutputs[iter], 1, TinkerTools.MaterialID.Iron),
+                            true,
+                            50);
                 }
             }
 
@@ -265,6 +291,12 @@ public class TFTinkerConstructIntegration {
             ItemStack ingotcast_clay = new ItemStack(TinkerSmeltery.clayPattern, 1, 0);
 
             // Metal Casting
+            tableCasting.addCastingRecipe(
+                    new ItemStack(TFItems.fieryIngot),
+                    new FluidStack(fieryEssenceFluid, TConstruct.ingotLiquidValue),
+                    new ItemStack(Items.iron_ingot),
+                    true,
+                    50); // Iron -> Fiery Metal
             tableCasting.addCastingRecipe(
                     new ItemStack(TFItems.fieryIngot, 1, 0),
                     new FluidStack(moltenFieryMetalFluid, TConstruct.ingotLiquidValue),
@@ -293,7 +325,14 @@ public class TFTinkerConstructIntegration {
                     50); // Knightmetal
 
             LiquidCasting basinCasting = TConstructRegistry.getBasinCasting();
+
             // Block Casting
+            basinCasting.addCastingRecipe(
+                    new ItemStack(TFBlocks.fieryMetalStorage),
+                    new FluidStack(fieryEssenceFluid, TConstruct.blockLiquidValue),
+                    new ItemStack(Blocks.iron_block),
+                    true,
+                    100); // Iron -> Fiery Metal
             basinCasting.addCastingRecipe(
                     new ItemStack(TFBlocks.fieryMetalStorage),
                     new FluidStack(moltenFieryMetalFluid, TConstruct.blockLiquidValue),
@@ -311,14 +350,20 @@ public class TFTinkerConstructIntegration {
             if (TConstruct.pulsar.isPulseLoaded("Tinkers' Weaponry")) {
                 for (int i = 0; i < TinkerWeaponry.patternOutputs.length; i++) {
                     ItemStack cast = new ItemStack(TinkerWeaponry.metalPattern, 1, i);
+                    fluidAmount = TinkerWeaponry.metalPattern.getPatternCost(cast) * TConstruct.ingotLiquidValue / 2;
                     for (int iterTwo = 0; iterTwo < liquids.length; iterTwo++) {
                         fs = liquids[iterTwo].getFluid();
-                        fluidAmount = TinkerWeaponry.metalPattern.getPatternCost(cast) * TConstruct.ingotLiquidValue
-                                / 2;
                         ItemStack metalCast = new ItemStack(TinkerWeaponry.patternOutputs[i], 1, liquidDamage[iterTwo]);
                         tableCasting.addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), cast, 50);
                         Smeltery.addMelting(FluidType.getFluidType(fs), metalCast, 0, fluidAmount);
                     }
+
+                    tableCasting.addCastingRecipe(
+                            new ItemStack(TinkerWeaponry.patternOutputs[i], 1, MaterialID.FieryMetal),
+                            new FluidStack(fieryEssenceFluid, fluidAmount),
+                            new ItemStack(TinkerWeaponry.patternOutputs[i], 1, TinkerTools.MaterialID.Iron),
+                            true,
+                            50);
                 }
                 // Register clay part casting for BowLimbs
                 for (int iterTwo = 0; iterTwo < liquids.length; iterTwo++) {
@@ -336,17 +381,24 @@ public class TFTinkerConstructIntegration {
 
                 ItemStack cast = new ItemStack(TinkerSmeltery.metalPattern, 1, 25);
                 ItemStack clay_cast = new ItemStack(TinkerSmeltery.clayPattern, 1, 25);
+                fluidAmount = ((IPattern) TinkerSmeltery.metalPattern).getPatternCost(cast)
+                        * TConstruct.ingotLiquidValue
+                        / 2;
 
                 for (int iterTwo = 0; iterTwo < liquids.length; iterTwo++) {
                     fs = liquids[iterTwo].getFluid();
-                    fluidAmount = ((IPattern) TinkerSmeltery.metalPattern).getPatternCost(cast)
-                            * TConstruct.ingotLiquidValue
-                            / 2;
                     ItemStack metalCast = new ItemStack(TinkerWeaponry.arrowhead, 1, liquidDamage[iterTwo]);
                     tableCasting.addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), cast, 50);
                     tableCasting.addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), clay_cast, true, 50);
                     Smeltery.addMelting(FluidType.getFluidType(fs), metalCast, 0, fluidAmount);
                 }
+
+                tableCasting.addCastingRecipe(
+                        new ItemStack(TinkerWeaponry.arrowhead, 1, MaterialID.FieryMetal),
+                        new FluidStack(fieryEssenceFluid, fluidAmount),
+                        new ItemStack(TinkerWeaponry.arrowhead, 1, TinkerTools.MaterialID.Iron),
+                        true,
+                        50);
 
                 TConstructRegistry.addBowMaterial(MaterialID.FieryMetal, 54, 5.2f);
                 TConstructRegistry.addArrowMaterial(MaterialID.FieryMetal, 3.3F, 0.8F);
