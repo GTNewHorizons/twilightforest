@@ -4,6 +4,9 @@ item.tconstruct.Fletching.steeleaf.name=Сталелиственное опер�
 material.twilit.ability=Сумеречный
 material.raven_feather.ability=Теневая вуаль
 
+entity.TConstruct.Bolt.name=Болт
+entity.TConstruct.Arrow.name=Стрела
+
 material.fierymetal=Огненный металл
 material.fierymetal.ability=
 material.fierymetal.display=Огненная

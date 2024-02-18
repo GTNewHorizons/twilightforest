@@ -4,6 +4,9 @@ item.tconstruct.Fletching.steeleaf.name=Steeleaf Fletching
 material.twilit.ability=Twilit
 material.raven_feather.ability=Veiled
 
+entity.TConstruct.Bolt.name=Bolt
+entity.TConstruct.Arrow.name=Arrow
+
 material.fierymetal=Fiery Metal
 material.fierymetal.display=Fiery
 material.fierymetal.ability=
