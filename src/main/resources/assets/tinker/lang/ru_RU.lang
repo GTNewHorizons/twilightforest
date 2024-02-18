@@ -1,6 +1,14 @@
 item.tconstruct.Fletching.raven_feather.name=Оперение из вороньих перьев
 item.tconstruct.Fletching.steeleaf.name=Сталелиственное оперение
 
+fluid.fiery_essence=Огненная эссенция
+fluid.fierymetal.molten=Расплавленный огненный металл
+fluid.knightmetal.molten=Расплавленный рыцарский металл
+
+tile.fiery_essence.name=Огненная эссенция
+tile.fluid.molten.fierymetal.name=Расплавленный огненный металл
+tile.fluid.molten.knightmetal.name=Расплавленный рыцарский металл
+
 material.twilit.ability=Сумеречный
 material.raven_feather.ability=Теневая вуаль
 
@@ -96,8 +104,8 @@ tool.shortbow.knightmetal=Рыцарский короткий лук
 tool.longbow.knightmetal=Рыцарский длинный лук
 tool.crossbow.knightmetal=Рыцарский арбалет
 tool.shuriken.knightmetal=Рыцарский сюрикэн
-tool.arrowammo.knightmetal=Рыцарскые стрелы
-tool.boltammo.knightmetal=Рыцарскые болты
+tool.arrowammo.knightmetal=Рыцарские стрелы
+tool.boltammo.knightmetal=Рыцарские болты
 tool.throwingknife.knightmetal=Рыцарский метательный нож
 tool.javelin.knightmetal=Рыцарское копьё
 tool.shortbow.knightmetal=Рыцарский короткий лук
