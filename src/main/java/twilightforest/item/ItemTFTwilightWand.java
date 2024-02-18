@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
@@ -100,7 +101,9 @@ public class ItemTFTwilightWand extends ItemTF {
     public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List<String> par3List,
             boolean par4) {
         super.addInformation(par1ItemStack, par2EntityPlayer, par3List, par4);
-        par3List.add((par1ItemStack.getMaxDamage() - par1ItemStack.getItemDamage()) + " charges left");
+        par3List.add(
+                StatCollector.translateToLocal("item.wand.tooltip")
+                        .replace("%n", "" + (par1ItemStack.getMaxDamage() - par1ItemStack.getItemDamage())));
     }
 
     /**

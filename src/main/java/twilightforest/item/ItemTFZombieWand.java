@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -113,7 +114,9 @@ public class ItemTFZombieWand extends ItemTF {
     @Override
     public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List<String> par3List,
             boolean par4) {
-        par3List.add((par1ItemStack.getMaxDamage() - par1ItemStack.getItemDamage()) + " charges left");
+        par3List.add(
+                StatCollector.translateToLocal("item.wand.tooltip")
+                        .replace("%n", "" + (par1ItemStack.getMaxDamage() - par1ItemStack.getItemDamage())));
     }
 
     /**

@@ -442,6 +442,7 @@ item.yetiHelm.tooltip=Chills attackers
 item.yetiPlate.tooltip=Chills attackers
 item.yetiLegs.tooltip=Chills attackers
 item.yetiBoots.tooltip=Chills attackers
+item.wand.tooltip=%n charges left
 item.fieryBlood.tooltip=Can be poured into Tinkers Construct tanks
 item.fieryTears.tooltip=Can be poured into Tinkers Construct tanks
 item.charm.tooltip=Can be equipped into any Baubles slot

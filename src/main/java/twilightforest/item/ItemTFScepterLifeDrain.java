@@ -18,6 +18,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -276,7 +277,9 @@ public class ItemTFScepterLifeDrain extends ItemTF {
     public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List<String> par3List,
             boolean par4) {
         super.addInformation(par1ItemStack, par2EntityPlayer, par3List, par4);
-        par3List.add((par1ItemStack.getMaxDamage() - par1ItemStack.getItemDamage()) + " charges left");
+        par3List.add(
+                StatCollector.translateToLocal("item.wand.tooltip")
+                        .replace("%n", "" + (par1ItemStack.getMaxDamage() - par1ItemStack.getItemDamage())));
     }
 
     /**

@@ -386,6 +386,7 @@ item.yetiHelm.tooltip=Остужает атакующих
 item.yetiPlate.tooltip=Остужает атакующих
 item.yetiLegs.tooltip=Остужает атакующих
 item.yetiBoots.tooltip=Остужает атакующих
+item.wand.tooltip=Осталось %n зарядов
 item.fieryBlood.tooltip=Может быть налита в цистерны Tinkers Construct
 item.fieryTears.tooltip=Могут быть налиты в цистерны Tinkers Construct
 item.charm.tooltip=Можно надеть в слот для кольца, амулета или пояса
