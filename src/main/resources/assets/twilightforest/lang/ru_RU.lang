@@ -386,10 +386,12 @@ item.yetiHelm.tooltip=Остужает атакующих
 item.yetiPlate.tooltip=Остужает атакующих
 item.yetiLegs.tooltip=Остужает атакующих
 item.yetiBoots.tooltip=Остужает атакующих
-tooltip.tf.adherent=Последователь, но чей?
-tooltip.tf.harbinger=Предвестник, но чего?
+item.fieryBlood.tooltip=Может быть налита в цистерны Tinkers Construct
+item.fieryTears.tooltip=Могут быть налиты в цистерны Tinkers Construct
 item.charm.tooltip=Можно надеть в слот для кольца, амулета или пояса
 item.nagastone.outdatedTooltip=Устаревшая версия блока, установите и сломайте чтобы обновить
+tooltip.tf.adherent=Последователь, но чей?
+tooltip.tf.harbinger=Предвестник, но чего?
 
 item.tfspawnegg.name=Призвать существо - 
 
