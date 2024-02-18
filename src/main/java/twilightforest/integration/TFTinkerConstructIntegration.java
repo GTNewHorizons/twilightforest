@@ -292,6 +292,12 @@ public class TFTinkerConstructIntegration {
 
             // Metal Casting
             tableCasting.addCastingRecipe(
+                    new ItemStack(TFItems.fieryBlood),
+                    new FluidStack(fieryEssenceFluid, TConstruct.ingotLiquidValue),
+                    new ItemStack(Items.glass_bottle),
+                    true,
+                    50); // Fiery Essence
+            tableCasting.addCastingRecipe(
                     new ItemStack(TFItems.fieryIngot),
                     new FluidStack(fieryEssenceFluid, TConstruct.ingotLiquidValue),
                     new ItemStack(Items.iron_ingot),
