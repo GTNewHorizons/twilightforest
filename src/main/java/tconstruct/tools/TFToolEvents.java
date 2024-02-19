@@ -4,40 +4,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
-import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
-import net.minecraftforge.fluids.FluidStack;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
 
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import tconstruct.TConstruct;
+import mantle.world.WorldHelper;
 import tconstruct.library.entity.ProjectileBase;
 import tconstruct.library.event.ToolCraftEvent;
 import tconstruct.library.weaponry.AmmoItem;
-import tconstruct.smeltery.blocks.LavaTankBlock;
-import tconstruct.smeltery.logic.LavaTankLogic;
 import tconstruct.weaponry.ammo.ArrowAmmo;
 import tconstruct.weaponry.ammo.BoltAmmo;
 import tconstruct.weaponry.entity.ArrowEntity;
 import tconstruct.weaponry.entity.BoltEntity;
 import twilightforest.integration.TFTinkerConstructIntegration;
 import twilightforest.integration.TFTinkerConstructIntegration.MaterialID;
-import twilightforest.item.TFItems;
 
 public class TFToolEvents {
 
@@ -227,40 +223,26 @@ public class TFToolEvents {
     }
 
     @SubscribeEvent
-    public void fillBottle(PlayerInteractEvent event) {
-        if (event.action == Action.RIGHT_CLICK_BLOCK && event.entityPlayer.getHeldItem() != null
-                && (event.entityPlayer.getHeldItem().getItem() == Items.glass_bottle
-                        || event.entityPlayer.getHeldItem().getItem() == TFItems.fieryBlood
-                        || event.entityPlayer.getHeldItem().getItem() == TFItems.fieryTears)) {
-            World world = event.world;
-            EntityPlayer player = event.entityPlayer;
-            if (world.getBlock(event.x, event.y, event.z) instanceof LavaTankBlock) {
-                LavaTankLogic tank = (LavaTankLogic) world.getTileEntity(event.x, event.y, event.z);
-                if (event.entityPlayer.getHeldItem().getItem() == Items.glass_bottle) {
-                    if (tank.containsFluid()
-                            && tank.tank.getFluid().getFluid() == TFTinkerConstructIntegration.fieryEssenceFluid
-                            && tank.tank.getFluidAmount() >= TConstruct.ingotLiquidValue) {
-                        tank.drain(null, TConstruct.ingotLiquidValue, true);
-                        if (!player.capabilities.isCreativeMode) {
-                            player.getHeldItem().splitStack(1);
-                            player.inventory.addItemStackToInventory(new ItemStack(TFItems.fieryBlood));
-                        }
-                    }
-                } else {
-                    if (!tank.containsFluid()
-                            || (tank.tank.getFluid().getFluid() == TFTinkerConstructIntegration.fieryEssenceFluid
-                                    && tank.tank.getFluidAmount()
-                                            <= LavaTankLogic.tankCapacity - TConstruct.ingotLiquidValue)) {
-                        tank.fill(
-                                null,
-                                new FluidStack(
-                                        TFTinkerConstructIntegration.fieryEssenceFluid,
-                                        TConstruct.ingotLiquidValue),
-                                true);
-                        if (!player.capabilities.isCreativeMode) {
-                            player.getHeldItem().splitStack(1);
-                            player.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
-                        }
+    public void bucketFill(FillBucketEvent evt) {
+        if (evt.current.getItem() == Items.bucket && evt.target.typeOfHit == MovingObjectType.BLOCK) {
+            int hitX = evt.target.blockX;
+            int hitY = evt.target.blockY;
+            int hitZ = evt.target.blockZ;
+
+            if (evt.entityPlayer != null
+                    && !evt.entityPlayer.canPlayerEdit(hitX, hitY, hitZ, evt.target.sideHit, evt.current)) {
+                return;
+            }
+
+            Block bID = evt.world.getBlock(hitX, hitY, hitZ);
+            for (int id = 0; id < TFTinkerConstructIntegration.fluidBlocks.length; id++) {
+                if (bID == TFTinkerConstructIntegration.fluidBlocks[id]) {
+                    if (evt.entityPlayer.capabilities.isCreativeMode) {
+                        WorldHelper.setBlockToAir(evt.world, hitX, hitY, hitZ);
+                    } else {
+                        WorldHelper.setBlockToAir(evt.world, hitX, hitY, hitZ);
+                        evt.setResult(Result.ALLOW);
+                        evt.result = new ItemStack(TFTinkerConstructIntegration.buckets, 1, id);
                     }
                 }
             }

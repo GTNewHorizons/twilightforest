@@ -4,6 +4,10 @@ item.tconstruct.Fletching.steeleaf.name=Сталелиственное опер�
 item.tconstruct.Materials.FieryNugget.name=Огненный самородок
 item.tconstruct.Materials.KnightlyNugget.name=Рыцарский самородок
 
+item.tconstruct.bucket.FieryEssence.name=Ведро огненной эссенции
+item.tconstruct.bucket.FieryMetal.name=Ведро расплавленного огненного металла
+item.tconstruct.bucket.Knightmetal.name=Ведро расплавленного рыцарского металла
+
 fluid.fiery_essence=Огненная эссенция
 fluid.fierymetal.molten=Расплавленный огненный металл
 fluid.knightmetal.molten=Расплавленный рыцарский металл
