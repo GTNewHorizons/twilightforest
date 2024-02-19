@@ -1,6 +1,9 @@
 item.tconstruct.Fletching.raven_feather.name=Оперение из вороньих перьев
 item.tconstruct.Fletching.steeleaf.name=Сталелиственное оперение
 
+item.tconstruct.Materials.FieryNugget.name=Огненный самородок
+item.tconstruct.Materials.KnightlyNugget.name=Рыцарский самородок
+
 fluid.fiery_essence=Огненная эссенция
 fluid.fierymetal.molten=Расплавленный огненный металл
 fluid.knightmetal.molten=Расплавленный рыцарский металл

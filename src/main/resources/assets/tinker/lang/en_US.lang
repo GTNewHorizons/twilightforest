@@ -1,6 +1,9 @@
 item.tconstruct.Fletching.raven_feather.name=Raven's Feather Fletching
 item.tconstruct.Fletching.steeleaf.name=Steeleaf Fletching
 
+item.tconstruct.Materials.FieryNugget.name=Fiery Nugget
+item.tconstruct.Materials.KnightlyNugget.name=Knightly Nugget
+
 fluid.fiery_essence=Fiery Essence
 fluid.fierymetal.molten=Molten Fiery Metal
 fluid.knightmetal.molten=Molten Knightmetal

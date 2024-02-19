@@ -16,6 +16,7 @@ import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.oredict.OreDictionary;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.Event.Result;
@@ -38,7 +39,9 @@ import tconstruct.tools.TFActiveToolMod;
 import tconstruct.tools.TFToolEvents;
 import tconstruct.tools.TinkerTools;
 import tconstruct.tools.items.TFFletching;
+import tconstruct.tools.items.TFMaterialItem;
 import tconstruct.util.Reference;
+import tconstruct.util.config.PHConstruct;
 import tconstruct.weaponry.TinkerWeaponry;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.TFBlocks;
@@ -47,6 +50,7 @@ import twilightforest.item.TFItems;
 public class TFTinkerConstructIntegration {
 
     public static Item fletching;
+    public static Item materials;
 
     public static Fluid fieryEssenceFluid;
     public static Fluid moltenFieryMetalFluid;
@@ -75,6 +79,35 @@ public class TFTinkerConstructIntegration {
 
         // Adding materials requiring smeltery
         if (TinkerSmeltery.smeltery != null) {
+            // Register nuggets and rods
+            materials = new TFMaterialItem().setUnlocalizedName("tconstruct.Materials");
+            GameRegistry.registerItem(materials, "materials");
+
+            String[] materialStrings = { "nuggetFiery", "nuggetKnightmetal" };
+
+            for (int i = 0; i < materialStrings.length; i++) {
+                TConstructRegistry.addItemStackToDirectory(materialStrings[i], new ItemStack(materials, 1, i));
+            }
+
+            OreDictionary.registerOre("nuggetFiery", new ItemStack(TinkerTools.materials, 1, 0));
+            OreDictionary.registerOre("nuggetKnightmetal", new ItemStack(TinkerTools.materials, 1, 1));
+
+            GameRegistry.addRecipe(
+                    new ItemStack(TFItems.fieryIngot, 1, 0),
+                    new Object[] { "###", "###", "###", '#', new ItemStack(materials, 1, 0) });
+            GameRegistry.addRecipe(
+                    new ItemStack(TFItems.knightMetal, 1, 0),
+                    new Object[] { "###", "###", "###", '#', new ItemStack(materials, 1, 1) });
+
+            GameRegistry.addShapelessRecipe(new ItemStack(materials, 9, 0), new Object[] { TFItems.fieryIngot });
+            GameRegistry.addShapelessRecipe(new ItemStack(materials, 9, 1), new Object[] { TFItems.knightMetal });
+
+            String[] matNames = { "FieryMetal", "Knightmetal" };
+            for (int i = 0; i < matNames.length; i++) {
+                OreDictionary.registerOre(matNames[i].toLowerCase() + "Rod", new ItemStack(TinkerTools.toolRod, 1, i));
+                OreDictionary.registerOre("rod" + matNames[i], new ItemStack(TinkerTools.toolRod, 1, i));
+            }
+
             // Fiery liquid (blood, sweat and tears)
             fieryEssenceFluid = new Fluid("fiery_essence");
             if (!FluidRegistry.registerFluid(fieryEssenceFluid))
@@ -163,14 +196,20 @@ public class TFTinkerConstructIntegration {
             FluidType fieryMetal = FluidType.getFluidType(moltenFieryMetalFluid);
             FluidType knightmetal = FluidType.getFluidType(moltenKnightmetalFluid);
 
-            // Melting ingots
+            // Fiery essence
             Smeltery.addMelting(fieryEssence, new ItemStack(TFItems.fieryTears), -1000, TConstruct.ingotLiquidValue);
             Smeltery.addMelting(fieryEssence, new ItemStack(TFItems.fieryBlood), -1000, TConstruct.ingotLiquidValue);
 
+            // Melting nuggets
+            Smeltery.addMelting(fieryMetal, new ItemStack(materials, 1, 0), 0, TConstruct.nuggetLiquidValue);
+
+            Smeltery.addMelting(knightmetal, new ItemStack(materials, 1, 1), 0, TConstruct.nuggetLiquidValue);
+            Smeltery.addMelting(knightmetal, new ItemStack(TFItems.armorShard), 0, TConstruct.nuggetLiquidValue);
+
+            // Melting ingots
             Smeltery.addMelting(fieryMetal, new ItemStack(TFItems.fieryIngot), 0, TConstruct.ingotLiquidValue);
 
             Smeltery.addMelting(knightmetal, new ItemStack(TFItems.knightMetal), 0, TConstruct.ingotLiquidValue);
-            Smeltery.addMelting(knightmetal, new ItemStack(TFItems.armorShard), 0, TConstruct.nuggetLiquidValue);
             Smeltery.addMelting(knightmetal, new ItemStack(TFItems.shardCluster), 0, TConstruct.ingotLiquidValue);
 
             // Melting armor
@@ -290,7 +329,70 @@ public class TFTinkerConstructIntegration {
             ItemStack ingotcast = new ItemStack(TinkerSmeltery.metalPattern, 1, 0);
             ItemStack ingotcast_clay = new ItemStack(TinkerSmeltery.clayPattern, 1, 0);
 
-            // Metal Casting
+            // Patterns casting
+            Item[] ingots = { TFItems.fieryIngot, TFItems.ironwoodIngot, TFItems.knightMetal };
+            for (Item ingot : ingots) {
+                tableCasting.addCastingRecipe(
+                        ingotcast,
+                        new FluidStack(TinkerSmeltery.moltenAlubrassFluid, TConstruct.ingotLiquidValue),
+                        new ItemStack(ingot),
+                        false,
+                        50);
+                if (!PHConstruct.removeGoldCastRecipes) tableCasting.addCastingRecipe(
+                        ingotcast,
+                        new FluidStack(TinkerSmeltery.moltenGoldFluid, TConstruct.ingotLiquidValue * 2),
+                        new ItemStack(ingot),
+                        false,
+                        50);
+            }
+
+            // Nuggets Casting
+            ItemStack nuggetcast = new ItemStack(TinkerSmeltery.metalPattern, 1, 27);
+            ItemStack nuggetcast_clay = new ItemStack(TinkerSmeltery.clayPattern, 1, 27);
+            for (int i = 0; i < materialStrings.length; i++) {
+                tableCasting.addCastingRecipe(
+                        nuggetcast,
+                        new FluidStack(TinkerSmeltery.moltenAlubrassFluid, TConstruct.ingotLiquidValue),
+                        new ItemStack(materials, 1, i),
+                        false,
+                        50);
+                if (!PHConstruct.removeGoldCastRecipes) tableCasting.addCastingRecipe(
+                        nuggetcast,
+                        new FluidStack(TinkerSmeltery.moltenGoldFluid, TConstruct.ingotLiquidValue * 2),
+                        new ItemStack(materials, 1, i),
+                        false,
+                        50);
+            }
+            tableCasting.addCastingRecipe(
+                    new ItemStack(materials, 1, 0),
+                    new FluidStack(fieryEssenceFluid, TConstruct.nuggetLiquidValue),
+                    new ItemStack(TinkerTools.materials, 1, 19),
+                    true,
+                    50); // Iron -> Fiery Metal
+            tableCasting.addCastingRecipe(
+                    new ItemStack(materials, 1, 0),
+                    new FluidStack(moltenFieryMetalFluid, TConstruct.nuggetLiquidValue),
+                    nuggetcast,
+                    40);
+            tableCasting.addCastingRecipe(
+                    new ItemStack(materials, 1, 0),
+                    new FluidStack(moltenFieryMetalFluid, TConstruct.nuggetLiquidValue),
+                    nuggetcast_clay,
+                    true,
+                    40); // Fiery Metal
+            tableCasting.addCastingRecipe(
+                    new ItemStack(materials, 1, 1),
+                    new FluidStack(moltenKnightmetalFluid, TConstruct.nuggetLiquidValue),
+                    nuggetcast,
+                    40);
+            tableCasting.addCastingRecipe(
+                    new ItemStack(materials, 1, 1),
+                    new FluidStack(moltenKnightmetalFluid, TConstruct.nuggetLiquidValue),
+                    nuggetcast_clay,
+                    true,
+                    40); // Knightmetal
+
+            // Ingots Casting
             tableCasting.addCastingRecipe(
                     new ItemStack(TFItems.fieryBlood),
                     new FluidStack(fieryEssenceFluid, TConstruct.ingotLiquidValue),
@@ -431,6 +533,13 @@ public class TFTinkerConstructIntegration {
                 TFNeiIntegration.hideItem(new ItemStack(TinkerWeaponry.patternOutputs[1], 1, MaterialID.Knightmetal));
                 TFNeiIntegration.hideItem(new ItemStack(TinkerWeaponry.patternOutputs[3], 1, MaterialID.Knightmetal));
             }
+        }
+
+        // Register rods
+        String[] matNames = { "NagaScale", "Steeleaf" };
+        for (int i = 0; i < matNames.length; i++) {
+            OreDictionary.registerOre(matNames[i].toLowerCase() + "Rod", new ItemStack(TinkerTools.toolRod, 1, i));
+            OreDictionary.registerOre("rod" + matNames[i], new ItemStack(TinkerTools.toolRod, 1, i));
         }
 
         // For materials that do not use casting
