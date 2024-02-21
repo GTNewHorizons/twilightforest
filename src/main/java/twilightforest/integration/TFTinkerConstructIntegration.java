@@ -148,7 +148,7 @@ public class TFTinkerConstructIntegration {
             TConstructRegistry.addToolMaterial(
                     MaterialID.FieryMetal,
                     "FieryMetal",
-                    2,
+                    3,
                     250,
                     600,
                     2,
@@ -186,7 +186,7 @@ public class TFTinkerConstructIntegration {
             TConstructRegistry.addToolMaterial(
                     MaterialID.Knightmetal,
                     "Knightmetal",
-                    2,
+                    4,
                     250,
                     600,
                     2,
@@ -647,7 +647,7 @@ public class TFTinkerConstructIntegration {
         TConstructRegistry.addToolMaterial(
                 MaterialID.NagaScale,
                 "NagaScale",
-                2,
+                1,
                 250,
                 600,
                 2,
