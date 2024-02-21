@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+
+<book>
+<page type="intro">
+<text>[[An explorer's notebook, dotted with metal drops]]
+
+While exploring this wonderful dimension, I stumbled upon a selection of unusual materials with unique properties. Some of them were obtained in battles with powerful inhabitants of the realm, some were found in forgotten treasuries, some were results of pure curiosity. 
+
+Capabilities of tools made out of these materials are truly astonishing, but they are not enough to make me give up my trusty manyullyn pickaxe. However, by installing parts made of newfound materials into my tools, I was able to achieve unbelievable results.</text>
+</page>
+
+<page type="intro">
+<text>In this journal I'm going to keep record of all the discovered materials and their properties. And, since I'm going to write a materials guide, I should do it appropriately - with colored illustrations.</text>
+</page>
+
+<page type="sectionpage">
+<title>Twilight Materials</title>
+<text>It seems that every material I discovered possesses a mystic affinity for dimension of its origin.
+When out of it, these materials seem to become "angrier" - blades and arrrowheads made of such materials become sharper, posing a risk to hurt an unwary wielder, and tool parts themselves become heavier, making tools more stiff as if showing unwilingness to work.
+At the same time once the tools are returned back to Twilight Forest, these effects are being reversed - blades become less sharp once again, аnd tools become lighter, as if starting to work faster.
+
+- Twilight: +2 speed when in Twilight Forest, +2 damage when out of it</text>
+</page>
+
+<page type="toolpage">
+<title>Veiled</title>
+<text>Feathers of twilight ravens are used for magic maps creation for a reason: a weak magic energy contained in them, once combined with magic light, allows to see things hidden from mundane eyes.
+It seems that feathers alone have an opposite effect: fletching made out of them makes arrows and bolts invisible once fired.
+These projectiles can become a wonderful way of stealthy elimination of enemies.</text>
+<text>
+- Veiled: fired projectiles become invisible</text>
+<icon>ravenfletching</icon>
+<item>
+ <text>Raven's Feather</text>
+ <icon>ravenfeather</icon>
+</item>
+</page>
+
+<page type="sectionpage">
+<title>Precipitate</title>
+<text>Until recently I was seeing Naga scale only as an armor material - who would even think of making weapons out of keratoid plates?
+But I seemed to be wrong: you can carve almost any tool part out of properly treated Naga scales.
+Moreover, once stripped of its protective properties it truly unleashes its magic potential: it seems that it's the scales that allow Naga to move faster after suffering significant damage. This trait will also be gained by any tool containing parts made from Naga scales; it will become lighter the less health their wielder has left.
+
+- Precipitate: bonus speed up to +100%, inversely relative to the health of the owner</text>
+</page>
+
+<page type="materialstats">
+<title>Naga Scale</title>
+<icon>nagapick</icon>
+<text>Non-purpose use of armor material.</text>
+<material>
+ <main>nagascale</main>
+</material>
+</page>
+
+<page type="sectionpage">
+<title>Synergy</title>
+<text>It seems that steeleaves possess another curious trait.
+When torn apart, a steeleaf displays a weak ability to regenerate, which becomes stronger depending on amount of intact steeleaves nearby.
+I can't determine the reason of such behavior for sure, but it reminds me of regenerating moss I studied before.
+By putting a toolpart made out of torn steeleaves into my tool, I can endue it with ability to regenerate.
+
+- Synergy: regeneration of durability, with the speed dependant on amount of steeleaves (or blocks of steeleaf) in toolbar</text>
+</page>
+
+<page type="materialstats">
+<title>Steeleaf</title>
+<icon>leafaxe</icon>
+<text>Doesn't grow on trees.</text>
+<material>
+ <main>steeleaf</main>
+</material>
+</page>
+
+<page type="toolpage">
+<title>Fiery Essence</title>
+<text>I had already been using fiery blood and tears for makeshift metallurgy. The time has come for professional one.
+Since both of these substances possess the similar properties, for the sake of simplicity I will be using a generic term "fiery essence".
+By pouring it into smelery, I can create alloys with molten iron, or turn iron tool parts, ingots, or even blocks into fiery ones.
+Beyond that, temperature of fiery essence is comparable to that of lava, which makes it a wonderful smeltery fuel.</text>
+<text>
+
+Can be poured directly into smeltery tanks</text>
+<icon>fierybucket</icon>
+<item>
+ <text>Fiery Blood</text>
+ <icon>fieryblood</icon>
+</item>
+<item>
+ <text>Fiery Tears</text>
+ <icon>fierytears</icon>
+</item>
+</page>
+
+<page type="materialstats">
+<title>Fiery Metal</title>
+<icon>fierysword</icon>
+<text>How did you even melt it?
+- Requires the Smeltery</text>
+<material>
+ <main>fieryingot</main>
+</material>
+</page>
+
+<page type="sectionpage">
+<title>Stalwart</title>
+<text>Though the secret of this alloy is long lost, no one can prevent me from using remaining metal however I want.
+Especially since I don't have to smelt it from scraps of goblin armor by one ingot at a time, thanks to my smeltery. 
+The strange aura irradiating from it had gone weaker over the years, but even in such condition weapons made out of this metal are capable of breathing courage into its wielder from time to time.
+
+- Stalwart: 10% chance of getting Resistance effect when hitting enemy. The effect stacks</text>
+</page>
+
+<page type="materialstats">
+<title>Knightmetal</title>
+<icon>knightlyshovel</icon>
+<text>Rightfully rieved from the goblins.
+- Requires the Smeltery</text>
+<material>
+ <main>knightlyingot</main>
+</material>
+</page>
+
+</book>

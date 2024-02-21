@@ -6,7 +6,9 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -14,9 +16,11 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 
@@ -24,9 +28,12 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import mantle.world.WorldHelper;
+import tconstruct.armor.player.TFTPlayerStats;
 import tconstruct.library.entity.ProjectileBase;
 import tconstruct.library.event.ToolCraftEvent;
+import tconstruct.library.tools.AbilityHelper;
 import tconstruct.library.weaponry.AmmoItem;
 import tconstruct.weaponry.ammo.ArrowAmmo;
 import tconstruct.weaponry.ammo.BoltAmmo;
@@ -34,6 +41,7 @@ import tconstruct.weaponry.entity.ArrowEntity;
 import tconstruct.weaponry.entity.BoltEntity;
 import twilightforest.integration.TFTinkerConstructIntegration;
 import twilightforest.integration.TFTinkerConstructIntegration.MaterialID;
+import twilightforest.item.TFItems;
 
 public class TFToolEvents {
 
@@ -121,7 +129,8 @@ public class TFToolEvents {
         ChatFormatting color = colorFromID(twilitID);
         for (int i = event.toolTip.size() - 1; i > 1; i--) {
             if (event.toolTip.get(i).contains(color.toString())) tooltipIndex = i;
-            if (event.toolTip.get(i).isEmpty() && !event.toolTip.get(i - 1).isEmpty()) lastEmptyIndex = i;
+            if (lastEmptyIndex == -1 && event.toolTip.get(i).isEmpty() && !event.toolTip.get(i - 1).isEmpty())
+                lastEmptyIndex = i;
         }
         if (lastEmptyIndex == -1) lastEmptyIndex = event.toolTip.size();
         if (twilitID == 5) tooltipIndex = lastEmptyIndex;
@@ -246,6 +255,53 @@ public class TFToolEvents {
                     }
                 }
             }
+        }
+    }
+
+    // Giving the tutorial book
+
+    @SubscribeEvent
+    public void onEntityConstructing(EntityEvent.EntityConstructing event) {
+        if (event.entity instanceof EntityPlayer && TFTPlayerStats.get((EntityPlayer) event.entity) == null) {
+            TFTPlayerStats.register((EntityPlayer) event.entity);
+        }
+    }
+
+    @SubscribeEvent
+    public void onItemPickup(EntityItemPickupEvent event) {
+        Item item = event.item.getEntityItem().getItem();
+        EntityPlayer player = event.entityPlayer;
+        TFTPlayerStats stats = TFTPlayerStats.get(player);
+
+        if (!stats.twilightManual && (item == TFItems.feather || item == TFItems.nagaScale
+                || item == TFItems.fieryBlood
+                || item == TFItems.fieryTears
+                || item == TFItems.fieryIngot
+                || item == TFItems.steeleafIngot
+                || item == TFItems.armorShard
+                || item == TFItems.shardCluster
+                || item == TFItems.knightMetal)) {
+            ItemStack diary = new ItemStack(TFTinkerConstructIntegration.manualBook);
+            if (!player.inventory.addItemStackToInventory(diary)) {
+                AbilityHelper.spawnItemAtPlayer(player, diary);
+            }
+            stats.twilightManual = true;
+        }
+    }
+
+    @SubscribeEvent
+    public void onCrafting(ItemCraftedEvent event) {
+        Item item = event.crafting.getItem();
+        EntityPlayer player = event.player;
+        TFTPlayerStats stats = TFTPlayerStats.get(player);
+
+        if (!stats.twilightManual
+                && (item == TFItems.fieryIngot || item == TFItems.shardCluster || item == TFItems.knightMetal)) {
+            ItemStack diary = new ItemStack(TFTinkerConstructIntegration.manualBook);
+            if (!player.inventory.addItemStackToInventory(diary)) {
+                AbilityHelper.spawnItemAtPlayer(player, diary);
+            }
+            stats.twilightManual = true;
         }
     }
 
