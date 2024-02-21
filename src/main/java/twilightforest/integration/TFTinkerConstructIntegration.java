@@ -156,7 +156,7 @@ public class TFTinkerConstructIntegration {
                     0,
                     0f,
                     GOLD.toString(),
-                    0xDADADA);
+                    0x3C2323);
             TConstructRegistry.toolMaterialStrings.put(
                     StatCollector.translateToLocal("material.fierymetal"),
                     TConstructRegistry.toolMaterials.get(MaterialID.FieryMetal)); // For the tutorial book to work
@@ -194,7 +194,7 @@ public class TFTinkerConstructIntegration {
                     0,
                     0f,
                     GREEN.toString(),
-                    0xDADADA);
+                    0xDBEEC1);
             TConstructRegistry.toolMaterialStrings.put(
                     StatCollector.translateToLocal("material.knightmetal"),
                     TConstructRegistry.toolMaterials.get(MaterialID.Knightmetal)); // For the tutorial book to work
@@ -655,7 +655,7 @@ public class TFTinkerConstructIntegration {
                 0,
                 0f,
                 DARK_GREEN.toString(),
-                0xDADADA);
+                0x53763B);
         TConstructRegistry.toolMaterialStrings.put(
                 StatCollector.translateToLocal("material.nagascale"),
                 TConstructRegistry.toolMaterials.get(MaterialID.NagaScale)); // For the tutorial book to work properly
@@ -682,7 +682,7 @@ public class TFTinkerConstructIntegration {
                 0,
                 0f,
                 DARK_GREEN.toString(),
-                0xDADADA);
+                0x1F3716);
         TConstructRegistry.toolMaterialStrings.put(
                 StatCollector.translateToLocal("material.steeleaf"),
                 TConstructRegistry.toolMaterials.get(MaterialID.Steeleaf)); // For the tutorial book to work properly on
