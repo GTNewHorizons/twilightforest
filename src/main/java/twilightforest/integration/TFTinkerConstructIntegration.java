@@ -56,7 +56,6 @@ import tconstruct.tools.items.TFMaterialItem;
 import tconstruct.util.Reference;
 import tconstruct.util.config.PHConstruct;
 import tconstruct.weaponry.TinkerWeaponry;
-import twilightforest.TwilightForestMod;
 import twilightforest.block.TFBlocks;
 import twilightforest.item.TFItems;
 
@@ -149,10 +148,11 @@ public class TFTinkerConstructIntegration {
                     MaterialID.FieryMetal,
                     "FieryMetal",
                     3,
-                    250,
-                    600,
-                    2,
-                    1.3F,
+                    720, // TiC2 value untouched
+                    720, // TiC2 value untouched
+                    3,
+                    1.2F, // Is 0.8 in TiC2, but in TiC1 metals' modifiers are always ≥1.0, so I used a netherrack value
+                          // to go with the fiery theme
                     0,
                     0f,
                     GOLD.toString(),
@@ -187,10 +187,10 @@ public class TFTinkerConstructIntegration {
                     MaterialID.Knightmetal,
                     "Knightmetal",
                     4,
-                    250,
-                    600,
-                    2,
-                    1.3F,
+                    900, // TiC2 value untouched
+                    700, // TiC2 value untouched
+                    3, // The converted value was 2.75. Might have to decrease later
+                    1.25F, // TiC2 value untouched
                     0,
                     0f,
                     GREEN.toString(),
@@ -613,10 +613,10 @@ public class TFTinkerConstructIntegration {
                                 6,
                                 TinkerTools.toolRod,
                                 MaterialID.FieryMetal,
-                                1.0f,
-                                1.0f,
-                                0.15f,
-                                0x866526));
+                                1.2f, // Blaze rod stats
+                                2.7f, // Blaze rod stats * 3. That's a metal after all
+                                0.08f, // Blaze rod stats
+                                0xfff32d));
 
                 TConstructRegistry.addBowMaterial(MaterialID.Knightmetal, 54, 5.2f);
                 TConstructRegistry.addArrowMaterial(MaterialID.Knightmetal, 3.3F, 0.8F);
@@ -624,12 +624,6 @@ public class TFTinkerConstructIntegration {
 
             TConstructRegistry.addDefaultToolPartMaterial(MaterialID.FieryMetal);
             TConstructRegistry.addDefaultToolPartMaterial(MaterialID.Knightmetal);
-
-            // Remove certain things from NEI
-            if (TwilightForestMod.isNeiLoaded) {
-                TFNeiIntegration.hideItem(new ItemStack(TinkerWeaponry.patternOutputs[1], 1, MaterialID.Knightmetal));
-                TFNeiIntegration.hideItem(new ItemStack(TinkerWeaponry.patternOutputs[3], 1, MaterialID.Knightmetal));
-            }
         }
 
         // Register rods
@@ -648,10 +642,10 @@ public class TFTinkerConstructIntegration {
                 MaterialID.NagaScale,
                 "NagaScale",
                 1,
-                250,
-                600,
+                460, // TiC2 value untouched
+                890, // TiC2 value untouched
                 2,
-                1.3F,
+                0.5F, // Wasn't originally intended to use as a handle + mining level is like that of a stone
                 0,
                 0f,
                 DARK_GREEN.toString(),
@@ -675,10 +669,11 @@ public class TFTinkerConstructIntegration {
                 MaterialID.Steeleaf,
                 "Steeleaf",
                 2,
-                250,
-                600,
-                2,
-                1.3F,
+                180, // TiC2 value untouched
+                700, // TiC2 value untouched
+                3, // Converted value - 2.75
+                0.8F, // Left untouched since a handle made of leaves is not a very bright idea + it gives imbalance
+                      // regenerating power
                 0,
                 0f,
                 DARK_GREEN.toString(),
@@ -740,15 +735,28 @@ public class TFTinkerConstructIntegration {
             TConstructRegistry.addArrowMaterial(MaterialID.NagaScale, 1.8F, 0.5F);
 
             TConstructRegistry.addCustomMaterial(
-                    ArrowShaftMaterial
-                            .createMaterial(4, TinkerTools.toolRod, MaterialID.NagaScale, 1.0f, 1.0f, 0.15f, 0x866526));
+                    ArrowShaftMaterial.createMaterial(
+                            4,
+                            TinkerTools.toolRod,
+                            MaterialID.NagaScale,
+                            1.4f, // TiC2 value untouched
+                            1.8f, // Bone stats. Scales are close to bones after all
+                            0.02f, // Bone stats
+                            0x53763B));
 
             TConstructRegistry.addBowMaterial(MaterialID.Steeleaf, 35, 4.75f);
             TConstructRegistry.addArrowMaterial(MaterialID.Steeleaf, 1.8F, 0.5F);
 
             TConstructRegistry.addCustomMaterial(
-                    ArrowShaftMaterial
-                            .createMaterial(5, TinkerTools.toolRod, MaterialID.Steeleaf, 1.0f, 1.0f, 0.15f, 0x866526));
+                    ArrowShaftMaterial.createMaterial(
+                            5,
+                            TinkerTools.toolRod,
+                            MaterialID.Steeleaf,
+                            0.6f, // TiC2 value untouched. Not a good idea to make arrows out of leaves, but they do
+                                  // regenerate
+                            0.5f, // Reed stats. Leaves are very light
+                            0.15f, // Stick stats. I don't think that it should break more or less often
+                            0x1F3716));
 
             // Arrow Fletching Materials
             fletching = new TFFletching().setUnlocalizedName("tconstruct.Fletching");
