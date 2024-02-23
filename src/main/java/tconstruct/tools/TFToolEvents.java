@@ -307,7 +307,7 @@ public class TFToolEvents {
             e.printStackTrace();
         }
     }
-  
+
     @SubscribeEvent
     public void bucketFill(FillBucketEvent evt) {
         if (evt.current.getItem() == Items.bucket && evt.target.typeOfHit == MovingObjectType.BLOCK) {
