@@ -61,6 +61,8 @@ import twilightforest.item.TFItems;
 
 public class TFTinkerConstructIntegration {
 
+    public static boolean hasClay = GameRegistry.findItem("TConstruct", "clayPattern") != null;
+
     public static Item fletching;
     public static Item materials;
     public static Item buckets;
@@ -363,7 +365,7 @@ public class TFTinkerConstructIntegration {
             for (int iter = 0; iter < TinkerTools.patternOutputs.length; iter++) {
                 if (TinkerTools.patternOutputs[iter] != null) {
                     ItemStack cast = new ItemStack(TinkerSmeltery.metalPattern, 1, iter + 1);
-                    ItemStack clay_cast = new ItemStack(TinkerSmeltery.clayPattern, 1, iter + 1);
+                    ItemStack clay_cast = hasClay ? new ItemStack(TinkerSmeltery.clayPattern, 1, iter + 1) : null;
                     fluidAmount = ((IPattern) TinkerSmeltery.metalPattern).getPatternCost(cast)
                             * TConstruct.ingotLiquidValue
                             / 2;
@@ -372,7 +374,7 @@ public class TFTinkerConstructIntegration {
                         fs = liquids[iterTwo].getFluid();
                         ItemStack metalCast = new ItemStack(TinkerTools.patternOutputs[iter], 1, liquidDamage[iterTwo]);
                         tableCasting.addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), cast, 50);
-                        if (isValidClayCast(iter)) {
+                        if (hasClay && isValidClayCast(iter)) {
                             tableCasting
                                     .addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), clay_cast, true, 50);
                         }
@@ -424,7 +426,7 @@ public class TFTinkerConstructIntegration {
                             new ItemStack(Items.glass_bottle)));
 
             ItemStack ingotcast = new ItemStack(TinkerSmeltery.metalPattern, 1, 0);
-            ItemStack ingotcast_clay = new ItemStack(TinkerSmeltery.clayPattern, 1, 0);
+            ItemStack ingotcast_clay = hasClay ? new ItemStack(TinkerSmeltery.clayPattern, 1, 0) : null;
 
             // Patterns casting
             Item[] ingots = { TFItems.fieryIngot, TFItems.ironwoodIngot, TFItems.knightMetal };
@@ -445,7 +447,7 @@ public class TFTinkerConstructIntegration {
 
             // Nuggets Casting
             ItemStack nuggetcast = new ItemStack(TinkerSmeltery.metalPattern, 1, 27);
-            ItemStack nuggetcast_clay = new ItemStack(TinkerSmeltery.clayPattern, 1, 27);
+            ItemStack nuggetcast_clay = hasClay ? new ItemStack(TinkerSmeltery.clayPattern, 1, 27) : null;
             for (int i = 0; i < materialStrings.length; i++) {
                 tableCasting.addCastingRecipe(
                         nuggetcast,
@@ -470,24 +472,26 @@ public class TFTinkerConstructIntegration {
                     new ItemStack(materials, 1, 0),
                     new FluidStack(moltenFieryMetalFluid, TConstruct.nuggetLiquidValue),
                     nuggetcast,
-                    40);
-            tableCasting.addCastingRecipe(
-                    new ItemStack(materials, 1, 0),
-                    new FluidStack(moltenFieryMetalFluid, TConstruct.nuggetLiquidValue),
-                    nuggetcast_clay,
-                    true,
                     40); // Fiery Metal
             tableCasting.addCastingRecipe(
                     new ItemStack(materials, 1, 1),
                     new FluidStack(moltenKnightmetalFluid, TConstruct.nuggetLiquidValue),
                     nuggetcast,
-                    40);
-            tableCasting.addCastingRecipe(
-                    new ItemStack(materials, 1, 1),
-                    new FluidStack(moltenKnightmetalFluid, TConstruct.nuggetLiquidValue),
-                    nuggetcast_clay,
-                    true,
                     40); // Knightmetal
+            if (hasClay) {
+                tableCasting.addCastingRecipe(
+                        new ItemStack(materials, 1, 0),
+                        new FluidStack(moltenFieryMetalFluid, TConstruct.nuggetLiquidValue),
+                        nuggetcast_clay,
+                        true,
+                        40); // Fiery Metal
+                tableCasting.addCastingRecipe(
+                        new ItemStack(materials, 1, 1),
+                        new FluidStack(moltenKnightmetalFluid, TConstruct.nuggetLiquidValue),
+                        nuggetcast_clay,
+                        true,
+                        40); // Knightmetal
+            }
 
             // Ingots Casting
             tableCasting.addCastingRecipe(
@@ -516,18 +520,20 @@ public class TFTinkerConstructIntegration {
                     50); // Knightmetal
 
             // Clay Casting
-            tableCasting.addCastingRecipe(
-                    new ItemStack(TFItems.fieryIngot, 1, 0),
-                    new FluidStack(moltenFieryMetalFluid, TConstruct.ingotLiquidValue),
-                    ingotcast_clay,
-                    true,
-                    50); // Fiery Metal
-            tableCasting.addCastingRecipe(
-                    new ItemStack(TFItems.knightMetal, 1, 0),
-                    new FluidStack(moltenKnightmetalFluid, TConstruct.ingotLiquidValue),
-                    ingotcast_clay,
-                    true,
-                    50); // Knightmetal
+            if (hasClay) {
+                tableCasting.addCastingRecipe(
+                        new ItemStack(TFItems.fieryIngot, 1, 0),
+                        new FluidStack(moltenFieryMetalFluid, TConstruct.ingotLiquidValue),
+                        ingotcast_clay,
+                        true,
+                        50); // Fiery Metal
+                tableCasting.addCastingRecipe(
+                        new ItemStack(TFItems.knightMetal, 1, 0),
+                        new FluidStack(moltenKnightmetalFluid, TConstruct.ingotLiquidValue),
+                        ingotcast_clay,
+                        true,
+                        50); // Knightmetal
+            }
 
             LiquidCasting basinCasting = TConstructRegistry.getBasinCasting();
 
@@ -571,21 +577,23 @@ public class TFTinkerConstructIntegration {
                             50);
                 }
                 // Register clay part casting for BowLimbs
-                for (int iterTwo = 0; iterTwo < liquids.length; iterTwo++) {
-                    fs = liquids[iterTwo].getFluid();
-                    ItemStack clay_cast = new ItemStack(TinkerWeaponry.clayPattern, 1, 3);
-                    fluidAmount = TinkerWeaponry.clayPattern.getPatternCost(clay_cast) * TConstruct.ingotLiquidValue
-                            / 2;
-                    tableCasting.addCastingRecipe(
-                            new ItemStack(TinkerWeaponry.patternOutputs[3], 1, liquidDamage[iterTwo]),
-                            new FluidStack(fs, fluidAmount),
-                            clay_cast,
-                            true,
-                            50);
+                if (hasClay) {
+                    for (int iterTwo = 0; iterTwo < liquids.length; iterTwo++) {
+                        fs = liquids[iterTwo].getFluid();
+                        ItemStack clay_cast = new ItemStack(TinkerWeaponry.clayPattern, 1, 3);
+                        fluidAmount = TinkerWeaponry.clayPattern.getPatternCost(clay_cast) * TConstruct.ingotLiquidValue
+                                / 2;
+                        tableCasting.addCastingRecipe(
+                                new ItemStack(TinkerWeaponry.patternOutputs[3], 1, liquidDamage[iterTwo]),
+                                new FluidStack(fs, fluidAmount),
+                                clay_cast,
+                                true,
+                                50);
+                    }
                 }
 
                 ItemStack cast = new ItemStack(TinkerSmeltery.metalPattern, 1, 25);
-                ItemStack clay_cast = new ItemStack(TinkerSmeltery.clayPattern, 1, 25);
+                ItemStack clay_cast = hasClay ? new ItemStack(TinkerSmeltery.clayPattern, 1, 25) : null;
                 fluidAmount = ((IPattern) TinkerSmeltery.metalPattern).getPatternCost(cast)
                         * TConstruct.ingotLiquidValue
                         / 2;
@@ -594,7 +602,8 @@ public class TFTinkerConstructIntegration {
                     fs = liquids[iterTwo].getFluid();
                     ItemStack metalCast = new ItemStack(TinkerWeaponry.arrowhead, 1, liquidDamage[iterTwo]);
                     tableCasting.addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), cast, 50);
-                    tableCasting.addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), clay_cast, true, 50);
+                    if (hasClay)
+                        tableCasting.addCastingRecipe(metalCast, new FluidStack(fs, fluidAmount), clay_cast, true, 50);
                     Smeltery.addMelting(FluidType.getFluidType(fs), metalCast, 0, fluidAmount);
                 }
 
