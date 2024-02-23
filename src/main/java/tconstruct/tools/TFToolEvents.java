@@ -1,10 +1,12 @@
 package tconstruct.tools;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -187,31 +189,36 @@ public class TFToolEvents {
     public void onProjectileHit(LivingHurtEvent event) {
         if (event.source instanceof EntityDamageSourceIndirect) {
             EntityDamageSourceIndirect damageSource = (EntityDamageSourceIndirect) event.source;
-            if (damageSource.damageSourceEntity instanceof ProjectileBase) {
-                ProjectileBase entity = (ProjectileBase) damageSource.damageSourceEntity;
+            Entity damageSourceEntity = getDamageSourceEntity(damageSource);
+            if (damageSourceEntity instanceof ProjectileBase) {
+                ProjectileBase entity = (ProjectileBase) damageSourceEntity;
                 ItemStack projectile = entity.getEntityItem();
                 if (projectile.getTagCompound().getCompoundTag("InfiTool").hasKey("Stalwart")) {
-                    if (damageSource.indirectEntity instanceof EntityLivingBase && random.nextInt(10) == 0) {
-                        PotionEffect potionEffect = ((EntityLivingBase) damageSource.indirectEntity)
-                                .getActivePotionEffect(Potion.resistance);
-                        int amplifier = 0;
-                        int duration = 200;
-                        if (potionEffect != null) {
-                            amplifier = (potionEffect.getAmplifier() < 2) ? potionEffect.getAmplifier() + 1 : 2;
-                            duration = (potionEffect.getDuration() < 401) ? potionEffect.getDuration() + 200 : 600;
-                        }
-                        ((EntityLivingBase) damageSource.indirectEntity)
-                                .addPotionEffect(new PotionEffect(Potion.resistance.id, duration, amplifier));
+                    Entity indirectEntity = getIndirectEntity(damageSource);
+                    if (indirectEntity instanceof EntityLivingBase) {
+                        stalwartBuff((EntityLivingBase) indirectEntity);
                     }
                 }
-                if (damageSource.damageSourceEntity instanceof ArrowEntity
-                        || damageSource.damageSourceEntity instanceof BoltEntity) {
+                if (damageSourceEntity instanceof ArrowEntity || damageSourceEntity instanceof BoltEntity) {
                     int accessory = projectile.getTagCompound().getCompoundTag("InfiTool").getInteger("Accessory");
                     if (accessory == 5) {
-                        damageSource.indirectEntity = null;
+                        setIndirectEntity(damageSource, null);
                     }
                 }
             }
+        }
+    }
+
+    private void stalwartBuff(EntityLivingBase entity) {
+        if (random.nextInt(10) == 0) {
+            PotionEffect potionEffect = entity.getActivePotionEffect(Potion.resistance);
+            int amplifier = 0;
+            int duration = 200;
+            if (potionEffect != null) {
+                amplifier = (potionEffect.getAmplifier() < 2) ? potionEffect.getAmplifier() + 1 : 2;
+                duration = (potionEffect.getDuration() < 401) ? potionEffect.getDuration() + 200 : 600;
+            }
+            entity.addPotionEffect(new PotionEffect(Potion.resistance.id, duration, amplifier));
         }
     }
 
@@ -219,15 +226,85 @@ public class TFToolEvents {
     public void onProjectileKill(LivingDeathEvent event) {
         if (event.source instanceof EntityDamageSourceIndirect) {
             EntityDamageSourceIndirect damageSource = (EntityDamageSourceIndirect) event.source;
-            if (damageSource.damageSourceEntity instanceof ArrowEntity
-                    || damageSource.damageSourceEntity instanceof BoltEntity) {
-                ProjectileBase entity = (ProjectileBase) damageSource.damageSourceEntity;
+            Entity damageSourceEntity = getDamageSourceEntity(damageSource);
+            if (damageSourceEntity instanceof ArrowEntity || damageSourceEntity instanceof BoltEntity) {
+                ProjectileBase entity = (ProjectileBase) damageSourceEntity;
                 int accessory = entity.getEntityItem().getTagCompound().getCompoundTag("InfiTool")
                         .getInteger("Accessory");
                 if (accessory == 5) {
-                    damageSource.indirectEntity = null;
+                    setIndirectEntity(damageSource, null);
                 }
             }
+        }
+    }
+
+    private Entity getDamageSourceEntity(EntityDamageSourceIndirect damageSource) {
+        try {
+            Field field;
+            field = damageSource.getClass().getDeclaredField("damageSourceEntity");
+            field.setAccessible(true);
+            return (Entity) field.get(damageSource);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void setDamageSourceEntity(EntityDamageSourceIndirect damageSource, Entity entity) {
+        try {
+            Field field;
+            field = damageSource.getClass().getDeclaredField("damageSourceEntity");
+            field.setAccessible(true);
+            field.set(damageSource, entity);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Entity getIndirectEntity(EntityDamageSourceIndirect damageSource) {
+        try {
+            Field field;
+            field = damageSource.getClass().getDeclaredField("indirectEntity");
+            field.setAccessible(true);
+            return (Entity) field.get(damageSource);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void setIndirectEntity(EntityDamageSourceIndirect damageSource, Entity entity) {
+        try {
+            Field field;
+            field = damageSource.getClass().getDeclaredField("indirectEntity");
+            field.setAccessible(true);
+            field.set(damageSource, entity);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
     }
 
