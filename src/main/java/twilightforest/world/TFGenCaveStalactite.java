@@ -180,7 +180,7 @@ public class TFGenCaveStalactite extends TFGenerator {
                 }
 
                 for (int dy = 0; dy != (spikeLength * dir); dy += dir) {
-                    setBlock(world, x + dx, y + dy, z + dz, blockID);
+                    StalactiteOreGen.placeOre(world, x + dx, y + dy, z + dz, blockID);
                 }
             }
         }
