@@ -16,6 +16,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -25,8 +26,6 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-
-import com.mojang.realmsclient.gui.ChatFormatting;
 
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -128,7 +127,7 @@ public class TFToolEvents {
         int tooltipIndex = 1;
         int lastEmptyIndex = -1;
         int twilitID = tags.getInteger("TwilitID");
-        ChatFormatting color = colorFromID(twilitID);
+        EnumChatFormatting color = colorFromID(twilitID);
         for (int i = event.toolTip.size() - 1; i > 1; i--) {
             if (event.toolTip.get(i).contains(color.toString())) tooltipIndex = i;
             if (lastEmptyIndex == -1 && event.toolTip.get(i).isEmpty() && !event.toolTip.get(i - 1).isEmpty())
@@ -141,32 +140,32 @@ public class TFToolEvents {
         if (event.itemStack.getItem() instanceof ArrowAmmo || event.itemStack.getItem() instanceof BoltAmmo)
             if (tags.getInteger("Accessory") == 5) event.toolTip.add(
                     lastEmptyIndex + 1,
-                    "" + ChatFormatting.DARK_GRAY + StatCollector.translateToLocal("material.raven_feather.ability"));
+                    "" + EnumChatFormatting.DARK_GRAY + StatCollector.translateToLocal("material.raven_feather.ability"));
         if (tags.hasKey("TFFiery")) {
             event.toolTip.add(
                     tooltipIndex + 1,
-                    "" + ChatFormatting.GOLD + StatCollector.translateToLocal("modifier.tooltip.Auto-Smelt"));
+                    "" + EnumChatFormatting.GOLD + StatCollector.translateToLocal("modifier.tooltip.Auto-Smelt"));
             event.toolTip.add(
                     tooltipIndex + 2,
-                    "" + ChatFormatting.GOLD + StatCollector.translateToLocal("modifier.tooltip.Fiery"));
+                    "" + EnumChatFormatting.GOLD + StatCollector.translateToLocal("modifier.tooltip.Fiery"));
         }
     }
 
-    private ChatFormatting colorFromID(int materialID) {
-        ChatFormatting cf;
+    private EnumChatFormatting colorFromID(int materialID) {
+        EnumChatFormatting cf;
         switch (materialID) {
             default:
-                cf = ChatFormatting.DARK_GRAY;
+                cf = EnumChatFormatting.DARK_GRAY;
                 break;
             case MaterialID.FieryMetal:
-                cf = ChatFormatting.GOLD;
+                cf = EnumChatFormatting.GOLD;
                 break;
             case MaterialID.Knightmetal:
-                cf = ChatFormatting.GREEN;
+                cf = EnumChatFormatting.GREEN;
                 break;
             case MaterialID.NagaScale:
             case MaterialID.Steeleaf:
-                cf = ChatFormatting.DARK_GREEN;
+                cf = EnumChatFormatting.DARK_GREEN;
                 break;
         }
         return cf;
