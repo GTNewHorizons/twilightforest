@@ -1,6 +1,5 @@
 package tconstruct.tools;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -140,7 +139,8 @@ public class TFToolEvents {
         if (event.itemStack.getItem() instanceof ArrowAmmo || event.itemStack.getItem() instanceof BoltAmmo)
             if (tags.getInteger("Accessory") == 5) event.toolTip.add(
                     lastEmptyIndex + 1,
-                    "" + EnumChatFormatting.DARK_GRAY + StatCollector.translateToLocal("material.raven_feather.ability"));
+                    "" + EnumChatFormatting.DARK_GRAY
+                            + StatCollector.translateToLocal("material.raven_feather.ability"));
         if (tags.hasKey("TFFiery")) {
             event.toolTip.add(
                     tooltipIndex + 1,
@@ -186,22 +186,20 @@ public class TFToolEvents {
 
     @SubscribeEvent
     public void onProjectileHit(LivingHurtEvent event) {
-        if (event.source instanceof EntityDamageSourceIndirect) {
-            EntityDamageSourceIndirect damageSource = (EntityDamageSourceIndirect) event.source;
-            Entity damageSourceEntity = getDamageSourceEntity(damageSource);
-            if (damageSourceEntity instanceof ProjectileBase) {
-                ProjectileBase entity = (ProjectileBase) damageSourceEntity;
+        if (event.source instanceof EntityDamageSourceIndirect damageSource) {
+            Entity damageSourceEntity = damageSource.damageSourceEntity;
+            if (damageSourceEntity instanceof ProjectileBase entity) {
                 ItemStack projectile = entity.getEntityItem();
                 if (projectile.getTagCompound().getCompoundTag("InfiTool").hasKey("Stalwart")) {
-                    Entity indirectEntity = getIndirectEntity(damageSource);
-                    if (indirectEntity instanceof EntityLivingBase) {
-                        stalwartBuff((EntityLivingBase) indirectEntity);
+                    Entity indirectEntity = damageSource.indirectEntity;
+                    if (indirectEntity instanceof EntityLivingBase entityLiving) {
+                        stalwartBuff(entityLiving);
                     }
                 }
                 if (damageSourceEntity instanceof ArrowEntity || damageSourceEntity instanceof BoltEntity) {
                     int accessory = projectile.getTagCompound().getCompoundTag("InfiTool").getInteger("Accessory");
                     if (accessory == 5) {
-                        setIndirectEntity(damageSource, null);
+                        damageSource.indirectEntity = null;
                     }
                 }
             }
@@ -223,87 +221,16 @@ public class TFToolEvents {
 
     @SubscribeEvent
     public void onProjectileKill(LivingDeathEvent event) {
-        if (event.source instanceof EntityDamageSourceIndirect) {
-            EntityDamageSourceIndirect damageSource = (EntityDamageSourceIndirect) event.source;
-            Entity damageSourceEntity = getDamageSourceEntity(damageSource);
+        if (event.source instanceof EntityDamageSourceIndirect damageSource) {
+            Entity damageSourceEntity = damageSource.damageSourceEntity;
             if (damageSourceEntity instanceof ArrowEntity || damageSourceEntity instanceof BoltEntity) {
                 ProjectileBase entity = (ProjectileBase) damageSourceEntity;
                 int accessory = entity.getEntityItem().getTagCompound().getCompoundTag("InfiTool")
                         .getInteger("Accessory");
                 if (accessory == 5) {
-                    setIndirectEntity(damageSource, null);
+                    damageSource.indirectEntity = null;
                 }
             }
-        }
-    }
-
-    private Entity getDamageSourceEntity(EntityDamageSourceIndirect damageSource) {
-        try {
-            Field field;
-            field = damageSource.getClass().getDeclaredField("damageSourceEntity");
-            field.setAccessible(true);
-            return (Entity) field.get(damageSource);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void setDamageSourceEntity(EntityDamageSourceIndirect damageSource, Entity entity) {
-        try {
-            Field field;
-            field = damageSource.getClass().getDeclaredField("damageSourceEntity");
-            field.setAccessible(true);
-            field.set(damageSource, entity);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Entity getIndirectEntity(EntityDamageSourceIndirect damageSource) {
-        try {
-            Field field;
-            field = damageSource.getClass().getDeclaredField("indirectEntity");
-            field.setAccessible(true);
-            return (Entity) field.get(damageSource);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void setIndirectEntity(EntityDamageSourceIndirect damageSource, Entity entity) {
-        try {
-            Field field;
-            field = damageSource.getClass().getDeclaredField("indirectEntity");
-            field.setAccessible(true);
-            field.set(damageSource, entity);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
         }
     }
 
@@ -338,8 +265,8 @@ public class TFToolEvents {
 
     @SubscribeEvent
     public void onEntityConstructing(EntityEvent.EntityConstructing event) {
-        if (event.entity instanceof EntityPlayer && TFTPlayerStats.get((EntityPlayer) event.entity) == null) {
-            TFTPlayerStats.register((EntityPlayer) event.entity);
+        if (event.entity instanceof EntityPlayer player && TFTPlayerStats.get(player) == null) {
+            TFTPlayerStats.register(player);
         }
     }
 
