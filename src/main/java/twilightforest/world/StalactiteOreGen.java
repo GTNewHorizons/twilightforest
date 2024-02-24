@@ -1,20 +1,21 @@
 package twilightforest.world;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
-import net.minecraft.world.World;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.minecraft.block.Block;
+import net.minecraft.world.World;
+
+import com.google.common.collect.ImmutableList;
+
 public class StalactiteOreGen {
-    private static final List<OrePlacer> orePlacers =
-            new LinkedList<>(ImmutableList.of(new DefaultOrePlacer()));
+
+    private static final List<OrePlacer> orePlacers = new LinkedList<>(ImmutableList.of(new DefaultOrePlacer()));
 
     /**
-     * Add an ore placing handler that will return true when it determines it
-     * wants to override the default ore placing behavior.
+     * Add an ore placing handler that will return true when it determines it wants to override the default ore placing
+     * behavior.
      * <p>
      * The OrePlacer must NOT have any side effects if it returns false.
      *
