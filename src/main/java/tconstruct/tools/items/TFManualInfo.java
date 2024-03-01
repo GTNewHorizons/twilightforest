@@ -26,7 +26,6 @@ public class TFManualInfo {
     }
 
     public BookData initManual(BookData data, String unlocName, String toolTip, Document xmlDoc, String itemImage) {
-        // proxy.readManuals();
         data.unlocalizedName = unlocName;
         data.toolTip = unlocName;
         data.modID = "TConstruct";

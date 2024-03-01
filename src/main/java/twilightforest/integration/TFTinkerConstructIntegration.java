@@ -28,7 +28,6 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.w3c.dom.Document;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
 import mantle.blocks.BlockUtils;
 import mantle.lib.client.MantleClientRegistry;
@@ -847,9 +846,9 @@ public class TFTinkerConstructIntegration {
 
     public static void readManuals() {
         initManualIcons();
-        if (!Loader.isModLoaded("dreamcraft")) {
-            readTinkersConstructManuals();
-        }
+        // if (!Loader.isModLoaded("dreamcraft")) {
+        readTinkersConstructManuals();
+        // }
     }
 
     private static void readTinkersConstructManuals() {
