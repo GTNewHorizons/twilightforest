@@ -834,6 +834,12 @@ public class TFTinkerConstructIntegration {
         manualBook = new TFManual();
         GameRegistry.registerItem(manualBook, "manualBook");
         readManuals();
+
+        GameRegistry.addShapelessRecipe(
+                new ItemStack(manualBook),
+                new ItemStack(TinkerTools.blankPattern, 1, 0),
+                new ItemStack(Items.paper),
+                new ItemStack(TFItems.magicMapFocus));
     }
 
     public static boolean isValidClayCast(int meta) {
