@@ -344,7 +344,7 @@ public class TwilightForestMod {
 
         // Tinkers Construct integration
         if (Loader.isModLoaded("TConstruct")) {
-            TFTinkerConstructIntegration.registerTinkersConstructIntegration();
+            TFTinkerConstructIntegration.registerTinkersConstructIntegration(evt);
         } else {
             FMLLog.info("[TwilightForest] Did not find Tinkers Construct, did not load Tinkers Construct integration.");
         }

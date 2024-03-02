@@ -28,7 +28,9 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.w3c.dom.Document;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
 import mantle.blocks.BlockUtils;
 import mantle.lib.client.MantleClientRegistry;
 import tconstruct.TConstruct;
@@ -85,7 +87,7 @@ public class TFTinkerConstructIntegration {
         public static final int Steeleaf = 45;
     }
 
-    public static void registerTinkersConstructIntegration() {
+    public static void registerTinkersConstructIntegration(FMLPostInitializationEvent evt) {
         TFToolEvents toolEvents = new TFToolEvents();
         MinecraftForge.EVENT_BUS.register(toolEvents);
         FMLCommonHandler.instance().bus().register(toolEvents);
@@ -833,7 +835,7 @@ public class TFTinkerConstructIntegration {
         // Register books
         manualBook = new TFManual();
         GameRegistry.registerItem(manualBook, "manualBook");
-        readManuals();
+        if (evt.getSide() == Side.CLIENT) readManuals();
 
         GameRegistry.addShapelessRecipe(
                 new ItemStack(manualBook),
