@@ -4,14 +4,8 @@ import static net.minecraft.util.EnumChatFormatting.DARK_GREEN;
 import static net.minecraft.util.EnumChatFormatting.GOLD;
 import static net.minecraft.util.EnumChatFormatting.GREEN;
 
-import java.io.InputStream;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -25,21 +19,19 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.oredict.OreDictionary;
 
-import org.w3c.dom.Document;
-
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.registry.GameRegistry;
 import mantle.blocks.BlockUtils;
-import mantle.lib.client.MantleClientRegistry;
 import tconstruct.TConstruct;
 import tconstruct.blocks.TFFieryEssence;
+import tconstruct.common.TProxyCommon;
 import tconstruct.library.TConstructRegistry;
 import tconstruct.library.client.TConstructClientRegistry;
 import tconstruct.library.crafting.FluidType;
 import tconstruct.library.crafting.LiquidCasting;
 import tconstruct.library.crafting.PatternBuilder;
 import tconstruct.library.crafting.Smeltery;
-import tconstruct.library.crafting.ToolBuilder;
 import tconstruct.library.tools.ToolCore;
 import tconstruct.library.util.IPattern;
 import tconstruct.library.weaponry.ArrowShaftMaterial;
@@ -50,7 +42,6 @@ import tconstruct.tools.TFToolEvents;
 import tconstruct.tools.TinkerTools;
 import tconstruct.tools.items.TFFletching;
 import tconstruct.tools.items.TFManual;
-import tconstruct.tools.items.TFManualInfo;
 import tconstruct.tools.items.TFMaterialItem;
 import tconstruct.util.Reference;
 import tconstruct.util.config.PHConstruct;
@@ -59,6 +50,10 @@ import twilightforest.block.TFBlocks;
 import twilightforest.item.TFItems;
 
 public class TFTinkerConstructIntegration {
+
+    /* Proxies for sides, used for graphics processing and client controls */
+    @SidedProxy(clientSide = "tconstruct.client.TFTProxyClient", serverSide = "tconstruct.common.TProxyCommon")
+    public static TProxyCommon proxy;
 
     public static boolean hasClay = GameRegistry.findItem("TConstruct", "clayPattern") != null;
 
@@ -833,7 +828,7 @@ public class TFTinkerConstructIntegration {
         // Register books
         manualBook = new TFManual();
         GameRegistry.registerItem(manualBook, "manualBook");
-        readManuals();
+        proxy.initialize();
 
         GameRegistry.addShapelessRecipe(
                 new ItemStack(manualBook),
@@ -844,89 +839,5 @@ public class TFTinkerConstructIntegration {
 
     public static boolean isValidClayCast(int meta) {
         return meta < 14 || meta == 22 || meta == 25;
-    }
-
-    // Registering documents
-    public static Document twilightMaterials;
-    public static TFManualInfo manualData;
-
-    public static void readManuals() {
-        initManualIcons();
-        // if (!Loader.isModLoaded("dreamcraft")) {
-        readTinkersConstructManuals();
-        // }
-    }
-
-    private static void readTinkersConstructManuals() {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        String CurrentLanguage = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode();
-        Document twilightMaterials_cl = readManual(
-                "/assets/tinker/manuals/" + CurrentLanguage + "/twilightMaterials.xml",
-                dbFactory);
-
-        twilightMaterials = twilightMaterials_cl != null ? twilightMaterials_cl
-                : readManual("/assets/tinker/manuals/en_US/twilightMaterials.xml", dbFactory);
-
-        manualData = new TFManualInfo();
-    }
-
-    static Document readManual(String location, DocumentBuilderFactory dbFactory) {
-        try {
-            InputStream stream = TConstruct.class.getResourceAsStream(location);
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(stream);
-            doc.getDocumentElement().normalize();
-            return doc;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static void initManualIcons() {
-        // ToolIcons
-        MantleClientRegistry.registerManualIcon(
-                "nagapick",
-                ToolBuilder.instance.buildTool(
-                        new ItemStack(TinkerTools.pickaxeHead, 1, 44),
-                        new ItemStack(TinkerTools.toolRod, 1, 0),
-                        new ItemStack(TinkerTools.binding, 1, 44),
-                        ""));
-        MantleClientRegistry.registerManualIcon(
-                "leafaxe",
-                ToolBuilder.instance.buildTool(
-                        new ItemStack(TinkerTools.hatchetHead, 1, 45),
-                        new ItemStack(TinkerTools.toolRod, 1, 0),
-                        null,
-                        ""));
-        MantleClientRegistry.registerManualIcon(
-                "fierysword",
-                ToolBuilder.instance.buildTool(
-                        new ItemStack(TinkerTools.swordBlade, 1, 42),
-                        new ItemStack(TinkerTools.toolRod, 1, 42),
-                        new ItemStack(TinkerTools.wideGuard, 1, 42),
-                        ""));
-        MantleClientRegistry.registerManualIcon(
-                "knightlyshovel",
-                ToolBuilder.instance.buildTool(
-                        new ItemStack(TinkerTools.shovelHead, 1, 43),
-                        new ItemStack(TinkerTools.toolRod, 1, 0),
-                        null,
-                        ""));
-
-        // Items
-        MantleClientRegistry.registerManualIcon("ravenfletching", new ItemStack(fletching));
-        MantleClientRegistry.registerManualIcon("ravenfeather", new ItemStack(TFItems.feather));
-        MantleClientRegistry.registerManualIcon("nagascale", new ItemStack(TFItems.nagaScale));
-        MantleClientRegistry.registerManualIcon("steeleaf", new ItemStack(TFItems.steeleafIngot));
-        MantleClientRegistry.registerManualIcon("fierybucket", new ItemStack(buckets));
-        MantleClientRegistry.registerManualIcon("fieryblood", new ItemStack(TFItems.fieryBlood));
-        MantleClientRegistry.registerManualIcon("fierytears", new ItemStack(TFItems.fieryTears));
-        MantleClientRegistry.registerManualIcon("fieryingot", new ItemStack(TFItems.fieryIngot));
-        MantleClientRegistry.registerManualIcon("knightlyingot", new ItemStack(TFItems.knightMetal));
-
-        MantleClientRegistry.registerManualIcon("bone", new ItemStack(Items.bone));
-        MantleClientRegistry.registerManualIcon("obsidian", new ItemStack(Blocks.obsidian));
-        MantleClientRegistry.registerManualIcon("netherrack", new ItemStack(Blocks.netherrack));
     }
 }

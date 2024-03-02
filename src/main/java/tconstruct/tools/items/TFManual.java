@@ -14,8 +14,8 @@ import mantle.books.BookData;
 import mantle.client.gui.GuiManual;
 import mantle.items.abstracts.CraftingItem;
 import tconstruct.TConstruct;
+import tconstruct.client.TFTProxyClient;
 import tconstruct.library.TConstructRegistry;
-import twilightforest.integration.TFTinkerConstructIntegration;
 
 public class TFManual extends CraftingItem {
 
@@ -42,7 +42,7 @@ public class TFManual extends CraftingItem {
     }
 
     private BookData getData(ItemStack stack) {
-        return TFTinkerConstructIntegration.manualData.twilightMaterials;
+        return TFTProxyClient.manualData.twilightMaterials;
     }
 
     @Override

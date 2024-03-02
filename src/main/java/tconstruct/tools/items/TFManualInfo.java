@@ -9,7 +9,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import mantle.books.BookData;
 import mantle.books.BookDataStore;
-import twilightforest.integration.TFTinkerConstructIntegration;
+import tconstruct.client.TFTProxyClient;
 
 public class TFManualInfo {
 
@@ -21,7 +21,7 @@ public class TFManualInfo {
                 twilightMaterials,
                 "tconstruct.manual.twilightmaterials",
                 "\u00a7o" + StatCollector.translateToLocal("manualTF.tooltip"),
-                side == Side.CLIENT ? TFTinkerConstructIntegration.twilightMaterials : null,
+                side == Side.CLIENT ? TFTProxyClient.twilightMaterials : null,
                 "tinker:tinkerbook_diary");
     }
 
