@@ -49,6 +49,7 @@ Moreover, once stripped of its protective properties it truly unleashes its magi
 <title>Naga Scale</title>
 <icon>nagapick</icon>
 <text>Non-purpose use of armor material.</text>
+<toolmaterial>NagaScale</toolmaterial>
 <material>
  <main>nagascale</main>
 </material>
@@ -68,6 +69,7 @@ By putting a toolpart made out of torn steeleaves into my tool, I can endue it w
 <title>Steeleaf</title>
 <icon>leafaxe</icon>
 <text>Doesn't grow on trees.</text>
+<toolmaterial>Steeleaf</toolmaterial>
 <material>
  <main>steeleaf</main>
 </material>
@@ -98,6 +100,7 @@ Can be poured directly into smeltery tanks</text>
 <icon>fierysword</icon>
 <text>How did you even melt it?
 - Requires the Smeltery</text>
+<toolmaterial>FieryMetal</toolmaterial>
 <material>
  <main>fieryingot</main>
 </material>
@@ -117,6 +120,7 @@ The strange aura irradiating from it had gone weaker over the years, but even in
 <icon>knightlyshovel</icon>
 <text>Rightfully rieved from the goblins.
 - Requires the Smeltery</text>
+<toolmaterial>Knightmetal</toolmaterial>
 <material>
  <main>knightlyingot</main>
 </material>

@@ -49,6 +49,7 @@
 <title>Чешуя Наги</title>
 <icon>nagapick</icon>
 <text>Нецелевое использование брони.</text>
+<toolmaterial>NagaScale</toolmaterial>
 <material>
  <main>nagascale</main>
 </material>
@@ -68,6 +69,7 @@
 <title>Сталелист</title>
 <icon>leafaxe</icon>
 <text>На деревьях не растёт.</text>
+<toolmaterial>Steeleaf</toolmaterial>
 <material>
  <main>steeleaf</main>
 </material>
@@ -98,6 +100,7 @@
 <icon>fierysword</icon>
 <text>Как его вообще удалось расплавить?
 - Требуется плавильня</text>
+<toolmaterial>FieryMetal</toolmaterial>
 <material>
  <main>fieryingot</main>
 </material>
@@ -117,6 +120,7 @@
 <icon>knightlyshovel</icon>
 <text>Честно отобран у гоблинов.
 - Требуется плавильня</text>
+<toolmaterial>Knightmetal</toolmaterial>
 <material>
  <main>knightlyingot</main>
 </material>
