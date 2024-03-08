@@ -61,6 +61,7 @@ import twilightforest.tileentity.TileEntityTFSnowQueenSpawner;
 import twilightforest.tileentity.TileEntityTFTowerBossSpawner;
 import twilightforest.tileentity.TileEntityTFTowerBuilder;
 import twilightforest.tileentity.TileEntityTFTrophy;
+import twilightforest.world.TFGenCaveStalactite;
 import twilightforest.world.WorldProviderTwilightForest;
 
 @Mod(modid = TwilightForestMod.ID, name = "The Twilight Forest", version = TwilightForestMod.VERSION)
@@ -238,6 +239,9 @@ public class TwilightForestMod {
 
         // just call this so that we register structure IDs correctly
         new StructureTFMajorFeatureStart();
+        
+        // register vanilla stalactite ores
+        TFGenCaveStalactite.registerVanillaStalactites();
 
         // check if various integrations are required
         isSkinportLoaded = Loader.isModLoaded("skinport");
