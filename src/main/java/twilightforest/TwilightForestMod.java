@@ -239,7 +239,7 @@ public class TwilightForestMod {
 
         // just call this so that we register structure IDs correctly
         new StructureTFMajorFeatureStart();
-        
+
         // register vanilla stalactite ores
         TFGenCaveStalactite.registerVanillaStalactites();
 
