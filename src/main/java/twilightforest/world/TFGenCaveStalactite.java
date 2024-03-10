@@ -76,15 +76,6 @@ public class TFGenCaveStalactite extends TFGenerator {
     }
 
     /**
-     * !!!REMOVES ALL THE STALACTITES. ONLY CALL IF YOUR MOD OVERWRITES ORES ENTIRELY!!!
-     */
-    public static void removeAllStalactites() {
-        hill3.clear();
-        hill2.clear();
-        hill1.clear();
-    }
-
-    /**
      * For other mods to add stalactites made of their blocks
      * 
      * @param block     Block to generate stalactite of. Most likely ore
@@ -98,9 +89,8 @@ public class TFGenCaveStalactite extends TFGenerator {
      *                  larger this number is, the more often this resource will generate. Examples: diamond, lapis - 2;
      *                  emerald - 1 | redstone - 2, gold - 1 | iron, coal - 2, glowstone - 1
      */
-    public static void addNewStalactite(Block block, float size, int maxLength, int minHeight, int hillLevel,
-            int weight) {
-        addNewStalactite(block, 0, size, maxLength, minHeight, hillLevel, weight);
+    public static void addStalactite(Block block, float size, int maxLength, int minHeight, int hillLevel, int weight) {
+        addStalactite(block, 0, size, maxLength, minHeight, hillLevel, weight);
     }
 
     /**
@@ -118,7 +108,7 @@ public class TFGenCaveStalactite extends TFGenerator {
      *                  larger this number is, the more often this resource will generate. Examples: diamond, lapis - 2;
      *                  emerald - 1 | redstone - 2, gold - 1 | iron, coal - 2, glowstone - 1
      */
-    public static void addNewStalactite(Block block, int meta, float size, int maxLength, int minHeight, int hillLevel,
+    public static void addStalactite(Block block, int meta, float size, int maxLength, int minHeight, int hillLevel,
             int weight) {
         addStalactite(new TFGenCaveStalactite(block, meta, size, maxLength, minHeight), hillLevel, weight);
     }
@@ -136,8 +126,8 @@ public class TFGenCaveStalactite extends TFGenerator {
      *                  larger this number is, the more often this resource will generate. Examples: diamond, lapis - 2;
      *                  emerald - 1 | redstone - 2, gold - 1 | iron, coal - 2, glowstone - 1
      */
-    public static void addNewStalactite(Block block, int meta, float size, int hillLevel, int weight) {
-        addNewStalactite(block, meta, size, -1, -1, hillLevel, weight);
+    public static void addStalactite(Block block, int meta, float size, int hillLevel, int weight) {
+        addStalactite(block, meta, size, -1, -1, hillLevel, weight);
     }
 
     /**
@@ -152,8 +142,8 @@ public class TFGenCaveStalactite extends TFGenerator {
      *                  larger this number is, the more often this resource will generate. Examples: diamond, lapis - 2;
      *                  emerald - 1 | redstone - 2, gold - 1 | iron, coal - 2, glowstone - 1
      */
-    public static void addNewStalactite(Block block, float size, int hillLevel, int weight) {
-        addNewStalactite(block, 0, size, -1, -1, hillLevel, weight);
+    public static void addStalactite(Block block, float size, int hillLevel, int weight) {
+        addStalactite(block, 0, size, -1, -1, hillLevel, weight);
     }
 
     public static void addStalactite(TFGenCaveStalactite stalactite, int hillLevel, int weight) {

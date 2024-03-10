@@ -241,7 +241,7 @@ public class TwilightForestMod {
         new StructureTFMajorFeatureStart();
 
         // register vanilla stalactite ores
-        TFGenCaveStalactite.registerVanillaStalactites();
+        if (!Loader.isModLoaded("dreamcraft")) TFGenCaveStalactite.registerVanillaStalactites();
 
         // check if various integrations are required
         isSkinportLoaded = Loader.isModLoaded("skinport");
