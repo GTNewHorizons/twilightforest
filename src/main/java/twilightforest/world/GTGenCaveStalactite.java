@@ -3,6 +3,7 @@ package twilightforest.world;
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
 
+import gregtech.api.GregTech_API;
 import gregtech.common.blocks.GT_TileEntity_Ores;
 
 public class GTGenCaveStalactite extends TFGenCaveStalactite {
@@ -13,15 +14,14 @@ public class GTGenCaveStalactite extends TFGenCaveStalactite {
     /**
      * Initializes a stalactite builder
      */
-    public GTGenCaveStalactite(Block blockType, int meta, float size, int maxLength, int minHeight, boolean isSmallOre,
-            boolean air) {
-        super(blockType, meta, size, maxLength, minHeight);
+    public GTGenCaveStalactite(int meta, float size, int maxLength, int minHeight, boolean isSmallOre, boolean air) {
+        super(GregTech_API.sBlockOres1, meta, size, maxLength, minHeight);
         this.isSmallOre = isSmallOre;
         this.air = air;
     }
 
     @Override
-    public void setBlock(World world, int x, int y, int z) {
+    protected void setBlockAndMetadata(World world, int x, int y, int z, Block block, int meta) {
         GT_TileEntity_Ores.setOreBlock(world, x, y, z, blockMeta, isSmallOre, air);
     }
 
