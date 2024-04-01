@@ -343,10 +343,11 @@ public class TwilightForestMod {
         }
 
         // Tinkers Construct integration
-        if (Loader.isModLoaded("TConstruct")) {
+        if (Loader.isModLoaded("TConstruct") && !Loader.isModLoaded("dreamcraft")) {
             TFTinkerConstructIntegration.registerTinkersConstructIntegration(evt);
         } else {
-            FMLLog.info("[TwilightForest] Did not find Tinkers Construct, did not load Tinkers Construct integration.");
+            FMLLog.info(
+                    "[TwilightForest] Did not find Tinkers Construct or detected GTNH, did not load Tinkers Construct integration.");
         }
 
         // Remove certain things from NEI
