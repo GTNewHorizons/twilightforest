@@ -4,7 +4,6 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
@@ -86,12 +85,18 @@ public class BlockTFNagastoneEtched extends Block {
     @Override
     public void onBlockPlacedBy(World par1World, int x, int y, int z, EntityLivingBase par5EntityLiving,
             ItemStack par6ItemStack) {
-        MovingObjectPosition mop = Minecraft.getMinecraft().renderViewEntity.rayTrace(200, 1.0F);
+        Vec3 start = Vec3.createVectorHelper(
+                par5EntityLiving.posX,
+                par5EntityLiving.posY + par5EntityLiving.getEyeHeight(),
+                par5EntityLiving.posZ);
+        Vec3 look = par5EntityLiving.getLookVec();
+        Vec3 end = start.addVector(look.xCoord * 200, look.yCoord * 200, look.zCoord * 200);
+        MovingObjectPosition mop = par1World.func_147447_a(start, end, false, true, false);
         Vec3 vec3 = mop.hitVec;
         double posX = vec3.xCoord;
         double posY = vec3.yCoord;
         double posZ = vec3.zCoord;
-        vec3 = Minecraft.getMinecraft().renderViewEntity.getLookVec().normalize();
+        vec3 = par5EntityLiving.getLookVec().normalize();
         double moveX = vec3.xCoord / 100;
         double moveY = vec3.yCoord / 100;
         double moveZ = vec3.zCoord / 100;
