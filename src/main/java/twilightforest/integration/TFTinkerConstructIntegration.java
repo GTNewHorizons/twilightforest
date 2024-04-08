@@ -124,8 +124,12 @@ public class TFTinkerConstructIntegration {
 
             String[] matNames = { "FieryMetal", "Knightmetal" };
             for (int i = 0; i < matNames.length; i++) {
-                OreDictionary.registerOre(matNames[i].toLowerCase() + "Rod", new ItemStack(TinkerTools.toolRod, 1, MaterialID.FieryMetal + i));
-                OreDictionary.registerOre("rod" + matNames[i], new ItemStack(TinkerTools.toolRod, 1, MaterialID.FieryMetal + i));
+                OreDictionary.registerOre(
+                        matNames[i].toLowerCase() + "Rod",
+                        new ItemStack(TinkerTools.toolRod, 1, MaterialID.FieryMetal + i));
+                OreDictionary.registerOre(
+                        "rod" + matNames[i],
+                        new ItemStack(TinkerTools.toolRod, 1, MaterialID.FieryMetal + i));
             }
 
             // Fiery liquid (blood, sweat and tears)
