@@ -204,6 +204,11 @@ public class TwilightForestMod {
     public static int idBiomeFireSwamp;
     public static int idBiomeThornlands;
 
+    public static int FieryMetal_ID;
+    public static int Knightmetal_ID;
+    public static int NagaScale_ID;
+    public static int Steeleaf_ID;
+
     // used to report conflicts
     public static boolean hasBiomeIdConflicts = false;
     public static boolean hasAssignedBiomeID = false;
@@ -975,12 +980,21 @@ public class TwilightForestMod {
                 "Performance",
                 "TwilightOakChance",
                 48).comment = "Chance that a chunk in the Twilight Forest will contain a twilight oak tree.  Higher numbers reduce the number of trees, increasing performance.";
-        enableTiCIntegration = configFile.get(Configuration.CATEGORY_GENERAL, "EnableTiConstructIntegration", true)
+        enableTiCIntegration = configFile.get("Tinker Integration", "EnableTiConstructIntegration", true)
                 .getBoolean(true);
         configFile.get(
-                Configuration.CATEGORY_GENERAL,
+                "Tinker Integration",
                 "EnableTiConstructIntegration",
                 true).comment = "Enable backport of 1.12.2 TiC integration including materials and modifiers.";
+        FieryMetal_ID = configFile.get("Tinker Integration", "FieryMetal_ID", 42).getInt(42);
+        configFile.get("Tinker Integration", "FieryMetal_ID", 42).comment = "Tinker Material ID for FieryMetal.";
+        Knightmetal_ID = configFile.get("Tinker Integration", "KnightMetal_ID", 43).getInt(43);
+        configFile.get("Tinker Integration", "KnightMetal_ID", 43).comment = "Tinker Material ID for KnightMetal.";
+        NagaScale_ID = configFile.get("Tinker Integration", "NagaScale_ID", 44).getInt(44);
+        configFile.get("Tinker Integration", "NagaScale_ID", 44).comment = "Tinker Material ID for NagaScale.";
+        Steeleaf_ID = configFile.get("Tinker Integration", "Steeleaf_ID", 45).getInt(45);
+        configFile.get("Tinker Integration", "Steeleaf_ID", 45).comment = "Tinker Material ID for Steeleaf.";
+
         // fixed values, don't even read the config
         idMobWildBoar = 177;
         idMobBighornSheep = 178;

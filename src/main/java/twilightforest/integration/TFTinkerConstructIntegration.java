@@ -56,6 +56,7 @@ import tconstruct.tools.items.TFMaterialItem;
 import tconstruct.util.Reference;
 import tconstruct.util.config.PHConstruct;
 import tconstruct.weaponry.TinkerWeaponry;
+import twilightforest.TwilightForestMod;
 import twilightforest.block.TFBlocks;
 import twilightforest.item.TFItems;
 
@@ -80,10 +81,10 @@ public class TFTinkerConstructIntegration {
 
     public static final class MaterialID {
 
-        public static final int FieryMetal = 42;
-        public static final int Knightmetal = 43;
-        public static final int NagaScale = 44;
-        public static final int Steeleaf = 45;
+        public static final int FieryMetal = TwilightForestMod.FieryMetal_ID;
+        public static final int Knightmetal = TwilightForestMod.Knightmetal_ID;
+        public static final int NagaScale = TwilightForestMod.NagaScale_ID;
+        public static final int Steeleaf = TwilightForestMod.Steeleaf_ID;
     }
 
     public static void registerTinkersConstructIntegration(FMLPostInitializationEvent evt) {
