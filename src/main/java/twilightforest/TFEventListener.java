@@ -494,7 +494,7 @@ public class TFEventListener {
     @SubscribeEvent
     public void livingDies(LivingDeathEvent event) {
         if (event.entityLiving instanceof EntityPlayer player
-                && !event.entityLiving.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
+                && !player.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
 
             // TODO: Add support for keeping Bauble slot items on all tiers
             if (TFBaublesIntegration.consumeBaublesItem(player, TFItems.charmOfKeeping3)
@@ -657,8 +657,8 @@ public class TFEventListener {
                         1.5F,
                         1.0F);
             }
-
             playerKeepsMap.remove(player.getCommandSenderName());
+            playerBaublesMap.remove(player.getCommandSenderName());
         }
     }
 

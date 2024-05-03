@@ -109,8 +109,8 @@ public class TFTinkerConstructIntegration {
                 TConstructRegistry.addItemStackToDirectory(materialStrings[i], new ItemStack(materials, 1, i));
             }
 
-            OreDictionary.registerOre("nuggetFiery", new ItemStack(TinkerTools.materials, 1, 0));
-            OreDictionary.registerOre("nuggetKnightmetal", new ItemStack(TinkerTools.materials, 1, 1));
+            OreDictionary.registerOre("nuggetFiery", new ItemStack(materials, 1, 0));
+            OreDictionary.registerOre("nuggetKnightmetal", new ItemStack(materials, 1, 1));
 
             GameRegistry.addRecipe(
                     new ItemStack(TFItems.fieryIngot, 1, 0),
@@ -124,8 +124,12 @@ public class TFTinkerConstructIntegration {
 
             String[] matNames = { "FieryMetal", "Knightmetal" };
             for (int i = 0; i < matNames.length; i++) {
-                OreDictionary.registerOre(matNames[i].toLowerCase() + "Rod", new ItemStack(TinkerTools.toolRod, 1, i));
-                OreDictionary.registerOre("rod" + matNames[i], new ItemStack(TinkerTools.toolRod, 1, i));
+                OreDictionary.registerOre(
+                        matNames[i].toLowerCase() + "Rod",
+                        new ItemStack(TinkerTools.toolRod, 1, MaterialID.FieryMetal + i));
+                OreDictionary.registerOre(
+                        "rod" + matNames[i],
+                        new ItemStack(TinkerTools.toolRod, 1, MaterialID.FieryMetal + i));
             }
 
             // Fiery liquid (blood, sweat and tears)

@@ -1327,8 +1327,8 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
         this.makeStonePillar(world, forgeDeco, 9, y, 17, getStairMeta(1 + rotation), rotation, sbb);
 
         // anvils
-        this.placeBlockRotated(world, Blocks.anvil, decoRNG.nextInt(16), 13, y + 2, 5, rotation, sbb);
-        this.placeBlockRotated(world, Blocks.anvil, decoRNG.nextInt(16), 13, y + 2, 13, rotation, sbb);
+        this.placeBlockRotated(world, Blocks.anvil, decoRNG.nextInt(3), 13, y + 2, 5, rotation, sbb);
+        this.placeBlockRotated(world, Blocks.anvil, decoRNG.nextInt(3), 13, y + 2, 13, rotation, sbb);
 
         // fire pit
         makeFirePit(world, forgeDeco, 6, y + 1, 12, rotation, sbb);
