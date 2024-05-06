@@ -57,6 +57,7 @@ import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.biomes.TFBiomeBase;
+import twilightforest.block.BlockTFNagastone;
 import twilightforest.block.TFBlocks;
 import twilightforest.enchantment.TFEnchantment;
 import twilightforest.entity.EntityTFCharmEffect;
@@ -1044,162 +1045,164 @@ public class TFEventListener {
                     for (int y = 0; y < 256; y++) {
                         x = chunk.xPosition * 16 + i;
                         z = chunk.zPosition * 16 + j;
-                        TileEntityTFNagastone te = (TileEntityTFNagastone) world.getTileEntity(x, y, z);
-                        if (te.isOutdated) {
-                            switch (world.getBlockMetadata(x, y, z)) {
-                                default:
-                                case 0:
-                                    world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH));
-                                    break;
-                                case 1:
-                                    world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH));
-                                    break;
-                                case 2:
-                                    world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST));
-                                    break;
-                                case 3:
-                                    world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST));
-                                    break;
-                                case 4:
-                                case 8:
-                                    world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH));
-                                    break;
-                                case 5:
-                                case 9:
-                                    world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH));
-                                    break;
-                                case 6:
-                                case 10:
-                                    world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST));
-                                    break;
-                                case 7:
-                                case 11:
-                                    world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST));
-                                    break;
-                                case 12:
-                                    world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST));
-                                    break;
-                                case 13:
-                                    world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-                                    world.setTileEntity(
-                                            x,
-                                            y,
-                                            z,
-                                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH));
-                                    break;
-                                case 14: {
-                                    world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-                                    Direction direction = Direction.UP;
-                                    Facing facing;
-                                    TileEntityTFNagastone neighbour = null;
-                                    if (world.getBlock(x, y - 1, z) == TFBlocks.nagastone)
-                                        neighbour = (TileEntityTFNagastone) world.getTileEntity(x, y - 1, z);
-                                    if (neighbour == null) {
-                                        Boolean airXplus = world.getBlock(x + 1, y, z) == Blocks.air;
-                                        Boolean airXminus = world.getBlock(x - 1, y, z) == Blocks.air;
-                                        Boolean airZplus = world.getBlock(x, y, z + 1) == Blocks.air;
-                                        Boolean airZminus = world.getBlock(x, y, z - 1) == Blocks.air;
-                                        int airX = 0 + (airXplus ? 1 : 0) + (airXminus ? 1 : 0);
-                                        int airZ = 0 + (airZplus ? 1 : 0) + (airZminus ? 1 : 0);
-                                        switch (airX + airZ) {
-                                            default:
-                                            case 0:
-                                            case 4:
-                                                facing = Facing.NORTH;
-                                                break;
-                                            case 2:
-                                                if (airX == airZ) {
+                        if (world.getBlock(x, y, z) instanceof BlockTFNagastone) {
+                            TileEntityTFNagastone te = (TileEntityTFNagastone) world.getTileEntity(x, y, z);
+                            if (te == null || te.isOutdated) {
+                                switch (world.getBlockMetadata(x, y, z)) {
+                                    default:
+                                    case 0:
+                                        world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH));
+                                        break;
+                                    case 1:
+                                        world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH));
+                                        break;
+                                    case 2:
+                                        world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.WEST));
+                                        break;
+                                    case 3:
+                                        world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.EAST));
+                                        break;
+                                    case 4:
+                                    case 8:
+                                        world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH));
+                                        break;
+                                    case 5:
+                                    case 9:
+                                        world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH));
+                                        break;
+                                    case 6:
+                                    case 10:
+                                        world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.WEST));
+                                        break;
+                                    case 7:
+                                    case 11:
+                                        world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.EAST));
+                                        break;
+                                    case 12:
+                                        world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.WEST));
+                                        break;
+                                    case 13:
+                                        world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+                                        world.setTileEntity(
+                                                x,
+                                                y,
+                                                z,
+                                                new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH));
+                                        break;
+                                    case 14: {
+                                        world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+                                        Direction direction = Direction.UP;
+                                        Facing facing;
+                                        TileEntityTFNagastone neighbour = null;
+                                        if (world.getBlock(x, y - 1, z) == TFBlocks.nagastone)
+                                            neighbour = (TileEntityTFNagastone) world.getTileEntity(x, y - 1, z);
+                                        if (neighbour == null) {
+                                            Boolean airXplus = world.getBlock(x + 1, y, z) == Blocks.air;
+                                            Boolean airXminus = world.getBlock(x - 1, y, z) == Blocks.air;
+                                            Boolean airZplus = world.getBlock(x, y, z + 1) == Blocks.air;
+                                            Boolean airZminus = world.getBlock(x, y, z - 1) == Blocks.air;
+                                            int airX = 0 + (airXplus ? 1 : 0) + (airXminus ? 1 : 0);
+                                            int airZ = 0 + (airZplus ? 1 : 0) + (airZminus ? 1 : 0);
+                                            switch (airX + airZ) {
+                                                default:
+                                                case 0:
+                                                case 4:
                                                     facing = Facing.NORTH;
                                                     break;
-                                                }
-                                            case 1:
-                                                if (airX > airZ) {
+                                                case 2:
+                                                    if (airX == airZ) {
+                                                        facing = Facing.NORTH;
+                                                        break;
+                                                    }
+                                                case 1:
+                                                    if (airX > airZ) {
+                                                        facing = Facing.NORTH;
+                                                    } else {
+                                                        facing = Facing.WEST;
+                                                    }
+                                                    break;
+                                                case 3:
+                                                    if (!airXplus) {
+                                                        facing = Facing.EAST;
+                                                        break;
+                                                    }
+                                                    if (!airXminus) {
+                                                        facing = Facing.WEST;
+                                                        break;
+                                                    }
+                                                    if (!airZplus) {
+                                                        facing = Facing.SOUTH;
+                                                        break;
+                                                    }
+                                                    if (!airZminus) {
+                                                        facing = Facing.NORTH;
+                                                        break;
+                                                    }
                                                     facing = Facing.NORTH;
-                                                } else {
-                                                    facing = Facing.WEST;
-                                                }
-                                                break;
-                                            case 3:
-                                                if (!airXplus) {
-                                                    facing = Facing.EAST;
                                                     break;
-                                                }
-                                                if (!airXminus) {
-                                                    facing = Facing.WEST;
-                                                    break;
-                                                }
-                                                if (!airZplus) {
-                                                    facing = Facing.SOUTH;
-                                                    break;
-                                                }
-                                                if (!airZminus) {
-                                                    facing = Facing.NORTH;
-                                                    break;
-                                                }
-                                                facing = Facing.NORTH;
-                                                break;
-                                        }
-                                    } else facing = neighbour.facing;
-                                    world.setTileEntity(x, y, z, new TileEntityTFNagastone(direction, facing));
-                                    break;
-                                }
-                                case 15: {
-                                    world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-                                    Direction direction = Direction.SIDE;
-                                    Facing facing;
-                                    TileEntityTFNagastone neighbourZminus = (TileEntityTFNagastone) world
-                                            .getTileEntity(x, y, z - 1);
-                                    TileEntityTFNagastone neighbourZplus = (TileEntityTFNagastone) world
-                                            .getTileEntity(x, y, z + 1);
-                                    if (neighbourZminus != null || neighbourZplus != null) facing = Facing.WEST;
-                                    else facing = Facing.NORTH;
-                                    world.setTileEntity(x, y, z, new TileEntityTFNagastone(direction, facing));
-                                    break;
+                                            }
+                                        } else facing = neighbour.facing;
+                                        world.setTileEntity(x, y, z, new TileEntityTFNagastone(direction, facing));
+                                        break;
+                                    }
+                                    case 15: {
+                                        world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+                                        Direction direction = Direction.SIDE;
+                                        Facing facing;
+                                        TileEntityTFNagastone neighbourZminus = (TileEntityTFNagastone) world
+                                                .getTileEntity(x, y, z - 1);
+                                        TileEntityTFNagastone neighbourZplus = (TileEntityTFNagastone) world
+                                                .getTileEntity(x, y, z + 1);
+                                        if (neighbourZminus != null || neighbourZplus != null) facing = Facing.WEST;
+                                        else facing = Facing.NORTH;
+                                        world.setTileEntity(x, y, z, new TileEntityTFNagastone(direction, facing));
+                                        break;
+                                    }
                                 }
                             }
                         }
