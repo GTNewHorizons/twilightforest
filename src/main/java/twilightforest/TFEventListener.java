@@ -2,6 +2,7 @@ package twilightforest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSapling;
@@ -37,8 +38,10 @@ import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
+import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
+import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
@@ -1030,14 +1033,34 @@ public class TFEventListener {
         }
     }
 
+    public List<Chunk> checkedChunks = new ArrayList<Chunk>();
+
+    /**
+     * New chunks are considered checked automatically
+     */
+    @SubscribeEvent
+    public void generateChunk(PopulateChunkEvent.Populate event) {
+        checkedChunks.add(event.chunkProvider.provideChunk(event.chunkX, event.chunkZ));
+    }
+
+    @SubscribeEvent
+    public void writeChunkToNBT(ChunkDataEvent.Save event) {
+        if (checkedChunks.contains(event.getChunk())) event.getData().setBoolean("NagastoneChecked", true);
+    }
+
+    @SubscribeEvent
+    public void readChunkFromNBT(ChunkDataEvent.Load event) {
+        if (event.getData().hasKey("NagastoneChecked")) checkedChunks.add(event.getChunk());
+    }
+
     /**
      * Checks for older versions of Nagastone block when loading chunk
      */
     @SubscribeEvent
     public void chunkLoaded(ChunkEvent.Load event) {
         World world = event.world;
-        if (!world.isRemote) {
-            Chunk chunk = event.getChunk();
+        Chunk chunk = event.getChunk();
+        if (!world.isRemote && !checkedChunks.contains(chunk)) {
             int x;
             int z;
             for (int i = 0; i < 16; i++) {
@@ -1209,6 +1232,7 @@ public class TFEventListener {
                     }
                 }
             }
+            checkedChunks.add(chunk);
         }
     }
 
