@@ -1142,10 +1142,10 @@ public class TFEventListener {
                                         if (world.getBlock(x, y - 1, z) == TFBlocks.nagastone)
                                             neighbour = (TileEntityTFNagastone) world.getTileEntity(x, y - 1, z);
                                         if (neighbour == null) {
-                                            Boolean airXplus = world.getBlock(x + 1, y, z) == Blocks.air;
-                                            Boolean airXminus = world.getBlock(x - 1, y, z) == Blocks.air;
-                                            Boolean airZplus = world.getBlock(x, y, z + 1) == Blocks.air;
-                                            Boolean airZminus = world.getBlock(x, y, z - 1) == Blocks.air;
+                                            boolean airXplus = world.getBlock(x + 1, y, z) == Blocks.air;
+                                            boolean airXminus = world.getBlock(x - 1, y, z) == Blocks.air;
+                                            boolean airZplus = world.getBlock(x, y, z + 1) == Blocks.air;
+                                            boolean airZminus = world.getBlock(x, y, z - 1) == Blocks.air;
                                             int airX = 0 + (airXplus ? 1 : 0) + (airXminus ? 1 : 0);
                                             int airZ = 0 + (airZplus ? 1 : 0) + (airZminus ? 1 : 0);
                                             switch (airX + airZ) {
