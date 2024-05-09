@@ -360,6 +360,10 @@ public class TwilightForestMod {
             TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTime));
             TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTrans));
             TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTwilight));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.firefly));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.cicada));
+            TFNeiIntegration.hideItem(new ItemStack(TFBlocks.moonworm));
+            for (int i = 0; i < 16; i++) TFNeiIntegration.hideItem(new ItemStack(TFBlocks.nagastone, 1, i));
         }
 
         // final check for biome ID conflicts

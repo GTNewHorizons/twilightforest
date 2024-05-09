@@ -255,6 +255,14 @@ public class TFThaumcraftIntegration {
                     -1,
                     (new AspectList()).add(Aspect.ORDER, 1).add(Aspect.MOTION, 1).add(Aspect.EARTH, 2));
             registerTCObjectTag(
+                    TFBlocks.newNagastoneHead,
+                    -1,
+                    (new AspectList()).add(Aspect.ORDER, 1).add(Aspect.MOTION, 1).add(Aspect.EARTH, 2));
+            registerTCObjectTag(
+                    TFBlocks.newNagastoneBody,
+                    -1,
+                    (new AspectList()).add(Aspect.ORDER, 1).add(Aspect.MOTION, 1).add(Aspect.EARTH, 2));
+            registerTCObjectTag(
                     TFBlocks.nagastoneEtched,
                     0,
                     (new AspectList()).add(Aspect.EXCHANGE, 1).add(Aspect.ORDER, 1).add(Aspect.EARTH, 2));

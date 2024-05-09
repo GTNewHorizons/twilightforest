@@ -47,6 +47,10 @@ public class TFCommonProxy implements IGuiHandler {
         return 0;
     }
 
+    public int getNewNagastoneBlockRenderID() {
+        return 0;
+    }
+
     public int getNagastoneEtchedBlockRenderID() {
         return 0;
     }

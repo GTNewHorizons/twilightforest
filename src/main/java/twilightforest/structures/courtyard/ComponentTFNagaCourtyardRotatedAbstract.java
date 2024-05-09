@@ -5,9 +5,8 @@ import java.util.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 
+import twilightforest.block.BlockTFNagastone2.Facing;
 import twilightforest.structures.StructureTFComponent;
-import twilightforest.tileentity.TileEntityTFNagastone;
-import twilightforest.tileentity.TileEntityTFNagastone.Facing;
 import twilightforest.tileentity.TileEntityTFNagastoneEtched;
 import twilightforest.tileentity.TileEntityTFNagastoneEtched.Direction;
 
@@ -30,10 +29,10 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
     protected TileEntityTFNagastoneEtched.Direction EtchedNagastoneWest;
     protected TileEntityTFNagastoneEtched.Direction EtchedNagastoneEast;
 
-    protected TileEntityTFNagastone.Facing NagastoneNorth;
-    protected TileEntityTFNagastone.Facing NagastoneSouth;
-    protected TileEntityTFNagastone.Facing NagastoneWest;
-    protected TileEntityTFNagastone.Facing NagastoneEast;
+    protected Facing NagastoneNorth;
+    protected Facing NagastoneSouth;
+    protected Facing NagastoneWest;
+    protected Facing NagastoneEast;
 
     public ComponentTFNagaCourtyardRotatedAbstract() {
         super();

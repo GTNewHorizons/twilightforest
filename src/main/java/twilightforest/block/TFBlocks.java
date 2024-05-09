@@ -9,6 +9,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.BlockTFNagastonePillar.BlockType;
 import twilightforest.item.ItemBlockTFMeta;
+import twilightforest.item.ItemBlockTFNagastone;
 
 public class TFBlocks {
 
@@ -53,6 +54,8 @@ public class TFBlocks {
     public static Block uncraftingTable;
     public static Block fireJet;
     public static Block nagastone;
+    public static Block newNagastoneBody;
+    public static Block newNagastoneHead;
     public static Block nagastoneEtched;
     public static Block nagastoneStairsLeft;
     public static Block nagastoneStairsRight;
@@ -163,6 +166,8 @@ public class TFBlocks {
         uncraftingTable = (new BlockTFUncraftingTable()).setBlockName("TFUncraftingTable");
         fireJet = (new BlockTFFireJet()).setBlockName("TFFireJet");
         nagastone = (new BlockTFNagastone()).setBlockName("TFNagastone");
+        newNagastoneBody = (new BlockTFNagastone2(false)).setBlockName("TFNagastoneBody");
+        newNagastoneHead = (new BlockTFNagastone2(true)).setBlockName("TFNagastoneHead");
         nagastoneEtched = (new BlockTFNagastoneEtched()).setBlockName("TFNagastoneEtched");
         nagastoneStairsLeft = (new BlockTFNagastoneStairs(0, false)).setBlockName("TFNagastoneStairsLeft");
         nagastoneStairsRight = (new BlockTFNagastoneStairs(0, true)).setBlockName("TFNagastoneStairsRight");
@@ -287,7 +292,9 @@ public class TFBlocks {
         registerMyBlock(plant, twilightforest.item.ItemBlockTFPlant.class);
         registerMyBlock(uncraftingTable, ItemBlock.class);
         registerMyBlock(fireJet);
-        registerMyBlock(nagastone);
+        registerMyBlock(nagastone, ItemBlockTFNagastone.class);
+        registerMyBlock(newNagastoneBody, ItemBlockTFNagastone.class);
+        registerMyBlock(newNagastoneHead, ItemBlockTFNagastone.class);
         registerMyBlock(nagastoneEtched);
         registerMyBlock(nagastoneStairsLeft);
         registerMyBlock(nagastoneStairsRight);

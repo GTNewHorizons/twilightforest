@@ -464,17 +464,6 @@ public abstract class StructureTFComponent extends StructureComponent {
         setTileEntityAtCurrentPosition(par1World, te, par4, par5, par6, par7StructureBoundingBox);
     }
 
-    protected void fillWithTileEntities(World world, StructureBoundingBox sbb, int minX, int minY, int minZ, int maxX,
-            int maxY, int maxZ, TileEntity tileEntity) {
-        for (int i2 = minY; i2 <= maxY; ++i2) {
-            for (int j2 = minX; j2 <= maxX; ++j2) {
-                for (int k2 = minZ; k2 <= maxZ; ++k2) {
-                    setTileEntityAtCurrentPosition(world, tileEntity, j2, i2, k2, sbb);
-                }
-            }
-        }
-    }
-
     protected void partiallyFillWithMetadataBlocks(World world, StructureBoundingBox structureBoundingBox, int minX,
             int minY, int minZ, int maxX, int maxY, int maxZ, Block placeBlock, int placeBlockMeta, Random random,
             float placeRate) {
@@ -494,26 +483,6 @@ public abstract class StructureTFComponent extends StructureComponent {
                 }
             }
         }
-    }
-
-    protected void fillWithTileEntityMetadataBlocks(World world, StructureBoundingBox sbb, int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ, Block placeBlock, int placeBlockMeta, TileEntity placeTileEntity,
-            Block replaceBlock, int replaceBlockMeta, boolean onlyReplace) {
-        fillWithMetadataBlocks(
-                world,
-                sbb,
-                minX,
-                minY,
-                minZ,
-                maxX,
-                maxY,
-                maxZ,
-                placeBlock,
-                placeBlockMeta,
-                replaceBlock,
-                replaceBlockMeta,
-                onlyReplace);
-        fillWithTileEntities(world, sbb, minX, minY, minZ, maxX, maxY, maxZ, placeTileEntity);
     }
 
     /**

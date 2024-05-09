@@ -97,6 +97,7 @@ import twilightforest.client.renderer.blocks.RenderBlockTFHugeLilyPad;
 import twilightforest.client.renderer.blocks.RenderBlockTFKnightMetal;
 import twilightforest.client.renderer.blocks.RenderBlockTFMagicLeaves;
 import twilightforest.client.renderer.blocks.RenderBlockTFNagastone;
+import twilightforest.client.renderer.blocks.RenderBlockTFNagastone2;
 import twilightforest.client.renderer.blocks.RenderBlockTFNagastoneEtched;
 import twilightforest.client.renderer.blocks.RenderBlockTFNagastoneStairs;
 import twilightforest.client.renderer.blocks.RenderBlockTFPedestal;
@@ -172,6 +173,7 @@ public class TFClientProxy extends TFCommonProxy {
     int blockCakeRenderID;
     int blockComplexRenderID;
     int nagastoneRenderID;
+    int newNagastoneRenderID;
     int nagastoneEtchedRenderID;
     int nagastoneEtchedStairsRenderID;
     int spiralBricksRenderID;
@@ -545,6 +547,9 @@ public class TFClientProxy extends TFCommonProxy {
         nagastoneRenderID = RenderingRegistry.getNextAvailableRenderId();
         RenderingRegistry.registerBlockHandler(new RenderBlockTFNagastone(nagastoneRenderID));
 
+        newNagastoneRenderID = RenderingRegistry.getNextAvailableRenderId();
+        RenderingRegistry.registerBlockHandler(new RenderBlockTFNagastone2(newNagastoneRenderID));
+
         nagastoneEtchedRenderID = RenderingRegistry.getNextAvailableRenderId();
         RenderingRegistry.registerBlockHandler(new RenderBlockTFNagastoneEtched(nagastoneEtchedRenderID));
 
@@ -621,6 +626,10 @@ public class TFClientProxy extends TFCommonProxy {
 
     public int getNagastoneBlockRenderID() {
         return nagastoneRenderID;
+    }
+
+    public int getNewNagastoneBlockRenderID() {
+        return newNagastoneRenderID;
     }
 
     public int getNagastoneEtchedBlockRenderID() {
