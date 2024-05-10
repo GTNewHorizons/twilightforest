@@ -4707,7 +4707,6 @@ public class RenderBlockTFNagastone2 implements ISimpleBlockRenderingHandler {
         GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-        // render jar portion
         par1Block.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
 
         tessellator.startDrawingQuads();

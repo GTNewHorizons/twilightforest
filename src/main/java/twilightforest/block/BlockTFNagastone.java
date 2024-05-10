@@ -55,105 +55,6 @@ public class BlockTFNagastone extends Block {
         return TwilightForestMod.proxy.getNagastoneBlockRenderID();
     }
 
-    // /**
-    // * Called when the block is placed in the world.
-    // */
-    // @Override
-    // public void onBlockPlacedBy(World par1World, int x, int y, int z, EntityLivingBase par5EntityLiving, ItemStack
-    // par6ItemStack)
-    // {
-    // int metadata = par1World.getBlockMetadata(x, y, z) & 12;
-    // int direction = 0;
-    //
-    // // first: are there two blocks, one up/down and one to the side?
-    // if (metadata > 0 && placePerfectFitBody(par1World, x, y, z))
-    // {
-    // // we placed it, we're done
-    // //System.out.println("Found a perfect fit and placed it");
-    // return;
-    // }
-    // else if (metadata == 0 && placePerfectFitHead(par1World, x, y, z))
-    // {
-    // // we placed it, we're done
-    // return;
-    // }
-    //
-    // // get preliminary orientation as if we were placing a straight block
-    // int pistonOrient = BlockPistonBase.determineOrientation(par1World, x, y, z, par5EntityLiving);
-    //
-    // switch (pistonOrient)
-    // {
-    // case 0:
-    // case 1:
-    // direction = 2;
-    // break;
-    // case 2:
-    // case 3:
-    // direction = 1;
-    // break;
-    // case 4:
-    // case 5:
-    // direction = 0;
-    // }
-    //
-    // // if there is a block up or down and we are placing a straight block (that's not up and down), modify so we
-    // connect
-    // if (metadata > 0 && (direction == 0 || direction == 1) && par1World.getBlock(x, y - 1, z) == this) {
-    // metadata = 4;
-    // }
-    // if (metadata > 0 && (direction == 0 || direction == 1) && par1World.getBlock(x, y + 1, z) == this) {
-    // metadata = 8;
-    // }
-    // // if we have decided not to place a straight block, face the block in question towards the player
-    // if (metadata == 0 || metadata == 4 || metadata == 8)
-    // {
-    // direction = BlockTFNagastone.determineOrientation(par1World, x, y, z, (EntityPlayer)par5EntityLiving);
-    // }
-    //
-    // // if we are placing a block up and down, see if there is block to the side, and if so, modify to connect
-    // if (metadata > 0 && direction == 2)
-    // {
-    // int connect = getOnlyNSEWConnection(par1World, x, y, z);
-    //
-    // if (connect != -1)
-    // {
-    // // recall that pistonOrient variable to determine if we're connecting up or down
-    // metadata = pistonOrient == 0 ? 4 : 8;
-    // direction = connect;
-    // }
-    // }
-    //
-    // // if, after all this, we've decided to place a straight block, and there is only one place to connect it,
-    // connect it
-    // if (metadata == 12)
-    // {
-    // int connect = getOnlyConnection(par1World, x, y, z);
-    // //System.out.println("Trying to orient straight block. Connection = " + connect);
-    //
-    //
-    // if (connect != -1)
-    // {
-    // switch (connect)
-    // {
-    // case 0:
-    // case 1:
-    // direction = 1;
-    // break;
-    // case 2:
-    // case 3:
-    // direction = 0;
-    // break;
-    // case 4:
-    // case 5:
-    // direction = 2;
-    // }
-    // }
-    // }
-    //
-    // // I think we've covered it
-    // par1World.setBlockMetadataWithNotify(x, y, z, metadata | direction, 3);
-    // }
-
     /**
      * Called when a block is placed using its ItemBlock. Args: World, X, Y, Z, side, hitX, hitY, hitZ, block metadata
      * 
@@ -197,8 +98,6 @@ public class BlockTFNagastone extends Block {
      */
     @Override
     public void onNeighborBlockChange(World par1World, int x, int y, int z, Block neighborID) {
-        // // is the block that changed nagastone?
-        // if (true || neighborID == this) { // this seems to be lies
         int type = par1World.getBlockMetadata(x, y, z) & 12;
         if (type == 0) {
             placePerfectFitHead(par1World, x, y, z);

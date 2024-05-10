@@ -216,7 +216,6 @@ public class BlockTFNagastone2 extends Block {
         te.neighbourNorth = CanConnectTo(world, x, y, z, 4);
         te.neighbourSouth = CanConnectTo(world, x, y, z, 5);
         te.UpdateNeighbourCount();
-        // world.setTileEntity(x, y, z, te);
     }
 
     public boolean CanConnectTo(World world, int x, int y, int z, int direction) {

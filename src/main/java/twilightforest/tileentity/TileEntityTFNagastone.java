@@ -6,8 +6,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 
-import twilightforest.block.TFBlocks;
-
 public class TileEntityTFNagastone extends TileEntity {
 
     public enum ConnectionType {
