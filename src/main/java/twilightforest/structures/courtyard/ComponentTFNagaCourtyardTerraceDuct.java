@@ -113,7 +113,7 @@ public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyar
             if (this.getBlockAtCurrentPosition(world, i, -1, 7, structureBoundingBox) != Blocks.air)
                 this.placeBlockAtCurrentPosition(
                         world,
-                        TFBlocks.newNagastoneBody,
+                        TFBlocks.nagastoneBody,
                         BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneNorth),
                         i,
                         -1,
@@ -122,7 +122,7 @@ public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyar
             if (this.getBlockAtCurrentPosition(world, 7, -1, i, structureBoundingBox) != Blocks.air)
                 this.placeBlockAtCurrentPosition(
                         world,
-                        TFBlocks.newNagastoneBody,
+                        TFBlocks.nagastoneBody,
                         BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneWest),
                         7,
                         -1,
@@ -132,7 +132,7 @@ public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyar
                 if (this.getBlockAtCurrentPosition(world, i, -1, 9, structureBoundingBox) != Blocks.air)
                     this.placeBlockAtCurrentPosition(
                             world,
-                            TFBlocks.newNagastoneBody,
+                            TFBlocks.nagastoneBody,
                             BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneNorth),
                             i,
                             -1,
@@ -141,7 +141,7 @@ public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyar
                 if (this.getBlockAtCurrentPosition(world, 9, -1, i, structureBoundingBox) != Blocks.air)
                     this.placeBlockAtCurrentPosition(
                             world,
-                            TFBlocks.newNagastoneBody,
+                            TFBlocks.nagastoneBody,
                             BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneWest),
                             9,
                             -1,

@@ -226,7 +226,7 @@ public class BlockTFNagastone2 extends Block {
         Direction currentDirection = DirectionFromMeta(currentMeta);
         Facing currentFacing = FacingFromMeta(currentMeta);
 
-        if (world.getBlock(x, y, z) == TFBlocks.newNagastoneBody && isNagaStoneInDirection(world, x, y, z, direction)) {
+        if (world.getBlock(x, y, z) == TFBlocks.nagastoneBody && isNagaStoneInDirection(world, x, y, z, direction)) {
             int dx = 0;
             int dy = 0;
             int dz = 0;
@@ -258,7 +258,7 @@ public class BlockTFNagastone2 extends Block {
             Direction neighbourDirection = DirectionFromMeta(neighbourMeta);
             Facing neighbourFacing = FacingFromMeta(neighbourMeta);
 
-            if (world.getBlock(x + dx, y + dy, z + dz) == TFBlocks.newNagastoneHead) {
+            if (world.getBlock(x + dx, y + dy, z + dz) == TFBlocks.nagastoneHead) {
                 switch (direction) {
                     case 0:
                         if (neighbourDirection != Direction.DOWN) return false;

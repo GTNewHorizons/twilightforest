@@ -270,7 +270,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
         // Snake ornament
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneSouth),
                 1,
                 2,
@@ -278,7 +278,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneSouth),
                 2,
                 2,
@@ -286,7 +286,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneSouth),
                 3,
                 2,
@@ -294,7 +294,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneSouth),
                 4,
                 2,
@@ -302,7 +302,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.UP, NagastoneNorth),
                 4,
                 3,
@@ -310,7 +310,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneHead,
+                TFBlocks.nagastoneHead,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneNorth),
                 3,
                 3,
@@ -328,7 +328,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
 
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneWest),
                 1,
                 2,
@@ -336,7 +336,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneWest),
                 1,
                 2,
@@ -344,7 +344,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneWest),
                 1,
                 2,
@@ -352,7 +352,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneWest),
                 1,
                 2,
@@ -360,7 +360,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.UP, NagastoneEast),
                 1,
                 3,
@@ -368,7 +368,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 sbb);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneHead,
+                TFBlocks.nagastoneHead,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneEast),
                 1,
                 3,

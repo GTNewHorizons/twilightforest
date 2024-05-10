@@ -79,14 +79,14 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
                 0,
                 1,
                 7,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 1,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 1,
                 true);
         for (int i = 1; i <= 7; i++) this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 0,
                 1,
                 i,
@@ -102,7 +102,7 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneHead,
+                TFBlocks.nagastoneHead,
                 BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneSouth),
                 1,
                 1,
@@ -126,7 +126,7 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneHead,
+                TFBlocks.nagastoneHead,
                 BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneSouth),
                 1,
                 1,

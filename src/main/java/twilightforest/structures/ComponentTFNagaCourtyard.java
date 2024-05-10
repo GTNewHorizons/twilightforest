@@ -74,56 +74,56 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
                 case 9:
                 case 13:
                 case 17:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 4, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 4, fx, 3, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 4, fx, 2, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 4, fx, 2, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 4, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 4, fx, 1, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 2, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 2, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 1, 0, sbb);
                     break;
                 case 3:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneHead, 8, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneHead, 8, fx, 3, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 9, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 9, fx, 1, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 8, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 8, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, 0, sbb);
                     break;
                 case 4:
                 case 8:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 9, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 9, fx, 1, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, 0, sbb);
                     break;
                 case 6:
                 case 10:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 9, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 9, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 3, 0, sbb);
                     break;
                 case 7:
                 case 11:
                 case 15:
                 case 19:
                 case 22:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 5, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 5, fx, 3, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 5, fx, 2, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 5, fx, 2, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 5, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 5, fx, 1, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 2, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 2, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 1, 0, sbb);
                     break;
                 case 14:
                 case 18:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 8, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 8, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 3, 0, sbb);
                     break;
                 case 16:
                 case 20:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 8, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 8, fx, 1, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, 0, sbb);
                     break;
                 case 21:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneHead, 9, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneHead, 9, fx, 3, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 8, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 8, fx, 1, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 9, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 9, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, 0, sbb);
                     break;
             }
 
@@ -157,56 +157,56 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
                 case 9:
                 case 13:
                 case 17:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 7, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 7, 0, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 7, DIAMETER, 2, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 7, 0, 2, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 7, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 7, 0, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 2, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 2, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 1, fz, sbb);
                     break;
                 case 3:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneHead, 11, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneHead, 10, 0, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 11, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 10, 0, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 11, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 10, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, 0, 1, fz, sbb);
                     break;
                 case 4:
                 case 8:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 10, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 10, 0, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, 0, 1, fz, sbb);
                     break;
                 case 6:
                 case 10:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 10, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 10, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, 0, 3, fz, sbb);
                     break;
                 case 7:
                 case 11:
                 case 15:
                 case 19:
                 case 22:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 6, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 6, 0, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 6, DIAMETER, 2, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 6, 0, 2, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 6, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 6, 0, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 2, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 2, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 1, fz, sbb);
                     break;
                 case 14:
                 case 18:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 11, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 11, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 3, fz, sbb);
                     break;
                 case 16:
                 case 20:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 11, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 11, 0, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 1, fz, sbb);
                     break;
                 case 21:
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneHead, 10, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneHead, 10, 0, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 11, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.newNagastoneBody, 11, 0, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 10, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 10, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 1, fz, sbb);
                     break;
             }
 

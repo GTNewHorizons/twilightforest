@@ -295,7 +295,7 @@ public class ComponentTFNagaCourtyardWallCornerInnerPart extends ComponentTFNaga
         // Nagastone ornament
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneNorth),
                 0,
                 2,
@@ -303,7 +303,7 @@ public class ComponentTFNagaCourtyardWallCornerInnerPart extends ComponentTFNaga
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneNorth),
                 1,
                 2,
@@ -311,7 +311,7 @@ public class ComponentTFNagaCourtyardWallCornerInnerPart extends ComponentTFNaga
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneNorth),
                 2,
                 2,
@@ -320,7 +320,7 @@ public class ComponentTFNagaCourtyardWallCornerInnerPart extends ComponentTFNaga
 
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.UP, NagastoneSouth),
                 0,
                 3,
@@ -328,7 +328,7 @@ public class ComponentTFNagaCourtyardWallCornerInnerPart extends ComponentTFNaga
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneHead,
+                TFBlocks.nagastoneHead,
                 BlockTFNagastone2.GetMetadata(BlockTFNagastone2.Direction.SIDE, NagastoneSouth),
                 1,
                 3,

@@ -754,8 +754,8 @@ public class BlockTFNagastone extends Block {
     }
 
     public Item getItemDropped(int meta, Random random, int fortune) {
-        if (meta < 4) return Item.getItemFromBlock(TFBlocks.newNagastoneHead);
-        else return Item.getItemFromBlock(TFBlocks.newNagastoneBody);
+        if (meta < 4) return Item.getItemFromBlock(TFBlocks.nagastoneHead);
+        else return Item.getItemFromBlock(TFBlocks.nagastoneBody);
     }
 
     /**

@@ -261,7 +261,7 @@ public class ComponentTFNagaCourtyardTerraceBrazier extends ComponentTFNagaCourt
         // side columns
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneSouth),
                 7,
                 2,
@@ -269,7 +269,7 @@ public class ComponentTFNagaCourtyardTerraceBrazier extends ComponentTFNagaCourt
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneSouth),
                 7,
                 3,
@@ -279,7 +279,7 @@ public class ComponentTFNagaCourtyardTerraceBrazier extends ComponentTFNagaCourt
 
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneWest),
                 8,
                 2,
@@ -287,7 +287,7 @@ public class ComponentTFNagaCourtyardTerraceBrazier extends ComponentTFNagaCourt
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneWest),
                 8,
                 3,
@@ -297,7 +297,7 @@ public class ComponentTFNagaCourtyardTerraceBrazier extends ComponentTFNagaCourt
 
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneEast),
                 8,
                 2,
@@ -305,7 +305,7 @@ public class ComponentTFNagaCourtyardTerraceBrazier extends ComponentTFNagaCourt
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneEast),
                 8,
                 3,
@@ -315,7 +315,7 @@ public class ComponentTFNagaCourtyardTerraceBrazier extends ComponentTFNagaCourt
 
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneNorth),
                 9,
                 2,
@@ -323,7 +323,7 @@ public class ComponentTFNagaCourtyardTerraceBrazier extends ComponentTFNagaCourt
                 structureBoundingBox);
         this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.newNagastoneBody,
+                TFBlocks.nagastoneBody,
                 BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneNorth),
                 9,
                 3,

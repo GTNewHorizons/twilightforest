@@ -53,9 +53,9 @@ public class TFBlocks {
     public static Block root;
     public static Block uncraftingTable;
     public static Block fireJet;
-    public static Block nagastone;
-    public static Block newNagastoneBody;
-    public static Block newNagastoneHead;
+    public static Block oldNagastone;
+    public static Block nagastoneBody;
+    public static Block nagastoneHead;
     public static Block nagastoneEtched;
     public static Block nagastoneStairsLeft;
     public static Block nagastoneStairsRight;
@@ -165,9 +165,9 @@ public class TFBlocks {
         root = (new BlockTFRoots()).setBlockName("TFRoots");
         uncraftingTable = (new BlockTFUncraftingTable()).setBlockName("TFUncraftingTable");
         fireJet = (new BlockTFFireJet()).setBlockName("TFFireJet");
-        nagastone = (new BlockTFNagastone()).setBlockName("TFNagastone");
-        newNagastoneBody = (new BlockTFNagastone2(false)).setBlockName("TFNagastoneBody");
-        newNagastoneHead = (new BlockTFNagastone2(true)).setBlockName("TFNagastoneHead");
+        oldNagastone = (new BlockTFNagastone()).setBlockName("TFNagastone");
+        nagastoneBody = (new BlockTFNagastone2(false)).setBlockName("TFNagastoneBody");
+        nagastoneHead = (new BlockTFNagastone2(true)).setBlockName("TFNagastoneHead");
         nagastoneEtched = (new BlockTFNagastoneEtched()).setBlockName("TFNagastoneEtched");
         nagastoneStairsLeft = (new BlockTFNagastoneStairs(0, false)).setBlockName("TFNagastoneStairsLeft");
         nagastoneStairsRight = (new BlockTFNagastoneStairs(0, true)).setBlockName("TFNagastoneStairsRight");
@@ -292,9 +292,9 @@ public class TFBlocks {
         registerMyBlock(plant, twilightforest.item.ItemBlockTFPlant.class);
         registerMyBlock(uncraftingTable, ItemBlock.class);
         registerMyBlock(fireJet);
-        registerMyBlock(nagastone, ItemBlockTFNagastone.class);
-        registerMyBlock(newNagastoneBody, ItemBlockTFNagastone.class);
-        registerMyBlock(newNagastoneHead, ItemBlockTFNagastone.class);
+        registerMyBlock(oldNagastone, ItemBlockTFNagastone.class);
+        registerMyBlock(nagastoneBody, ItemBlockTFNagastone.class);
+        registerMyBlock(nagastoneHead, ItemBlockTFNagastone.class);
         registerMyBlock(nagastoneEtched);
         registerMyBlock(nagastoneStairsLeft);
         registerMyBlock(nagastoneStairsRight);

@@ -22,7 +22,7 @@ public class ItemBlockTFNagastone extends ItemBlock {
 
     @Override
     public IIcon getIconFromDamage(int i) {
-        return TFBlocks.nagastone.getIcon(2, i);
+        return TFBlocks.oldNagastone.getIcon(2, i);
     }
 
     @Override
@@ -49,8 +49,8 @@ public class ItemBlockTFNagastone extends ItemBlock {
             float hitX, float hitY, float hitZ, int metadata) {
         Block blockToPlace = field_150939_a;
         if (blockToPlace instanceof BlockTFNagastone) {
-            if (metadata < 4) blockToPlace = TFBlocks.newNagastoneHead;
-            else blockToPlace = TFBlocks.newNagastoneBody;
+            if (metadata < 4) blockToPlace = TFBlocks.nagastoneHead;
+            else blockToPlace = TFBlocks.nagastoneBody;
         }
 
         if (!world.setBlock(x, y, z, blockToPlace, 0, 3)) {
