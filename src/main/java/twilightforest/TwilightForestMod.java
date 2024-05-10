@@ -996,7 +996,7 @@ public class TwilightForestMod {
         NagaScale_ID = configFile.get("Tinker Integration", "NagaScale_ID", 44).getInt(44);
         configFile.get("Tinker Integration", "NagaScale_ID", 44).comment = "Tinker Material ID for NagaScale.";
         Steeleaf_ID = configFile.get("Tinker Integration", "Steeleaf_ID", 45).getInt(45);
-        configFile.get("Tinker Integration", "Steeleaf_ID", 44).comment = "Tinker Material ID for Steeleaf.";
+        configFile.get("Tinker Integration", "Steeleaf_ID", 45).comment = "Tinker Material ID for Steeleaf.";
 
         // fixed values, don't even read the config
         idMobWildBoar = 177;

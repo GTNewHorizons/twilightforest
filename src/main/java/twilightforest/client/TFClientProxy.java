@@ -18,7 +18,6 @@ import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
 import twilightforest.TFCommonProxy;
 import twilightforest.TFGenericPacketHandler;
 import twilightforest.TwilightForestMod;
@@ -188,8 +187,6 @@ public class TFClientProxy extends TFCommonProxy {
     ModelBiped[] yetiArmorModel;
     ModelBiped[] arcticArmorModel;
     ModelBiped[] fieryArmorModel;
-
-    TFClientTicker clientTicker;
     TFClientEvents clientEvents;
 
     boolean isDangerOverlayShown;
@@ -211,10 +208,6 @@ public class TFClientProxy extends TFCommonProxy {
     @Override
     public void doOnLoadRegistration() {
         Minecraft mc = FMLClientHandler.instance().getClient();
-
-        // client tick listener
-        clientTicker = new TFClientTicker();
-        FMLCommonHandler.instance().bus().register(clientTicker);
 
         // client events
         clientEvents = new TFClientEvents();
