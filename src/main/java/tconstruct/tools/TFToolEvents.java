@@ -39,6 +39,7 @@ import tconstruct.weaponry.ammo.ArrowAmmo;
 import tconstruct.weaponry.ammo.BoltAmmo;
 import tconstruct.weaponry.entity.ArrowEntity;
 import tconstruct.weaponry.entity.BoltEntity;
+import twilightforest.TwilightForestMod;
 import twilightforest.integration.TFTinkerConstructIntegration;
 import twilightforest.integration.TFTinkerConstructIntegration.MaterialID;
 import twilightforest.item.TFItems;
@@ -152,22 +153,15 @@ public class TFToolEvents {
     }
 
     private EnumChatFormatting colorFromID(int materialID) {
-        EnumChatFormatting cf;
-        switch (materialID) {
-            default:
-                cf = EnumChatFormatting.DARK_GRAY;
-                break;
-            case MaterialID.FieryMetal:
-                cf = EnumChatFormatting.GOLD;
-                break;
-            case MaterialID.Knightmetal:
-                cf = EnumChatFormatting.GREEN;
-                break;
-            case MaterialID.NagaScale:
-            case MaterialID.Steeleaf:
-                cf = EnumChatFormatting.DARK_GREEN;
-                break;
+        EnumChatFormatting cf = EnumChatFormatting.DARK_GRAY;
+
+        if (materialID == MaterialID.FieryMetal) cf = EnumChatFormatting.GOLD;
+        else if (materialID == MaterialID.Knightmetal) {
+            cf = EnumChatFormatting.GREEN;
+        } else if (materialID == MaterialID.NagaScale || materialID == MaterialID.Steeleaf) {
+            cf = EnumChatFormatting.DARK_GREEN;
         }
+
         return cf;
     }
 
@@ -265,6 +259,7 @@ public class TFToolEvents {
 
     @SubscribeEvent
     public void onEntityConstructing(EntityEvent.EntityConstructing event) {
+        if (!TwilightForestMod.enableTiCIntegration) return;
         if (event.entity instanceof EntityPlayer player && TFTPlayerStats.get(player) == null) {
             TFTPlayerStats.register(player);
         }
@@ -272,6 +267,7 @@ public class TFToolEvents {
 
     @SubscribeEvent
     public void onItemPickup(EntityItemPickupEvent event) {
+        if (!TwilightForestMod.enableTiCIntegration) return;
         Item item = event.item.getEntityItem().getItem();
         EntityPlayer player = event.entityPlayer;
         TFTPlayerStats stats = TFTPlayerStats.get(player);
@@ -294,6 +290,7 @@ public class TFToolEvents {
 
     @SubscribeEvent
     public void onCrafting(ItemCraftedEvent event) {
+        if (!TwilightForestMod.enableTiCIntegration) return;
         Item item = event.crafting.getItem();
         EntityPlayer player = event.player;
         TFTPlayerStats stats = TFTPlayerStats.get(player);
