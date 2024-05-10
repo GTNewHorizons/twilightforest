@@ -486,72 +486,86 @@ public class BlockTFNagastone2 extends Block {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister par1IconRegister) {
-        BlockTFNagastone2.FACE_LEFT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_face_left");
-        BlockTFNagastone2.FACE_RIGHT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_face_right");
-        BlockTFNagastone2.FACE_FRONT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_face_front");
+        BlockTFNagastone2.FACE_LEFT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_face_left");
+        BlockTFNagastone2.FACE_RIGHT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_face_right");
+        BlockTFNagastone2.FACE_FRONT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_face_front");
         BlockTFNagastone2.CROSS_SECTION = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_cross_section");
-        BlockTFNagastone2.TOP_TIP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_top_tip");
-        BlockTFNagastone2.TOP_LONG = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_top_long");
-        BlockTFNagastone2.TOP_CROSS = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_top_turn");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_cross_section");
+        BlockTFNagastone2.TOP_TIP = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_tip");
+        BlockTFNagastone2.TOP_LONG = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_long");
+        BlockTFNagastone2.TOP_CROSS = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_turn");
         BlockTFNagastone2.TOP_ANGLE_UP = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_top_angle_up");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_angle_up");
         BlockTFNagastone2.TOP_ANGLE_DOWN = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_top_angle_down");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_angle_down");
         BlockTFNagastone2.TOP_TRIPLE_UP = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_top_triple_up");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_triple_up");
         BlockTFNagastone2.TOP_TRIPLE_DOWN = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_top_triple_down");
-        BlockTFNagastone2.BOTTOM_TIP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_bottom_tip");
-        BlockTFNagastone2.BOTTOM_LONG = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_bottom_long");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_triple_down");
+        BlockTFNagastone2.BOTTOM_TIP = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_tip");
+        BlockTFNagastone2.BOTTOM_LONG = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_long");
         BlockTFNagastone2.LEFT_DOWN_CLEAR = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_left_down_clear");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_left_down_clear");
         BlockTFNagastone2.LEFT_DOWN_ORNATED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_left_down_ornated");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_left_down_ornated");
         BlockTFNagastone2.LEFT_UP_CLEAR = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_left_up_clear");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_left_up_clear");
         BlockTFNagastone2.LEFT_UP_ORNATED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_left_up_ornated");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_left_up_ornated");
         BlockTFNagastone2.RIGHT_DOWN_CLEAR = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_right_down_clear");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_right_down_clear");
         BlockTFNagastone2.RIGHT_DOWN_ORNATED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_right_down_ornated");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_right_down_ornated");
         BlockTFNagastone2.RIGHT_UP_CLEAR = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_right_up_clear");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_right_up_clear");
         BlockTFNagastone2.RIGHT_UP_ORNATED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_right_up_ornated");
-        BlockTFNagastone2.TIP_LEFT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_tip_left");
-        BlockTFNagastone2.TIP_RIGHT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_tip_right");
-        BlockTFNagastone2.RIGHT_SIDE = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_side_right");
-        BlockTFNagastone2.LEFT_SIDE = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_side_left");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_right_up_ornated");
+        BlockTFNagastone2.TIP_LEFT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_tip_left");
+        BlockTFNagastone2.TIP_RIGHT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_tip_right");
+        BlockTFNagastone2.RIGHT_SIDE = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_side_right");
+        BlockTFNagastone2.LEFT_SIDE = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_side_left");
         BlockTFNagastone2.TRIPLE_RIGHT_UP_LB = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_triple_right_up_lb");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_triple_right_up_lb");
         BlockTFNagastone2.TRIPLE_RIGHT_DOWN_LB = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_triple_right_down_lb");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_triple_right_down_lb");
         BlockTFNagastone2.TRIPLE_RIGHT_UP_RB = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_triple_right_up_rb");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_triple_right_up_rb");
         BlockTFNagastone2.TRIPLE_RIGHT_DOWN_RB = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_triple_right_down_rb");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_triple_right_down_rb");
         BlockTFNagastone2.TRIPLE_LEFT_UP_LB = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_triple_left_up_lb");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_triple_left_up_lb");
         BlockTFNagastone2.TRIPLE_LEFT_DOWN_LB = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_triple_left_down_lb");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_triple_left_down_lb");
         BlockTFNagastone2.TRIPLE_LEFT_UP_RB = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_triple_left_up_rb");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_triple_left_up_rb");
         BlockTFNagastone2.TRIPLE_LEFT_DOWN_RB = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_triple_left_down_rb");
-        BlockTFNagastone2.RIGHT_CROSS = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_cross_right");
-        BlockTFNagastone2.LEFT_CROSS = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_cross_left");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_triple_left_down_rb");
+        BlockTFNagastone2.RIGHT_CROSS = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_cross_right");
+        BlockTFNagastone2.LEFT_CROSS = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_cross_left");
         BlockTFNagastone2.BOTTOM_ANGLE_UP = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bottom_angle_up");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_angle_up");
         BlockTFNagastone2.BOTTOM_ANGLE_DOWN = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bottom_angle_down");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_angle_down");
         BlockTFNagastone2.BOTTOM_TRIPLE_UP = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bottom_triple_up");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_triple_up");
         BlockTFNagastone2.BOTTOM_TRIPLE_DOWN = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bottom_triple_down");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_triple_down");
         BlockTFNagastone2.BOTTOM_CROSS = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bottom_cross");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_cross");
     }
 
     public int GetMetadata(int side, float hitX, float hitZ) {

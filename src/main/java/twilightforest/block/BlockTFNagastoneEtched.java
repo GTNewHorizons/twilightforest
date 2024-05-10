@@ -315,39 +315,42 @@ public class BlockTFNagastoneEtched extends Block {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister par1IconRegister) {
-        BlockTFNagastoneEtched.TEX_TILES = par1IconRegister.registerIcon(TwilightForestMod.ID + ":stone_tiles");
+        BlockTFNagastoneEtched.TEX_TILES = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/stone_tiles");
         BlockTFNagastoneEtched.TEX_TILES_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":stone_tiles_mossy");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/stone_tiles_mossy");
         BlockTFNagastoneEtched.TEX_TILES_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":stone_tiles_weathered");
-        BlockTFNagastoneEtched.TEX_BARE = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_bare");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/stone_tiles_weathered");
+        BlockTFNagastoneEtched.TEX_BARE = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bare");
         BlockTFNagastoneEtched.TEX_BARE_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bare_mossy");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bare_mossy");
         BlockTFNagastoneEtched.TEX_BARE_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bare_weathered");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bare_weathered");
         BlockTFNagastoneEtched.TEX_DOWN = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_down");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_down");
         BlockTFNagastoneEtched.TEX_DOWN_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_down_mossy");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_down_mossy");
         BlockTFNagastoneEtched.TEX_DOWN_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_down_weathered");
-        BlockTFNagastoneEtched.TEX_UP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":etched_nagastone_up");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_down_weathered");
+        BlockTFNagastoneEtched.TEX_UP = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_up");
         BlockTFNagastoneEtched.TEX_UP_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_up_mossy");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_up_mossy");
         BlockTFNagastoneEtched.TEX_UP_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_up_weathered");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_up_weathered");
         BlockTFNagastoneEtched.TEX_LEFT = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_left");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_left");
         BlockTFNagastoneEtched.TEX_LEFT_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_left_mossy");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_left_mossy");
         BlockTFNagastoneEtched.TEX_LEFT_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_left_weathered");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_left_weathered");
         BlockTFNagastoneEtched.TEX_RIGHT = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_right");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_right");
         BlockTFNagastoneEtched.TEX_RIGHT_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_right_mossy");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_right_mossy");
         BlockTFNagastoneEtched.TEX_RIGHT_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_right_weathered");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_right_weathered");
     }
 
     /**

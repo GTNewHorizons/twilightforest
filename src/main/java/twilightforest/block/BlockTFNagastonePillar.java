@@ -69,19 +69,22 @@ public class BlockTFNagastonePillar extends BlockRotatedPillar {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister par1IconRegister) {
-        this.PILLAR_END = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_pillar_end");
-        this.PILLAR_END_MOSSY = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_pillar_end_mossy");
+        this.PILLAR_END = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_end");
+        this.PILLAR_END_MOSSY = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_end_mossy");
         this.PILLAR_END_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_pillar_end_weathered");
-        this.PILLAR_SIDE = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_pillar_side");
-        this.PILLAR_SIDE_MOSSY = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_pillar_side_mossy");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_end_weathered");
+        this.PILLAR_SIDE = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_side");
+        this.PILLAR_SIDE_MOSSY = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_side_mossy");
         this.PILLAR_SIDE_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_pillar_side_weathered");
-        this.PILLAR_SIDE_ALT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_pillar_side_alt");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_side_weathered");
+        this.PILLAR_SIDE_ALT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_side_alt");
         this.PILLAR_SIDE_ALT_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_pillar_side_alt_mossy");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_side_alt_mossy");
         this.PILLAR_SIDE_ALT_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_pillar_side_alt_weathered");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_pillar_side_alt_weathered");
     }
 
 }

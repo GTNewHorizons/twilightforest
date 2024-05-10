@@ -769,23 +769,36 @@ public class BlockTFNagastone extends Block {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister par1IconRegister) {
-        BlockTFNagastone.FACE_LEFT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_face_left");
-        BlockTFNagastone.FACE_RIGHT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_face_right");
+        BlockTFNagastone.FACE_LEFT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_face_left");
+        BlockTFNagastone.FACE_RIGHT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_face_right");
         BlockTFNagastone.CROSS_SECTION = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_cross_section");
-        BlockTFNagastone.FACE_FRONT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_face_front");
-        BlockTFNagastone.TOP_TIP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_top_tip");
-        BlockTFNagastone.TOP_LONG = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_top_long");
-        BlockTFNagastone.BOTTOM_TIP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_bottom_tip");
-        BlockTFNagastone.BOTTOM_LONG = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_bottom_long");
-        BlockTFNagastone.LEFT_DOWN = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_left_down");
-        BlockTFNagastone.RIGHT_DOWN = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_right_down");
-        BlockTFNagastone.LEFT_UP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_left_up");
-        BlockTFNagastone.RIGHT_UP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_right_up");
-        BlockTFNagastone.TIP_LEFT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_tip_left");
-        BlockTFNagastone.LONG_SIDE = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_long_side");
-        BlockTFNagastone.TIP_RIGHT = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_tip_right");
-        BlockTFNagastone.TURN_TOP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_turn_top");
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_cross_section");
+        BlockTFNagastone.FACE_FRONT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_face_front");
+        BlockTFNagastone.TOP_TIP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_tip");
+        BlockTFNagastone.TOP_LONG = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_top_long");
+        BlockTFNagastone.BOTTOM_TIP = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_tip");
+        BlockTFNagastone.BOTTOM_LONG = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bottom_long");
+        BlockTFNagastone.LEFT_DOWN = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_left_down");
+        BlockTFNagastone.RIGHT_DOWN = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_right_down");
+        BlockTFNagastone.LEFT_UP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_left_up");
+        BlockTFNagastone.RIGHT_UP = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_right_up");
+        BlockTFNagastone.TIP_LEFT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_tip_left");
+        BlockTFNagastone.LONG_SIDE = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_long_side");
+        BlockTFNagastone.TIP_RIGHT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_tip_right");
+        BlockTFNagastone.TURN_TOP = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_turn_top");
     }
 
 }
