@@ -53,7 +53,6 @@ public class TileEntityTFNagastone extends TileEntity {
 
     public TileEntityTFNagastone() {
         super();
-        this.blockType = TFBlocks.nagastone;
         this.NoNeighbours();
     }
 
