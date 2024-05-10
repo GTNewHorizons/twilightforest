@@ -9,6 +9,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.RecipeSorter;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import twilightforest.TwilightForestMod;
@@ -39,6 +40,26 @@ public class TFRecipes {
         OreDictionary.registerOre("ingotSteeleaf", new ItemStack(TFItems.steeleafIngot));
         OreDictionary.registerOre("oreKnightmetal", new ItemStack(TFItems.shardCluster));
         OreDictionary.registerOre("ingotKnightmetal", new ItemStack(TFItems.knightMetal));
+
+        // nagastone stuff
+        OreDictionary.registerOre(
+                "nagastoneStairs",
+                new ItemStack(TFBlocks.nagastoneStairsLeft, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre(
+                "nagastoneStairs",
+                new ItemStack(TFBlocks.nagastoneStairsRight, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre(
+                "nagastoneStairsMossy",
+                new ItemStack(TFBlocks.nagastoneStairsMossyLeft, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre(
+                "nagastoneStairsMossy",
+                new ItemStack(TFBlocks.nagastoneStairsMossyRight, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre(
+                "nagastoneStairsWeathered",
+                new ItemStack(TFBlocks.nagastoneStairsWeatheredLeft, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre(
+                "nagastoneStairsWeathered",
+                new ItemStack(TFBlocks.nagastoneStairsWeatheredRight, 1, OreDictionary.WILDCARD_VALUE));
 
         // recipe sorter
         RecipeSorter.register(
@@ -111,41 +132,30 @@ public class TFRecipes {
                 new Object[] { "###", " ##", "  #", '#', new ItemStack(TFBlocks.nagastoneEtched, 1, 0) });
         GameRegistry.addRecipe(
                 new ItemStack(TFBlocks.nagastoneStairsMossyLeft, 8, 0),
-                new Object[] { "#  ", "## ", "###", '#', new ItemStack(TFBlocks.nagastoneEtched, 1, 1) });
+                new Object[] { "#  ", "## ", "###", '#', new ItemStack(TFBlocks.nagastoneEtchedMossy, 1, 0) });
         GameRegistry.addRecipe(
                 new ItemStack(TFBlocks.nagastoneStairsMossyRight, 8, 0),
-                new Object[] { "###", " ##", "  #", '#', new ItemStack(TFBlocks.nagastoneEtched, 1, 1) });
+                new Object[] { "###", " ##", "  #", '#', new ItemStack(TFBlocks.nagastoneEtchedMossy, 1, 0) });
         GameRegistry.addRecipe(
                 new ItemStack(TFBlocks.nagastoneStairsWeatheredLeft, 8, 0),
-                new Object[] { "#  ", "## ", "###", '#', new ItemStack(TFBlocks.nagastoneEtched, 1, 2) });
+                new Object[] { "#  ", "## ", "###", '#', new ItemStack(TFBlocks.nagastoneEtchedWeathered, 1, 0) });
         GameRegistry.addRecipe(
                 new ItemStack(TFBlocks.nagastoneStairsWeatheredRight, 8, 0),
-                new Object[] { "###", " ##", "  #", '#', new ItemStack(TFBlocks.nagastoneEtched, 1, 2) });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFBlocks.nagastoneEtched, 3, 0),
-                new Object[] { TFBlocks.nagastoneStairsLeft, TFBlocks.nagastoneStairsLeft, TFBlocks.nagastoneStairsLeft,
-                        TFBlocks.nagastoneStairsLeft });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFBlocks.nagastoneEtched, 3, 0),
-                new Object[] { TFBlocks.nagastoneStairsRight, TFBlocks.nagastoneStairsRight,
-                        TFBlocks.nagastoneStairsRight, TFBlocks.nagastoneStairsRight });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFBlocks.nagastoneEtched, 3, 1),
-                new Object[] { TFBlocks.nagastoneStairsMossyLeft, TFBlocks.nagastoneStairsMossyLeft,
-                        TFBlocks.nagastoneStairsMossyLeft, TFBlocks.nagastoneStairsMossyLeft });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFBlocks.nagastoneEtched, 3, 1),
-                new Object[] { TFBlocks.nagastoneStairsMossyRight, TFBlocks.nagastoneStairsMossyRight,
-                        TFBlocks.nagastoneStairsMossyRight, TFBlocks.nagastoneStairsMossyRight });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFBlocks.nagastoneEtched, 3, 2),
-                new Object[] { TFBlocks.nagastoneStairsWeatheredLeft, TFBlocks.nagastoneStairsWeatheredLeft,
-                        TFBlocks.nagastoneStairsWeatheredLeft, TFBlocks.nagastoneStairsWeatheredLeft });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFBlocks.nagastoneEtched, 3, 2),
-                new Object[] { TFBlocks.nagastoneStairsWeatheredRight, TFBlocks.nagastoneStairsWeatheredRight,
-                        TFBlocks.nagastoneStairsWeatheredRight, TFBlocks.nagastoneStairsWeatheredRight });
-
+                new Object[] { "###", " ##", "  #", '#', new ItemStack(TFBlocks.nagastoneEtchedWeathered, 1, 0) });
+        GameRegistry.addRecipe(
+                new ShapelessOreRecipe(
+                        new ItemStack(TFBlocks.nagastoneEtched, 3, 0),
+                        new Object[] { "nagastoneStairs", "nagastoneStairs", "nagastoneStairs", "nagastoneStairs" }));
+        GameRegistry.addRecipe(
+                new ShapelessOreRecipe(
+                        new ItemStack(TFBlocks.nagastoneEtchedMossy, 3, 0),
+                        new Object[] { "nagastoneStairsMossy", "nagastoneStairsMossy", "nagastoneStairsMossy",
+                                "nagastoneStairsMossy" }));
+        GameRegistry.addRecipe(
+                new ShapelessOreRecipe(
+                        new ItemStack(TFBlocks.nagastoneEtchedWeathered, 3, 0),
+                        new Object[] { "nagastoneStairsWeathered", "nagastoneStairsWeathered",
+                                "nagastoneStairsWeathered", "nagastoneStairsWeathered" }));
         GameRegistry.addRecipe(
                 new ItemStack(TFBlocks.spiralStoneBricks, 8, 0),
                 new Object[] { "#XX", "#XX", "###", '#', Blocks.stone, 'X', new ItemStack(Blocks.stone_slab, 1, 0) });

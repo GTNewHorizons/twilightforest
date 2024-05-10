@@ -23,15 +23,9 @@ public class BlockTFNagastonePillar extends BlockRotatedPillar {
     private static IIcon PILLAR_SIDE_ALT_MOSSY;
     private static IIcon PILLAR_SIDE_ALT_WEATHERED;
 
-    public enum BlockType {
-        NORMAL,
-        MOSSY,
-        WEATHERED
-    };
+    public NagastoneType blockType;
 
-    public BlockType blockType;
-
-    protected BlockTFNagastonePillar(BlockType type) {
+    protected BlockTFNagastonePillar(NagastoneType type) {
         super(Material.rock);
         this.setHardness(1.5F);
         this.setResistance(10.0F);

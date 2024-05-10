@@ -82,8 +82,9 @@ public class ComponentTFNagaCourtyardDecorator extends StructureTFComponent {
                     if (currentBlock == TFBlocks.nagastoneEtched) {
                         if (random.nextBoolean()) this.placeBlockAtCurrentPosition(
                                 world,
-                                TFBlocks.nagastoneEtched,
-                                random.nextInt(2) + 1,
+                                random.nextBoolean() ? TFBlocks.nagastoneEtchedMossy
+                                        : TFBlocks.nagastoneEtchedWeathered,
+                                0,
                                 x,
                                 y,
                                 z,

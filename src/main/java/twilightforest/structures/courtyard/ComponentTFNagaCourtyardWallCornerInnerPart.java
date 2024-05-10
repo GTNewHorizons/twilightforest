@@ -5,11 +5,10 @@ import java.util.Random;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import twilightforest.block.BlockTFNagastone2;
 import twilightforest.block.TFBlocks;
-import twilightforest.tileentity.TileEntityTFNagastoneEtched;
-import twilightforest.tileentity.TileEntityTFNagastoneEtched.Direction;
 
 public class ComponentTFNagaCourtyardWallCornerInnerPart extends ComponentTFNagaCourtyardRotatedAbstract {
 
@@ -254,39 +253,35 @@ public class ComponentTFNagaCourtyardWallCornerInnerPart extends ComponentTFNaga
 
         // Etched nagastone
         // Top
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
                 TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(Direction.DOWN),
+                ForgeDirection.UP.ordinal(),
                 2,
                 6,
                 0,
                 structureBoundingBox);
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
                 TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(Direction.DOWN),
+                ForgeDirection.UP.ordinal(),
                 2,
                 6,
                 2,
                 structureBoundingBox);
         // Bottom
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
                 TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(Direction.DOWN),
+                ForgeDirection.UP.ordinal(),
                 1,
                 1,
                 0,
                 structureBoundingBox);
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
                 TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(Direction.DOWN),
+                ForgeDirection.UP.ordinal(),
                 1,
                 1,
                 2,

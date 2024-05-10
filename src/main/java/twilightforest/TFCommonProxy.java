@@ -51,10 +51,6 @@ public class TFCommonProxy implements IGuiHandler {
         return 0;
     }
 
-    public int getNagastoneEtchedBlockRenderID() {
-        return 0;
-    }
-
     public int getNagastoneEtchedStairsBlockRenderID() {
         return 0;
     }

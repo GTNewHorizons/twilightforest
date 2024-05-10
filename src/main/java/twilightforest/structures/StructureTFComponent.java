@@ -455,15 +455,6 @@ public abstract class StructureTFComponent extends StructureComponent {
         super.placeBlockAtCurrentPosition(par1World, par2, par3, par4, par5, par6, par7StructureBoundingBox);
     }
 
-    /**
-     * current Position depends on currently set Coordinates mode, is computed here
-     */
-    protected void placeBlockWithTileEntityAtCurrentPosition(World par1World, Block par2, int par3, TileEntity te,
-            int par4, int par5, int par6, StructureBoundingBox par7StructureBoundingBox) {
-        placeBlockAtCurrentPosition(par1World, par2, par3, par4, par5, par6, par7StructureBoundingBox);
-        setTileEntityAtCurrentPosition(par1World, te, par4, par5, par6, par7StructureBoundingBox);
-    }
-
     protected void partiallyFillWithMetadataBlocks(World world, StructureBoundingBox structureBoundingBox, int minX,
             int minY, int minZ, int maxX, int maxY, int maxZ, Block placeBlock, int placeBlockMeta, Random random,
             float placeRate) {

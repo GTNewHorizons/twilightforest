@@ -8,7 +8,6 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 
 import twilightforest.block.BlockTFNagastone2;
 import twilightforest.block.TFBlocks;
-import twilightforest.tileentity.TileEntityTFNagastoneEtched;
 
 public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCourtyardRotatedAbstract {
 
@@ -50,79 +49,15 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
 
         // Horizontal rows
         // Outer
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneWest),
-                0,
-                5,
-                1,
-                sbb);
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneWest),
-                0,
-                5,
-                2,
-                sbb);
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneWest),
-                0,
-                5,
-                3,
-                sbb);
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneWest),
-                0,
-                5,
-                4,
-                sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneWest.ordinal(), 0, 5, 1, sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneWest.ordinal(), 0, 5, 2, sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneWest.ordinal(), 0, 5, 3, sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneWest.ordinal(), 0, 5, 4, sbb);
 
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneNorth),
-                1,
-                5,
-                0,
-                sbb);
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneNorth),
-                2,
-                5,
-                0,
-                sbb);
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneNorth),
-                3,
-                5,
-                0,
-                sbb);
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneNorth),
-                4,
-                5,
-                0,
-                sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneNorth.ordinal(), 1, 5, 0, sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneNorth.ordinal(), 2, 5, 0, sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneNorth.ordinal(), 3, 5, 0, sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneNorth.ordinal(), 4, 5, 0, sbb);
         // Inner
         this.fillWithMetadataBlocks(
                 world,
@@ -316,15 +251,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 3,
                 1,
                 sbb);
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneNorth),
-                2,
-                3,
-                1,
-                sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneNorth.ordinal(), 2, 3, 1, sbb);
 
         this.placeBlockAtCurrentPosition(
                 world,
@@ -374,15 +301,7 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
                 3,
                 3,
                 sbb);
-        this.placeBlockWithTileEntityAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneEtched,
-                0,
-                new TileEntityTFNagastoneEtched(EtchedNagastoneWest),
-                1,
-                3,
-                2,
-                sbb);
+        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, EtchedNagastoneWest.ordinal(), 1, 3, 2, sbb);
 
         this.placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 1, 3, 1, sbb);
 

@@ -36,7 +36,7 @@ public class BlockTFNagastone2 extends Block {
     // 1,5,9 = West
     // 2,6,10 = North
     // 3,7,11 = South
-    public enum Facing {
+    public enum Yaw {
         EAST,
         WEST,
         NORTH,
@@ -223,7 +223,7 @@ public class BlockTFNagastone2 extends Block {
         int currentMeta = world.getBlockMetadata(x, y, z);
 
         Direction currentDirection = DirectionFromMeta(currentMeta);
-        Facing currentFacing = FacingFromMeta(currentMeta);
+        Yaw currentFacing = FacingFromMeta(currentMeta);
 
         if (world.getBlock(x, y, z) == TFBlocks.nagastoneBody && isNagaStoneInDirection(world, x, y, z, direction)) {
             int dx = 0;
@@ -255,7 +255,7 @@ public class BlockTFNagastone2 extends Block {
             int neighbourMeta = world.getBlockMetadata(x + dx, y + dy, z + dz);
 
             Direction neighbourDirection = DirectionFromMeta(neighbourMeta);
-            Facing neighbourFacing = FacingFromMeta(neighbourMeta);
+            Yaw neighbourFacing = FacingFromMeta(neighbourMeta);
 
             if (world.getBlock(x + dx, y + dy, z + dz) == TFBlocks.nagastoneHead) {
                 switch (direction) {
@@ -265,10 +265,10 @@ public class BlockTFNagastone2 extends Block {
                             if (currentDirection == Direction.SIDE) switch (currentFacing) {
                                 case EAST:
                                 case WEST:
-                                    return neighbourFacing == Facing.EAST || neighbourFacing == Facing.WEST;
+                                    return neighbourFacing == Yaw.EAST || neighbourFacing == Yaw.WEST;
                                 case NORTH:
                                 case SOUTH:
-                                    return neighbourFacing == Facing.NORTH || neighbourFacing == Facing.SOUTH;
+                                    return neighbourFacing == Yaw.NORTH || neighbourFacing == Yaw.SOUTH;
                             }
                             else {
                                 return neighbourFacing == currentFacing;
@@ -281,10 +281,10 @@ public class BlockTFNagastone2 extends Block {
                             if (currentDirection == Direction.SIDE) switch (currentFacing) {
                                 case EAST:
                                 case WEST:
-                                    return neighbourFacing == Facing.EAST || neighbourFacing == Facing.WEST;
+                                    return neighbourFacing == Yaw.EAST || neighbourFacing == Yaw.WEST;
                                 case NORTH:
                                 case SOUTH:
-                                    return neighbourFacing == Facing.NORTH || neighbourFacing == Facing.SOUTH;
+                                    return neighbourFacing == Yaw.NORTH || neighbourFacing == Yaw.SOUTH;
                             }
                             else {
                                 return neighbourFacing == currentFacing;
@@ -292,13 +292,13 @@ public class BlockTFNagastone2 extends Block {
                         }
                         break;
                     case 2:
-                        return neighbourDirection == Direction.SIDE && neighbourFacing == Facing.EAST;
+                        return neighbourDirection == Direction.SIDE && neighbourFacing == Yaw.EAST;
                     case 3:
-                        return neighbourDirection == Direction.SIDE && neighbourFacing == Facing.WEST;
+                        return neighbourDirection == Direction.SIDE && neighbourFacing == Yaw.WEST;
                     case 4:
-                        return neighbourDirection == Direction.SIDE && neighbourFacing == Facing.NORTH;
+                        return neighbourDirection == Direction.SIDE && neighbourFacing == Yaw.NORTH;
                     case 5:
-                        return neighbourDirection == Direction.SIDE && neighbourFacing == Facing.SOUTH;
+                        return neighbourDirection == Direction.SIDE && neighbourFacing == Yaw.SOUTH;
                 }
             } else {
                 switch (direction) {
@@ -311,10 +311,10 @@ public class BlockTFNagastone2 extends Block {
                         } else switch (currentFacing) {
                             case EAST:
                             case WEST:
-                                return neighbourFacing == Facing.EAST || neighbourFacing == Facing.WEST;
+                                return neighbourFacing == Yaw.EAST || neighbourFacing == Yaw.WEST;
                             case NORTH:
                             case SOUTH:
-                                return neighbourFacing == Facing.NORTH || neighbourFacing == Facing.SOUTH;
+                                return neighbourFacing == Yaw.NORTH || neighbourFacing == Yaw.SOUTH;
                         }
                         break;
                     case 2:
@@ -324,11 +324,11 @@ public class BlockTFNagastone2 extends Block {
                                 case EAST:
                                 case WEST:
                                     if (neighbourDirection == Direction.SIDE) return true;
-                                    else return (neighbourFacing == Facing.EAST || neighbourFacing == Facing.WEST);
+                                    else return (neighbourFacing == Yaw.EAST || neighbourFacing == Yaw.WEST);
                                 case NORTH:
                                 case SOUTH:
                                     if (neighbourDirection != Direction.SIDE) return false;
-                                    else return (neighbourFacing == Facing.EAST || neighbourFacing == Facing.WEST);
+                                    else return (neighbourFacing == Yaw.EAST || neighbourFacing == Yaw.WEST);
                             }
                         } else {
                             if (neighbourDirection != Direction.SIDE) return false;
@@ -336,7 +336,7 @@ public class BlockTFNagastone2 extends Block {
                                 switch (currentFacing) {
                                     case EAST:
                                     case WEST:
-                                        return neighbourFacing == Facing.EAST || neighbourFacing == Facing.WEST;
+                                        return neighbourFacing == Yaw.EAST || neighbourFacing == Yaw.WEST;
                                     case NORTH:
                                     case SOUTH:
                                         return false;
@@ -351,11 +351,11 @@ public class BlockTFNagastone2 extends Block {
                                 case EAST:
                                 case WEST:
                                     if (neighbourDirection != Direction.SIDE) return false;
-                                    else return (neighbourFacing == Facing.NORTH || neighbourFacing == Facing.SOUTH);
+                                    else return (neighbourFacing == Yaw.NORTH || neighbourFacing == Yaw.SOUTH);
                                 case NORTH:
                                 case SOUTH:
                                     if (neighbourDirection == Direction.SIDE) return true;
-                                    else return (neighbourFacing == Facing.NORTH || neighbourFacing == Facing.SOUTH);
+                                    else return (neighbourFacing == Yaw.NORTH || neighbourFacing == Yaw.SOUTH);
                             }
                         } else {
                             if (neighbourDirection != Direction.SIDE) return false;
@@ -366,7 +366,7 @@ public class BlockTFNagastone2 extends Block {
                                         return false;
                                     case NORTH:
                                     case SOUTH:
-                                        return neighbourFacing == Facing.NORTH || neighbourFacing == Facing.SOUTH;
+                                        return neighbourFacing == Yaw.NORTH || neighbourFacing == Yaw.SOUTH;
                                 }
                             }
                         }
@@ -569,7 +569,7 @@ public class BlockTFNagastone2 extends Block {
 
     public int GetMetadata(int side, float hitX, float hitZ) {
         Direction direction = GetDirection(side);
-        Facing facing;
+        Yaw facing;
         if (direction == Direction.SIDE) {
             facing = GetFacing(side - 2);
         } else {
@@ -577,19 +577,19 @@ public class BlockTFNagastone2 extends Block {
             double vecZ = hitZ - 0.5f;
             double angle = Math.atan2(vecX, vecZ);
             if ((angle >= Math.PI / 4) && (angle < Math.PI * 3 / 4)) {
-                facing = Facing.EAST;
+                facing = Yaw.EAST;
             } else if ((angle >= Math.PI * 3 / 4) || (angle < -Math.PI * 3 / 4)) {
-                facing = Facing.NORTH;
+                facing = Yaw.NORTH;
             } else if ((angle >= -Math.PI * 3 / 4) && (angle < -Math.PI / 4)) {
-                facing = Facing.WEST;
-            } else facing = Facing.SOUTH;
+                facing = Yaw.WEST;
+            } else facing = Yaw.SOUTH;
         }
         return GetMetadata(direction, facing);
     }
 
     public int GetMetadata(int side, int x, int z, float hitX, float hitZ, boolean invertFacing) {
         Direction direction = GetDirection(side);
-        Facing facing;
+        Yaw facing;
         if (direction == Direction.SIDE) {
             facing = GetFacing(side - 2);
         } else {
@@ -597,27 +597,27 @@ public class BlockTFNagastone2 extends Block {
             double vecZ = hitZ - (z + 0.5f);
             double angle = Math.atan2(vecX, vecZ);
             if ((angle >= Math.PI / 4) && (angle < Math.PI * 3 / 4)) {
-                facing = Facing.EAST;
+                facing = Yaw.EAST;
             } else if ((angle >= Math.PI * 3 / 4) || (angle < -Math.PI * 3 / 4)) {
-                facing = Facing.NORTH;
+                facing = Yaw.NORTH;
             } else if ((angle >= -Math.PI * 3 / 4) && (angle < -Math.PI / 4)) {
-                facing = Facing.WEST;
-            } else facing = Facing.SOUTH;
+                facing = Yaw.WEST;
+            } else facing = Yaw.SOUTH;
         }
         if (invertFacing) {
             switch (facing) {
                 default:
                 case EAST:
-                    facing = Facing.WEST;
+                    facing = Yaw.WEST;
                     break;
                 case WEST:
-                    facing = Facing.EAST;
+                    facing = Yaw.EAST;
                     break;
                 case SOUTH:
-                    facing = Facing.NORTH;
+                    facing = Yaw.NORTH;
                     break;
                 case NORTH:
-                    facing = Facing.SOUTH;
+                    facing = Yaw.SOUTH;
                     break;
             }
         }
@@ -626,16 +626,16 @@ public class BlockTFNagastone2 extends Block {
 
     public int GetMetadata(int side) {
         Direction direction = GetDirection(side);
-        Facing facing;
+        Yaw facing;
         if (direction == Direction.SIDE) {
             facing = GetFacing(side - 2);
         } else {
-            facing = Facing.EAST;
+            facing = Yaw.EAST;
         }
         return GetMetadata(direction, facing);
     }
 
-    public static int GetMetadata(Direction direction, Facing facing) {
+    public static int GetMetadata(Direction direction, Yaw facing) {
         return direction.ordinal() * 4 + facing.ordinal();
     }
 
@@ -655,21 +655,21 @@ public class BlockTFNagastone2 extends Block {
         return GetDirection(meta / 4);
     }
 
-    private Facing GetFacing(int f) {
+    private Yaw GetFacing(int f) {
         switch (f) {
             default:
             case 0:
-                return Facing.EAST;
+                return Yaw.EAST;
             case 1:
-                return Facing.WEST;
+                return Yaw.WEST;
             case 2:
-                return Facing.NORTH;
+                return Yaw.NORTH;
             case 3:
-                return Facing.SOUTH;
+                return Yaw.SOUTH;
         }
     }
 
-    public Facing FacingFromMeta(int meta) {
+    public Yaw FacingFromMeta(int meta) {
         return GetFacing(meta % 4);
     }
 
