@@ -19,8 +19,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import thaumcraft.api.crafting.IInfusionStabiliser;
 import twilightforest.item.TFItems;
 import twilightforest.tileentity.TileEntityTFTrophy;
 
@@ -28,7 +30,8 @@ import twilightforest.tileentity.TileEntityTFTrophy;
  * Head trophy similar to (and based partially on) BlockSkull
  *
  */
-public class BlockTFTrophy extends BlockContainer {
+@Optional.Interface(iface = "thaumcraft.api.crafting.IInfusionStabiliser", modid = "Thaumcraft")
+public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser {
 
     public BlockTFTrophy() {
         super(Material.circuits);
@@ -210,6 +213,11 @@ public class BlockTFTrophy extends BlockContainer {
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister par1IconRegister) {
         // don't load anything
+    }
+
+    @Override
+    public boolean canStabaliseInfusion(World world, int x, int y, int z) {
+        return true;
     }
 
 }
