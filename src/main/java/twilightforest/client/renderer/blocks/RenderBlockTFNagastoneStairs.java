@@ -8,8 +8,8 @@ import net.minecraft.world.IBlockAccess;
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
+import twilightforest.block.BlockTFNagastoneEtched;
 import twilightforest.block.BlockTFNagastoneStairs;
-import twilightforest.tileentity.TileEntityTFNagastoneEtched.Direction;
 
 public class RenderBlockTFNagastoneStairs implements ISimpleBlockRenderingHandler {
 
@@ -28,26 +28,14 @@ public class RenderBlockTFNagastoneStairs implements ISimpleBlockRenderingHandle
         BlockTFNagastoneStairs currentBlock = (BlockTFNagastoneStairs) block;
         currentBlock.func_150147_e(world, x, y, z);
 
-        if (block.getBlockBoundsMinY() == 0) {
-            if (currentBlock.facingRight) currentBlock.parentBlock.direction = Direction.StairsRightBottom;
-            else currentBlock.parentBlock.direction = Direction.StairsLeftBottom;
-        } else {
-            if (currentBlock.facingRight) currentBlock.parentBlock.direction = Direction.StairsRightTop;
-            else currentBlock.parentBlock.direction = Direction.StairsLeftTop;
-        }
+        ((BlockTFNagastoneEtched) currentBlock.field_150149_b).stairsTop = block.getBlockBoundsMinY() > 0;
 
         renderer.setRenderBoundsFromBlock(block);
         renderer.renderStandardBlock(block, x, y, z);
         renderer.field_152631_f = true;
         boolean flag = currentBlock.func_150145_f(world, x, y, z);
 
-        if (block.getBlockBoundsMinY() == 0) {
-            if (currentBlock.facingRight) currentBlock.parentBlock.direction = Direction.StairsRightBottom;
-            else currentBlock.parentBlock.direction = Direction.StairsLeftBottom;
-        } else {
-            if (currentBlock.facingRight) currentBlock.parentBlock.direction = Direction.StairsRightTop;
-            else currentBlock.parentBlock.direction = Direction.StairsLeftTop;
-        }
+        ((BlockTFNagastoneEtched) currentBlock.field_150149_b).stairsTop = block.getBlockBoundsMinY() > 0;
 
         renderer.setRenderBoundsFromBlock(block);
         renderer.renderStandardBlock(block, x, y, z);
@@ -77,10 +65,12 @@ public class RenderBlockTFNagastoneStairs implements ISimpleBlockRenderingHandle
         for (int k = 0; k < 2; ++k) {
             if (k == 0) {
                 renderer.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.5D);
+                ((BlockTFNagastoneEtched) ((BlockTFNagastoneStairs) block).field_150149_b).stairsTop = true;
             }
 
             if (k == 1) {
                 renderer.setRenderBounds(0.0D, 0.0D, 0.5D, 1.0D, 0.5D, 1.0D);
+                ((BlockTFNagastoneEtched) ((BlockTFNagastoneStairs) block).field_150149_b).stairsTop = false;
             }
 
             GL11.glTranslatef(-0.5F, -0.5F, -0.5F);

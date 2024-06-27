@@ -6,8 +6,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 
+import twilightforest.block.BlockTFNagastone2;
+import twilightforest.block.BlockTFNagastone2.Direction;
 import twilightforest.block.TFBlocks;
-import twilightforest.tileentity.TileEntityTFNagastone;
 
 public class ComponentTFNagaCourtyardTerraceDuctPart extends ComponentTFNagaCourtyardRotatedAbstract {
 
@@ -162,75 +163,67 @@ public class ComponentTFNagaCourtyardTerraceDuctPart extends ComponentTFNagaCour
                 structureBoundingBox);
 
         // sneks
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.nagastone,
-                1,
-                new TileEntityTFNagastone(TileEntityTFNagastone.Direction.UP, NagastoneWest),
+                TFBlocks.nagastoneBody,
+                BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneWest),
                 0,
                 0,
                 0,
                 structureBoundingBox);
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.nagastone,
-                1,
-                new TileEntityTFNagastone(TileEntityTFNagastone.Direction.UP, NagastoneWest),
+                TFBlocks.nagastoneBody,
+                BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneWest),
                 0,
                 1,
                 0,
                 structureBoundingBox);
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.nagastone,
-                1,
-                new TileEntityTFNagastone(TileEntityTFNagastone.Direction.UP, NagastoneWest),
+                TFBlocks.nagastoneBody,
+                BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneWest),
                 0,
                 2,
                 0,
                 structureBoundingBox);
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.nagastone,
-                0,
-                new TileEntityTFNagastone(TileEntityTFNagastone.Direction.SIDE, NagastoneWest),
+                TFBlocks.nagastoneHead,
+                BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneWest),
                 0,
                 2,
                 1,
                 structureBoundingBox);
 
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.nagastone,
-                1,
-                new TileEntityTFNagastone(TileEntityTFNagastone.Direction.UP, NagastoneEast),
+                TFBlocks.nagastoneBody,
+                BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneEast),
                 0,
                 0,
                 4,
                 structureBoundingBox);
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.nagastone,
-                1,
-                new TileEntityTFNagastone(TileEntityTFNagastone.Direction.UP, NagastoneEast),
+                TFBlocks.nagastoneBody,
+                BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneEast),
                 0,
                 1,
                 4,
                 structureBoundingBox);
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.nagastone,
-                1,
-                new TileEntityTFNagastone(TileEntityTFNagastone.Direction.UP, NagastoneEast),
+                TFBlocks.nagastoneBody,
+                BlockTFNagastone2.GetMetadata(Direction.UP, NagastoneEast),
                 0,
                 2,
                 4,
                 structureBoundingBox);
-        this.placeBlockWithTileEntityAtCurrentPosition(
+        this.placeBlockAtCurrentPosition(
                 world,
-                TFBlocks.nagastone,
-                0,
-                new TileEntityTFNagastone(TileEntityTFNagastone.Direction.SIDE, NagastoneEast),
+                TFBlocks.nagastoneHead,
+                BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneEast),
                 0,
                 2,
                 3,

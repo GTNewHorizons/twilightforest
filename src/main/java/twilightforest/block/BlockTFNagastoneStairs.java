@@ -2,6 +2,7 @@ package twilightforest.block;
 
 import java.util.List;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -15,15 +16,11 @@ import twilightforest.item.TFItems;
 
 public class BlockTFNagastoneStairs extends BlockStairs {
 
-    public boolean facingRight = false;
-    public BlockTFNagastoneEtched parentBlock;
-    public int parentMeta;
+    boolean facingRight = false;
 
-    BlockTFNagastoneStairs(int meta, boolean fr) {
-        super(new BlockTFNagastoneEtched(), meta);
-        parentBlock = new BlockTFNagastoneEtched();
-        parentMeta = meta;
-        facingRight = fr;
+    BlockTFNagastoneStairs(Block parentBlock, boolean facingRight) {
+        super(parentBlock, 0);
+        this.facingRight = facingRight;
         this.setCreativeTab(TFItems.creativeTab);
     }
 
@@ -33,7 +30,7 @@ public class BlockTFNagastoneStairs extends BlockStairs {
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int side, int meta) {
-        return this.parentBlock.getIcon(side, this.parentMeta);
+        return ((BlockTFNagastoneEtched) this.field_150149_b).getIconStairs(side, facingRight);
     }
 
     /**
@@ -49,7 +46,7 @@ public class BlockTFNagastoneStairs extends BlockStairs {
      */
     @Override
     public void getSubBlocks(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
-        par3List.add(new ItemStack(par1, 1, 0));
+        par3List.add(new ItemStack(par1));
     }
 
 }

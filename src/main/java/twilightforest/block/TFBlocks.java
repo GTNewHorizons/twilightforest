@@ -7,8 +7,8 @@ import net.minecraft.item.ItemBlock;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import twilightforest.TwilightForestMod;
-import twilightforest.block.BlockTFNagastonePillar.BlockType;
 import twilightforest.item.ItemBlockTFMeta;
+import twilightforest.item.ItemBlockTFNagastone;
 
 public class TFBlocks {
 
@@ -52,8 +52,12 @@ public class TFBlocks {
     public static Block root;
     public static Block uncraftingTable;
     public static Block fireJet;
-    public static Block nagastone;
+    public static Block oldNagastone;
+    public static Block nagastoneBody;
+    public static Block nagastoneHead;
     public static Block nagastoneEtched;
+    public static Block nagastoneEtchedMossy;
+    public static Block nagastoneEtchedWeathered;
     public static Block nagastoneStairsLeft;
     public static Block nagastoneStairsRight;
     public static Block nagastoneStairsMossyLeft;
@@ -162,19 +166,28 @@ public class TFBlocks {
         root = (new BlockTFRoots()).setBlockName("TFRoots");
         uncraftingTable = (new BlockTFUncraftingTable()).setBlockName("TFUncraftingTable");
         fireJet = (new BlockTFFireJet()).setBlockName("TFFireJet");
-        nagastone = (new BlockTFNagastone()).setBlockName("TFNagastone");
-        nagastoneEtched = (new BlockTFNagastoneEtched()).setBlockName("TFNagastoneEtched");
-        nagastoneStairsLeft = (new BlockTFNagastoneStairs(0, false)).setBlockName("TFNagastoneStairsLeft");
-        nagastoneStairsRight = (new BlockTFNagastoneStairs(0, true)).setBlockName("TFNagastoneStairsRight");
-        nagastoneStairsMossyLeft = (new BlockTFNagastoneStairs(1, false)).setBlockName("TFNagastoneStairsMossyLeft");
-        nagastoneStairsMossyRight = (new BlockTFNagastoneStairs(1, true)).setBlockName("TFNagastoneStairsMossyRight");
-        nagastoneStairsWeatheredLeft = (new BlockTFNagastoneStairs(2, false))
+        oldNagastone = (new BlockTFNagastone()).setBlockName("TFNagastone");
+        nagastoneBody = (new BlockTFNagastone2(false)).setBlockName("TFNagastoneBody");
+        nagastoneHead = (new BlockTFNagastone2(true)).setBlockName("TFNagastoneHead");
+        nagastoneEtched = (new BlockTFNagastoneEtched(NagastoneType.NORMAL)).setBlockName("TFNagastoneEtched");
+        nagastoneEtchedMossy = (new BlockTFNagastoneEtched(NagastoneType.MOSSY)).setBlockName("TFNagastoneEtchedMossy");
+        nagastoneEtchedWeathered = (new BlockTFNagastoneEtched(NagastoneType.WEATHERED))
+                .setBlockName("TFNagastoneEtchedWeathered");
+        nagastoneStairsLeft = (new BlockTFNagastoneStairs(nagastoneEtched, false))
+                .setBlockName("TFNagastoneStairsLeft");
+        nagastoneStairsRight = (new BlockTFNagastoneStairs(nagastoneEtched, true))
+                .setBlockName("TFNagastoneStairsRight");
+        nagastoneStairsMossyLeft = (new BlockTFNagastoneStairs(nagastoneEtchedMossy, false))
+                .setBlockName("TFNagastoneStairsMossyLeft");
+        nagastoneStairsMossyRight = (new BlockTFNagastoneStairs(nagastoneEtchedMossy, true))
+                .setBlockName("TFNagastoneStairsMossyRight");
+        nagastoneStairsWeatheredLeft = (new BlockTFNagastoneStairs(nagastoneEtchedWeathered, false))
                 .setBlockName("TFNagastoneStairsWeatheredLeft");
-        nagastoneStairsWeatheredRight = (new BlockTFNagastoneStairs(2, true))
+        nagastoneStairsWeatheredRight = (new BlockTFNagastoneStairs(nagastoneEtchedWeathered, true))
                 .setBlockName("TFNagastoneStairsWeatheredRight");
-        nagastonePillar = (new BlockTFNagastonePillar(BlockType.NORMAL)).setBlockName("TFNagastonePillar");
-        nagastonePillarMossy = (new BlockTFNagastonePillar(BlockType.MOSSY)).setBlockName("TFNagastonePillarMossy");
-        nagastonePillarWeathered = (new BlockTFNagastonePillar(BlockType.WEATHERED))
+        nagastonePillar = (new BlockTFNagastonePillar(NagastoneType.NORMAL)).setBlockName("TFNagastonePillar");
+        nagastonePillarMossy = (new BlockTFNagastonePillar(NagastoneType.MOSSY)).setBlockName("TFNagastonePillarMossy");
+        nagastonePillarWeathered = (new BlockTFNagastonePillar(NagastoneType.WEATHERED))
                 .setBlockName("TFNagastonePillarWeathered");
         spiralStoneBricks = (new BlockTFSpiralBricks()).setBlockName("TFSpiralBricks");
         sapling = (new BlockTFSapling()).setBlockName("TFSapling");
@@ -287,8 +300,12 @@ public class TFBlocks {
         registerMyBlock(plant, twilightforest.item.ItemBlockTFPlant.class);
         registerMyBlock(uncraftingTable, ItemBlock.class);
         registerMyBlock(fireJet);
-        registerMyBlock(nagastone);
+        registerMyBlock(oldNagastone, ItemBlockTFNagastone.class);
+        registerMyBlock(nagastoneBody, ItemBlockTFNagastone.class);
+        registerMyBlock(nagastoneHead, ItemBlockTFNagastone.class);
         registerMyBlock(nagastoneEtched);
+        registerMyBlock(nagastoneEtchedMossy);
+        registerMyBlock(nagastoneEtchedWeathered);
         registerMyBlock(nagastoneStairsLeft);
         registerMyBlock(nagastoneStairsRight);
         registerMyBlock(nagastoneStairsMossyLeft);

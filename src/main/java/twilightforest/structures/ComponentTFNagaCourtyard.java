@@ -7,9 +7,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 
 import twilightforest.block.TFBlocks;
-import twilightforest.tileentity.TileEntityTFNagastone;
-import twilightforest.tileentity.TileEntityTFNagastone.Direction;
-import twilightforest.tileentity.TileEntityTFNagastone.Facing;
 
 public class ComponentTFNagaCourtyard extends StructureTFComponent {
 
@@ -77,252 +74,56 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
                 case 9:
                 case 13:
                 case 17:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 3, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.EAST),
-                            fx,
-                            3,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 3, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.EAST),
-                            fx,
-                            3,
-                            0,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 2, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.EAST),
-                            fx,
-                            2,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 2, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.EAST),
-                            fx,
-                            2,
-                            0,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.EAST),
-                            fx,
-                            1,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.EAST),
-                            fx,
-                            1,
-                            0,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 2, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 2, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 1, 0, sbb);
                     break;
                 case 3:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, fx, 3, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST),
-                            fx,
-                            3,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, fx, 3, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST),
-                            fx,
-                            3,
-                            0,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST),
-                            fx,
-                            1,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST),
-                            fx,
-                            1,
-                            0,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 8, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 8, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, 0, sbb);
                     break;
                 case 4:
                 case 8:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST),
-                            fx,
-                            1,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST),
-                            fx,
-                            1,
-                            0,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, 0, sbb);
                     break;
                 case 6:
                 case 10:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 3, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST),
-                            fx,
-                            1,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 3, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST),
-                            fx,
-                            1,
-                            0,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 3, 0, sbb);
                     break;
                 case 7:
                 case 11:
                 case 15:
                 case 19:
                 case 22:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 3, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.WEST),
-                            fx,
-                            3,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 3, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.WEST),
-                            fx,
-                            3,
-                            0,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 2, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.WEST),
-                            fx,
-                            2,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 2, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.WEST),
-                            fx,
-                            2,
-                            0,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.WEST),
-                            fx,
-                            1,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.WEST),
-                            fx,
-                            1,
-                            0,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 2, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 2, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 1, 0, sbb);
                     break;
                 case 14:
                 case 18:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 3, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST),
-                            fx,
-                            1,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 3, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST),
-                            fx,
-                            1,
-                            0,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 3, 0, sbb);
                     break;
                 case 16:
                 case 20:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST),
-                            fx,
-                            1,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST),
-                            fx,
-                            1,
-                            0,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, 0, sbb);
                     break;
                 case 21:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, fx, 3, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST),
-                            fx,
-                            3,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, fx, 3, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.WEST),
-                            fx,
-                            3,
-                            0,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, DIAMETER, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST),
-                            fx,
-                            1,
-                            DIAMETER,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, fx, 1, 0, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.EAST),
-                            fx,
-                            1,
-                            0,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 9, fx, 3, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 9, fx, 3, 0, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, DIAMETER, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, 0, sbb);
                     break;
             }
 
@@ -356,252 +157,56 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
                 case 9:
                 case 13:
                 case 17:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.SOUTH),
-                            DIAMETER,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.SOUTH),
-                            0,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 2, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.SOUTH),
-                            DIAMETER,
-                            2,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 2, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.SOUTH),
-                            0,
-                            2,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.SOUTH),
-                            DIAMETER,
-                            1,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.SOUTH),
-                            0,
-                            1,
-                            fz,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 2, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 2, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 1, fz, sbb);
                     break;
                 case 3:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, DIAMETER, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH),
-                            DIAMETER,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, 0, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH),
-                            0,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH),
-                            DIAMETER,
-                            1,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH),
-                            0,
-                            1,
-                            fz,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 11, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 10, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, 0, 1, fz, sbb);
                     break;
                 case 4:
                 case 8:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH),
-                            DIAMETER,
-                            1,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH),
-                            0,
-                            1,
-                            fz,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, 0, 1, fz, sbb);
                     break;
                 case 6:
                 case 10:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH),
-                            DIAMETER,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH),
-                            0,
-                            3,
-                            fz,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, 0, 3, fz, sbb);
                     break;
                 case 7:
                 case 11:
                 case 15:
                 case 19:
                 case 22:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.NORTH),
-                            DIAMETER,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.NORTH),
-                            0,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 2, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.NORTH),
-                            DIAMETER,
-                            2,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 2, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.NORTH),
-                            0,
-                            2,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.NORTH),
-                            DIAMETER,
-                            1,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.UP, Facing.NORTH),
-                            0,
-                            1,
-                            fz,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 2, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 2, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 1, fz, sbb);
                     break;
                 case 14:
                 case 18:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH),
-                            DIAMETER,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 13, 0, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH),
-                            0,
-                            3,
-                            fz,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 3, fz, sbb);
                     break;
                 case 16:
                 case 20:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH),
-                            DIAMETER,
-                            1,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH),
-                            0,
-                            1,
-                            fz,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 1, fz, sbb);
                     break;
                 case 21:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, DIAMETER, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH),
-                            DIAMETER,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 0, 0, 3, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.NORTH),
-                            0,
-                            3,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, DIAMETER, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH),
-                            DIAMETER,
-                            1,
-                            fz,
-                            sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastone, 1, 0, 1, fz, sbb);
-                    setTileEntityAtCurrentPosition(
-                            world,
-                            new TileEntityTFNagastone(Direction.SIDE, Facing.SOUTH),
-                            0,
-                            1,
-                            fz,
-                            sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 10, DIAMETER, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 10, 0, 3, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 1, fz, sbb);
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 1, fz, sbb);
                     break;
             }
 

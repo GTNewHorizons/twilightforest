@@ -9,42 +9,27 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
 import twilightforest.item.TFItems;
-import twilightforest.tileentity.TileEntityTFNagastoneEtched;
-import twilightforest.tileentity.TileEntityTFNagastoneEtched.Direction;
 
 public class BlockTFNagastoneEtched extends Block {
 
-    private static IIcon TEX_TILES;
-    private static IIcon TEX_TILES_MOSSY;
-    private static IIcon TEX_TILES_WEATHERED;
-    private static IIcon TEX_BARE;
-    private static IIcon TEX_BARE_MOSSY;
-    private static IIcon TEX_BARE_WEATHERED;
-    private static IIcon TEX_DOWN;
-    private static IIcon TEX_DOWN_MOSSY;
-    private static IIcon TEX_DOWN_WEATHERED;
-    private static IIcon TEX_UP;
-    private static IIcon TEX_UP_MOSSY;
-    private static IIcon TEX_UP_WEATHERED;
-    private static IIcon TEX_LEFT;
-    private static IIcon TEX_LEFT_MOSSY;
-    private static IIcon TEX_LEFT_WEATHERED;
-    private static IIcon TEX_RIGHT;
-    private static IIcon TEX_RIGHT_MOSSY;
-    private static IIcon TEX_RIGHT_WEATHERED;
+    public IIcon TEX_TILES;
+    public IIcon TEX_BARE;
+    public IIcon TEX_DOWN;
+    public IIcon TEX_UP;
+    public IIcon TEX_LEFT;
+    public IIcon TEX_RIGHT;
 
-    public Direction direction = Direction.UP;
+    public NagastoneType type = NagastoneType.NORMAL;
+    public boolean stairsTop = false;
 
     /**
      * Note that the texture called for here will only be used when the meta value is not a good block to mimic
@@ -52,99 +37,44 @@ public class BlockTFNagastoneEtched extends Block {
      * @param id
      * @param texture
      */
-    public BlockTFNagastoneEtched() {
+    public BlockTFNagastoneEtched(NagastoneType type) {
         super(Material.rock);
         this.setHardness(1.5F);
         this.setResistance(10.0F);
         this.setStepSound(Block.soundTypeStone);
         this.setCreativeTab(TFItems.creativeTab);
-
-    }
-
-    /**
-     * The type of render function that is called for this block
-     */
-    @Override
-    public int getRenderType() {
-        return TwilightForestMod.proxy.getNagastoneEtchedBlockRenderID();
+        this.type = type;
     }
 
     @Override
-    public boolean hasTileEntity(final int metadata) {
-        return true;
-    }
+    public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ,
+            int metadata) {
+        int newMeta = 0;
 
-    @Override
-    public TileEntity createTileEntity(World world, int metadata) {
-        return new TileEntityTFNagastoneEtched();
-    }
-
-    /**
-     * Called when the block is placed in the world.
-     */
-    @Override
-    public void onBlockPlacedBy(World par1World, int x, int y, int z, EntityLivingBase par5EntityLiving,
-            ItemStack par6ItemStack) {
-        Vec3 start = Vec3.createVectorHelper(
-                par5EntityLiving.posX,
-                par5EntityLiving.posY + par5EntityLiving.getEyeHeight(),
-                par5EntityLiving.posZ);
-        Vec3 look = par5EntityLiving.getLookVec();
-        Vec3 end = start.addVector(look.xCoord * 200, look.yCoord * 200, look.zCoord * 200);
-        MovingObjectPosition mop = par1World.func_147447_a(start, end, false, true, false);
-        Vec3 vec3 = mop.hitVec;
-        double posX = vec3.xCoord;
-        double posY = vec3.yCoord;
-        double posZ = vec3.zCoord;
-        vec3 = par5EntityLiving.getLookVec().normalize();
-        double moveX = vec3.xCoord / 100;
-        double moveY = vec3.yCoord / 100;
-        double moveZ = vec3.zCoord / 100;
-        int borderX = 0;
-        int borderY = 0;
-        int borderZ = 0;
-        if (posX == Math.round(posX)) {
-            if (moveX > 0) borderX = (int) posX + 1;
-            else borderX = (int) posX;
-            borderY = posY >= 0 ? (int) posY + 1 : (int) posY;
-            borderZ = posZ >= 0 ? (int) posZ + 1 : (int) posZ;
-        } else if (posY == Math.round(posY)) {
-            if (moveY > 0) borderY = (int) posY + 1;
-            else borderY = (int) posY;
-            borderX = posX >= 0 ? (int) posX + 1 : (int) posX;
-            borderZ = posZ >= 0 ? (int) posZ + 1 : (int) posZ;
-        } else if (posZ == Math.round(posZ)) {
-            if (moveZ > 0) borderZ = (int) posZ + 1;
-            else borderZ = (int) posZ;
-            borderX = posX >= 0 ? (int) posX + 1 : (int) posX;
-            borderY = posY >= 0 ? (int) posY + 1 : (int) posY;
+        switch (side) {
+            default:
+            case 0:
+                newMeta = ForgeDirection.UP.ordinal();
+                break;
+            case 1:
+                newMeta = ForgeDirection.DOWN.ordinal();
+                break;
+            case 2:
+                newMeta = ForgeDirection.NORTH.ordinal();
+                break;
+            case 3:
+                newMeta = ForgeDirection.SOUTH.ordinal();
+                break;
+            case 4:
+                newMeta = ForgeDirection.WEST.ordinal();
+                break;
+            case 5:
+                newMeta = ForgeDirection.EAST.ordinal();
+                break;
         }
-        do {
-            posX += moveX;
-            posY += moveY;
-            posZ += moveZ;
-        } while (posX >= (borderX - 1) && posX <= borderX
-                && posY >= (borderY - 1)
-                && posY <= borderY
-                && posZ >= (borderZ - 1)
-                && posZ <= borderZ);
-        int side = 0;
-        if (posY > borderY) side = 0;
-        else if (posY < (borderY - 1)) side = 1;
-        else if (posX < (borderX - 1)) side = 2;
-        else if (posX > borderX) side = 3;
-        else if (posZ > borderZ) side = 4;
-        else if (posZ < (borderZ - 1)) side = 5;
-        par1World.setTileEntity(x, y, z, new TileEntityTFNagastoneEtched(side));
-    }
 
-    // @Override
-    // public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int
-    // metadata)
-    // {
-    // world.setTileEntity(x, y, z, new TileEntityTFNagastoneEtched(side));
-    // return metadata;
-    // }
+        return newMeta;
+    }
 
     /**
      * gets the way these bricks should face for that entity that placed it.
@@ -172,49 +102,60 @@ public class BlockTFNagastoneEtched extends Block {
      */
     @Override
     public IIcon getIcon(int side, int meta) {
-        IIcon[][] iconList = { { TEX_TILES, TEX_BARE, TEX_DOWN, TEX_UP, TEX_LEFT, TEX_RIGHT },
-                { TEX_TILES_MOSSY, TEX_BARE_MOSSY, TEX_DOWN_MOSSY, TEX_UP_MOSSY, TEX_LEFT_MOSSY, TEX_RIGHT_MOSSY },
-                { TEX_TILES_WEATHERED, TEX_BARE_WEATHERED, TEX_DOWN_WEATHERED, TEX_UP_WEATHERED, TEX_LEFT_WEATHERED,
-                        TEX_RIGHT_WEATHERED } };
-        meta = meta % 3;
+        ForgeDirection direction = ForgeDirection.getOrientation(meta);
         switch (direction) {
             default:
-            case UP:
-                switch (side) {
-                    default:
-                    case 0:
-                    case 1:
-                        return iconList[meta][0];
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        return iconList[meta][2];
-                }
             case DOWN:
                 switch (side) {
                     default:
                     case 0:
                     case 1:
-                        return iconList[meta][0];
+                        return this.TEX_TILES;
                     case 2:
                     case 3:
                     case 4:
                     case 5:
-                        return iconList[meta][3];
+                        return this.TEX_UP;
                 }
-            case EAST:
+            case UP:
                 switch (side) {
                     default:
                     case 0:
                     case 1:
-                    case 3:
-                        return iconList[meta][4];
+                        return this.TEX_TILES;
                     case 2:
-                        return iconList[meta][5];
+                    case 3:
                     case 4:
                     case 5:
-                        return iconList[meta][0];
+                        return this.TEX_DOWN;
+                }
+            case SOUTH:
+                switch (side) {
+                    default:
+                    case 2:
+                    case 3:
+                        return this.TEX_TILES;
+                    case 0:
+                    case 1:
+                        return this.TEX_DOWN;
+                    case 4:
+                        return this.TEX_RIGHT;
+                    case 5:
+                        return this.TEX_LEFT;
+                }
+            case NORTH:
+                switch (side) {
+                    default:
+                    case 2:
+                    case 3:
+                        return this.TEX_TILES;
+                    case 0:
+                    case 1:
+                        return this.TEX_UP;
+                    case 4:
+                        return this.TEX_LEFT;
+                    case 5:
+                        return this.TEX_RIGHT;
                 }
             case WEST:
                 switch (side) {
@@ -222,132 +163,82 @@ public class BlockTFNagastoneEtched extends Block {
                     case 0:
                     case 1:
                     case 3:
-                        return iconList[meta][5];
+                        return this.TEX_LEFT;
                     case 2:
-                        return iconList[meta][4];
+                        return this.TEX_RIGHT;
                     case 4:
                     case 5:
-                        return iconList[meta][0];
+                        return this.TEX_TILES;
                 }
-            case SOUTH:
-                switch (side) {
-                    default:
-                    case 2:
-                    case 3:
-                        return iconList[meta][0];
-                    case 0:
-                    case 1:
-                        return iconList[meta][2];
-                    case 4:
-                        return iconList[meta][5];
-                    case 5:
-                        return iconList[meta][4];
-                }
-            case NORTH:
-                switch (side) {
-                    default:
-                    case 2:
-                    case 3:
-                        return iconList[meta][0];
-                    case 0:
-                    case 1:
-                        return iconList[meta][3];
-                    case 4:
-                        return iconList[meta][4];
-                    case 5:
-                        return iconList[meta][5];
-                }
-            case StairsLeftTop:
+            case EAST:
                 switch (side) {
                     default:
                     case 0:
-                        return iconList[meta][1];
                     case 1:
-                        return iconList[meta][0];
-                    case 2:
                     case 3:
+                        return this.TEX_RIGHT;
+                    case 2:
+                        return this.TEX_LEFT;
                     case 4:
                     case 5:
-                        return iconList[meta][4];
+                        return this.TEX_TILES;
                 }
-            case StairsLeftBottom:
-                switch (side) {
-                    default:
-                    case 0:
-                        return iconList[meta][0];
-                    case 1:
-                        return iconList[meta][1];
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        return iconList[meta][4];
-                }
-            case StairsRightTop:
-                switch (side) {
-                    default:
-                    case 0:
-                        return iconList[meta][1];
-                    case 1:
-                        return iconList[meta][0];
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        return iconList[meta][5];
-                }
-            case StairsRightBottom:
-                switch (side) {
-                    default:
-                    case 0:
-                        return iconList[meta][0];
-                    case 1:
-                        return iconList[meta][1];
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        return iconList[meta][5];
-                }
+        }
+    }
+
+    public IIcon getIconStairs(int side, boolean stairsRight) {
+        IIcon topIcon;
+        IIcon bottomIcon;
+        IIcon sideIcon;
+        if (this.stairsTop) {
+            topIcon = this.TEX_TILES;
+            bottomIcon = this.TEX_BARE;
+        } else {
+            topIcon = this.TEX_BARE;
+            bottomIcon = this.TEX_TILES;
+        }
+        if (stairsRight) sideIcon = this.TEX_RIGHT;
+        else sideIcon = this.TEX_LEFT;
+        switch (side) {
+            default:
+            case 0:
+                return bottomIcon;
+            case 1:
+                return topIcon;
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                return sideIcon;
         }
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister par1IconRegister) {
-        BlockTFNagastoneEtched.TEX_TILES = par1IconRegister.registerIcon(TwilightForestMod.ID + ":stone_tiles");
-        BlockTFNagastoneEtched.TEX_TILES_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":stone_tiles_mossy");
-        BlockTFNagastoneEtched.TEX_TILES_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":stone_tiles_weathered");
-        BlockTFNagastoneEtched.TEX_BARE = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone_bare");
-        BlockTFNagastoneEtched.TEX_BARE_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bare_mossy");
-        BlockTFNagastoneEtched.TEX_BARE_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":nagastone_bare_weathered");
-        BlockTFNagastoneEtched.TEX_DOWN = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_down");
-        BlockTFNagastoneEtched.TEX_DOWN_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_down_mossy");
-        BlockTFNagastoneEtched.TEX_DOWN_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_down_weathered");
-        BlockTFNagastoneEtched.TEX_UP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":etched_nagastone_up");
-        BlockTFNagastoneEtched.TEX_UP_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_up_mossy");
-        BlockTFNagastoneEtched.TEX_UP_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_up_weathered");
-        BlockTFNagastoneEtched.TEX_LEFT = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_left");
-        BlockTFNagastoneEtched.TEX_LEFT_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_left_mossy");
-        BlockTFNagastoneEtched.TEX_LEFT_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_left_weathered");
-        BlockTFNagastoneEtched.TEX_RIGHT = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_right");
-        BlockTFNagastoneEtched.TEX_RIGHT_MOSSY = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_right_mossy");
-        BlockTFNagastoneEtched.TEX_RIGHT_WEATHERED = par1IconRegister
-                .registerIcon(TwilightForestMod.ID + ":etched_nagastone_right_weathered");
+        String postfix;
+        switch (this.type) {
+            default:
+            case NORMAL:
+                postfix = "";
+                break;
+            case MOSSY:
+                postfix = "_mossy";
+                break;
+            case WEATHERED:
+                postfix = "_weathered";
+                break;
+        }
+
+        this.TEX_TILES = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone/stone_tiles" + postfix);
+        this.TEX_BARE = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone/nagastone_bare" + postfix);
+        this.TEX_DOWN = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_down" + postfix);
+        this.TEX_UP = par1IconRegister.registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_up" + postfix);
+        this.TEX_LEFT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_left" + postfix);
+        this.TEX_RIGHT = par1IconRegister
+                .registerIcon(TwilightForestMod.ID + ":nagastone/etched_nagastone_right" + postfix);
     }
 
     /**
@@ -355,9 +246,7 @@ public class BlockTFNagastoneEtched extends Block {
      */
     @Override
     public void getSubBlocks(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
-        par3List.add(new ItemStack(par1, 1, 0));
-        par3List.add(new ItemStack(par1, 1, 1));
-        par3List.add(new ItemStack(par1, 1, 2));
+        par3List.add(new ItemStack(par1));
     }
 
     /**
@@ -365,7 +254,7 @@ public class BlockTFNagastoneEtched extends Block {
      */
     @Override
     public int damageDropped(int meta) {
-        return meta;
+        return 0;
     }
 
 }

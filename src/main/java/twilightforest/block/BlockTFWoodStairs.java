@@ -2,7 +2,6 @@ package twilightforest.block;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -15,13 +14,8 @@ import twilightforest.item.TFItems;
 
 public class BlockTFWoodStairs extends BlockStairs {
 
-    public Block parentBlock;
-    public int parentMeta;
-
     BlockTFWoodStairs(int meta) {
-        super(new BlockTFNagastoneEtched(), meta);
-        parentBlock = TFBlocks.planks;
-        parentMeta = meta;
+        super(TFBlocks.planks, meta);
         this.setCreativeTab(TFItems.creativeTab);
     }
 
@@ -31,7 +25,7 @@ public class BlockTFWoodStairs extends BlockStairs {
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int side, int meta) {
-        return this.parentBlock.getIcon(side, this.parentMeta);
+        return this.field_150149_b.getIcon(side, this.field_150151_M);
     }
 
     /**

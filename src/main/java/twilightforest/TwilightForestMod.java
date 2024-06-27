@@ -53,7 +53,6 @@ import twilightforest.tileentity.TileEntityTFLichSpawner;
 import twilightforest.tileentity.TileEntityTFMoonworm;
 import twilightforest.tileentity.TileEntityTFNagaSpawner;
 import twilightforest.tileentity.TileEntityTFNagastone;
-import twilightforest.tileentity.TileEntityTFNagastoneEtched;
 import twilightforest.tileentity.TileEntityTFPoppingJet;
 import twilightforest.tileentity.TileEntityTFReverter;
 import twilightforest.tileentity.TileEntityTFSmoker;
@@ -377,6 +376,7 @@ public class TwilightForestMod {
             TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTime));
             TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTrans));
             TFNeiIntegration.hideItem(new ItemStack(TFBlocks.doorTwilight));
+            for (int i = 0; i < 16; i++) TFNeiIntegration.hideItem(new ItemStack(TFBlocks.oldNagastone, 1, i));
         }
 
         // final check for biome ID conflicts
@@ -883,7 +883,6 @@ public class TwilightForestMod {
     private void registerTileEntities() {
         GameRegistry.registerTileEntity(TileEntityTFCake.class, "Experiment 115");
         GameRegistry.registerTileEntity(TileEntityTFNagastone.class, "Nagastone");
-        GameRegistry.registerTileEntity(TileEntityTFNagastoneEtched.class, "Etched Nagastone");
         GameRegistry.registerTileEntity(TileEntityTFFirefly.class, "Firefly");
         GameRegistry.registerTileEntity(TileEntityTFCicada.class, "Cicada");
         GameRegistry.registerTileEntity(TileEntityTFNagaSpawner.class, "Naga Spawner");

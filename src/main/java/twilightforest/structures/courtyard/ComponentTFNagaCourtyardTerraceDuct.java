@@ -8,8 +8,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 
+import twilightforest.block.BlockTFNagastone2;
+import twilightforest.block.BlockTFNagastone2.Direction;
 import twilightforest.block.TFBlocks;
-import twilightforest.tileentity.TileEntityTFNagastone;
 
 public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyardTerraceAbstract {
 
@@ -100,92 +101,52 @@ public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyar
                 TFBlocks.nagastoneEtched,
                 TFBlocks.nagastoneEtched,
                 true);
-        this.fillWithMetadataBlocks(
-                world,
-                structureBoundingBox,
-                7,
-                -1,
-                7,
-                16,
-                -1,
-                7,
-                TFBlocks.nagastone,
-                1,
-                TFBlocks.nagastone,
-                1,
-                true);
-        this.fillWithMetadataBlocks(
-                world,
-                structureBoundingBox,
-                9,
-                -1,
-                9,
-                16,
-                -1,
-                9,
-                TFBlocks.nagastone,
-                1,
-                TFBlocks.nagastone,
-                1,
-                true);
-        this.fillWithMetadataBlocks(
-                world,
-                structureBoundingBox,
-                7,
-                -1,
-                7,
-                7,
-                -1,
-                16,
-                TFBlocks.nagastone,
-                1,
-                TFBlocks.nagastone,
-                1,
-                true);
-        this.fillWithMetadataBlocks(
-                world,
-                structureBoundingBox,
-                9,
-                -1,
-                9,
-                9,
-                -1,
-                16,
-                TFBlocks.nagastone,
-                1,
-                TFBlocks.nagastone,
-                1,
-                true);
+        /*
+         * this.fillWithMetadataBlocks( world, structureBoundingBox, 7, -1, 7, 16, -1, 7, TFBlocks.newNagastoneBody, 0,
+         * TFBlocks.newNagastoneBody, 0, true); this.fillWithMetadataBlocks( world, structureBoundingBox, 9, -1, 9, 16,
+         * -1, 9, TFBlocks.newNagastoneBody, 0, TFBlocks.newNagastoneBody, 0, true); this.fillWithMetadataBlocks( world,
+         * structureBoundingBox, 7, -1, 7, 7, -1, 16, TFBlocks.newNagastoneBody, 0, TFBlocks.newNagastoneBody, 0, true);
+         * this.fillWithMetadataBlocks( world, structureBoundingBox, 9, -1, 9, 9, -1, 16, TFBlocks.newNagastoneBody, 0,
+         * TFBlocks.newNagastoneBody, 0, true);
+         */
         for (int i = 16; i > 6; i--) {
-            this.setTileEntityAtCurrentPosition(
-                    world,
-                    new TileEntityTFNagastone(TileEntityTFNagastone.Direction.SIDE, NagastoneNorth),
-                    i,
-                    -1,
-                    7,
-                    structureBoundingBox);
-            this.setTileEntityAtCurrentPosition(
-                    world,
-                    new TileEntityTFNagastone(TileEntityTFNagastone.Direction.SIDE, NagastoneWest),
-                    7,
-                    -1,
-                    i,
-                    structureBoundingBox);
+            if (this.getBlockAtCurrentPosition(world, i, -1, 7, structureBoundingBox) != Blocks.air)
+                this.placeBlockAtCurrentPosition(
+                        world,
+                        TFBlocks.nagastoneBody,
+                        BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneNorth),
+                        i,
+                        -1,
+                        7,
+                        structureBoundingBox);
+            if (this.getBlockAtCurrentPosition(world, 7, -1, i, structureBoundingBox) != Blocks.air)
+                this.placeBlockAtCurrentPosition(
+                        world,
+                        TFBlocks.nagastoneBody,
+                        BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneWest),
+                        7,
+                        -1,
+                        i,
+                        structureBoundingBox);
             if (i > 8) {
-                this.setTileEntityAtCurrentPosition(
-                        world,
-                        new TileEntityTFNagastone(TileEntityTFNagastone.Direction.SIDE, NagastoneNorth),
-                        i,
-                        -1,
-                        9,
-                        structureBoundingBox);
-                this.setTileEntityAtCurrentPosition(
-                        world,
-                        new TileEntityTFNagastone(TileEntityTFNagastone.Direction.SIDE, NagastoneWest),
-                        9,
-                        -1,
-                        i,
-                        structureBoundingBox);
+                if (this.getBlockAtCurrentPosition(world, i, -1, 9, structureBoundingBox) != Blocks.air)
+                    this.placeBlockAtCurrentPosition(
+                            world,
+                            TFBlocks.nagastoneBody,
+                            BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneNorth),
+                            i,
+                            -1,
+                            9,
+                            structureBoundingBox);
+                if (this.getBlockAtCurrentPosition(world, 9, -1, i, structureBoundingBox) != Blocks.air)
+                    this.placeBlockAtCurrentPosition(
+                            world,
+                            TFBlocks.nagastoneBody,
+                            BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneWest),
+                            9,
+                            -1,
+                            i,
+                            structureBoundingBox);
             }
         }
 
@@ -259,9 +220,8 @@ public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyar
                 TFBlocks.nagastonePillar,
                 horizontalColumnsOrient4,
                 true);
-
-        this.fillWithBlocks(world, structureBoundingBox, 7, 0, 7, 16, 0, 9, Blocks.water, Blocks.water, false);
-        this.fillWithBlocks(world, structureBoundingBox, 7, 0, 7, 9, 0, 16, Blocks.water, Blocks.water, false);
+        this.fillWithBlocks(world, structureBoundingBox, 7, 0, 7, 16, 0, 9, Blocks.water, Blocks.water, true);
+        this.fillWithBlocks(world, structureBoundingBox, 7, 0, 7, 9, 0, 16, Blocks.water, Blocks.water, true);
 
         return true;
     }
