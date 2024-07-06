@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
-import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSapling;
 import net.minecraft.client.Minecraft;
@@ -48,6 +46,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import com.google.common.io.Files;
 
 import cpw.mods.fml.common.FMLLog;
+import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
@@ -57,6 +56,7 @@ import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.biomes.TFBiomeBase;
@@ -1069,7 +1069,7 @@ public class TFEventListener {
 
     @SubscribeEvent
     public void remap(FMLMissingMappingsEvent.MissingMapping event) {
-        if (event.type == GameRegistry.Type.BLOCK && event.name.equals("TFPlank")){
+        if (event.type == GameRegistry.Type.BLOCK && event.name.equals("TFPlank")) {
             event.remap(TFBlocks.planks);
         }
     }
