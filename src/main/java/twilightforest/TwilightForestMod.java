@@ -400,14 +400,12 @@ public class TwilightForestMod {
     @EventHandler
     public void missingMappings(FMLMissingMappingsEvent event) {
         for (FMLMissingMappingsEvent.MissingMapping mapping : event.get()) {
-            if (mapping.name.equals("TwilightForest:tile.TFPlank")) {
+            if (mapping.name.equals("TwilightForest:tile.TFPlanks")) {
                 if (mapping.type == GameRegistry.Type.BLOCK) {
                     mapping.remap(TFBlocks.planks);
                 } else if (mapping.type == GameRegistry.Type.ITEM) {
                     mapping.remap(Item.getItemFromBlock(TFBlocks.planks));
                 }
-            } else {
-                FMLLog.fine("missing mapping?: %s - %s", mapping.name, mapping.id);
             }
         }
     }

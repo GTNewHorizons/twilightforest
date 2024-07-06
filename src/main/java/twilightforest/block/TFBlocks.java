@@ -145,7 +145,7 @@ public class TFBlocks {
     public static void registerBlocks() {
 
         log = (new BlockTFLog()).setBlockName("TFLog");
-        planks = (new BlockTFWood()).setBlockName("TFPlanks");
+        planks = (new BlockTFWood()).setBlockName("TFPlank");
         doubleWoodenSlab = new BlockTFWoodSlab(true).setBlockName("TFWoodSlabDouble");
         woodenSlab = new BlockTFWoodSlab(false).setBlockName("TFWoodSlab");
         woodenStairsTwilight = (new BlockTFWoodStairs(0)).setBlockName("TFWoodStairsTwilight");
