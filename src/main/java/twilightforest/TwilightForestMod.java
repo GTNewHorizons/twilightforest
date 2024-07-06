@@ -399,7 +399,7 @@ public class TwilightForestMod {
 
     @EventHandler
     public void missingMappings(FMLMissingMappingsEvent event) {
-        for (FMLMissingMappingsEvent.MissingMapping mapping : event.getAll()) {
+        for (FMLMissingMappingsEvent.MissingMapping mapping : event.get()) {
             if (mapping.name.equals("TwilightForest:tile.TFPlank")) {
                 if (mapping.type == GameRegistry.Type.BLOCK) {
                     mapping.remap(TFBlocks.planks);
