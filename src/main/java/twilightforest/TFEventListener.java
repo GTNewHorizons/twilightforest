@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
+import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSapling;
 import net.minecraft.client.Minecraft;
@@ -1062,6 +1064,13 @@ public class TFEventListener {
             boolean isEnforced = Boolean.parseBoolean(event.parameters[1]);
             TwilightForestMod.genericChannel
                     .sendToAll(TFGenericPacketHandler.makeEnforcedProgressionStatusPacket(isEnforced));
+        }
+    }
+
+    @SubscribeEvent
+    public void remap(FMLMissingMappingsEvent.MissingMapping event) {
+        if (event.type == GameRegistry.Type.BLOCK && event.name.equals("TFPlank")){
+            event.remap(TFBlocks.planks);
         }
     }
 
