@@ -403,10 +403,10 @@ public class TwilightForestMod {
             if (mapping.name.equals("twilightforest:TFPlank")) {
                 if (mapping.type == GameRegistry.Type.BLOCK) {
                     mapping.remap(TFBlocks.planks);
-                } else if (mapping.type == GameRegistry.Type.ITEM){
+                } else if (mapping.type == GameRegistry.Type.ITEM) {
                     mapping.remap(Item.getItemFromBlock(TFBlocks.planks));
                 }
-            }else {
+            } else {
                 FMLLog.info("missing mapping?: %s - %s", mapping.name, mapping.id);
             }
         }
