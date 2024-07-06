@@ -20,6 +20,7 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -394,6 +395,21 @@ public class TwilightForestMod {
 
         // event.registerServerCommand(new CommandTFFeature());
         event.registerServerCommand(new CommandTFProgress());
+    }
+
+    @EventHandler
+    public void missingMappings(FMLMissingMappingsEvent event) {
+        for (FMLMissingMappingsEvent.MissingMapping mapping : event.getAll()) {
+            if (mapping.name.equals("twilightforest:TFPlank")) {
+                if (mapping.type == GameRegistry.Type.BLOCK) {
+                    mapping.remap(TFBlocks.planks);
+                } else if (mapping.type == GameRegistry.Type.ITEM){
+                    mapping.remap(Item.getItemFromBlock(TFBlocks.planks));
+                }
+            }else {
+                FMLLog.info("missing mapping?: %s - %s", mapping.name, mapping.id);
+            }
+        }
     }
 
     private void registerCreatures() {
