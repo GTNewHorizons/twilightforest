@@ -156,88 +156,36 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
     @Override
     public void provideDropsInformation(@Nonnull ArrayList<MobDrop> drops) {
         // scepter
-        drops.add(
-                new MobDrop(
-                        new ItemStack(TFItems.scepterZombie),
-                        MobDrop.DropType.Normal,
-                        3333,
-                        null,
-                        null,
-                        false,
-                        false));
-        drops.add(
-                new MobDrop(
-                        new ItemStack(TFItems.scepterLifeDrain),
-                        MobDrop.DropType.Normal,
-                        3333,
-                        null,
-                        null,
-                        false,
-                        false));
-        drops.add(
-                new MobDrop(
-                        new ItemStack(TFItems.scepterTwilight),
-                        MobDrop.DropType.Normal,
-                        3333,
-                        null,
-                        null,
-                        false,
-                        false));
+        drops.add(MobDrop.create(new ItemStack(TFItems.scepterZombie)).withChance(0.3333d));
+        drops.add(MobDrop.create(new ItemStack(TFItems.scepterLifeDrain)).withChance(0.3333d));
+        drops.add(MobDrop.create(new ItemStack(TFItems.scepterTwilight)).withChance(0.3333d));
         // gold thing
-        int chance = (int) ((MobDrop.getChanceBasedOnFromTo(2, 4) / 5d) * 10000d);
+        double chance = MobDrop.getChanceBasedOnFromTo(2, 4) / 5d;
         drops.add(
-                new MobDrop(new ItemStack(Items.golden_sword), MobDrop.DropType.Normal, chance, 25, null, true, false));
+                MobDrop.create(new ItemStack(Items.golden_sword)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
         drops.add(
-                new MobDrop(
-                        new ItemStack(Items.golden_helmet),
-                        MobDrop.DropType.Normal,
-                        chance,
-                        25,
-                        null,
-                        true,
-                        false));
+                MobDrop.create(new ItemStack(Items.golden_helmet)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
         drops.add(
-                new MobDrop(
-                        new ItemStack(Items.golden_chestplate),
-                        MobDrop.DropType.Normal,
-                        chance,
-                        25,
-                        null,
-                        true,
-                        false));
+                MobDrop.create(new ItemStack(Items.golden_chestplate)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
         drops.add(
-                new MobDrop(
-                        new ItemStack(Items.golden_leggings),
-                        MobDrop.DropType.Normal,
-                        chance,
-                        25,
-                        null,
-                        true,
-                        false));
+                MobDrop.create(new ItemStack(Items.golden_leggings)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
         drops.add(
-                new MobDrop(new ItemStack(Items.golden_boots), MobDrop.DropType.Normal, chance, 25, null, true, false));
+                MobDrop.create(new ItemStack(Items.golden_boots)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
         // ender pearl
         drops.add(
-                new MobDrop(
-                        new ItemStack(Items.ender_pearl),
-                        MobDrop.DropType.Normal,
-                        (int) (MobDrop.getChanceBasedOnFromTo(1, 4) * 10000d),
-                        null,
-                        null,
-                        true,
-                        false));
+                MobDrop.create(new ItemStack(Items.ender_pearl)).withChance(MobDrop.getChanceBasedOnFromTo(1, 4))
+                        .withLooting());
         // bones
         drops.add(
-                new MobDrop(
-                        new ItemStack(Items.bone),
-                        MobDrop.DropType.Normal,
-                        (int) (MobDrop.getChanceBasedOnFromTo(5, 9) * 10000d),
-                        null,
-                        null,
-                        true,
-                        false));
+                MobDrop.create(new ItemStack(Items.bone)).withChance(MobDrop.getChanceBasedOnFromTo(5, 9))
+                        .withLooting());
         // trophy
-        drops.add(new MobDrop(new ItemStack(TFItems.trophy), MobDrop.DropType.Normal, 10000, null, null, true, false));
+        drops.add(MobDrop.create(new ItemStack(TFItems.trophy, 1, 2)));
     }
 
     private void dropScepter() {
