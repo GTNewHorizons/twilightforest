@@ -1,6 +1,9 @@
 package twilightforest.entity.boss;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -30,6 +33,10 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
+import com.kuba6000.mobsinfo.api.IMobInfoProvider;
+import com.kuba6000.mobsinfo.api.MobDrop;
+
+import cpw.mods.fml.common.Optional;
 import twilightforest.TFAchievementPage;
 import twilightforest.TFFeature;
 import twilightforest.TwilightForestMod;
@@ -40,7 +47,8 @@ import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;
 import twilightforest.world.WorldProviderTwilightForest;
 
-public class EntityTFLich extends EntityMob implements IBossDisplayData {
+@Optional.Interface(iface = "com.kuba6000.mobsinfo.api.IMobInfoProvider", modid = "mobsinfo")
+public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInfoProvider {
 
     private static final int DATA_ISCLONE = 21;
     private static final int DATA_SHIELDSTRENGTH = 17;
@@ -121,6 +129,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
 
     @Override
     protected void dropFewItems(boolean par1, int par2) {
+        // EVERY CHANGE MADE IN HERE MUST BE ALSO MADE IN provideDropsInformation
         dropScepter();
 
         int totalDrops = this.rand.nextInt(3 + par2) + 2;
@@ -141,6 +150,94 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
 
         // trophy
         this.entityDropItem(new ItemStack(TFItems.trophy, 1, 2), 0);
+    }
+
+    @Optional.Method(modid = "mobsinfo")
+    @Override
+    public void provideDropsInformation(@Nonnull ArrayList<MobDrop> drops) {
+        // scepter
+        drops.add(
+                new MobDrop(
+                        new ItemStack(TFItems.scepterZombie),
+                        MobDrop.DropType.Normal,
+                        3333,
+                        null,
+                        null,
+                        false,
+                        false));
+        drops.add(
+                new MobDrop(
+                        new ItemStack(TFItems.scepterLifeDrain),
+                        MobDrop.DropType.Normal,
+                        3333,
+                        null,
+                        null,
+                        false,
+                        false));
+        drops.add(
+                new MobDrop(
+                        new ItemStack(TFItems.scepterTwilight),
+                        MobDrop.DropType.Normal,
+                        3333,
+                        null,
+                        null,
+                        false,
+                        false));
+        // gold thing
+        int chance = (int) ((MobDrop.getChanceBasedOnFromTo(2, 4) / 5d) * 10000d);
+        drops.add(
+                new MobDrop(new ItemStack(Items.golden_sword), MobDrop.DropType.Normal, chance, 25, null, true, false));
+        drops.add(
+                new MobDrop(
+                        new ItemStack(Items.golden_helmet),
+                        MobDrop.DropType.Normal,
+                        chance,
+                        25,
+                        null,
+                        true,
+                        false));
+        drops.add(
+                new MobDrop(
+                        new ItemStack(Items.golden_chestplate),
+                        MobDrop.DropType.Normal,
+                        chance,
+                        25,
+                        null,
+                        true,
+                        false));
+        drops.add(
+                new MobDrop(
+                        new ItemStack(Items.golden_leggings),
+                        MobDrop.DropType.Normal,
+                        chance,
+                        25,
+                        null,
+                        true,
+                        false));
+        drops.add(
+                new MobDrop(new ItemStack(Items.golden_boots), MobDrop.DropType.Normal, chance, 25, null, true, false));
+        // ender pearl
+        drops.add(
+                new MobDrop(
+                        new ItemStack(Items.ender_pearl),
+                        MobDrop.DropType.Normal,
+                        (int) (MobDrop.getChanceBasedOnFromTo(1, 4) * 10000d),
+                        null,
+                        null,
+                        true,
+                        false));
+        // bones
+        drops.add(
+                new MobDrop(
+                        new ItemStack(Items.bone),
+                        MobDrop.DropType.Normal,
+                        (int) (MobDrop.getChanceBasedOnFromTo(5, 9) * 10000d),
+                        null,
+                        null,
+                        true,
+                        false));
+        // trophy
+        drops.add(new MobDrop(new ItemStack(TFItems.trophy), MobDrop.DropType.Normal, 10000, null, null, true, false));
     }
 
     private void dropScepter() {
@@ -1101,5 +1198,4 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     public EnumCreatureAttribute getCreatureAttribute() {
         return EnumCreatureAttribute.UNDEAD;
     }
-
 }
