@@ -6,7 +6,7 @@ dependencies {
     compileOnly("com.github.GTNewHorizons:Battlegear2:1.4.0:api") {} //For TiC to work
     compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.6.14-GTNH:dev")
     compileOnly("curse.maven:skinport-234948:3212017")
-    compileOnly("com.github.GTNewHorizons:Mobs-Info:0.4.0-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:Mobs-Info:0.4.1-GTNH:dev")
 
     // For Thaumcraft runtime
     compileOnly ("com.github.GTNewHorizons:Baubles:1.0.4:dev")
