@@ -2,6 +2,7 @@ package twilightforest.item;
 
 import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPELESS;
 
+import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -40,6 +41,16 @@ public class TFRecipes {
         OreDictionary.registerOre("ingotSteeleaf", new ItemStack(TFItems.steeleafIngot));
         OreDictionary.registerOre("oreKnightmetal", new ItemStack(TFItems.shardCluster));
         OreDictionary.registerOre("ingotKnightmetal", new ItemStack(TFItems.knightMetal));
+        OreDictionary.registerOre("fieryEssence", new ItemStack(TFItems.fieryBlood));
+        OreDictionary.registerOre("fieryEssence", new ItemStack(TFItems.fieryTears));
+
+        // in order for all critters recipes to work
+        OreDictionary.registerOre("firefly", new ItemStack(TFBlocks.firefly, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre("firefly", new ItemStack(TFItems.critter, 1, 0));
+        OreDictionary.registerOre("cicada", new ItemStack(TFBlocks.cicada, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre("cicada", new ItemStack(TFItems.critter, 1, 1));
+        OreDictionary.registerOre("moonworm", new ItemStack(TFBlocks.moonworm, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre("moonworm", new ItemStack(TFItems.critter, 1, 2));
 
         // nagastone stuff
         OreDictionary.registerOre(
@@ -110,12 +121,28 @@ public class TFRecipes {
                 new ItemStack(TFBlocks.woodenStairsDarkwood, 8, 0), new ItemStack(TFBlocks.woodenStairsTime, 8, 0),
                 new ItemStack(TFBlocks.woodenStairsTrans, 8, 0), new ItemStack(TFBlocks.woodenStairsMine, 8, 0),
                 new ItemStack(TFBlocks.woodenStairsSort, 8, 0) };
+        Block[] chests = new Block[] { TFBlocks.chestTwilight, TFBlocks.chestCanopy, TFBlocks.chestMangrove,
+                TFBlocks.chestDarkwood, TFBlocks.chestTime, TFBlocks.chestTrans, TFBlocks.chestMine,
+                TFBlocks.chestSort };
+        Block[] trappedChests = new Block[] { TFBlocks.trappedChestTwilight, TFBlocks.trappedChestCanopy,
+                TFBlocks.trappedChestMangrove, TFBlocks.trappedChestDarkwood, TFBlocks.trappedChestTime,
+                TFBlocks.trappedChestTrans, TFBlocks.trappedChestMine, TFBlocks.trappedChestSort };
         for (int i = 0; i < doors.length; i++) {
-            GameRegistry.addRecipe(
-                    new ItemStack(doors[i], 1, 0),
-                    new Object[] { "##", "##", "##", '#', new ItemStack(TFBlocks.planks, 1, i) });
-            GameRegistry
-                    .addRecipe(trapdoors[i], new Object[] { "###", "###", '#', new ItemStack(TFBlocks.planks, 1, i) });
+            if (!TwilightForestMod.isGTNHLoaded) {
+                GameRegistry.addRecipe(
+                        new ItemStack(doors[i], 1, 0),
+                        new Object[] { "##", "##", "##", '#', new ItemStack(TFBlocks.planks, 1, i) });
+                GameRegistry.addRecipe(
+                        trapdoors[i],
+                        new Object[] { "###", "###", '#', new ItemStack(TFBlocks.planks, 1, i) });
+                GameRegistry.addRecipe(
+                        new ItemStack(chests[i], 2),
+                        new Object[] { "###", "#0#", "###", '#', new ItemStack(TFBlocks.planks, 1, i), '0',
+                                new ItemStack(Blocks.chest) });
+                GameRegistry.addShapelessRecipe(
+                        new ItemStack(trappedChests[i]),
+                        new Object[] { new ItemStack(chests[i]), new ItemStack(Blocks.tripwire_hook) });
+            }
             GameRegistry.addRecipe(
                     stairs[i],
                     new Object[] { "#  ", "## ", "###", '#', new ItemStack(TFBlocks.planks, 1, i) });
@@ -123,6 +150,10 @@ public class TFRecipes {
                     new ItemStack(TFBlocks.woodenSlab, 6, i),
                     new Object[] { "###", '#', new ItemStack(TFBlocks.planks, 1, i) });
         }
+
+        // Dyes from TF plants
+        GameRegistry.addShapelessRecipe(new ItemStack(Items.dye, 2, 13), new Object[] { TFBlocks.hugeWaterLily });
+        GameRegistry.addShapelessRecipe(new ItemStack(Items.dye, 2, 1), new Object[] { TFBlocks.thornRose });
 
         GameRegistry.addRecipe(
                 new ItemStack(TFBlocks.nagastoneStairsLeft, 8, 0),
@@ -182,9 +213,10 @@ public class TFRecipes {
                 3,
                 new Object[] { "###", "# #", "# #", '#', TFItems.nagaScale });
 
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFBlocks.fireflyJar, 1, 0),
-                new Object[] { TFBlocks.firefly, Items.glass_bottle });
+        GameRegistry.addRecipe(
+                new ShapelessOreRecipe(
+                        new ItemStack(TFBlocks.fireflyJar, 1, 0),
+                        new Object[] { "firefly", Items.glass_bottle }));
 
         GameRegistry.addShapelessRecipe(
                 new ItemStack(TFItems.scepterTwilight),
@@ -310,12 +342,10 @@ public class TFRecipes {
 
         GameRegistry.addSmelting(TFItems.venisonRaw, new ItemStack(TFItems.venisonCooked), 0.3F);
 
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFItems.fieryIngot),
-                new Object[] { TFItems.fieryBlood, Items.iron_ingot });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFItems.fieryIngot),
-                new Object[] { TFItems.fieryTears, Items.iron_ingot });
+        GameRegistry.addRecipe(
+                new ShapelessOreRecipe(
+                        new ItemStack(TFItems.fieryIngot),
+                        new Object[] { "fieryEssence", Items.iron_ingot }));
         GameRegistry
                 .addRecipe(new ItemStack(TFItems.fieryHelm), new Object[] { "###", "# #", '#', TFItems.fieryIngot });
         GameRegistry.addRecipe(
@@ -326,6 +356,32 @@ public class TFRecipes {
                 new Object[] { "###", "# #", "# #", '#', TFItems.fieryIngot });
         GameRegistry
                 .addRecipe(new ItemStack(TFItems.fieryBoots), new Object[] { "# #", "# #", '#', TFItems.fieryIngot });
+
+        // Direct Fiery armor crafting
+        if (!TwilightForestMod.isGTNHLoaded) {
+            GameRegistry.addRecipe(
+                    new ShapelessOreRecipe(
+                            new ItemStack(TFItems.fieryHelm),
+                            new Object[] { new ItemStack(Items.iron_helmet, 1, 0), "fieryEssence", "fieryEssence",
+                                    "fieryEssence", "fieryEssence", "fieryEssence" }));
+            GameRegistry.addRecipe(
+                    new ShapelessOreRecipe(
+                            new ItemStack(TFItems.fieryPlate),
+                            new Object[] { new ItemStack(Items.iron_chestplate, 1, 0), "fieryEssence", "fieryEssence",
+                                    "fieryEssence", "fieryEssence", "fieryEssence", "fieryEssence", "fieryEssence",
+                                    "fieryEssence" }));
+            GameRegistry.addRecipe(
+                    new ShapelessOreRecipe(
+                            new ItemStack(TFItems.fieryLegs),
+                            new Object[] { new ItemStack(Items.iron_leggings, 1, 0), "fieryEssence", "fieryEssence",
+                                    "fieryEssence", "fieryEssence", "fieryEssence", "fieryEssence", "fieryEssence" }));
+            GameRegistry.addRecipe(
+                    new ShapelessOreRecipe(
+                            new ItemStack(TFItems.fieryBoots),
+                            new Object[] { new ItemStack(Items.iron_boots, 1, 0), "fieryEssence", "fieryEssence",
+                                    "fieryEssence", "fieryEssence" }));
+        }
+
         addEnchantedRecipe(
                 TFItems.fierySword,
                 Enchantment.fireAspect,

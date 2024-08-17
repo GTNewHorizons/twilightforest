@@ -23,6 +23,15 @@ import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import thaumcraft.api.crafting.IInfusionStabiliser;
+import twilightforest.entity.boss.EntityTFHydra;
+import twilightforest.entity.boss.EntityTFKnightPhantom;
+import twilightforest.entity.boss.EntityTFLich;
+import twilightforest.entity.boss.EntityTFMinoshroom;
+import twilightforest.entity.boss.EntityTFNaga;
+import twilightforest.entity.boss.EntityTFSnowQueen;
+import twilightforest.entity.boss.EntityTFUrGhast;
+import twilightforest.entity.boss.EntityTFYetiAlpha;
+import twilightforest.entity.passive.EntityTFQuestRam;
 import twilightforest.item.TFItems;
 import twilightforest.tileentity.TileEntityTFTrophy;
 
@@ -35,6 +44,7 @@ public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser
 
     public BlockTFTrophy() {
         super(Material.circuits);
+        this.setStepSound(soundTypeCloth);
         this.setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.5F, 0.75F);
     }
 
@@ -91,6 +101,41 @@ public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser
         } else if (trophy != null && trophy.func_145904_a() == 3) {
             // urghast bounds
             this.setBlockBounds(0.25F, 0.5F, 0.25F, 0.75F, 1F, 0.75F);
+        } else if (trophy != null && trophy.func_145904_a() == 7) {
+            // alpha yeti skull bounds
+            float pixel = 1f / 16;
+            switch (meta) {
+                default -> this
+                        .setBlockBounds(pixel * 3.2f, 0.0F, pixel * 3.2f, 1 - pixel * 3.2f, 0.665F, 1 - pixel * 3.2f);
+                case 2 -> this.setBlockBounds(
+                        pixel * 3.2f,
+                        pixel * 4,
+                        pixel * 4.4f * 2,
+                        1 - pixel * 3.2f,
+                        0.67F + pixel * 4,
+                        1.0f);
+                case 3 -> this.setBlockBounds(
+                        pixel * 3.2f,
+                        pixel * 4,
+                        0.0f,
+                        1 - pixel * 3.2f,
+                        0.67F + pixel * 4,
+                        1.0f - pixel * 4.4f * 2);
+                case 4 -> this.setBlockBounds(
+                        pixel * 4.4f * 2,
+                        pixel * 4,
+                        pixel * 3.2f,
+                        1.0f,
+                        0.67F + pixel * 4,
+                        1 - pixel * 3.2f);
+                case 5 -> this.setBlockBounds(
+                        0.0f,
+                        pixel * 4,
+                        pixel * 3.2f,
+                        1.0f - pixel * 4.4f * 2,
+                        0.67F + pixel * 4,
+                        1 - pixel * 3.2f);
+            }
         } else {
             // normal skull bounds
             switch (meta) {
@@ -146,6 +191,14 @@ public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser
     @Override
     public int damageDropped(int par1) {
         return par1;
+    }
+
+    /**
+     * Gets an item for the block being called on. Args: world, x, y, z
+     */
+    @SideOnly(Side.CLIENT)
+    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_) {
+        return TFItems.trophy;
     }
 
     /**
@@ -213,6 +266,62 @@ public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister par1IconRegister) {
         // don't load anything
+    }
+
+    /**
+     * Called upon block activation (right click on the block.)
+     */
+    @Override
+    public boolean onBlockActivated(World worldIn, int x, int y, int z, EntityPlayer player, int side, float subX,
+            float subY, float subZ) {
+        if (player.isSneaking() && player.inventory.armorInventory[3] == null) {
+            player.inventory.armorInventory[3] = new ItemStack(
+                    TFItems.trophy,
+                    1,
+                    this.getDamageValue(worldIn, x, y, z));
+            if (!player.capabilities.isCreativeMode) worldIn.setBlockToAir(x, y, z);
+            return true;
+        } else {
+            String sound;
+            switch (((TileEntitySkull) worldIn.getTileEntity(x, y, z)).func_145904_a()) {
+                default:
+                case 0:
+                    sound = new EntityTFHydra(worldIn).getTrophySound();
+                    break;
+                case 1:
+                    sound = new EntityTFNaga(worldIn).getTrophySound();
+                    break;
+                case 2:
+                    sound = new EntityTFLich(worldIn).getTrophySound();
+                    break;
+                case 3:
+                    sound = new EntityTFUrGhast(worldIn).getTrophySound();
+                    break;
+                case 4:
+                    sound = new EntityTFSnowQueen(worldIn).getTrophySound();
+                    break;
+                case 5:
+                    sound = new EntityTFMinoshroom(worldIn).getTrophySound();
+                    break;
+                case 6:
+                    sound = new EntityTFKnightPhantom(worldIn).getTrophySound();
+                    break;
+                case 7:
+                    sound = new EntityTFYetiAlpha(worldIn).getTrophySound();
+                    break;
+                case 8:
+                    sound = new EntityTFQuestRam(worldIn).getTrophySound();
+                    break;
+            }
+            worldIn.playSoundEffect(
+                    (double) x + 0.5D,
+                    (double) y + 0.5D,
+                    (double) z + 0.5D,
+                    sound,
+                    1.0F,
+                    worldIn.rand.nextFloat() * 0.1F + 0.9F);
+            return true;
+        }
     }
 
     @Override

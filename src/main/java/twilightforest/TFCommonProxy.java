@@ -2,6 +2,8 @@ package twilightforest;
 
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import cpw.mods.fml.common.network.IGuiHandler;
@@ -39,6 +41,10 @@ public class TFCommonProxy implements IGuiHandler {
         return 0;
     }
 
+    public int getChestBlockRenderID() {
+        return 0;
+    }
+
     public int getComplexBlockRenderID() {
         return 0;
     }
@@ -72,6 +78,10 @@ public class TFCommonProxy implements IGuiHandler {
     }
 
     public int getKnightmetalBlockRenderID() {
+        return 0;
+    }
+
+    public int getFieryMetalBlockRenderID() {
         return 0;
     }
 
@@ -142,6 +152,22 @@ public class TFCommonProxy implements IGuiHandler {
         return null;
     }
 
+    public ModelBiped getTrophyArmorModel(int boss) {
+        return null;
+    }
+
+    public ModelBiped getCritterArmorModel(int critter) {
+        return null;
+    }
+
     public void doBlockAnnihilateEffect(World worldObj, int blockX, int blockY, int blockZ) {}
+
+    public boolean checkForSound(ChunkCoordinates chunkcoordinates) {
+        return true;
+    }
+
+    public void stopSound(World worldIn, int x, int y, int z) {}
+
+    public void playSound(World worldObj, ChunkCoordinates chunkcoordinates, ResourceLocation soundResource) {}
 
 }

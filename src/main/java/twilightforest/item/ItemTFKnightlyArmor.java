@@ -33,11 +33,11 @@ public class ItemTFKnightlyArmor extends ItemArmor {
 
     /**
      * Called by RenderBiped and RenderPlayer to determine the armor texture that should be use for the currently
-     * equiped item. This will only be called on instances of ItemArmor.
+     * equipped item. This will only be called on instances of ItemArmor.
      * 
      * Returning null from this function will use the default value.
      * 
-     * @param stack  ItemStack for the equpt armor
+     * @param stack  ItemStack for the equipped armor
      * @param entity The entity wearing the armor
      * @param slot   The slot the armor is in
      * @param layer  The render layer, either 1 or 2, 2 is only used for CLOTH armor by default

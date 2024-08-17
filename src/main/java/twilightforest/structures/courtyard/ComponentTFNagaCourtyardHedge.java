@@ -16,13 +16,10 @@ public class ComponentTFNagaCourtyardHedge extends ComponentTFNagaCourtyardRotat
         super();
     }
 
-    public float hedgeFloof = 1.0f;
-
-    public ComponentTFNagaCourtyardHedge(int i, int x, int y, int z, int rotation, float floof) {
+    public ComponentTFNagaCourtyardHedge(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
         this.coordBaseMode = rotation;
         this.boundingBox = new StructureBoundingBox(x, y + 1, z, x + 4, y + 6, z + 4);
-        this.hedgeFloof = floof;
     }
 
     @Override
@@ -158,7 +155,7 @@ public class ComponentTFNagaCourtyardHedge extends ComponentTFNagaCourtyardRotat
                 TFBlocks.leaves,
                 4,
                 random,
-                hedgeFloof);
+                ComponentTFNagaCourtyardMain.HEDGE_FLOOF);
         this.partiallyFillWithMetadataBlocks(
                 world,
                 structureBoundingBox,
@@ -171,7 +168,7 @@ public class ComponentTFNagaCourtyardHedge extends ComponentTFNagaCourtyardRotat
                 TFBlocks.leaves,
                 4,
                 random,
-                hedgeFloof);
+                ComponentTFNagaCourtyardMain.HEDGE_FLOOF);
         this.partiallyFillWithMetadataBlocks(
                 world,
                 structureBoundingBox,
@@ -184,7 +181,7 @@ public class ComponentTFNagaCourtyardHedge extends ComponentTFNagaCourtyardRotat
                 TFBlocks.leaves,
                 4,
                 random,
-                hedgeFloof);
+                ComponentTFNagaCourtyardMain.HEDGE_FLOOF);
         this.partiallyFillWithMetadataBlocks(
                 world,
                 structureBoundingBox,
@@ -197,7 +194,7 @@ public class ComponentTFNagaCourtyardHedge extends ComponentTFNagaCourtyardRotat
                 TFBlocks.leaves,
                 4,
                 random,
-                hedgeFloof);
+                ComponentTFNagaCourtyardMain.HEDGE_FLOOF);
         this.partiallyFillWithMetadataBlocks(
                 world,
                 structureBoundingBox,
@@ -210,7 +207,7 @@ public class ComponentTFNagaCourtyardHedge extends ComponentTFNagaCourtyardRotat
                 TFBlocks.leaves,
                 4,
                 random,
-                hedgeFloof);
+                ComponentTFNagaCourtyardMain.HEDGE_FLOOF);
 
         return true;
     }

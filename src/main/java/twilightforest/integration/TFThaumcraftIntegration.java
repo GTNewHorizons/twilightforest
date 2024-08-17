@@ -232,6 +232,7 @@ public class TFThaumcraftIntegration {
 
             // blocks
             registerTCObjectTag(TFBlocks.firefly, -1, (new AspectList()).add(Aspect.FLIGHT, 1).add(Aspect.LIGHT, 2));
+            registerTCObjectTag(TFItems.critter, 0, (new AspectList()).add(Aspect.FLIGHT, 1).add(Aspect.LIGHT, 2));
             registerTCObjectTag(TFBlocks.leaves, -1, (new AspectList()).add(Aspect.PLANT, 2));
             registerTCObjectTag(
                     TFBlocks.mazestone,
@@ -241,6 +242,7 @@ public class TFThaumcraftIntegration {
             registerTCObjectTag(TFBlocks.hedge, 1, (new AspectList()).add(Aspect.PLANT, 3).add(Aspect.DARKNESS, 1));
             registerTCObjectTag(TFBlocks.root, -1, (new AspectList()).add(Aspect.TREE, 2));
             registerTCObjectTag(TFBlocks.cicada, -1, (new AspectList()).add(Aspect.SENSES, 2));
+            registerTCObjectTag(TFItems.critter, 1, (new AspectList()).add(Aspect.SENSES, 2));
             registerTCObjectTag(
                     TFBlocks.uncraftingTable,
                     -1,
@@ -346,6 +348,7 @@ public class TFThaumcraftIntegration {
             registerTCObjectTag(TFBlocks.plant, 14, (new AspectList()).add(Aspect.PLANT, 2));
             registerTCObjectTag(TFBlocks.sapling, -1, (new AspectList()).add(Aspect.PLANT, 4).add(Aspect.TREE, 2));
             registerTCObjectTag(TFBlocks.moonworm, -1, (new AspectList()).add(Aspect.DARKNESS, 2).add(Aspect.LIGHT, 2));
+            registerTCObjectTag(TFItems.critter, 2, (new AspectList()).add(Aspect.DARKNESS, 2).add(Aspect.LIGHT, 2));
             registerTCObjectTag(
                     TFBlocks.shield,
                     -1,

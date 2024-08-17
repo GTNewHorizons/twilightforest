@@ -2,6 +2,7 @@ package twilightforest.structures.courtyard;
 
 import java.util.Random;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -23,33 +24,31 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
     protected int rotatedStairs6;
     protected int rotatedStairs7;
 
-    protected ForgeDirection EtchedNagastoneNorth;
-    protected ForgeDirection EtchedNagastoneSouth;
-    protected ForgeDirection EtchedNagastoneWest;
-    protected ForgeDirection EtchedNagastoneEast;
+    protected ForgeDirection EtchedNagastoneNorth = ForgeDirection.NORTH;
+    protected ForgeDirection EtchedNagastoneSouth = ForgeDirection.SOUTH;
+    protected ForgeDirection EtchedNagastoneWest = ForgeDirection.WEST;
+    protected ForgeDirection EtchedNagastoneEast = ForgeDirection.EAST;
 
-    protected Yaw NagastoneNorth;
-    protected Yaw NagastoneSouth;
-    protected Yaw NagastoneWest;
-    protected Yaw NagastoneEast;
+    protected Yaw NagastoneNorth = Yaw.NORTH;
+    protected Yaw NagastoneSouth = Yaw.SOUTH;
+    protected Yaw NagastoneWest = Yaw.WEST;
+    protected Yaw NagastoneEast = Yaw.EAST;
 
     public ComponentTFNagaCourtyardRotatedAbstract() {
         super();
-        EtchedNagastoneNorth = ForgeDirection.UP;
-        EtchedNagastoneSouth = ForgeDirection.UP;
-        EtchedNagastoneWest = ForgeDirection.UP;
-        EtchedNagastoneEast = ForgeDirection.UP;
-
-        NagastoneNorth = Yaw.EAST;
-        NagastoneSouth = Yaw.EAST;
-        NagastoneWest = Yaw.EAST;
-        NagastoneEast = Yaw.EAST;
     }
 
     public ComponentTFNagaCourtyardRotatedAbstract(int i, int x, int y, int z, int rotation) {
         super(i);
         this.coordBaseMode = rotation;
 
+        this.initRotation();
+    }
+
+    /**
+     * Initialize all of our fancy rotation object thingys based on coordBaseMode.
+     */
+    private void initRotation() {
         switch (coordBaseMode) {
             default:
             case 0:
@@ -151,5 +150,17 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
     public boolean addComponentParts(World p_74875_1_, Random p_74875_2_, StructureBoundingBox p_74875_3_) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    /**
+     * Load from NBT
+     */
+    @Override
+    protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
+        super.func_143011_b(par1NBTTagCompound);
+        // We should be good to go as coordBaseMode is loaded by
+        // net.minecraft.world.gen.structure.StructureComponent
+        // #func_143009_a(World, NBTTagCompound) (the caller of func_143011_b)
+        this.initRotation();
     }
 }

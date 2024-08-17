@@ -7,10 +7,12 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -76,6 +78,17 @@ public class ItemTFPhantomArmor extends ItemArmor {
     public void registerIcons(IIconRegister par1IconRegister) {
         this.itemIcon = par1IconRegister
                 .registerIcon(TwilightForestMod.ID + ":" + this.getUnlocalizedName().substring(5));
+    }
+
+    /**
+     * allows items to add custom lines of information to the mouseover description
+     */
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List<String> par3List,
+            boolean par4) {
+        super.addInformation(par1ItemStack, par2EntityPlayer, par3List, par4);
+        par3List.add(StatCollector.translateToLocal(getUnlocalizedName() + ".tooltip"));
     }
 
     /**

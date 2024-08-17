@@ -2,8 +2,10 @@ package twilightforest.tileentity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLiving;
 
 import twilightforest.entity.TFCreatures;
+import twilightforest.entity.boss.EntityTFHydra;
 
 public class TileEntityTFHydraSpawner extends TileEntityTFBossSpawner {
 
@@ -20,5 +22,15 @@ public class TileEntityTFHydraSpawner extends TileEntityTFBossSpawner {
         }
 
         return this.displayCreature;
+    }
+
+    /**
+     * Any post-creation initialization goes here
+     */
+    @Override
+    protected void initializeCreature(EntityLiving myCreature) {
+        if (myCreature instanceof EntityTFHydra) {
+            ((EntityTFHydra) myCreature).setHomeArea(xCoord, yCoord, zCoord, 46);
+        }
     }
 }

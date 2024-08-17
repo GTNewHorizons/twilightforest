@@ -3,8 +3,13 @@ package twilightforest.entity.boss;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
+import twilightforest.block.TFBlocks;
 import twilightforest.entity.EntityTFMinotaur;
 import twilightforest.item.TFItems;
 
@@ -48,6 +53,9 @@ public class EntityTFMinoshroom extends EntityTFMinotaur {
         for (int i = 0; i < numDrops; ++i) {
             this.dropItem(TFItems.meefStroganoff, 1);
         }
+
+        // trophy
+        this.entityDropItem(new ItemStack(TFItems.trophy, 1, 5), 0);
     }
 
     /**
@@ -58,6 +66,53 @@ public class EntityTFMinoshroom extends EntityTFMinotaur {
         return false;
     }
 
+    @Override
+    public void onLivingUpdate() {
+        despawnIfInvalid();
+        super.onLivingUpdate();
+    }
+
+    protected void despawnIfInvalid() {
+        // check to see if we're valid
+        if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+            despawnMe();
+        }
+    }
+
+    /**
+     * Despawn the minoshroom, and restore the boss spawner at our home location, if set
+     */
+    protected void despawnMe() {
+        if (this.hasHome()) {
+            ChunkCoordinates home = this.getHomePosition();
+            worldObj.setBlock(home.posX, home.posY, home.posZ, TFBlocks.bossSpawner, 6, 2);
+        }
+        setDead();
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+        super.writeEntityToNBT(nbttagcompound);
+        ChunkCoordinates home = this.getHomePosition();
+        nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
+        nbttagcompound.setBoolean("HasHome", this.hasHome());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+        super.readEntityFromNBT(nbttagcompound);
+        if (nbttagcompound.hasKey("Home", 9)) {
+            NBTTagList nbttaglist = nbttagcompound.getTagList("Home", 6);
+            int hx = (int) nbttaglist.func_150309_d(0);
+            int hy = (int) nbttaglist.func_150309_d(1);
+            int hz = (int) nbttaglist.func_150309_d(2);
+            this.setHomeArea(hx, hy, hz, 20);
+        }
+        if (!nbttagcompound.getBoolean("HasHome")) {
+            this.detachHome();
+        }
+    }
+
     /**
      * Drop the equipment for this entity.
      */
@@ -65,6 +120,13 @@ public class EntityTFMinoshroom extends EntityTFMinotaur {
         super.dropEquipment(par1, par2);
         this.entityDropItem(new ItemStack(TFItems.minotaurAxe), 0.0F);
 
+    }
+
+    /**
+     * Basically a public getter for living sounds
+     */
+    public String getTrophySound() {
+        return this.getLivingSound();
     }
 
 }

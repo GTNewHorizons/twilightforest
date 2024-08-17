@@ -159,7 +159,8 @@ public class EntityTFRedcap extends EntityMob {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getSourceOfDamage() instanceof EntityPlayer) {
+        if (par1DamageSource.getSourceOfDamage() instanceof EntityPlayer
+                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getSourceOfDamage()).triggerAchievement(TFAchievementPage.twilightHunter);
             // are we in a level 1 hill?
             int chunkX = MathHelper.floor_double(posX) >> 4;

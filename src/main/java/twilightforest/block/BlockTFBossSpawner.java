@@ -16,9 +16,11 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.tileentity.TileEntityTFAlphaYetiSpawner;
 import twilightforest.tileentity.TileEntityTFHydraSpawner;
 import twilightforest.tileentity.TileEntityTFKnightPhantomsSpawner;
 import twilightforest.tileentity.TileEntityTFLichSpawner;
+import twilightforest.tileentity.TileEntityTFMinoshroomSpawner;
 import twilightforest.tileentity.TileEntityTFNagaSpawner;
 import twilightforest.tileentity.TileEntityTFSnowQueenSpawner;
 import twilightforest.tileentity.TileEntityTFTowerBossSpawner;
@@ -58,6 +60,8 @@ public class BlockTFBossSpawner extends BlockContainer {
             case 3 -> new TileEntityTFTowerBossSpawner();
             case 4 -> new TileEntityTFKnightPhantomsSpawner();
             case 5 -> new TileEntityTFSnowQueenSpawner();
+            case 6 -> new TileEntityTFMinoshroomSpawner();
+            case 7 -> new TileEntityTFAlphaYetiSpawner();
             default -> null;
         };
     }
@@ -90,12 +94,14 @@ public class BlockTFBossSpawner extends BlockContainer {
      */
     @Override
     public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
-        list.add(new ItemStack(item, 1, 0));
-        list.add(new ItemStack(item, 1, 1));
-        list.add(new ItemStack(item, 1, 2));
-        list.add(new ItemStack(item, 1, 3));
-        list.add(new ItemStack(item, 1, 4));
-        list.add(new ItemStack(item, 1, 5));
+        list.add(new ItemStack(item, 1, 0)); // Naga
+        list.add(new ItemStack(item, 1, 1)); // Lich
+        list.add(new ItemStack(item, 1, 6)); // Minoshroom
+        list.add(new ItemStack(item, 1, 2)); // Hydra
+        list.add(new ItemStack(item, 1, 4)); // Knight Phantoms
+        list.add(new ItemStack(item, 1, 3)); // Ur-Ghast
+        list.add(new ItemStack(item, 1, 7)); // Alpha Yeti
+        list.add(new ItemStack(item, 1, 5)); // Snow Queen
     }
 
     /**

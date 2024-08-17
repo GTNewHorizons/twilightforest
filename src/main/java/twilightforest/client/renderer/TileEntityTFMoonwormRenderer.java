@@ -22,14 +22,14 @@ public class TileEntityTFMoonwormRenderer extends TileEntitySpecialRenderer {
 
     @Override
     public void renderTileEntityAt(TileEntity tileentity, double d, double d1, double d2, float f) {
-        renderTileEntityFireflyAt((TileEntityTFMoonworm) tileentity, d, d1, d2, f);
+        renderTileEntityMoonwormAt((TileEntityTFMoonworm) tileentity, d, d1, d2, f);
 
     }
 
     /**
-     * Render a cute firefly!
+     * Render a cute moonworm!
      */
-    private void renderTileEntityFireflyAt(TileEntityTFMoonworm tileentity, double d, double d1, double d2,
+    private void renderTileEntityMoonwormAt(TileEntityTFMoonworm tileentity, double d, double d1, double d2,
             float partialTime) {
         GL11.glPushMatrix();
         int facing = tileentity.getBlockMetadata();
@@ -65,7 +65,7 @@ public class TileEntityTFMoonwormRenderer extends TileEntitySpecialRenderer {
 
         moonwormModel.setLivingAnimations(tileentity, partialTime);
 
-        // render the firefly body
+        // render the moonworm body
         moonwormModel.render(0.0625f);
 
         GL11.glPopMatrix();

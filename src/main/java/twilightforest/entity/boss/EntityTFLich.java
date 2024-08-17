@@ -1,6 +1,9 @@
 package twilightforest.entity.boss;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -21,21 +24,31 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
+import com.kuba6000.mobsinfo.api.IMobInfoProvider;
+import com.kuba6000.mobsinfo.api.MobDrop;
+
+import cpw.mods.fml.common.Optional;
 import twilightforest.TFAchievementPage;
 import twilightforest.TFFeature;
+import twilightforest.TwilightForestMod;
+import twilightforest.block.TFBlocks;
 import twilightforest.entity.EntityTFSwarmSpider;
 import twilightforest.item.TFItems;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;
 import twilightforest.world.WorldProviderTwilightForest;
 
-public class EntityTFLich extends EntityMob implements IBossDisplayData {
+@Optional.Interface(iface = "com.kuba6000.mobsinfo.api.IMobInfoProvider", modid = "mobsinfo")
+public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInfoProvider {
 
     private static final int DATA_ISCLONE = 21;
     private static final int DATA_SHIELDSTRENGTH = 17;
@@ -116,6 +129,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
 
     @Override
     protected void dropFewItems(boolean par1, int par2) {
+        // EVERY CHANGE MADE IN HERE MUST BE ALSO MADE IN provideDropsInformation
         dropScepter();
 
         int totalDrops = this.rand.nextInt(3 + par2) + 2;
@@ -136,6 +150,42 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
 
         // trophy
         this.entityDropItem(new ItemStack(TFItems.trophy, 1, 2), 0);
+    }
+
+    @Optional.Method(modid = "mobsinfo")
+    @Override
+    public void provideDropsInformation(@Nonnull ArrayList<MobDrop> drops) {
+        // scepter
+        drops.add(MobDrop.create(new ItemStack(TFItems.scepterZombie)).withChance(0.3333d));
+        drops.add(MobDrop.create(new ItemStack(TFItems.scepterLifeDrain)).withChance(0.3333d));
+        drops.add(MobDrop.create(new ItemStack(TFItems.scepterTwilight)).withChance(0.3333d));
+        // gold thing
+        double chance = MobDrop.getChanceBasedOnFromTo(2, 4) / 5d;
+        drops.add(
+                MobDrop.create(new ItemStack(Items.golden_sword)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
+        drops.add(
+                MobDrop.create(new ItemStack(Items.golden_helmet)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
+        drops.add(
+                MobDrop.create(new ItemStack(Items.golden_chestplate)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
+        drops.add(
+                MobDrop.create(new ItemStack(Items.golden_leggings)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
+        drops.add(
+                MobDrop.create(new ItemStack(Items.golden_boots)).withChance(chance).withRandomEnchant(25)
+                        .withLooting());
+        // ender pearl
+        drops.add(
+                MobDrop.create(new ItemStack(Items.ender_pearl)).withChance(MobDrop.getChanceBasedOnFromTo(1, 4))
+                        .withLooting());
+        // bones
+        drops.add(
+                MobDrop.create(new ItemStack(Items.bone)).withChance(MobDrop.getChanceBasedOnFromTo(5, 9))
+                        .withLooting());
+        // trophy
+        drops.add(MobDrop.create(new ItemStack(TFItems.trophy, 1, 2)));
     }
 
     private void dropScepter() {
@@ -160,6 +210,24 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
         // enchant!
         EnchantmentHelper.addRandomEnchantment(rand, goldThing, 10 + rand.nextInt(30));
         this.entityDropItem(goldThing, 0);
+    }
+
+    protected void despawnIfInvalid() {
+        // check to see if we're valid
+        if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+            despawnMe();
+        }
+    }
+
+    /**
+     * Despawn the lich, and restore the boss spawner at our home location, if set
+     */
+    protected void despawnMe() {
+        if (this.hasHome()) {
+            ChunkCoordinates home = this.getHomePosition();
+            worldObj.setBlock(home.posX, home.posY, home.posZ, TFBlocks.bossSpawner, 1, 2);
+        }
+        setDead();
     }
 
     /**
@@ -214,6 +282,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
      */
     @Override
     public void onLivingUpdate() {
+        despawnIfInvalid();
         // determine the hand position
         float angle = ((renderYawOffset * 3.141593F) / 180F);
 
@@ -982,6 +1051,13 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     }
 
     /**
+     * Basically a public getter for living sounds
+     */
+    public String getTrophySound() {
+        return this.getLivingSound();
+    }
+
+    /**
      * Returns the sound this mob makes when it is hurt.
      */
     @Override
@@ -1000,6 +1076,9 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         super.writeEntityToNBT(nbttagcompound);
+        ChunkCoordinates home = this.getHomePosition();
+        nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
+        nbttagcompound.setBoolean("HasHome", this.hasHome());
         nbttagcompound.setBoolean("ShadowClone", isShadowClone());
         nbttagcompound.setByte("ShieldStrength", getShieldStrength());
         nbttagcompound.setByte("MinionsToSummon", getMinionsToSummon());
@@ -1008,6 +1087,16 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     @Override
     public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
         super.readEntityFromNBT(nbttagcompound);
+        if (nbttagcompound.hasKey("Home", 9)) {
+            NBTTagList nbttaglist = nbttagcompound.getTagList("Home", 6);
+            int hx = (int) nbttaglist.func_150309_d(0);
+            int hy = (int) nbttaglist.func_150309_d(1);
+            int hz = (int) nbttaglist.func_150309_d(2);
+            this.setHomeArea(hx, hy, hz, 20);
+        }
+        if (!nbttagcompound.getBoolean("HasHome")) {
+            this.detachHome();
+        }
         setShadowClone(nbttagcompound.getBoolean("ShadowClone"));
         setShieldStrength(nbttagcompound.getByte("ShieldStrength"));
         setMinionsToSummon(nbttagcompound.getByte("MinionsToSummon"));
@@ -1019,7 +1108,8 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer) {
+        if (par1DamageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightKillLich);
 
@@ -1056,5 +1146,4 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData {
     public EnumCreatureAttribute getCreatureAttribute() {
         return EnumCreatureAttribute.UNDEAD;
     }
-
 }

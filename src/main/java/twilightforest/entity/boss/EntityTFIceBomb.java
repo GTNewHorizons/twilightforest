@@ -12,6 +12,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import twilightforest.TwilightForestMod;
@@ -64,7 +65,8 @@ public class EntityTFIceBomb extends EntityThrowable {
         for (int x = -range; x <= range; x++) {
             for (int y = -range; y <= range; y++) {
                 for (int z = -range; z <= range; z++) {
-                    this.doTerrainEffect(ix + x, iy + y, iz + z);
+                    if (Vec3.createVectorHelper(x, y, z).lengthVector() <= range + 0.5d)
+                        this.doTerrainEffect(ix + x, iy + y, iz + z);
                 }
             }
         }
@@ -82,7 +84,10 @@ public class EntityTFIceBomb extends EntityThrowable {
         }
         if (this.worldObj.isAirBlock(x, y, z) && Blocks.snow_layer.canPlaceBlockAt(this.worldObj, x, y, z)) {
             this.worldObj.setBlock(x, y, z, Blocks.snow_layer);
-        }
+        } else
+            if (this.worldObj.getBlock(x, y, z) == Blocks.snow_layer && this.worldObj.getBlockMetadata(x, y, z) < 7) {
+                this.worldObj.setBlockMetadataWithNotify(x, y, z, this.worldObj.getBlockMetadata(x, y, z) + 1, 2);
+            }
     }
 
     /**

@@ -1,5 +1,7 @@
 package twilightforest;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -34,14 +36,15 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
-import baubles.common.container.InventoryBaubles;
-import baubles.common.lib.PlayerHandler;
+import com.google.common.io.Files;
+
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -61,6 +64,7 @@ import twilightforest.entity.EntityTFCharmEffect;
 import twilightforest.entity.EntityTFPinchBeetle;
 import twilightforest.entity.EntityTFYeti;
 import twilightforest.integration.TFBaublesIntegration;
+import twilightforest.item.ItemTFPhantomArmor;
 import twilightforest.item.TFItems;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;
@@ -70,6 +74,9 @@ import twilightforest.world.WorldProviderTwilightForest;
  * So much of the mod logic in this one class
  */
 public class TFEventListener {
+
+    public static String fileName = "tf";
+    public static String fileNameBackup = "tfback";
 
     protected HashMap<String, InventoryPlayer> playerKeepsMap = new HashMap<>();
     protected HashMap<String, ItemStack[]> playerBaublesMap = new HashMap<>();
@@ -102,6 +109,9 @@ public class TFEventListener {
                     case 2 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillLich);
                     case 3 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
                     case 4 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
+                    case 5 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
+                    case 6 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressKnights);
+                    case 7 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressYeti);
                 }
                 // mazebreaker
             } else if (item == TFItems.mazebreakerPick) {
@@ -421,24 +431,19 @@ public class TFEventListener {
                 EntityTFCharmEffect effect = new EntityTFCharmEffect(
                         player.worldObj,
                         player,
-                        charm1 ? TFItems.charmOfLife1 : TFItems.charmOfLife2);
+                        charm1 ? TFItems.charmOfLife1 : TFItems.charmOfLife2,
+                        0);
                 player.worldObj.spawnEntityInWorld(effect);
 
                 EntityTFCharmEffect effect2 = new EntityTFCharmEffect(
                         player.worldObj,
                         player,
-                        charm1 ? TFItems.charmOfLife1 : TFItems.charmOfLife2);
-                effect2.offset = (float) Math.PI;
+                        charm1 ? TFItems.charmOfLife1 : TFItems.charmOfLife2,
+                        (float) Math.PI);
                 player.worldObj.spawnEntityInWorld(effect2);
 
                 // sound
-                player.worldObj.playSoundEffect(
-                        player.posX + 0.5D,
-                        player.posY + 0.5D,
-                        player.posZ + 0.5D,
-                        "mob.zombie.unfect",
-                        1.5F,
-                        1.0F);
+                player.worldObj.playSoundEffect(player.posX, player.posY, player.posZ, "mob.zombie.unfect", 1.5F, 1.0F);
 
             }
         }
@@ -570,6 +575,17 @@ public class TFEventListener {
                 }
                 playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
             }
+
+            // check for phantom armor
+            for (int i = 0; i < 4; i++) {
+                if (player.inventory.armorInventory[i] != null
+                        && player.inventory.armorInventory[i].getItem() instanceof ItemTFPhantomArmor) {
+                    InventoryPlayer keepInventory = retrieveOrMakeKeepInventory(player);
+                    keepInventory.armorInventory[i] = ItemStack.copyItemStack(player.inventory.armorInventory[i]);
+                    player.inventory.armorInventory[i] = null;
+                    playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
+                }
+            }
         }
 
         if (playerKeepsMap.size() > 1) {
@@ -597,6 +613,51 @@ public class TFEventListener {
             keepInventory.armorInventory[i] = ItemStack.copyItemStack(player.inventory.armorInventory[i]);
             player.inventory.armorInventory[i] = null;
         }
+    }
+
+    @SubscribeEvent
+    public void playerLoad(PlayerEvent.LoadFromFile event) {
+        playerLoadDo(event.entityPlayer, event.playerDirectory);
+    }
+
+    private void playerLoadDo(EntityPlayer player, File directory) {
+        File file1, file2;
+
+        // look for normal files first
+        file1 = getPlayerFile(fileName, directory, player.getCommandSenderName());
+        file2 = getPlayerFile(fileNameBackup, directory, player.getCommandSenderName());
+
+        // look for uuid files when normal file missing
+        if (!file1.exists()) {
+            File filep = getPlayerFileUUID(fileName, directory, player.getGameProfile().getId().toString());
+            if (filep.exists()) {
+                try {
+                    Files.copy(filep, file1);
+                    System.out.println(
+                            "Using and converting UUID Charm of Keeping savefile for " + player.getCommandSenderName());
+                    filep.delete();
+                    File fb = getPlayerFileUUID(fileNameBackup, directory, player.getGameProfile().getId().toString());
+                    if (fb.exists()) fb.delete();
+                } catch (IOException e) {}
+            }
+        }
+
+        TFPlayerHandler.loadPlayerKeepInventory(player, file1, file2);
+    }
+
+    public static File getPlayerFile(String suffix, File playerDirectory, String playername) {
+        if ("dat".equals(suffix)) throw new IllegalArgumentException("The suffix 'dat' is reserved");
+        return new File(playerDirectory, playername + "." + suffix);
+    }
+
+    public File getPlayerFileUUID(String suffix, File playerDirectory, String playerUUID) {
+        if ("dat".equals(suffix)) throw new IllegalArgumentException("The suffix 'dat' is reserved");
+        return new File(playerDirectory, playerUUID + "." + suffix);
+    }
+
+    @SubscribeEvent
+    public void playerSave(PlayerEvent.SaveToFile event) {
+        TFBaublesIntegration.playerSaveDo(event.entityPlayer, event.playerDirectory);
     }
 
     /**
@@ -627,35 +688,25 @@ public class TFEventListener {
                 }
             }
 
-            if (TwilightForestMod.areBaublesLoaded && baublesInventory != null) {
-                InventoryBaubles inventoryBaubles = PlayerHandler.getPlayerBaubles(player);
-                for (int i = 0; i < inventoryBaubles.getSizeInventory(); i++) {
-                    if (baublesInventory[i] != null) inventoryBaubles.setInventorySlotContents(i, baublesInventory[i]);
-                }
-            }
+            TFBaublesIntegration.restoreBaubles(player, baublesInventory);
 
             // spawn effect thingers
             if (keepInventory.getItemStack() != null) {
                 EntityTFCharmEffect effect = new EntityTFCharmEffect(
                         player.worldObj,
                         player,
-                        keepInventory.getItemStack().getItem());
+                        keepInventory.getItemStack().getItem(),
+                        0);
                 player.worldObj.spawnEntityInWorld(effect);
 
                 EntityTFCharmEffect effect2 = new EntityTFCharmEffect(
                         player.worldObj,
                         player,
-                        keepInventory.getItemStack().getItem());
-                effect2.offset = (float) Math.PI;
+                        keepInventory.getItemStack().getItem(),
+                        (float) Math.PI);
                 player.worldObj.spawnEntityInWorld(effect2);
 
-                player.worldObj.playSoundEffect(
-                        player.posX + 0.5D,
-                        player.posY + 0.5D,
-                        player.posZ + 0.5D,
-                        "mob.zombie.unfect",
-                        1.5F,
-                        1.0F);
+                player.worldObj.playSoundEffect(player.posX, player.posY, player.posZ, "mob.zombie.unfect", 1.5F, 1.0F);
             }
             playerKeepsMap.remove(player.getCommandSenderName());
             playerBaublesMap.remove(player.getCommandSenderName());
@@ -668,18 +719,8 @@ public class TFEventListener {
     @SubscribeEvent
     public void onPlayerLogout(PlayerLoggedOutEvent event) {
         EntityPlayer player = event.player;
-        if (playerKeepsMap.containsKey(player.getCommandSenderName())) {
-            FMLLog.warning(
-                    "[TwilightForest] Mod was keeping inventory items in reserve for player %s but they logged out!  Items are being dropped.",
-                    player.getCommandSenderName());
-            InventoryPlayer keepInventory = playerKeepsMap.get(player.getCommandSenderName());
-
-            // set player to the player logging out
-            keepInventory.player = player;
-            keepInventory.dropAllItems();
-
+        if (playerKeepsMap.containsKey(player.getCommandSenderName()))
             playerKeepsMap.remove(player.getCommandSenderName());
-        }
     }
 
     /**

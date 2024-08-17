@@ -1,12 +1,16 @@
 
 package twilightforest.entity;
 
+import java.util.Calendar;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIArrowAttack;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 import net.minecraft.entity.ai.EntityAIFleeSun;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
@@ -17,8 +21,10 @@ import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemHoe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -26,9 +32,17 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
 import twilightforest.TFAchievementPage;
+import twilightforest.TwilightForestMod;
 import twilightforest.item.TFItems;
 
 public class EntityTFSkeletonDruid extends EntityMob implements IRangedAttackMob {
+
+    private EntityAIArrowAttack aiArrowAttack = new EntityAIArrowAttack(this, 1.0D, 60, 10.0F);
+    private EntityAIAttackOnCollide aiAttackOnCollide = new EntityAIAttackOnCollide(
+            this,
+            EntityPlayer.class,
+            1.2D,
+            false);
 
     public EntityTFSkeletonDruid(World world) {
         super(world);
@@ -38,14 +52,18 @@ public class EntityTFSkeletonDruid extends EntityMob implements IRangedAttackMob
         this.tasks.addTask(1, new EntityAISwimming(this));
         this.tasks.addTask(2, new EntityAIRestrictSun(this));
         this.tasks.addTask(3, new EntityAIFleeSun(this, 1.0D));
-        this.tasks.addTask(4, new EntityAIArrowAttack(this, 1.0D, 60, 10.0F));
-        this.tasks.addTask(5, new EntityAIWander(this, 1.0D));
-        this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        // this.tasks.addTask(4, new EntityAIArrowAttack(this, 1.0D, 60, 10.0F));
+        this.tasks.addTask(4, new EntityAIWander(this, 1.0D));
+        this.tasks.addTask(5, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
         this.tasks.addTask(6, new EntityAILookIdle(this));
         this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
         this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
 
-        this.setCurrentItemOrArmor(0, new ItemStack(Items.golden_hoe));
+        if (world != null && !world.isRemote) {
+            this.setCombatTask();
+        }
+
+        // this.setCurrentItemOrArmor(0, new ItemStack(Items.golden_hoe));
 
     }
 
@@ -134,8 +152,58 @@ public class EntityTFSkeletonDruid extends EntityMob implements IRangedAttackMob
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer) {
+        if (par1DamageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        }
+    }
+
+    /**
+     * Makes entity wear random armor based on difficulty
+     */
+    protected void addRandomArmor() {
+        super.addRandomArmor();
+        this.setCurrentItemOrArmor(0, new ItemStack(Items.golden_hoe));
+    }
+
+    public IEntityLivingData onSpawnWithEgg(IEntityLivingData p_110161_1_) {
+        p_110161_1_ = super.onSpawnWithEgg(p_110161_1_);
+
+        // this.tasks.addTask(4, this.aiArrowAttack);
+        this.addRandomArmor();
+        // this.enchantEquipment();
+
+        this.setCanPickUpLoot(
+                this.rand.nextFloat() < 0.55F * this.worldObj.func_147462_b(this.posX, this.posY, this.posZ));
+
+        this.setCombatTask();
+
+        if (this.getEquipmentInSlot(4) == null) {
+            Calendar calendar = this.worldObj.getCurrentDate();
+
+            if (calendar.get(2) + 1 == 10 && calendar.get(5) == 31 && this.rand.nextFloat() < 0.25F) {
+                this.setCurrentItemOrArmor(
+                        4,
+                        new ItemStack(this.rand.nextFloat() < 0.1F ? Blocks.lit_pumpkin : Blocks.pumpkin));
+                this.equipmentDropChances[4] = 0.0F;
+            }
+        }
+
+        return p_110161_1_;
+    }
+
+    /**
+     * sets this entity's combat AI.
+     */
+    public void setCombatTask() {
+        this.tasks.removeTask(this.aiAttackOnCollide);
+        this.tasks.removeTask(this.aiArrowAttack);
+        ItemStack itemstack = this.getHeldItem();
+
+        if (itemstack != null && itemstack.getItem() instanceof ItemHoe) {
+            this.tasks.addTask(4, this.aiArrowAttack);
+        } else {
+            this.tasks.addTask(4, this.aiAttackOnCollide);
         }
     }
 

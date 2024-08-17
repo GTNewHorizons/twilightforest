@@ -72,6 +72,32 @@ public class ModelTFYetiAlpha extends ModelBiped {
 
     }
 
+    public ModelTFYetiAlpha trophySetup() {
+        this.bipedBody = new ModelRenderer(this, 80, 0);
+        this.bipedBody.addBox(-24.0F, -60.0F, -18.0F, 48, 54, 36);
+        this.bipedBody.setRotationPoint(0.0F, -6.0F, 0.0F);
+
+        this.mouth = new ModelRenderer(this, 121, 50);
+        this.mouth.addBox(-17.0F, -7.0F, -1.5F, 34, 29, 2);
+        this.mouth.setRotationPoint(0.0F, -37.0F, -18.0F);
+        this.bipedBody.addChild(mouth);
+
+        this.rightEye = new ModelRenderer(this, 64, 0);
+        this.rightEye.addBox(-6.0F, -6.0F, -1.5F, 12, 12, 2);
+        this.rightEye.setRotationPoint(-14.0F, -50.0F, -18.0F);
+        this.bipedBody.addChild(rightEye);
+
+        this.leftEye = new ModelRenderer(this, 64, 0);
+        this.leftEye.addBox(-6.0F, -6.0F, -1.5F, 12, 12, 2);
+        this.leftEye.setRotationPoint(14.0F, -50.0F, -18.0F);
+        this.bipedBody.addChild(leftEye);
+
+        addPairHorns(-58.0F, 35F);
+        addPairHorns(-46.0F, 15F);
+        addPairHorns(-36.0F, -5F);
+        return this;
+    }
+
     /**
      * Add a pair of horns
      */

@@ -17,7 +17,9 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
@@ -26,12 +28,17 @@ import net.minecraft.world.World;
 import twilightforest.TFAchievementPage;
 import twilightforest.TFFeature;
 import twilightforest.TwilightForestMod;
+import twilightforest.block.TFBlocks;
 import twilightforest.item.TFItems;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;
 import twilightforest.world.WorldProviderTwilightForest;
 
 public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEntityMultiPart, IMob {
+
+    private ChunkCoordinates homePosition = new ChunkCoordinates(0, 0, 0);
+    /** If -1 there is no maximum distance */
+    private float maximumHomeDistance = -1.0F;
 
     private static int TICKS_BEFORE_HEALING = 1000;
     private static int HEAD_RESPAWN_TICKS = 100;
@@ -285,7 +292,7 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
                 }
             }
         }
-
+        despawnIfInvalid();
     }
 
     @Override
@@ -307,12 +314,51 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
         }
     }
 
+    protected void despawnIfInvalid() {
+        // check to see if we're valid
+        if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+            despawnMe();
+        }
+    }
+
+    /**
+     * Despawn the hydra, and restore the boss spawner at our home location, if set
+     */
+    protected void despawnMe() {
+        if (this.hasHome()) {
+            ChunkCoordinates home = this.getHomePosition();
+            worldObj.setBlock(home.posX, home.posY, home.posZ, TFBlocks.bossSpawner, 2, 2);
+        }
+        this.deathTime = 200; // For heads and stuff to despawn
+        setDead();
+    }
+
+    private ChunkCoordinates getHomePosition() {
+        return homePosition;
+    }
+
+    private boolean hasHome() {
+        return maximumHomeDistance > -1;
+    }
+
+    public void setHomeArea(int hx, int hy, int hz, int i) {
+        homePosition = new ChunkCoordinates(hx, hy, hz);
+        maximumHomeDistance = i;
+    }
+
+    public void detachHome() {
+        this.maximumHomeDistance = -1.0F;
+    }
+
     /**
      * Save to disk.
      */
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         super.writeEntityToNBT(nbttagcompound);
+        ChunkCoordinates home = this.getHomePosition();
+        nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
+        nbttagcompound.setBoolean("HasHome", this.hasHome());
         nbttagcompound.setBoolean("SpawnHeads", shouldSpawnHeads());
         nbttagcompound.setByte("NumHeads", (byte) countActiveHeads());
     }
@@ -323,6 +369,16 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
     @Override
     public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
         super.readEntityFromNBT(nbttagcompound);
+        if (nbttagcompound.hasKey("Home", 9)) {
+            NBTTagList nbttaglist = nbttagcompound.getTagList("Home", 6);
+            int hx = (int) nbttaglist.func_150309_d(0);
+            int hy = (int) nbttaglist.func_150309_d(1);
+            int hz = (int) nbttaglist.func_150309_d(2);
+            this.setHomeArea(hx, hy, hz, 20);
+        }
+        if (!nbttagcompound.getBoolean("HasHome")) {
+            this.detachHome();
+        }
         setSpawnHeads(nbttagcompound.getBoolean("SpawnHeads"));
         activateNumberOfHeads(nbttagcompound.getByte("NumHeads"));
     }
@@ -920,6 +976,13 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
     }
 
     /**
+     * Basically a public getter for living sounds
+     */
+    public String getTrophySound() {
+        return this.getLivingSound();
+    }
+
+    /**
      * Returns the sound this mob makes when it is hurt.
      */
     @Override
@@ -949,7 +1012,8 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer) {
+        if (par1DamageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightKillHydra);
         }

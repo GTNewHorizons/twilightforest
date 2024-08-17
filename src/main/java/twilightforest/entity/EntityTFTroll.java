@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import twilightforest.TFAchievementPage;
+import twilightforest.TwilightForestMod;
 import twilightforest.block.TFBlocks;
 import twilightforest.entity.ai.EntityAITFCollideAttackFixed;
 import twilightforest.entity.boss.EntityTFIceBomb;
@@ -186,7 +187,8 @@ public class EntityTFTroll extends EntityMob implements IRangedAttackMob {
     @Override
     public void onDeath(DamageSource damageSource) {
         super.onDeath(damageSource);
-        if (damageSource.getEntity() instanceof EntityPlayer) {
+        if (damageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) damageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) damageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
         }
 

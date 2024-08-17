@@ -8,6 +8,7 @@ import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
@@ -110,12 +111,17 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
         return false;
     }
 
+    @Override
+    public void onLivingUpdate() {
+        despawnIfInvalid();
+        super.onLivingUpdate();
+    }
+
     /**
      * Keep health updated
      */
     @Override
     public void onUpdate() {
-
         super.onUpdate();
 
         // extra death explosions
@@ -136,6 +142,24 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
                         d2);
             }
         }
+    }
+
+    protected void despawnIfInvalid() {
+        // check to see if we're valid
+        if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+            despawnMe();
+        }
+    }
+
+    /**
+     * Despawn the minoshroom, and restore the boss spawner at our home location, if set
+     */
+    protected void despawnMe() {
+        if (this.hasHome()) {
+            ChunkCoordinates home = this.getHomePosition();
+            worldObj.setBlock(home.posX, home.posY, home.posZ, TFBlocks.bossSpawner, 3, 2);
+        }
+        setDead();
     }
 
     /**
@@ -760,6 +784,13 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     }
 
     /**
+     * Basically a public getter for living sounds
+     */
+    public String getTrophySound() {
+        return this.getLivingSound();
+    }
+
+    /**
      * Needed for boss health bar on the client
      */
     // @Override
@@ -770,12 +801,25 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         nbttagcompound.setBoolean("inTantrum", this.isInTantrum());
+        ChunkCoordinates home = this.getHomePosition();
+        nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
+        nbttagcompound.setBoolean("HasHome", this.hasHome());
         super.writeEntityToNBT(nbttagcompound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
         super.readEntityFromNBT(nbttagcompound);
+        if (nbttagcompound.hasKey("Home", 9)) {
+            NBTTagList nbttaglist = nbttagcompound.getTagList("Home", 6);
+            int hx = (int) nbttaglist.func_150309_d(0);
+            int hy = (int) nbttaglist.func_150309_d(1);
+            int hz = (int) nbttaglist.func_150309_d(2);
+            this.setHomeArea(hx, hy, hz, 20);
+        }
+        if (!nbttagcompound.getBoolean("HasHome")) {
+            this.detachHome();
+        }
         this.setInTantrum(nbttagcompound.getBoolean("inTantrum"));
     }
 
@@ -798,7 +842,8 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer) {
+        if (par1DamageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightProgressUrghast);
 

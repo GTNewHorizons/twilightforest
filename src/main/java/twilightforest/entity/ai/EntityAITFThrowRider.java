@@ -60,6 +60,11 @@ public class EntityAITFThrowRider extends EntityAIBase {
 
         }
 
+        theEntityCreature.playSound(
+                TwilightForestMod.ID + ":mob.yeti.throw",
+                4F,
+                0.75F + this.theEntityCreature.rand.nextFloat() * 0.25F);
+
         FMLLog.finer("[TwilightForest] throw!");
         this.throwTimer = 0;
     }

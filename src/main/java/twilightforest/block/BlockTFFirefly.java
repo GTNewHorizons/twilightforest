@@ -12,7 +12,7 @@ public class BlockTFFirefly extends BlockTFCritter {
 
     // public static Random rand = new Random();
 
-    protected BlockTFFirefly() {
+    public BlockTFFirefly() {
         super();
         this.setLightLevel(0.9375F);
     }

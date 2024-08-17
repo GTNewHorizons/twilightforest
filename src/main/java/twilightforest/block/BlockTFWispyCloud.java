@@ -1,10 +1,18 @@
 package twilightforest.block;
 
+import java.util.ArrayList;
 import java.util.Random;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockBreakable;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -14,7 +22,7 @@ import twilightforest.item.TFItems;
 public class BlockTFWispyCloud extends BlockBreakable {
 
     protected BlockTFWispyCloud() {
-        super("", Material.craftedSnow, false);
+        super("", Material.ice, false);
         this.setStepSound(soundTypeCloth);
         this.setCreativeTab(TFItems.creativeTab);
 
@@ -41,6 +49,25 @@ public class BlockTFWispyCloud extends BlockBreakable {
      */
     protected boolean canSilkHarvest() {
         return true;
+    }
+
+    /**
+     * Called when the player destroys a block with an item that can harvest it. (i, j, k) are the coordinates of the
+     * block and l is the block's subtype/damage.
+     */
+    public void harvestBlock(World worldIn, EntityPlayer player, int x, int y, int z, int meta) {
+        player.addStat(StatList.mineBlockStatArray[Block.getIdFromBlock(this)], 1);
+        player.addExhaustion(0.025F);
+
+        if (this.canSilkHarvest(worldIn, player, x, y, z, meta) && EnchantmentHelper.getSilkTouchModifier(player)) {
+            ArrayList<ItemStack> items = new ArrayList<ItemStack>();
+            ItemStack itemstack = this.createStackedBlock(meta);
+
+            if (itemstack != null) items.add(itemstack);
+
+            ForgeEventFactory.fireBlockHarvesting(items, worldIn, this, x, y, z, meta, 0, 1.0f, true, player);
+            for (ItemStack is : items) this.dropBlockAsItem(worldIn, x, y, z, is);
+        }
     }
 
     /**

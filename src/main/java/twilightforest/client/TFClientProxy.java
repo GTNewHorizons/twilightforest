@@ -1,6 +1,8 @@
 package twilightforest.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPig;
 import net.minecraft.client.model.ModelSilverfish;
@@ -8,9 +10,12 @@ import net.minecraft.client.model.ModelSlime;
 import net.minecraft.client.model.ModelWolf;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.particle.EntitySmokeFX;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
@@ -29,6 +34,7 @@ import twilightforest.client.model.ModelTFBighornFur;
 import twilightforest.client.model.ModelTFBlockGoblin;
 import twilightforest.client.model.ModelTFBoar;
 import twilightforest.client.model.ModelTFBunny;
+import twilightforest.client.model.ModelTFCritterArmor;
 import twilightforest.client.model.ModelTFDeathTome;
 import twilightforest.client.model.ModelTFDeer;
 import twilightforest.client.model.ModelTFFieryArmor;
@@ -64,6 +70,7 @@ import twilightforest.client.model.ModelTFTinyBird;
 import twilightforest.client.model.ModelTFTowerBoss;
 import twilightforest.client.model.ModelTFTowerGolem;
 import twilightforest.client.model.ModelTFTroll;
+import twilightforest.client.model.ModelTFTrophyArmor;
 import twilightforest.client.model.ModelTFWraith;
 import twilightforest.client.model.ModelTFYeti;
 import twilightforest.client.model.ModelTFYetiAlpha;
@@ -79,19 +86,23 @@ import twilightforest.client.particle.EntityTFSnowFX;
 import twilightforest.client.particle.EntityTFSnowGuardianFX;
 import twilightforest.client.particle.EntityTFSnowWarningFX;
 import twilightforest.client.renderer.TFFieryItemRenderer;
+import twilightforest.client.renderer.TFFieryMetalBlockRenderer;
 import twilightforest.client.renderer.TFGiantBlockRenderer;
 import twilightforest.client.renderer.TFGiantItemRenderer;
 import twilightforest.client.renderer.TFIceItemRenderer;
 import twilightforest.client.renderer.TFMagicMapRenderer;
 import twilightforest.client.renderer.TFMazeMapRenderer;
 import twilightforest.client.renderer.TileEntityTFCakeRenderer;
+import twilightforest.client.renderer.TileEntityTFChestRenderer;
 import twilightforest.client.renderer.TileEntityTFCicadaRenderer;
 import twilightforest.client.renderer.TileEntityTFFireflyRenderer;
 import twilightforest.client.renderer.TileEntityTFMoonwormRenderer;
 import twilightforest.client.renderer.TileEntityTFTrophyRenderer;
 import twilightforest.client.renderer.blocks.RenderBlockTFCake;
 import twilightforest.client.renderer.blocks.RenderBlockTFCastleMagic;
+import twilightforest.client.renderer.blocks.RenderBlockTFChest;
 import twilightforest.client.renderer.blocks.RenderBlockTFCritters;
+import twilightforest.client.renderer.blocks.RenderBlockTFFieryMetal;
 import twilightforest.client.renderer.blocks.RenderBlockTFFireflyJar;
 import twilightforest.client.renderer.blocks.RenderBlockTFHugeLilyPad;
 import twilightforest.client.renderer.blocks.RenderBlockTFKnightMetal;
@@ -111,7 +122,6 @@ import twilightforest.client.renderer.entity.RenderTFBlockGoblin;
 import twilightforest.client.renderer.entity.RenderTFBoar;
 import twilightforest.client.renderer.entity.RenderTFBunny;
 import twilightforest.client.renderer.entity.RenderTFChainBlock;
-import twilightforest.client.renderer.entity.RenderTFCharm;
 import twilightforest.client.renderer.entity.RenderTFCubeOfAnnihilation;
 import twilightforest.client.renderer.entity.RenderTFDeer;
 import twilightforest.client.renderer.entity.RenderTFFallingIce;
@@ -160,6 +170,7 @@ import twilightforest.client.renderer.entity.RenderTFWraith;
 import twilightforest.client.renderer.entity.RenderTFYeti;
 import twilightforest.item.TFItems;
 import twilightforest.tileentity.TileEntityTFCake;
+import twilightforest.tileentity.TileEntityTFChest;
 import twilightforest.tileentity.TileEntityTFCicada;
 import twilightforest.tileentity.TileEntityTFFirefly;
 import twilightforest.tileentity.TileEntityTFMoonworm;
@@ -169,7 +180,8 @@ public class TFClientProxy extends TFCommonProxy {
 
     int critterRenderID;
     int plantRenderID;
-    int blockCakeRenderID;
+    int cakeRenderID;
+    int chestRenderID;
     int blockComplexRenderID;
     int nagastoneRenderID;
     int newNagastoneRenderID;
@@ -180,6 +192,7 @@ public class TFClientProxy extends TFCommonProxy {
     int pedestalRenderID;
     int thornsRenderID;
     int knightmetalBlockRenderID;
+    int fieryMetalBlockRenderID;
     int hugeLilyPadBlockRenderID;
     int castleMagicBlockRenderID;
 
@@ -188,6 +201,9 @@ public class TFClientProxy extends TFCommonProxy {
     ModelBiped[] yetiArmorModel;
     ModelBiped[] arcticArmorModel;
     ModelBiped[] fieryArmorModel;
+    ModelBiped[] trophyArmorModel;
+    ModelBiped[] critterArmorModel;
+
     TFClientEvents clientEvents;
 
     boolean isDangerOverlayShown;
@@ -441,9 +457,8 @@ public class TFClientProxy extends TFCommonProxy {
         RenderingRegistry.registerEntityRenderingHandler(
                 twilightforest.entity.EntityTFMoonwormShot.class,
                 new RenderTFMoonwormShot());
-        RenderingRegistry.registerEntityRenderingHandler(
-                twilightforest.entity.EntityTFCharmEffect.class,
-                new RenderTFCharm(TFItems.charmOfLife1.getIconFromDamage(0)));
+        RenderingRegistry
+                .registerEntityRenderingHandler(twilightforest.entity.EntityTFCharmEffect.class, new RenderItem());
         RenderingRegistry.registerEntityRenderingHandler(
                 twilightforest.entity.boss.EntityTFLichBomb.class,
                 new RenderSnowball(Items.magma_cream));
@@ -494,6 +509,7 @@ public class TFClientProxy extends TFCommonProxy {
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTFMoonworm.class, new TileEntityTFMoonwormRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTFTrophy.class, new TileEntityTFTrophyRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTFCake.class, new TileEntityTFCakeRenderer());
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTFChest.class, new TileEntityTFChestRenderer());
 
         // map item renderer
         MinecraftForgeClient.registerItemRenderer(
@@ -524,6 +540,10 @@ public class TFClientProxy extends TFCommonProxy {
         MinecraftForgeClient.registerItemRenderer(TFItems.fieryLegs, fieryRenderer);
         MinecraftForgeClient.registerItemRenderer(TFItems.fieryBoots, fieryRenderer);
 
+        MinecraftForgeClient.registerItemRenderer(
+                Item.getItemFromBlock(TFBlocks.fieryMetalStorage),
+                new TFFieryMetalBlockRenderer());
+
         // ice item renderers
         TFIceItemRenderer iceRenderer = new TFIceItemRenderer(mc.gameSettings, mc.getTextureManager());
         MinecraftForgeClient.registerItemRenderer(TFItems.iceSword, iceRenderer);
@@ -531,8 +551,11 @@ public class TFClientProxy extends TFCommonProxy {
         MinecraftForgeClient.registerItemRenderer(TFItems.iceBow, iceRenderer);
 
         // block render ids
-        blockCakeRenderID = RenderingRegistry.getNextAvailableRenderId();
-        RenderingRegistry.registerBlockHandler(new RenderBlockTFCake(blockCakeRenderID));
+        cakeRenderID = RenderingRegistry.getNextAvailableRenderId();
+        RenderingRegistry.registerBlockHandler(new RenderBlockTFCake(cakeRenderID));
+
+        chestRenderID = RenderingRegistry.getNextAvailableRenderId();
+        RenderingRegistry.registerBlockHandler(new RenderBlockTFChest(chestRenderID));
 
         blockComplexRenderID = RenderingRegistry.getNextAvailableRenderId();
         RenderingRegistry.registerBlockHandler(new RenderBlockTFFireflyJar(blockComplexRenderID));
@@ -566,6 +589,9 @@ public class TFClientProxy extends TFCommonProxy {
 
         knightmetalBlockRenderID = RenderingRegistry.getNextAvailableRenderId();
         RenderingRegistry.registerBlockHandler(new RenderBlockTFKnightMetal(knightmetalBlockRenderID));
+
+        fieryMetalBlockRenderID = RenderingRegistry.getNextAvailableRenderId();
+        RenderingRegistry.registerBlockHandler(new RenderBlockTFFieryMetal(fieryMetalBlockRenderID));
 
         hugeLilyPadBlockRenderID = RenderingRegistry.getNextAvailableRenderId();
         RenderingRegistry.registerBlockHandler(new RenderBlockTFHugeLilyPad(hugeLilyPadBlockRenderID));
@@ -602,6 +628,22 @@ public class TFClientProxy extends TFCommonProxy {
         fieryArmorModel[2] = new ModelTFFieryArmor(2, 0.5F);
         fieryArmorModel[3] = new ModelTFFieryArmor(3, 0.5F);
 
+        trophyArmorModel = new ModelBiped[9];
+        trophyArmorModel[0] = new ModelTFTrophyArmor(0, 0.5F);
+        trophyArmorModel[1] = new ModelTFTrophyArmor(1, 0.5F);
+        trophyArmorModel[2] = new ModelTFTrophyArmor(2, 0.5F);
+        trophyArmorModel[3] = new ModelTFTrophyArmor(3, 0.5F);
+        trophyArmorModel[4] = new ModelTFTrophyArmor(4, 0.5F);
+        trophyArmorModel[5] = new ModelTFTrophyArmor(5, 0.5F);
+        trophyArmorModel[6] = new ModelTFTrophyArmor(6, 0.5F);
+        trophyArmorModel[7] = new ModelTFTrophyArmor(7, 0.5F);
+        trophyArmorModel[8] = new ModelTFTrophyArmor(8, 0.5F);
+
+        critterArmorModel = new ModelBiped[3];
+        critterArmorModel[0] = new ModelTFCritterArmor(0, 0.5F);
+        critterArmorModel[1] = new ModelTFCritterArmor(1, 0.5F);
+        critterArmorModel[2] = new ModelTFCritterArmor(2, 0.5F);
+
     }
 
     public int getCritterBlockRenderID() {
@@ -613,7 +655,11 @@ public class TFClientProxy extends TFCommonProxy {
     }
 
     public int getCakeBlockRenderID() {
-        return blockCakeRenderID;
+        return cakeRenderID;
+    }
+
+    public int getChestBlockRenderID() {
+        return chestRenderID;
     }
 
     public int getComplexBlockRenderID() {
@@ -654,6 +700,10 @@ public class TFClientProxy extends TFCommonProxy {
 
     public int getKnightmetalBlockRenderID() {
         return knightmetalBlockRenderID;
+    }
+
+    public int getFieryMetalBlockRenderID() {
+        return fieryMetalBlockRenderID;
     }
 
     public int getHugeLilyPadBlockRenderID() {
@@ -754,6 +804,14 @@ public class TFClientProxy extends TFCommonProxy {
         return this.fieryArmorModel[armorSlot];
     }
 
+    public ModelBiped getTrophyArmorModel(int boss) {
+        return this.trophyArmorModel[boss];
+    }
+
+    public ModelBiped getCritterArmorModel(int critter) {
+        return this.critterArmorModel[critter];
+    }
+
     public boolean isDangerOverlayShown() {
         return isDangerOverlayShown;
     }
@@ -800,6 +858,46 @@ public class TFClientProxy extends TFCommonProxy {
                 }
             }
         }
+    }
+
+    public boolean checkForSound(ChunkCoordinates chunkcoordinates) {
+        Minecraft mc = Minecraft.getMinecraft();
+        ISound isound = (ISound) mc.renderGlobal.mapSoundPositions.get(chunkcoordinates);
+        if (isound == null) return false;
+        else {
+            if (mc.getSoundHandler().isSoundPlaying(isound)) return true;
+            else {
+                mc.getSoundHandler().stopSound(isound);
+                mc.renderGlobal.mapSoundPositions.remove(chunkcoordinates);
+                return false;
+            }
+        }
+    }
+
+    public void stopSound(World worldIn, int x, int y, int z) {
+        ChunkCoordinates chunkcoordinates = new ChunkCoordinates(x, y, z);
+        Minecraft mc = Minecraft.getMinecraft();
+        ISound isound = (ISound) mc.renderGlobal.mapSoundPositions.get(chunkcoordinates);
+
+        while (isound != null) {
+            mc.getSoundHandler().stopSound(isound);
+            mc.renderGlobal.mapSoundPositions.remove(chunkcoordinates);
+            isound = (ISound) mc.renderGlobal.mapSoundPositions.get(chunkcoordinates);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void playSound(World worldObj, ChunkCoordinates chunkcoordinates, ResourceLocation soundResource) {
+        PositionedSoundRecord positionedsoundrecord = new PositionedSoundRecord(
+                soundResource,
+                1.0f,
+                (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F + 1.0F,
+                (float) chunkcoordinates.posX,
+                (float) chunkcoordinates.posY,
+                (float) chunkcoordinates.posZ);
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.renderGlobal.mapSoundPositions.put(chunkcoordinates, positionedsoundrecord);
+        mc.getSoundHandler().playSound(positionedsoundrecord);
     }
 
 }

@@ -3,6 +3,8 @@ package twilightforest.structures.courtyard;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -220,9 +222,44 @@ public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyar
                 TFBlocks.nagastonePillar,
                 horizontalColumnsOrient4,
                 true);
-        this.fillWithBlocks(world, structureBoundingBox, 7, 0, 7, 16, 0, 9, Blocks.water, Blocks.water, true);
-        this.fillWithBlocks(world, structureBoundingBox, 7, 0, 7, 9, 0, 16, Blocks.water, Blocks.water, true);
-
+        this.fillWithBlocksAndUpdate(world, structureBoundingBox, 7, 0, 7, 16, 0, 9, Blocks.water, Blocks.water, false);
+        this.fillWithBlocksAndUpdate(world, structureBoundingBox, 7, 0, 7, 9, 0, 16, Blocks.water, Blocks.water, false);
         return true;
+    }
+
+    /**
+     * arguments: (World worldObj, StructureBoundingBox structBB, int minX, int minY, int minZ, int maxX, int maxY, int
+     * maxZ, int placeBlock, int replaceBlock, boolean alwaysreplace)
+     */
+    protected void fillWithBlocksAndUpdate(World world, StructureBoundingBox sbb, int minX, int minY, int minZ,
+            int maxX, int maxY, int maxZ, Block placeBlock, Block replaceBlock, boolean alwaysReplace) {
+        for (int k1 = minY; k1 <= maxY; ++k1) {
+            for (int l1 = minX; l1 <= maxX; ++l1) {
+                for (int i2 = minZ; i2 <= maxZ; ++i2) {
+                    if (!alwaysReplace
+                            || this.getBlockAtCurrentPosition(world, l1, k1, i2, sbb).getMaterial() != Material.air) {
+                        if (k1 != minY && k1 != maxY && l1 != minX && l1 != maxX && i2 != minZ && i2 != maxZ) {
+                            this.placeBlockAtCurrentPositionWithUpdate(world, replaceBlock, 0, l1, k1, i2, sbb);
+                        } else {
+                            this.placeBlockAtCurrentPositionWithUpdate(world, placeBlock, 0, l1, k1, i2, sbb);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * current Position depends on currently set Coordinates mode, is computed here
+     */
+    protected void placeBlockAtCurrentPositionWithUpdate(World world, Block block, int meta, int x, int y, int z,
+            StructureBoundingBox sbb) {
+        int i1 = this.getXWithOffset(x, z);
+        int j1 = this.getYWithOffset(y);
+        int k1 = this.getZWithOffset(x, z);
+
+        if (sbb.isVecInside(i1, j1, k1)) {
+            world.setBlock(i1, j1, k1, block, meta, 1);
+        }
     }
 }

@@ -6,11 +6,17 @@ import static net.minecraftforge.common.util.ForgeDirection.SOUTH;
 import static net.minecraftforge.common.util.ForgeDirection.WEST;
 
 import java.util.List;
+import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -25,12 +31,36 @@ import twilightforest.item.TFItems;
 
 public abstract class BlockTFCritter extends Block {
 
+    protected Item dropItem = Items.glowstone_dust;
+    protected int dropMeta = 0;
+
     protected BlockTFCritter() {
         super(Material.circuits);
         this.setHardness(0.0F);
         this.setCreativeTab(TFItems.creativeTab);
 
         this.stepSound = new StepSoundTFInsect("squish", 0.25F, 0.6F);
+    }
+
+    /**
+     * Triggered whenever an entity collides with this block (enters into the block). Args: world, x, y, z, entity
+     */
+    public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
+        // squish
+        if (!world.isRemote && (entity instanceof IProjectile)) {
+            int metadata = world.getBlockMetadata(x, y, z);
+            world.playAuxSFX(2001, x, y, z, Block.getIdFromBlock(this) + (metadata << 12));
+            world.setBlockToAir(x, y, z);
+            double dx = this.getBlockBoundsMinX()
+                    + world.rand.nextDouble() * (this.getBlockBoundsMaxX() - this.getBlockBoundsMinX());
+            double dy = this.getBlockBoundsMinY()
+                    + world.rand.nextDouble() * (this.getBlockBoundsMaxY() - this.getBlockBoundsMinY());
+            double dz = this.getBlockBoundsMinZ()
+                    + world.rand.nextDouble() * (this.getBlockBoundsMaxZ() - this.getBlockBoundsMinZ());
+            EntityItem entityitem = new EntityItem(world, x + dx, y + dy, z + dz, new ItemStack(dropItem, 1, dropMeta));
+            entityitem.delayBeforeCanPickup = 10;
+            world.spawnEntityInWorld(entityitem);
+        }
     }
 
     // Updates the blocks bounds based on its current state. Args: world, x, y, z
@@ -255,7 +285,51 @@ public abstract class BlockTFCritter extends Block {
      */
     @Override
     public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
-        itemList.add(new ItemStack(item, 1, 0));
+        // itemList.add(new ItemStack(item, 1, 0));
+        // We're using an item instead
+    }
+
+    @Override
+    public Item getItemDropped(int meta, Random random, int fortune) {
+        return TFItems.critter;
+    }
+
+    /**
+     * Determines the damage on the item the block drops. Used in cloth and wood.
+     */
+    @Override
+    public int damageDropped(int par1) {
+        int metadata = 0;
+        if (this == TFBlocks.cicada) metadata = 1;
+        else if (this == TFBlocks.moonworm) metadata = 2;
+        return metadata;
+    }
+
+    /**
+     * Gets an item for the block being called on. Args: world, x, y, z
+     */
+    @SideOnly(Side.CLIENT)
+    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_) {
+        return TFItems.critter;
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public int getDamageValue(World worldIn, int x, int y, int z) {
+        return this.damageDropped(0);
+    }
+
+    /**
+     * Called upon block activation (right click on the block.)
+     */
+    public boolean onBlockActivated(World worldIn, int x, int y, int z, EntityPlayer player, int side, float subX,
+            float subY, float subZ) {
+        if (player.isSneaking() && player.inventory.armorInventory[3] == null) {
+            player.inventory.armorInventory[3] = new ItemStack(TFItems.critter, 1, this.damageDropped(0));
+            if (!player.capabilities.isCreativeMode) worldIn.setBlockToAir(x, y, z);
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -9,6 +9,7 @@ import net.minecraft.world.World;
 
 import twilightforest.TFAchievementPage;
 import twilightforest.TFFeature;
+import twilightforest.TwilightForestMod;
 
 /**
  * The hedge spider is just like a normal spider, but it can spawn in the daytime.
@@ -60,7 +61,8 @@ public class EntityTFHedgeSpider extends EntitySpider {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer) {
+        if (par1DamageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
             // are in a hedge maze?
             int chunkX = MathHelper.floor_double(posX) >> 4;

@@ -1,20 +1,23 @@
 package twilightforest.entity;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import twilightforest.item.TFItems;
 
-public class EntityTFCharmEffect extends Entity {
+public class EntityTFCharmEffect extends EntityItem {
 
     private static final int DATA_OWNER = 17;
     private static final int DATA_ITEMID = 16;
-    private static final double DISTANCE = 1.75;
+    private static final double DISTANCE = 1;
     private EntityLivingBase orbiting;
     private double newPosX;
     private double newPosY;
@@ -22,8 +25,7 @@ public class EntityTFCharmEffect extends Entity {
     private double newRotationYaw;
     private double newRotationPitch;
     private int newPosRotationIncrements;
-
-    public float offset;
+    private float offset = 0;
 
     // client constructor
     public EntityTFCharmEffect(World par1World) {
@@ -31,29 +33,32 @@ public class EntityTFCharmEffect extends Entity {
         this.setSize(0.25F, 0.25F);
 
         this.setItemID(TFItems.charmOfLife1);
+        // this.setEntityItemStack(new ItemStack(TFItems.charmOfLife1));
     }
 
     // server constructor
-    public EntityTFCharmEffect(World par1World, EntityLivingBase par2EntityLiving, Item item) {
+    public EntityTFCharmEffect(World par1World, EntityLivingBase par2EntityLiving, Item item, float offset) {
         super(par1World);
         this.setSize(0.25F, 0.25F);
 
         this.orbiting = par2EntityLiving;
-        // this.setOwner(orbiting.getEntityName());
+        if (this.orbiting instanceof EntityPlayer) this.setOwner(((EntityPlayer) orbiting).getDisplayName());
         this.setItemID(item);
+        this.setEntityItemStack(new ItemStack(item));
 
         Vec3 look = Vec3.createVectorHelper(DISTANCE, 0, 0);
+        this.offset = offset;
+        look.rotateAroundY(offset);
 
         this.setLocationAndAngles(
                 par2EntityLiving.posX,
-                par2EntityLiving.posY + par2EntityLiving.getEyeHeight(),
+                par2EntityLiving.posY + par2EntityLiving.getEyeHeight() - 0.5d,
                 par2EntityLiving.posZ,
                 par2EntityLiving.rotationYaw,
                 par2EntityLiving.rotationPitch);
-        this.posX += look.xCoord * DISTANCE;
-        // this.posY += look.yCoord * DISTANCE;
-        this.posZ += look.zCoord * DISTANCE;
-        this.setPosition(this.posX, this.posY, this.posZ);
+        this.posX += look.xCoord;
+        this.posY += look.yCoord;
+        this.posZ += look.zCoord;
         this.yOffset = 0.0F;
 
     }
@@ -65,7 +70,7 @@ public class EntityTFCharmEffect extends Entity {
         this.lastTickPosX = this.posX;
         this.lastTickPosY = this.posY;
         this.lastTickPosZ = this.posZ;
-        super.onUpdate();
+        this.onEntityUpdate();
 
         if (this.newPosRotationIncrements > 0) {
             double var1 = this.posX + (this.newPosX - this.posX) / (double) this.newPosRotationIncrements;
@@ -89,7 +94,7 @@ public class EntityTFCharmEffect extends Entity {
         if (this.orbiting != null && !worldObj.isRemote) {
             this.setLocationAndAngles(
                     orbiting.posX,
-                    orbiting.posY + orbiting.getEyeHeight(),
+                    orbiting.posY + orbiting.getEyeHeight() - 0.5d,
                     orbiting.posZ,
                     orbiting.rotationYaw,
                     orbiting.rotationPitch);
@@ -97,18 +102,15 @@ public class EntityTFCharmEffect extends Entity {
             Vec3 look = Vec3.createVectorHelper(DISTANCE, 0, 0);
             look.rotateAroundY(rotation);
             this.posX += look.xCoord;
-            // this.posY += Math.sin(this.ticksExisted / 3.0F + offset);
+            this.posY += Math.sin(this.ticksExisted / 3.0F + offset) / 8;
             this.posZ += look.zCoord;
-
-            this.setPosition(this.posX, this.posY, this.posZ);
-
         }
 
         if (this.getItemID() > 0) {
             for (int i = 0; i < 3; i++) {
-                double dx = posX + 0.5 * (rand.nextDouble() - rand.nextDouble());
-                double dy = posY + 0.5 * (rand.nextDouble() - rand.nextDouble());
-                double dz = posZ + 0.5 * (rand.nextDouble() - rand.nextDouble());
+                double dx = posX + 0.25 * (rand.nextDouble() - rand.nextDouble());
+                double dy = posY + 0.25 * (rand.nextDouble() - rand.nextDouble());
+                double dz = posZ + 0.25 * (rand.nextDouble() - rand.nextDouble());
 
                 worldObj.spawnParticle("iconcrack_" + this.getItemID(), dx, dy, dz, 0, 0.2, 0);
             }
@@ -136,6 +138,7 @@ public class EntityTFCharmEffect extends Entity {
     protected void entityInit() {
         this.dataWatcher.addObject(DATA_ITEMID, 0);
         this.dataWatcher.addObject(DATA_OWNER, "");
+        super.entityInit();
     }
 
     public String getOwnerName() {
@@ -155,19 +158,65 @@ public class EntityTFCharmEffect extends Entity {
     }
 
     public void setItemID(Item charmOfLife1) {
-        // this.dataWatcher.updateObject(DATA_ITEMID, Integer.valueOf(charmOfLife1));
+        this.dataWatcher.updateObject(DATA_ITEMID, Item.getIdFromItem(charmOfLife1));
+    }
+
+    public void setItemID(int id) {
+        this.dataWatcher.updateObject(DATA_ITEMID, id);
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
+    public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
+        super.readEntityFromNBT(par1NBTTagCompound);
         par1NBTTagCompound.setString("Owner", this.getOwnerName());
         par1NBTTagCompound.setShort("ItemID", (short) this.getItemID());
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
+    public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
         this.setOwner(par1NBTTagCompound.getString("Owner"));
-        // this.setItemID(par1NBTTagCompound.getShort("ItemID"));
+        this.setItemID(par1NBTTagCompound.getShort("ItemID"));
+        super.writeEntityToNBT(par1NBTTagCompound);
+    }
+
+    /**
+     * Called by a player entity when they collide with an entity
+     */
+    public void onCollideWithPlayer(EntityPlayer entityIn) {
+        // Can't pick it up
+    }
+
+    /**
+     * Tries to merge this item with the item passed as the parameter. Returns true if successful. Either this item or
+     * the other item will be removed from the world.
+     */
+    public boolean combineItems(EntityItem p_70289_1_) {
+        // No, we don't
+        return false;
+    }
+
+    /**
+     * Returns if this entity is in water and will end up adding the waters velocity to the entity
+     */
+    public boolean handleWaterMovement() {
+        // Magic is not affected by water
+        return false;
+    }
+
+    /**
+     * Will deal the specified amount of damage to the entity if the entity isn't immune to fire damage. Args:
+     * amountDamage
+     */
+    protected void dealFireDamage(int amount) {
+        // No, we don't
+    }
+
+    /**
+     * Called when the entity is attacked.
+     */
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        // Can't be attacked, magic
+        return false;
     }
 
 }

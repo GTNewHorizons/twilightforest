@@ -3,6 +3,7 @@ package twilightforest.block;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -27,7 +28,7 @@ public class BlockTFBurntThorns extends BlockTFThorns {
      */
     public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
         // dissolve
-        if (!world.isRemote && entity instanceof EntityLivingBase) {
+        if (!world.isRemote && (entity instanceof EntityLivingBase || entity instanceof IProjectile)) {
             int metadata = world.getBlockMetadata(x, y, z);
             world.playAuxSFX(2001, x, y, z, Block.getIdFromBlock(this) + (metadata << 12));
             world.setBlockToAir(x, y, z);

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -163,8 +164,7 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
                             boundingBox.minX + 3 + x * 6,
                             boundingBox.minY,
                             boundingBox.minZ + 3 + z * 6,
-                            0,
-                            HEDGE_FLOOF);
+                            0);
                     list.add(hedge);
                     hedge.buildComponent(this, list, random);
                 }
@@ -202,8 +202,7 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
                                 boundingBox.minX + 3 + x1 * 6,
                                 boundingBox.minY,
                                 boundingBox.minZ + 3 + z1 * 6,
-                                0,
-                                HEDGE_FLOOF);
+                                0);
                         list.add(hedge);
                         hedge.buildComponent(this, list, random);
                     }
@@ -221,8 +220,7 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
                                     boundingBox.minX + 3 + x * 6,
                                     boundingBox.minY,
                                     boundingBox.minZ + 3 + z * 6,
-                                    0,
-                                    HEDGE_FLOOF);
+                                    0);
                             list.add(pillar);
                             pillar.buildComponent(this, list, random);
                         }
@@ -257,8 +255,7 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
                                 boundingBox.minX + 1 + (x + 1) * 6,
                                 boundingBox.minY,
                                 boundingBox.minZ + 6 + z * 6,
-                                3,
-                                HEDGE_FLOOF);
+                                3);
                         list.add(padder);
                         padder.buildComponent(this, list, random);
                     }
@@ -273,8 +270,7 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
                                 boundingBox.minX + 1 + x * 6,
                                 boundingBox.minY,
                                 boundingBox.minZ + 6 + z * 6,
-                                3,
-                                HEDGE_FLOOF);
+                                3);
                         list.add(padder);
                         padder.buildComponent(this, list, random);
                     }
@@ -284,8 +280,7 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
                                 boundingBox.minX + 3 + x * 6,
                                 boundingBox.minY,
                                 boundingBox.minZ + 2 + (z + 1) * 6,
-                                0,
-                                HEDGE_FLOOF);
+                                0);
                         list.add(padder);
                         padder.buildComponent(this, list, random);
                     }
@@ -295,8 +290,7 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
                                 boundingBox.minX + 3 + x * 6,
                                 boundingBox.minY,
                                 boundingBox.minZ + 2 + z * 6,
-                                0,
-                                HEDGE_FLOOF);
+                                0);
                         list.add(padder);
                         padder.buildComponent(this, list, random);
                     }
@@ -1105,6 +1099,69 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
         list.add(decorator);
         decorator.buildComponent(this, list, random);
 
+    }
+
+    /**
+     * Save to NBT
+     */
+    @Override
+    protected void func_143012_a(NBTTagCompound tag) {
+        super.func_143012_a(tag);
+
+        // We don't really need to storeanything other than null vs CellType.EMPTY
+        // This data is used by addComponentParts to generate paths in empty areas
+        int numBits = tableWidth * tableWidth;
+        // Use a byte array to store the tableWidth and a packed bit array
+        byte[] emptySpots = new byte[1 + numBits / 8 + (numBits % 8 > 0 ? 1 : 0)];
+        emptySpots[0] = (byte) tableWidth;
+        for (int x = 0; x < this.tableWidth; x++) {
+            for (int z = 0; z < this.tableWidth; z++) {
+                if (this.courtyard[x][z] == CellType.EMPTY) {
+                    int bitIndex = this.tableWidth * x + z;
+                    emptySpots[1 + (bitIndex / 8)] |= 1 << (bitIndex % 8);
+                }
+            }
+        }
+        tag.setByteArray("CY", emptySpots);
+    }
+
+    /**
+     * Load from NBT
+     */
+    @Override
+    protected void func_143011_b(NBTTagCompound tag) {
+        super.func_143011_b(tag);
+
+        // We don't really care about anything other than null vs CellType.EMPTY
+        // This data is used by addComponentParts to generate paths in empty areas
+        byte[] emptySpots = tag.getByteArray("CY");
+        if (emptySpots.length > 1) {
+            this.tableWidth = emptySpots[0];
+            this.courtyard = new CellType[tableWidth][tableWidth];
+
+            // Load boolean values from a packed bit array starting at index 1
+            // 0 => Leave the CellType as null
+            // 1 => Use CellType.EMPTY (it's the only one that gets used durring block generation)
+            int index = 1;
+            int shift = 0;
+            read_bits_array: for (int x = 0; x < this.tableWidth; x++) {
+                for (int z = 0; z < this.tableWidth; z++) {
+                    if ((((emptySpots[index] & 0xFF) >> shift++) & 1) == 1) {
+                        this.courtyard[x][z] = CellType.EMPTY;
+                    }
+
+                    // Incronmnet our bit index and break if we hit the end, that's it.
+                    if (shift >= 8) {
+                        shift = 0;
+                        index++;
+                        // Sanity check just in case
+                        if (index >= emptySpots.length) {
+                            break read_bits_array;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

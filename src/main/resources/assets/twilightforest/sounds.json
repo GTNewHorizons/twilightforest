@@ -220,6 +220,60 @@
       "mob/ice/death1"
     ]
   },
+    "mob.yeti.hurt": {
+    "category": "hostile",
+    "sounds": [
+      "mob/yeti/hurt1",
+      "mob/yeti/hurt2",
+      "mob/yeti/hurt3"
+    ]
+  },
+    "mob.yeti.death": {
+    "category": "hostile",
+    "sounds": [
+      "mob/yeti/death"
+    ]
+  },
+    "mob.yeti.growl": {
+    "category": "hostile",
+    "sounds": [
+      "mob/yeti/growl1",
+      "mob/yeti/growl2",
+      "mob/yeti/growl3"
+    ]
+  },
+    "mob.yeti.roar": {
+    "category": "hostile",
+    "sounds": [
+      "mob/yeti/roar"
+    ]
+  },
+    "mob.yeti.alert": {
+    "category": "hostile",
+    "sounds": [
+      "mob/yeti/alert"
+    ]
+  },
+    "mob.yeti.grab": {
+    "category": "hostile",
+    "sounds": [
+      "mob/yeti/grab"
+    ]
+  },
+    "mob.yeti.throw": {
+    "category": "hostile",
+    "sounds": [
+      "mob/yeti/throw"
+    ]
+  },
+    "mob.yeti.pant": {
+    "category": "hostile",
+    "sounds": [
+      "mob/yeti/pant1",
+      "mob/yeti/pant2",
+      "mob/yeti/pant"
+    ]
+  },
     "random.slider": {
     "category": "block",
     "sounds": [

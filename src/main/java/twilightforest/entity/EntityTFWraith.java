@@ -239,7 +239,8 @@ public class EntityTFWraith extends EntityFlying implements IMob {
     @Override
     public void onDeath(DamageSource damageSource) {
         super.onDeath(damageSource);
-        if (damageSource.getEntity() instanceof EntityPlayer) {
+        if (damageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) damageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) damageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
             // are we in a level 3 hill?
             int chunkX = MathHelper.floor_double(posX) >> 4;

@@ -14,6 +14,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 import twilightforest.TFAchievementPage;
+import twilightforest.TwilightForestMod;
 import twilightforest.item.TFItems;
 
 public class EntityTFHarbingerCube extends EntityMob {
@@ -44,7 +45,8 @@ public class EntityTFHarbingerCube extends EntityMob {
     @Override
     public void onDeath(DamageSource damageSource) {
         super.onDeath(damageSource);
-        if (damageSource.getEntity() instanceof EntityPlayer) {
+        if (damageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) damageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) damageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }

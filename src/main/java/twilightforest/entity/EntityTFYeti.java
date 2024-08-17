@@ -18,6 +18,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import twilightforest.TFAchievementPage;
+import twilightforest.TwilightForestMod;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.entity.ai.EntityAITFThrowRider;
 import twilightforest.item.TFItems;
@@ -123,6 +124,7 @@ public class EntityTFYeti extends EntityMob {
     @Override
     public boolean attackEntityAsMob(Entity par1Entity) {
         if (this.riddenByEntity == null && par1Entity.ridingEntity == null) {
+            this.playSound(TwilightForestMod.ID + ":mob.yeti.grab", 4F, 0.75F + rand.nextFloat() * 0.25F);
             par1Entity.mountEntity(this);
         }
 
@@ -232,13 +234,14 @@ public class EntityTFYeti extends EntityMob {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer) {
+        if (par1DamageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 
     /**
-     * We're allowed to spawn in bright light only in sniw
+     * We're allowed to spawn in bright light only in snow
      */
     @Override
     public boolean getCanSpawnHere() {
@@ -271,6 +274,30 @@ public class EntityTFYeti extends EntityMob {
 
     protected Item getDropItem() {
         return TFItems.arcticFur;
+    }
+
+    /**
+     * Returns the sound this mob makes while it's alive.
+     */
+    @Override
+    protected String getLivingSound() {
+        return TwilightForestMod.ID + ":mob.yeti.growl";
+    }
+
+    /**
+     * Returns the sound this mob makes when it is hurt.
+     */
+    @Override
+    protected String getHurtSound() {
+        return TwilightForestMod.ID + ":mob.yeti.hurt";
+    }
+
+    /**
+     * Returns the sound this mob makes on death.
+     */
+    @Override
+    protected String getDeathSound() {
+        return TwilightForestMod.ID + ":mob.yeti.death";
     }
 
 }

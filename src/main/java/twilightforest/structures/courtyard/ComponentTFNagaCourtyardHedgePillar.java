@@ -16,8 +16,8 @@ public class ComponentTFNagaCourtyardHedgePillar extends ComponentTFNagaCourtyar
         super();
     }
 
-    public ComponentTFNagaCourtyardHedgePillar(int i, int x, int y, int z, int rotation, float floof) {
-        super(i, x, y, z, rotation, floof);
+    public ComponentTFNagaCourtyardHedgePillar(int i, int x, int y, int z, int rotation) {
+        super(i, x, y, z, rotation);
         this.coordBaseMode = rotation;
         this.boundingBox = new StructureBoundingBox(x, y + 1, z, x + 4, y + 11, z + 4);
     }

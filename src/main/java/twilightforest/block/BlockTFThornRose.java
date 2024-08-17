@@ -2,6 +2,7 @@ package twilightforest.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -74,18 +75,19 @@ public class BlockTFThornRose extends Block {
      * Can this block stay at this position. Similar to canPlaceBlockAt except gets checked often with plants.
      */
     public boolean canBlockStay(World world, int x, int y, int z) {
-        boolean supported = false;
-
         for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
             int dx = x + dir.offsetX;
             int dy = y + dir.offsetY;
             int dz = z + dir.offsetZ;
 
-            if (world.getBlock(dx, dy, dz).canSustainLeaves(world, dx, dy, dz)) {
-                supported = true;
+            Block block = world.getBlock(dx, dy, dz);
+            if (block.canSustainLeaves(world, dx, dy, dz) || block.isLeaves(world, dx, dy, dz)
+                    || (dir == ForgeDirection.DOWN
+                            && block.canSustainPlant(world, dx, dy, dz, ForgeDirection.UP, Blocks.red_flower))) {
+                return true;
             }
         }
-        return supported;
+        return false;
     }
 
 }

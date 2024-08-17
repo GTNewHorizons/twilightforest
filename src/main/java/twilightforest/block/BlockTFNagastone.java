@@ -170,7 +170,6 @@ public class BlockTFNagastone extends Block {
      */
     public boolean placePerfectFitHead(World world, int x, int y, int z) {
         int connect = getOnlyNSEWConnection(world, x, y, z);
-
         if (connect != -1) {
             // if the first connection is n/s/e/w, and the second connection is not, we win!
             // System.out.println("Got a perfect head fit : " + connect);

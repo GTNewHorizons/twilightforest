@@ -16,13 +16,10 @@ public class ComponentTFNagaCourtyardHedgePadder extends ComponentTFNagaCourtyar
         super();
     }
 
-    public float hedgeFloof = 1.0f;
-
-    public ComponentTFNagaCourtyardHedgePadder(int i, int x, int y, int z, int rotation, float floof) {
+    public ComponentTFNagaCourtyardHedgePadder(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
         this.coordBaseMode = rotation;
         this.boundingBox = new StructureBoundingBox(x, y + 1, z - 1, x + 4, y + 6, z + 1);
-        this.hedgeFloof = floof;
     }
 
     @Override
@@ -108,7 +105,7 @@ public class ComponentTFNagaCourtyardHedgePadder extends ComponentTFNagaCourtyar
                 TFBlocks.leaves,
                 4,
                 random,
-                hedgeFloof);
+                ComponentTFNagaCourtyardMain.HEDGE_FLOOF);
         this.partiallyFillWithMetadataBlocks(
                 world,
                 structureBoundingBox,
@@ -121,7 +118,7 @@ public class ComponentTFNagaCourtyardHedgePadder extends ComponentTFNagaCourtyar
                 TFBlocks.leaves,
                 4,
                 random,
-                hedgeFloof);
+                ComponentTFNagaCourtyardMain.HEDGE_FLOOF);
         this.partiallyFillWithMetadataBlocks(
                 world,
                 structureBoundingBox,
@@ -134,7 +131,7 @@ public class ComponentTFNagaCourtyardHedgePadder extends ComponentTFNagaCourtyar
                 TFBlocks.leaves,
                 4,
                 random,
-                hedgeFloof);
+                ComponentTFNagaCourtyardMain.HEDGE_FLOOF);
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {

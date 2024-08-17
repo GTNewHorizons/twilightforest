@@ -18,6 +18,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 import twilightforest.TFAchievementPage;
+import twilightforest.TwilightForestMod;
 
 public class EntityTFBunny extends EntityCreature implements IAnimals {
 
@@ -164,7 +165,8 @@ public class EntityTFBunny extends EntityCreature implements IAnimals {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer) {
+        if (par1DamageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }

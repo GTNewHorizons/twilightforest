@@ -26,6 +26,8 @@ public class ItemTFChainBlock extends ItemTool {
     // which items have launched which blocks?
     private HashMap<ItemStack, Entity> launchedBlocksMap = new HashMap<>();
 
+    private IIcon ring;
+
     protected ItemTFChainBlock() {
         super(6, TFItems.TOOL_KNIGHTLY, Sets.newHashSet(Blocks.stone));
         this.maxStackSize = 1;
@@ -127,6 +129,7 @@ public class ItemTFChainBlock extends ItemTool {
     public void registerIcons(IIconRegister par1IconRegister) {
         this.itemIcon = par1IconRegister
                 .registerIcon(TwilightForestMod.ID + ":" + this.getUnlocalizedName().substring(5));
+        this.ring = par1IconRegister.registerIcon(TwilightForestMod.ID + ":" + "chainBlockRing");
     }
 
     /**
@@ -145,7 +148,7 @@ public class ItemTFChainBlock extends ItemTool {
         if (this.doesChainHaveBlock(stack)) {
             return this.itemIcon;
         } else {
-            return TFItems.knightmetalRing.getIconIndex(stack);
+            return this.ring;
         }
     }
 

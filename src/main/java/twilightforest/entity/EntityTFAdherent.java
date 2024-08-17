@@ -20,6 +20,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 import twilightforest.TFAchievementPage;
+import twilightforest.TwilightForestMod;
 import twilightforest.item.TFItems;
 
 public class EntityTFAdherent extends EntityMob implements IRangedAttackMob, ITFCharger {
@@ -84,7 +85,8 @@ public class EntityTFAdherent extends EntityMob implements IRangedAttackMob, ITF
     @Override
     public void onDeath(DamageSource damageSource) {
         super.onDeath(damageSource);
-        if (damageSource.getEntity() instanceof EntityPlayer) {
+        if (damageSource.getEntity() instanceof EntityPlayer
+                && ((EntityPlayer) damageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) damageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }

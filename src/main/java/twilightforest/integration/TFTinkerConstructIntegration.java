@@ -338,6 +338,34 @@ public class TFTinkerConstructIntegration {
                 }
             }
 
+            // Fiery armor casting
+            if (!TwilightForestMod.isGTNHLoaded) {
+                tableCasting.addCastingRecipe(
+                        new ItemStack(TFItems.fieryHelm),
+                        new FluidStack(fieryEssenceFluid, TConstruct.ingotLiquidValue * 5),
+                        new ItemStack(Items.iron_helmet, 1, 0),
+                        true,
+                        50);
+                tableCasting.addCastingRecipe(
+                        new ItemStack(TFItems.fieryPlate),
+                        new FluidStack(fieryEssenceFluid, TConstruct.ingotLiquidValue * 8),
+                        new ItemStack(Items.iron_chestplate, 1, 0),
+                        true,
+                        50);
+                tableCasting.addCastingRecipe(
+                        new ItemStack(TFItems.fieryLegs),
+                        new FluidStack(fieryEssenceFluid, TConstruct.ingotLiquidValue * 7),
+                        new ItemStack(Items.iron_leggings, 1, 0),
+                        true,
+                        50);
+                tableCasting.addCastingRecipe(
+                        new ItemStack(TFItems.fieryBoots),
+                        new FluidStack(fieryEssenceFluid, TConstruct.ingotLiquidValue * 4),
+                        new ItemStack(Items.iron_boots, 1, 0),
+                        true,
+                        50);
+            }
+
             // Fluids registry
             fluids[0] = fieryEssenceFluid;
             fluids[1] = moltenFieryMetalFluid;

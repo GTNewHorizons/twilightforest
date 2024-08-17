@@ -135,14 +135,20 @@ public class ItemTFCrumbleHorn extends ItemTF {
         if (currentID != Blocks.air) {
             int currentMeta = world.getBlockMetadata(dx, dy, dz);
 
-            if (currentID == Blocks.stone && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
-                world.setBlock(dx, dy, dz, Blocks.cobblestone, 0, 3);
+            if (currentID == Blocks.stonebrick && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, Blocks.stonebrick, 2, 3);
                 world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
                 cost++;
             }
 
-            if (currentID == Blocks.stonebrick && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
-                world.setBlock(dx, dy, dz, Blocks.stonebrick, 2, 3);
+            if (currentID == Blocks.monster_egg && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, Blocks.monster_egg, 1, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == Blocks.monster_egg && currentMeta == 2 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, Blocks.monster_egg, 4, 3);
                 world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
                 cost++;
             }
@@ -153,13 +159,132 @@ public class ItemTFCrumbleHorn extends ItemTF {
                 cost++;
             }
 
-            if (currentID == Blocks.cobblestone && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+            if (currentID == TFBlocks.underBrick && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, TFBlocks.underBrick, 2, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == TFBlocks.towerWood && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, TFBlocks.towerWood, 2, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == TFBlocks.deadrock && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, TFBlocks.deadrock, 2, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == TFBlocks.castleBlock && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, TFBlocks.castleBlock, 2, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == TFBlocks.nagastonePillar && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, TFBlocks.nagastonePillarWeathered, currentMeta, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == TFBlocks.nagastoneEtched && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlockMetadataWithNotify(dx, dy, dz, 2, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == TFBlocks.nagastoneStairsLeft && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, TFBlocks.nagastoneStairsWeatheredLeft, currentMeta, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == TFBlocks.nagastoneStairsRight && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, TFBlocks.nagastoneStairsWeatheredRight, currentMeta, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == Blocks.stone && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, Blocks.cobblestone, 0, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == Blocks.ice && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, Blocks.water, 0, 1);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if ((currentID == Blocks.cobblestone || currentID == Blocks.stone_stairs
+                    || (currentID == Blocks.double_stone_slab && currentMeta == 3))
+                    && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
                 world.setBlock(dx, dy, dz, Blocks.gravel, 0, 3);
                 world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
                 cost++;
             }
 
-            if (currentID == Blocks.gravel || currentID == Blocks.dirt) {
+            if (currentID == Blocks.stone_slab && (currentMeta == 0 || currentMeta == 8)
+                    && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlockMetadataWithNotify(dx, dy, dz, currentMeta + 3, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == Blocks.double_stone_slab && currentMeta == 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlockMetadataWithNotify(dx, dy, dz, 3, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == Blocks.stone_slab && (currentMeta == 1 || currentMeta == 9)
+                    && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                if (world.rand.nextBoolean()) world.setBlock(dx, dy, dz, Blocks.sand, 0, 3);
+                else world.setBlockToAir(dx, dy, dz);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == Blocks.stone_slab && (currentMeta == 3 || currentMeta == 11)
+                    && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                if (world.rand.nextBoolean()) world.setBlock(dx, dy, dz, Blocks.gravel, 0, 3);
+                else world.setBlockToAir(dx, dy, dz);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (((currentID == Blocks.sandstone && currentMeta == 0) || currentID == Blocks.sandstone_stairs
+                    || (currentID == Blocks.double_stone_slab && currentMeta == 1))
+                    && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, Blocks.sand, 0, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == Blocks.sandstone && currentMeta > 0 && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, Blocks.sandstone, 0, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if ((currentID == Blocks.grass || currentID == Blocks.mycelium
+                    || (currentID == Blocks.dirt && currentMeta == 2)) && world.rand.nextInt(CHANCE_CRUMBLE) == 0) {
+                world.setBlock(dx, dy, dz, Blocks.dirt, 0, 3);
+                world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                cost++;
+            }
+
+            if (currentID == Blocks.gravel || (currentID == Blocks.dirt && currentMeta != 2)
+                    || currentID == Blocks.sand
+                    || currentID == Blocks.clay
+                    || currentID == Blocks.glass
+                    || currentID == Blocks.glass_pane
+                    || currentID == Blocks.stained_glass
+                    || currentID == Blocks.stained_glass_pane
+                    || currentID == Blocks.glowstone) {
                 if (currentID.canHarvestBlock(player, currentMeta) && world.rand.nextInt(CHANCE_HARVEST) == 0) {
                     world.setBlock(dx, dy, dz, Blocks.air, 0, 3);
                     currentID.harvestBlock(world, player, dx, dy, dz, currentMeta);
