@@ -12,6 +12,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.BlockTFFireJet;
@@ -604,43 +605,44 @@ public class TFRecipes {
                 new ItemStack(TFItems.chainBlock),
                 new Object[] { TFItems.knightmetalRing, TFItems.knightMetal, TFItems.knightMetal, TFItems.knightMetal,
                         TFBlocks.knightmetalStorage });
-
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFItems.knightMetal, 9),
-                new Object[] { new ItemStack(TFBlocks.knightmetalStorage) });
-        GameRegistry.addRecipe(
-                new ItemStack(TFBlocks.knightmetalStorage),
-                new Object[] { "###", "###", "###", '#', TFItems.knightMetal });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFItems.arcticFur, 9),
-                new Object[] { new ItemStack(TFBlocks.arcticFurStorage) });
-        GameRegistry.addRecipe(
-                new ItemStack(TFBlocks.arcticFurStorage),
-                new Object[] { "###", "###", "###", '#', TFItems.arcticFur });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFItems.carminite, 9),
-                new Object[] { new ItemStack(TFBlocks.carminiteStorage) });
-        GameRegistry.addRecipe(
-                new ItemStack(TFBlocks.carminiteStorage),
-                new Object[] { "###", "###", "###", '#', TFItems.carminite });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFItems.fieryIngot, 9),
-                new Object[] { new ItemStack(TFBlocks.fieryMetalStorage) });
-        GameRegistry.addRecipe(
-                new ItemStack(TFBlocks.fieryMetalStorage),
-                new Object[] { "###", "###", "###", '#', TFItems.fieryIngot });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFItems.ironwoodIngot, 9),
-                new Object[] { new ItemStack(TFBlocks.ironwoodStorage) });
-        GameRegistry.addRecipe(
-                new ItemStack(TFBlocks.ironwoodStorage),
-                new Object[] { "###", "###", "###", '#', TFItems.ironwoodIngot });
-        GameRegistry.addShapelessRecipe(
-                new ItemStack(TFItems.steeleafIngot, 9),
-                new Object[] { new ItemStack(TFBlocks.steeleafStorage) });
-        GameRegistry.addRecipe(
-                new ItemStack(TFBlocks.steeleafStorage),
-                new Object[] { "###", "###", "###", '#', TFItems.steeleafIngot });
+        if (!Loader.isModLoaded("dreamcraft")) {
+            GameRegistry.addShapelessRecipe(
+                    new ItemStack(TFItems.knightMetal, 9),
+                    new Object[]{new ItemStack(TFBlocks.knightmetalStorage)});
+            GameRegistry.addRecipe(
+                    new ItemStack(TFBlocks.knightmetalStorage),
+                    new Object[]{"###", "###", "###", '#', TFItems.knightMetal});
+            GameRegistry.addShapelessRecipe(
+                    new ItemStack(TFItems.arcticFur, 9),
+                    new Object[]{new ItemStack(TFBlocks.arcticFurStorage)});
+            GameRegistry.addRecipe(
+                    new ItemStack(TFBlocks.arcticFurStorage),
+                    new Object[]{"###", "###", "###", '#', TFItems.arcticFur});
+            GameRegistry.addShapelessRecipe(
+                    new ItemStack(TFItems.carminite, 9),
+                    new Object[]{new ItemStack(TFBlocks.carminiteStorage)});
+            GameRegistry.addRecipe(
+                    new ItemStack(TFBlocks.carminiteStorage),
+                    new Object[]{"###", "###", "###", '#', TFItems.carminite});
+            GameRegistry.addShapelessRecipe(
+                    new ItemStack(TFItems.fieryIngot, 9),
+                    new Object[]{new ItemStack(TFBlocks.fieryMetalStorage)});
+            GameRegistry.addRecipe(
+                    new ItemStack(TFBlocks.fieryMetalStorage),
+                    new Object[]{"###", "###", "###", '#', TFItems.fieryIngot});
+            GameRegistry.addShapelessRecipe(
+                    new ItemStack(TFItems.ironwoodIngot, 9),
+                    new Object[]{new ItemStack(TFBlocks.ironwoodStorage)});
+            GameRegistry.addRecipe(
+                    new ItemStack(TFBlocks.ironwoodStorage),
+                    new Object[]{"###", "###", "###", '#', TFItems.ironwoodIngot});
+            GameRegistry.addShapelessRecipe(
+                    new ItemStack(TFItems.steeleafIngot, 9),
+                    new Object[]{new ItemStack(TFBlocks.steeleafStorage)});
+            GameRegistry.addRecipe(
+                    new ItemStack(TFBlocks.steeleafStorage),
+                    new Object[]{"###", "###", "###", '#', TFItems.steeleafIngot});
+        }
 
     }
 
