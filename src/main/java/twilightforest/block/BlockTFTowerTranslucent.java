@@ -3,6 +3,7 @@ package twilightforest.block;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.Loader;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -41,9 +42,13 @@ public class BlockTFTowerTranslucent extends Block {
     public BlockTFTowerTranslucent() {
         super(Material.glass);
         this.setHardness(50.0F);
-        this.setResistance(2000.0F);
+        if (Loader.isModLoaded("dreamcraft")){
+            this.setResistance(30.0F);
+        }
+        else{
+            this.setResistance(2000.0F);
+        }
         this.setStepSound(Block.soundTypeMetal);
-        // this.setCreativeTab(TFItems.creativeTab);
     }
 
     /**

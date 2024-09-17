@@ -3,6 +3,7 @@ package twilightforest.block;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.Loader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRotatedPillar;
 import net.minecraft.block.material.Material;
@@ -38,7 +39,12 @@ public class BlockTFThorns extends BlockRotatedPillar {
         this.setNames(new String[] { "brown", "green" });
 
         this.setHardness(50.0F);
-        this.setResistance(2000.0F);
+        if (Loader.isModLoaded("dreamcraft")){
+            this.setResistance(10.0F);
+        }
+        else{
+            this.setResistance(2000.0F);
+        }
         this.setStepSound(soundTypeWood);
         this.setCreativeTab(TFItems.creativeTab);
     }

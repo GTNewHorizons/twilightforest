@@ -3,6 +3,7 @@ package twilightforest.block;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.Loader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.material.Material;
@@ -32,8 +33,13 @@ public class BlockTFShield extends Block {
     public BlockTFShield() {
         super(Material.rock);
         this.setBlockUnbreakable();
-        // this.setResistance(2000.0F);
-        this.setResistance(6000000.0F);
+        if (Loader.isModLoaded("dreamcraft")){
+            this.setResistance(30.0F);
+        }
+        else{
+            this.setResistance(6000000.0F);
+        }
+
         this.setStepSound(Block.soundTypeMetal);
         this.setCreativeTab(TFItems.creativeTab);
     }
