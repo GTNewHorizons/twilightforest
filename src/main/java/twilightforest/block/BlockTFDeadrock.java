@@ -2,7 +2,6 @@ package twilightforest.block;
 
 import java.util.List;
 
-import cpw.mods.fml.common.Loader;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -11,6 +10,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
@@ -24,10 +24,9 @@ public class BlockTFDeadrock extends Block {
     protected BlockTFDeadrock() {
         super(Material.rock);
         this.setHardness(100F);
-        if (Loader.isModLoaded("dreamcraft")){
+        if (Loader.isModLoaded("dreamcraft")) {
             this.setResistance(5.0F);
-        }
-        else{
+        } else {
             this.setResistance(6000000.0F);
         }
         this.setStepSound(soundTypePiston);

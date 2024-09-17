@@ -3,7 +3,6 @@ package twilightforest.block;
 import java.util.List;
 import java.util.Random;
 
-import cpw.mods.fml.common.Loader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.material.Material;
@@ -19,6 +18,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
@@ -33,10 +33,9 @@ public class BlockTFShield extends Block {
     public BlockTFShield() {
         super(Material.rock);
         this.setBlockUnbreakable();
-        if (Loader.isModLoaded("dreamcraft")){
+        if (Loader.isModLoaded("dreamcraft")) {
             this.setResistance(30.0F);
-        }
-        else{
+        } else {
             this.setResistance(6000000.0F);
         }
 
