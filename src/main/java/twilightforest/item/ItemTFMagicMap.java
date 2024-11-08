@@ -20,7 +20,9 @@ import twilightforest.TFMagicMapData;
 import twilightforest.TFMapPacketHandler;
 import twilightforest.TwilightForestMod;
 import twilightforest.biomes.TFBiomeBase;
+import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;
+import twilightforest.world.WorldProviderTwilightForest;
 
 public class ItemTFMagicMap extends ItemMap {
 
@@ -65,6 +67,8 @@ public class ItemTFMagicMap extends ItemMap {
 
     public void updateMapData(World world, Entity entity, TFMagicMapData mapData) {
         if (world.provider.dimensionId == mapData.dimension && entity instanceof EntityPlayer) {
+            ChunkProviderTwilightForest chunkProvider = ((WorldProviderTwilightForest) world.provider)
+                    .getChunkProvider();
             short xSize = 128;
             short zSize = 128;
             int scaleFactor = 1 << mapData.scale;
@@ -119,26 +123,32 @@ public class ItemTFMagicMap extends ItemMap {
                                                             (zDraw2 + zStep2) >> 4,
                                                             world),
                                                     xDraw2,
-                                                    zDraw2);
+                                                    zDraw2,
+                                                    chunkProvider
+                                                            .isStructureConquered(xDraw2 + xStep2, 0, zDraw2 + zStep2));
                                         }
                                     }
 
-                                    // // mark features we find into the mapdata, provided they are within our draw area
+                                    // // mark features we find into the mapdata, provided they are within our draw
+                                    // area
                                     // if (biomeID == TFBiomeBase.majorFeature.biomeID && zStep >= 0 && xOffset *
                                     // xOffset + zOffset * zOffset < drawSize * drawSize) {
-                                    // par3MapData.addFeatureToMap(TFFeature.getNearestFeature((xDraw2 + xStep2) >> 4,
+                                    // par3MapData.addFeatureToMap(TFFeature.getNearestFeature((xDraw2 + xStep2) >>
+                                    // 4,
                                     // (zDraw2 + zStep2) >> 4, par1World), xDraw2, zDraw2);
                                     //// biomeFrequencies[biomeID] += 4096; // don't bother, now the icon will show
                                     // }
 
-                                    // // mark features we find into the mapdata, provided they are within our draw area
+                                    // // mark features we find into the mapdata, provided they are within our draw
+                                    // area
                                     // if (biomeID == TFBiomeBase.minorFeature.biomeID) {
                                     // biomeFrequencies[biomeID] += 4096; // don't bother, now the icon will show
                                     // }
                                 }
                             }
 
-                            // figure out which color is the most prominent and make that one appear on the map
+                            // figure out which color is the most prominent and make that one appear on the
+                            // map
                             byte biomeIDToShow = 0;
                             int highestFrequency = 0;
 

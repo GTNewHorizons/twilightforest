@@ -181,6 +181,7 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
         par2TextureManager.bindTexture(twilightMapIcons);
 
         for (MapCoord mapCoord : magicMapData.featuresVisibleOnMap) {
+            int size = mapCoord.iconSize > 80 ? mapCoord.iconSize - 80 : mapCoord.iconSize;
             GL11.glPushMatrix();
             GL11.glTranslatef(
                     (float) var15 + (float) mapCoord.centerX / 2.0F + 64.0F,
@@ -189,10 +190,10 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
             GL11.glRotatef((float) (mapCoord.iconRotation * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
             GL11.glScalef(4.0F, 4.0F, 3.0F);
             GL11.glTranslatef(-0.125F, 0.125F, 0.0F);
-            float var21 = (float) (mapCoord.iconSize % 8 + 0) / 8.0F;
-            float var23 = (float) (mapCoord.iconSize / 8 + 0) / 8.0F;
-            float var22 = (float) (mapCoord.iconSize % 8 + 1) / 8.0F;
-            float var24 = (float) (mapCoord.iconSize / 8 + 1) / 8.0F;
+            float var21 = (float) (size % 8 + 0) / 8.0F;
+            float var23 = (float) (size / 8 + 0) / 8.0F;
+            float var22 = (float) (size % 8 + 1) / 8.0F;
+            float var24 = (float) (size / 8 + 1) / 8.0F;
             tesselator.startDrawingQuads();
             tesselator.addVertexWithUV(-1.0D, 1.0D, 0.0D, var21, var23);
             tesselator.addVertexWithUV(1.0D, 1.0D, 0.0D, var22, var23);
@@ -202,6 +203,30 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
             GL11.glPopMatrix();
         }
 
+        par2TextureManager.bindTexture(vanillaMapIcons);
+        for (MapCoord mapCoord : magicMapData.featuresVisibleOnMap) {
+            if (mapCoord.iconSize > 80) {
+                GL11.glPushMatrix();
+                GL11.glTranslatef(
+                        (float) var15 + (float) mapCoord.centerX / 2.0F + 64.0F,
+                        (float) var16 + (float) mapCoord.centerZ / 2.0F + 64.0F,
+                        -0.02F);
+                GL11.glRotatef((float) (mapCoord.iconRotation * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
+                GL11.glScalef(4.0F, 4.0F, 3.0F);
+                GL11.glTranslatef(-0.125F, 0.125F, 0.0F);
+                float var21 = (float) (4 % 4 + 0) / 4.0F;
+                float var23 = (float) (4 / 4 + 0) / 4.0F;
+                float var22 = (float) (4 % 4 + 1) / 4.0F;
+                float var24 = (float) (4 / 4 + 1) / 4.0F;
+                tesselator.startDrawingQuads();
+                tesselator.addVertexWithUV(-1.0D, 0D, 0.0D, var21, var23);
+                tesselator.addVertexWithUV(0D, 0D, 0.0D, var22, var23);
+                tesselator.addVertexWithUV(0D, -1.0D, 0.0D, var22, var24);
+                tesselator.addVertexWithUV(-1.0D, -1.0D, 0.0D, var21, var24);
+                tesselator.draw();
+                GL11.glPopMatrix();
+            }
+        }
         // GL11.glPushMatrix();
         // GL11.glTranslatef(0.0F, 0.0F, -0.04F);
         // GL11.glScalef(1.0F, 1.0F, 1.0F);

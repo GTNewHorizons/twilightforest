@@ -7,12 +7,15 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
 
+import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;
+import twilightforest.world.WorldProviderTwilightForest;
 
 public class TFMagicMapData extends MapData {
 
     private static final int FEATURE_DATA_BYTE = 18;
     public List<MapCoord> featuresVisibleOnMap = new ArrayList<>();
+    public static final byte CONQ_OFFSET = 80;
 
     public TFMagicMapData(String par1Str) {
         super(par1Str);
@@ -51,7 +54,7 @@ public class TFMagicMapData extends MapData {
     /**
      * Adds a twilight forest feature to the map.
      */
-    public void addFeatureToMap(TFFeature feature, int x, int z) {
+    public void addFeatureToMap(TFFeature feature, int x, int z, boolean conq) {
         byte relativeX = (byte) ((x - this.xCenter) >> this.scale);
         byte relativeZ = (byte) ((z - this.zCenter) >> this.scale);
         byte rangeX = 64;
@@ -59,6 +62,7 @@ public class TFMagicMapData extends MapData {
 
         if (relativeX >= (-rangeX) && relativeZ >= (-rangeY) && relativeX <= rangeX && relativeZ <= rangeY) {
             byte markerIcon = (byte) feature.featureID;
+            markerIcon += conq ? CONQ_OFFSET : 0;
             byte mapX = (byte) (relativeX << 1);
             byte mapZ = (byte) (relativeZ << 1);
             byte mapRotation = 8;
@@ -93,13 +97,18 @@ public class TFMagicMapData extends MapData {
             int worldZ = (coord.centerZ << this.scale - 1) + this.zCenter;
 
             if (world != null && world.getWorldChunkManager() instanceof TFWorldChunkManager tfManager) {
-                coord.iconSize = (byte) tfManager.getFeatureID(worldX, worldZ, world);
-
                 if (coord.iconSize == 0) {
                     if (toRemove == null) {
                         toRemove = new ArrayList<>();
                     }
                     toRemove.add(coord);
+                } else if (coord.iconSize < CONQ_OFFSET) {
+                    ChunkProviderTwilightForest chunkProvider = ((WorldProviderTwilightForest) world.provider)
+                            .getChunkProvider();
+                    coord.iconSize = (byte) tfManager.getFeatureID(worldX, worldZ, world);
+                    if (chunkProvider.isStructureConquered(worldX, 0, worldZ)) {
+                        coord.iconSize += CONQ_OFFSET;
+                    }
                 }
             }
         }
