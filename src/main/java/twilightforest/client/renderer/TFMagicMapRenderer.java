@@ -227,11 +227,6 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
                 GL11.glPopMatrix();
             }
         }
-        // GL11.glPushMatrix();
-        // GL11.glTranslatef(0.0F, 0.0F, -0.04F);
-        // GL11.glScalef(1.0F, 1.0F, 1.0F);
-        // this.fontRenderer.drawString(par3MapData.mapName, var15, var16, -16777216);
-        // GL11.glPopMatrix();
     }
 
     private void renderMapInFrame(ItemStack item, RenderManager renderManager, TFMagicMapData mapData) {
