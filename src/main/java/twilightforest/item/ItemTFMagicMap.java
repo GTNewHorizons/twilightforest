@@ -128,22 +128,6 @@ public class ItemTFMagicMap extends ItemMap {
                                                             .isStructureConquered(xDraw2 + xStep2, 0, zDraw2 + zStep2));
                                         }
                                     }
-
-                                    // // mark features we find into the mapdata, provided they are within our draw
-                                    // area
-                                    // if (biomeID == TFBiomeBase.majorFeature.biomeID && zStep >= 0 && xOffset *
-                                    // xOffset + zOffset * zOffset < drawSize * drawSize) {
-                                    // par3MapData.addFeatureToMap(TFFeature.getNearestFeature((xDraw2 + xStep2) >>
-                                    // 4,
-                                    // (zDraw2 + zStep2) >> 4, par1World), xDraw2, zDraw2);
-                                    //// biomeFrequencies[biomeID] += 4096; // don't bother, now the icon will show
-                                    // }
-
-                                    // // mark features we find into the mapdata, provided they are within our draw
-                                    // area
-                                    // if (biomeID == TFBiomeBase.minorFeature.biomeID) {
-                                    // biomeFrequencies[biomeID] += 4096; // don't bother, now the icon will show
-                                    // }
                                 }
                             }
 
