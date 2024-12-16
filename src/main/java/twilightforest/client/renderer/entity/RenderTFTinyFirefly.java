@@ -20,6 +20,8 @@ public class RenderTFTinyFirefly extends Render {
     private static final ResourceLocation textureLoc = new ResourceLocation(
             TwilightForestMod.MODEL_DIR + "firefly-tiny.png");
 
+    private static final FloatBuffer modelview = BufferUtils.createFloatBuffer(16);
+
     public RenderTFTinyFirefly() {
         fireflyModel = new ModelTFTinyFirefly();
     }
@@ -42,7 +44,7 @@ public class RenderTFTinyFirefly extends Render {
         GL11.glTranslatef((float) x, (float) y + 0.5F, (float) z);
 
         // undo rotations so we can draw a billboarded firefly
-        FloatBuffer modelview = BufferUtils.createFloatBuffer(16);
+        modelview.clear().rewind();
 
         GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelview);
 
