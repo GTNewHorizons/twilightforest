@@ -44,7 +44,7 @@ public class RenderTFTinyFirefly extends Render {
         GL11.glTranslatef((float) x, (float) y + 0.5F, (float) z);
 
         // undo rotations so we can draw a billboarded firefly
-        modelview.clear().rewind();
+        modelview.clear();
 
         GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelview);
 
