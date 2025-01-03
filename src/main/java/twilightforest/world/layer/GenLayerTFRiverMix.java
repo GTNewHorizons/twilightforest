@@ -37,7 +37,7 @@ public class GenLayerTFRiverMix extends GenLayer {
 
         for (int i = 0; i < par3 * par4; ++i) {
             if (riverInputs[i] == TFBiomeBase.stream.biomeID) {
-                outputs[i] = riverInputs[i] & 255;
+                outputs[i] = riverInputs[i] & 32767;
             } else {
                 outputs[i] = biomeInputs[i];
             }
