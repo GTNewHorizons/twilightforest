@@ -94,7 +94,7 @@ public class ItemTFMagicMap extends ItemMap {
                             boolean var20 = xOffset * xOffset + zOffset * zOffset > (drawSize - 2) * (drawSize - 2);
                             int xDraw2 = (xCenter / scaleFactor + xStep - xSize / 2) * scaleFactor;
                             int zDraw2 = (zCenter / scaleFactor + zStep - zSize / 2) * scaleFactor;
-                            int[] biomeFrequencies = new int[32768];
+                            int[] biomeFrequencies = new int[TwilightForestMod.maxBiomeIDs];
                             int zStep2;
                             int xStep2;
 
@@ -136,7 +136,7 @@ public class ItemTFMagicMap extends ItemMap {
                             byte biomeIDToShow = 0;
                             int highestFrequency = 0;
 
-                            for (int i = 0; i < 32768; i++) {
+                            for (int i = 0; i < TwilightForestMod.maxBiomeIDs; i++) {
                                 if (biomeFrequencies[i] > highestFrequency) {
                                     biomeIDToShow = (byte) i;
                                     highestFrequency = biomeFrequencies[i];

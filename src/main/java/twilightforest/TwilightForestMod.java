@@ -102,6 +102,7 @@ public class TwilightForestMod {
     public static boolean areBaublesLoaded = false;
     public static boolean isNeiLoaded = false;
     public static boolean enableTiCIntegration = false;
+    public static int maxBiomeIDs = 256; // vanilla default
 
     // performance
     public static float canopyCoverage;
@@ -258,6 +259,9 @@ public class TwilightForestMod {
             areBaublesLoaded = false;
         }
         isGTNHLoaded = Loader.isModLoaded("dreamcraft");
+        if (Loader.isModLoaded("endlessids")) {
+            maxBiomeIDs = 65536;
+        }
 
         // check for biome conflicts, load biomes
         TFBiomeBase.assignBlankBiomeIds();

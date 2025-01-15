@@ -3,6 +3,7 @@ package twilightforest.world.layer;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.IntCache;
 
+import twilightforest.TwilightForestMod;
 import twilightforest.biomes.TFBiomeBase;
 
 public class GenLayerTFRiverMix extends GenLayer {
@@ -37,7 +38,7 @@ public class GenLayerTFRiverMix extends GenLayer {
 
         for (int i = 0; i < par3 * par4; ++i) {
             if (riverInputs[i] == TFBiomeBase.stream.biomeID) {
-                outputs[i] = riverInputs[i] & 32767;
+                outputs[i] = riverInputs[i] & (TwilightForestMod.maxBiomeIDs - 1);
             } else {
                 outputs[i] = biomeInputs[i];
             }
