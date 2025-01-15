@@ -2,11 +2,11 @@
 
 dependencies {
     compileOnly("thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev") {transitive = false}
-    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.12.16-GTNH:dev")
-    compileOnly("com.github.GTNewHorizons:Battlegear2:1.4.1:api") {} //For TiC to work
-    compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.6.51-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.13.2-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:Battlegear2:1.4.2:api") {} //For TiC to work
+    compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.7.11-GTNH:dev")
     compileOnly("curse.maven:skinport-234948:3212017")
-    compileOnly("com.github.GTNewHorizons:Mobs-Info:0.4.7-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:Mobs-Info:0.5.0-GTNH:dev")
 
     // For Thaumcraft runtime
     compileOnly ("com.github.GTNewHorizons:Baubles:1.0.4:dev")
