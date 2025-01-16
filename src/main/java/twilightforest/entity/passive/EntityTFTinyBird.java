@@ -11,6 +11,7 @@ import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
@@ -26,6 +27,7 @@ public class EntityTFTinyBird extends EntityTFBird {
 
     private static final int DATA_BIRDTYPE = 16;
     private static final int DATA_BIRDFLAGS = 17;
+    private static final long MIN_MS_BETWEEN_SPOOKED_DROPS = 20_000;
 
     /**
      * randomly selected ChunkCoordinates in a 7x6x7 box around the bat (y offset -2 to 4) towards which it will fly.
@@ -33,6 +35,8 @@ public class EntityTFTinyBird extends EntityTFBird {
      */
     private ChunkCoordinates currentFlightTarget;
     private int currentFlightTime;
+    // Prevent cheesing spook drops by reloading the entity
+    private long lastSpookedTime = System.currentTimeMillis();
 
     public EntityTFTinyBird(World par1World) {
         super(par1World);
@@ -231,6 +235,14 @@ public class EntityTFTinyBird extends EntityTFBird {
                     this.motionY = 0.4;
                     this.worldObj.playAuxSFXAtEntity(null, 1015, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
                     // FMLLog.info("bird taking off because it was spooked");
+                    final long now = System.currentTimeMillis();
+                    if (now - lastSpookedTime > MIN_MS_BETWEEN_SPOOKED_DROPS) {
+                        lastSpookedTime = now;
+                        final ItemStack spookDrop = getSpookedDrop();
+                        if (spookDrop != null) {
+                            this.entityDropItem(spookDrop, 0.0f);
+                        }
+                    }
                 }
             }
         } else {
@@ -327,4 +339,11 @@ public class EntityTFTinyBird extends EntityTFBird {
     protected void collideWithEntity(Entity par1Entity) {}
 
     protected void func_85033_bc() {}
+
+    /**
+     * @return The item this bird should drop when spooked after a cooldown, or {@code null} if none.
+     */
+    public ItemStack getSpookedDrop() {
+        return null;
+    }
 }

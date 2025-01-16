@@ -11,6 +11,7 @@ import net.minecraft.entity.ai.EntityLookHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 import twilightforest.TwilightForestMod;
@@ -23,7 +24,6 @@ public class EntityTFRaven extends EntityTFTinyBird {
 
     public EntityTFRaven(World par1World) {
         super(par1World);
-        // texture = TwilightForestMod.MODEL_DIR + "raven.png";
 
         this.setSize(0.3F, 0.7F);
 
@@ -35,8 +35,6 @@ public class EntityTFRaven extends EntityTFTinyBird {
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new EntityAIPanic(this, 1.5F));
         this.tasks.addTask(2, new EntityAITempt(this, 0.85F, Items.wheat_seeds, true));
-        // this.tasks.addTask(3, new EntityAIAvoidEntity(this, EntityPlayer.class, 2.0F, 0.23F, 0.4F));
-        // this.tasks.addTask(4, new EntityAITFBirdFly(this, 0.25F));
         this.tasks.addTask(5, new EntityAIWander(this, 1.0F));
         this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6F));
         this.tasks.addTask(7, new EntityAILookIdle(this));
@@ -109,11 +107,8 @@ public class EntityTFRaven extends EntityTFTinyBird {
         return 0.3F;
     }
 
-    /**
-     * Return true if the bird is spooked
-     */
-    public boolean isSpooked() {
-        return this.hurtTime > 0;
+    @Override
+    public ItemStack getSpookedDrop() {
+        return (this.rand.nextFloat() < 0.2f) ? new ItemStack(TFItems.feather, 1, 0) : null;
     }
-
 }
