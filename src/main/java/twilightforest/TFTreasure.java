@@ -10,8 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 
-import cpw.mods.fml.common.Loader;
 import twilightforest.block.TFBlocks;
+import twilightforest.compat.Mods;
 import twilightforest.item.TFItems;
 
 public class TFTreasure {
@@ -215,7 +215,7 @@ public class TFTreasure {
                 uncommon.add(Items.arrow, 12);
                 uncommon.add(Blocks.torch, 12);
                 rare.add(TFItems.nagaScale, 1);
-                if (!Loader.isModLoaded("dreamcraft")) rare.add(TFBlocks.uncraftingTable, 1);
+                if (!Mods.GTNH.isLoaded()) rare.add(TFBlocks.uncraftingTable, 1);
                 rare.add(TFItems.transformPowder, 12);
                 ultrarare.add(TFItems.peacockFan, 1);
                 ultrarare.add(Items.emerald, 6);

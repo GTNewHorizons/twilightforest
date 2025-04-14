@@ -10,10 +10,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
+import twilightforest.compat.Mods;
 
 public class ItemTF extends Item {
 
@@ -59,7 +59,7 @@ public class ItemTF extends Item {
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer player, List<String> list, boolean par4) {
-        if (Loader.isModLoaded("TConstruct") && (this == TFItems.fieryBlood || this == TFItems.fieryTears)) {
+        if (Mods.ticon.isLoaded() && (this == TFItems.fieryBlood || this == TFItems.fieryTears)) {
             String tooltip = "";
             if (this == TFItems.fieryBlood) {
                 tooltip = StatCollector.translateToLocal("item.fieryBlood.tooltip");

@@ -5,9 +5,10 @@ dependencies {
     compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.13.8-GTNH:dev")
     compileOnly("com.github.GTNewHorizons:Battlegear2:1.4.2:api") {} //For TiC to work
     compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.7.29-GTNH:dev")
+    compileOnly("ganymedes01.etfuturum:Et-Futurum-Requiem:2.6.2.6-GTNH:dev")
     compileOnly("curse.maven:skinport-234948:3212017")
     compileOnly("com.github.GTNewHorizons:Mobs-Info:0.5.1-GTNH:dev")
 
     // For Thaumcraft runtime
-    compileOnly ("com.github.GTNewHorizons:Baubles:1.0.4:dev")
+    compileOnly ("com.github.GTNewHorizons:Baubles-Expanded:2.1.6-GTNH:dev")
 }

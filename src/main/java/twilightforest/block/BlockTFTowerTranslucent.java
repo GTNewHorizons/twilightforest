@@ -15,10 +15,10 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
+import twilightforest.compat.Mods;
 
 public class BlockTFTowerTranslucent extends Block {
 
@@ -42,7 +42,7 @@ public class BlockTFTowerTranslucent extends Block {
     public BlockTFTowerTranslucent() {
         super(Material.glass);
         this.setHardness(50.0F);
-        if (Loader.isModLoaded("dreamcraft")) {
+        if (Mods.GTNH.isLoaded()) {
             this.setResistance(30.0F);
         } else {
             this.setResistance(2000.0F);
