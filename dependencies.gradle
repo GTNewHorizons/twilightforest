@@ -9,5 +9,5 @@ dependencies {
     compileOnly("com.github.GTNewHorizons:Mobs-Info:0.5.2-GTNH:dev")
 
     // For Thaumcraft runtime
-    compileOnly ("com.github.GTNewHorizons:Baubles:1.0.4:dev")
+    compileOnly ("com.github.GTNewHorizons:Baubles-Expanded:2.1.7-GTNH:dev")
 }
