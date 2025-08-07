@@ -1087,6 +1087,14 @@ public class RenderBlockTFSpiralBricks implements ISimpleBlockRenderingHandler {
         renderblocks.setRenderBounds(pixel * 19 / 4, 15 * pixel, 15 * pixel, 1.0F - pixel * 17 / 4, 1.0F, 1.0F);
         renderInvBlock(renderblocks, block, meta, tessellator);
 
+        // Reset State
+        renderblocks.uvRotateTop = 0;
+        renderblocks.uvRotateBottom = 0;
+        renderblocks.uvRotateEast = 0;
+        renderblocks.uvRotateWest = 0;
+        renderblocks.uvRotateNorth = 0;
+        renderblocks.uvRotateSouth = 0;
+
         block.setBlockBoundsForItemRender();
     }
 
