@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import ganymedes01.etfuturum.entities.EntityHusk;
+import ganymedes01.etfuturum.entities.EntityShulker;
+import ganymedes01.etfuturum.entities.EntityStray;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -33,6 +36,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 
 import twilightforest.biomes.TFBiomeBase;
+import twilightforest.compat.Mods;
 import twilightforest.entity.EntityTFAdherent;
 import twilightforest.entity.EntityTFArmoredGiant;
 import twilightforest.entity.EntityTFBlockGoblin;
@@ -105,12 +109,21 @@ public class TFFeature {
 
     static {
         // spawn lists!
-        lichTower.addMonster(EntityZombie.class, 10, 4, 4);
-        lichTower.addMonster(EntitySkeleton.class, 10, 4, 4);
-        lichTower.addMonster(EntityCreeper.class, 1, 4, 4);
+        if (Mods.EFR.isLoaded()){
+            lichTower.addMonster(EntityZombie.class, 6, 2, 4);
+            lichTower.addMonster(EntitySkeleton.class, 6, 2, 4);
+            lichTower.addMonster(EntityTFDeathTome.class, 6, 2, 4);
+            lichTower.addMonster(EntityShulker.class, 2, 1, 2);
+            lichTower.addMonster(EntityHusk.class, 1, 2, 4);
+            lichTower.addMonster(EntityStray.class, 1, 2, 4);
+        } else {
+            lichTower.addMonster(EntityZombie.class, 10, 4, 4);
+            lichTower.addMonster(EntitySkeleton.class, 10, 4, 4);
+            lichTower.addMonster(EntityTFDeathTome.class, 10, 4, 4);
+            lichTower.addMonster(EntityCreeper.class, 1, 4, 4);
+            lichTower.addMonster(EntityWitch.class, 1, 1, 1);
+        }
         lichTower.addMonster(EntityEnderman.class, 1, 1, 4);
-        lichTower.addMonster(EntityTFDeathTome.class, 10, 4, 4);
-        lichTower.addMonster(EntityWitch.class, 1, 1, 1);
 
         hill1.addMonster(EntitySpider.class, 10, 4, 4);
         hill1.addMonster(EntityZombie.class, 10, 4, 4);
@@ -160,6 +173,10 @@ public class TFFeature {
         darkTower.addMonster(EntityTFPinchBeetle.class, 10, 2, 4);
         // roof ghasts
         darkTower.addMonster(1, EntityTFTowerGhast.class, 10, 1, 4);
+        if (Mods.EFR.isLoaded()){
+            darkTower.addMonster(EntityShulker.class, 3, 1, 2);
+            darkTower.addMonster(1, EntityShulker.class, 3, 1, 2);
+        }
         // aquarium squids (only in aquariums between y = 35 and y = 64. :/
         darkTower.addWaterCreature(EntitySquid.class, 10, 4, 4);
 
