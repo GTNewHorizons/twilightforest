@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import ganymedes01.etfuturum.entities.EntityHusk;
-import ganymedes01.etfuturum.entities.EntityShulker;
-import ganymedes01.etfuturum.entities.EntityStray;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -35,6 +32,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 
+import ganymedes01.etfuturum.entities.EntityHusk;
+import ganymedes01.etfuturum.entities.EntityShulker;
+import ganymedes01.etfuturum.entities.EntityStray;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.compat.Mods;
 import twilightforest.entity.EntityTFAdherent;
@@ -109,7 +109,7 @@ public class TFFeature {
 
     static {
         // spawn lists!
-        if (Mods.EFR.isLoaded()){
+        if (Mods.EFR.isLoaded()) {
             lichTower.addMonster(EntityZombie.class, 6, 2, 4);
             lichTower.addMonster(EntitySkeleton.class, 6, 2, 4);
             lichTower.addMonster(EntityTFDeathTome.class, 6, 2, 4);
@@ -173,7 +173,7 @@ public class TFFeature {
         darkTower.addMonster(EntityTFPinchBeetle.class, 10, 2, 4);
         // roof ghasts
         darkTower.addMonster(1, EntityTFTowerGhast.class, 10, 1, 4);
-        if (Mods.EFR.isLoaded()){
+        if (Mods.EFR.isLoaded()) {
             darkTower.addMonster(EntityShulker.class, 3, 1, 2);
             darkTower.addMonster(1, EntityShulker.class, 3, 1, 2);
         }
