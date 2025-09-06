@@ -85,6 +85,11 @@ public class TFEventListener {
     private int amountOfCobbleToReplace = 0;
     private long lastSpawnedHintMonsterTime;
 
+    public void clearCaches() {
+        playerKeepsMap.clear();
+        playerBaublesMap.clear();
+    }
+
     /**
      * Check if the player picks up a lich scepter, and if so, check for the scepter mastery achievement
      */

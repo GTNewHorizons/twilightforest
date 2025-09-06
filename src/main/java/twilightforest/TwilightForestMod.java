@@ -24,6 +24,7 @@ import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
@@ -32,6 +33,7 @@ import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.TFBlocks;
 import twilightforest.compat.Mods;
 import twilightforest.entity.TFCreatures;
+import twilightforest.integration.TFBaublesIntegration;
 import twilightforest.integration.TFNeiIntegration;
 import twilightforest.integration.TFThaumcraftIntegration;
 import twilightforest.integration.TFTinkerConstructIntegration;
@@ -227,6 +229,8 @@ public class TwilightForestMod {
     @SidedProxy(clientSide = "twilightforest.client.TFClientProxy", serverSide = "twilightforest.TFCommonProxy")
     public static TFCommonProxy proxy;
 
+    final TFEventListener eventListener = new TFEventListener();
+
     public TwilightForestMod() {
         TwilightForestMod.instance = this;
     }
@@ -289,7 +293,6 @@ public class TwilightForestMod {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 
         // event listener, for those events that seem worth listening to
-        final TFEventListener eventListener = new TFEventListener();
         MinecraftForge.EVENT_BUS.register(eventListener);
         FMLCommonHandler.instance().bus().register(eventListener); // we're getting events off this bus too
 
@@ -400,6 +403,13 @@ public class TwilightForestMod {
 
         // event.registerServerCommand(new CommandTFFeature());
         event.registerServerCommand(new CommandTFProgress());
+    }
+
+    @EventHandler
+    public void stopServer(FMLServerStoppingEvent event) {
+        TFPlayerHandler.clearCaches();
+        TFBaublesIntegration.playerBaublesMap.clear();
+        eventListener.clearCaches();
     }
 
     @EventHandler

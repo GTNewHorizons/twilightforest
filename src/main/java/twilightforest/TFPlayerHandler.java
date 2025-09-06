@@ -24,6 +24,10 @@ public class TFPlayerHandler {
         TFBaublesIntegration.clearPlayerMap(player);
     }
 
+    public static void clearCaches() {
+        playerKeepsMap.clear();
+    }
+
     public static InventoryPlayer getPlayerKeepInventory(EntityPlayer player) {
         if (!playerKeepsMap.containsKey(player.getCommandSenderName())) {
             InventoryPlayer inventory = new InventoryPlayer(player);
