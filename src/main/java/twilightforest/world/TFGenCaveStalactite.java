@@ -152,7 +152,7 @@ public class TFGenCaveStalactite extends TFGenerator {
     }
 
     public boolean makeSpike(World world, Random random, int x, int y, int z, int maxLength) {
-
+        OrePlacer orePlacer = StalactiteOreGen.getOrePlacer(blockID);
         int diameter = (int) (maxLength / 4.5); // diameter of the base
 
         // let's see...
@@ -180,7 +180,7 @@ public class TFGenCaveStalactite extends TFGenerator {
                 }
 
                 for (int dy = 0; dy != (spikeLength * dir); dy += dir) {
-                    setBlock(world, x + dx, y + dy, z + dz, blockID);
+                    orePlacer.placeOre(world, x + dx, y + dy, z + dz, blockID);
                 }
             }
         }
