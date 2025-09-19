@@ -1,5 +1,9 @@
 package twilightforest;
 
+import static twilightforest.TwilightForestMod.enableEfRIntegration;
+import static twilightforest.TwilightForestMod.shulkerSpawnInLichTower;
+import static twilightforest.TwilightForestMod.shulkerSpawnInUrGhastTower;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -109,7 +113,7 @@ public class TFFeature {
 
     static {
         // spawn lists!
-        if (Mods.EFR.isLoaded()) {
+        if (Mods.EFR.isLoaded() && enableEfRIntegration && shulkerSpawnInLichTower) {
             lichTower.addMonster(EntityZombie.class, 6, 2, 4);
             lichTower.addMonster(EntitySkeleton.class, 6, 2, 4);
             lichTower.addMonster(EntityTFDeathTome.class, 6, 2, 4);
@@ -173,7 +177,7 @@ public class TFFeature {
         darkTower.addMonster(EntityTFPinchBeetle.class, 10, 2, 4);
         // roof ghasts
         darkTower.addMonster(1, EntityTFTowerGhast.class, 10, 1, 4);
-        if (Mods.EFR.isLoaded()) {
+        if (Mods.EFR.isLoaded() && enableEfRIntegration && shulkerSpawnInUrGhastTower) {
             darkTower.addMonster(EntityShulker.class, 3, 1, 2);
             darkTower.addMonster(1, EntityShulker.class, 3, 1, 2);
         }
