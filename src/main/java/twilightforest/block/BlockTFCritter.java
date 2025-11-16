@@ -105,6 +105,12 @@ public abstract class BlockTFCritter extends Block {
 
     @Override
     public boolean canPlaceBlockAt(World world, int x, int y, int z) {
+        Block currentBlock = world.getBlock(x, y, z);
+        // Check if current block can be replaced.
+        // This method can be called to check if current critter can stay, in which case that logic must be skipped.
+        if (currentBlock != this && !currentBlock.isReplaceable(world, x, y, z)) {
+            return false;
+        }
         if (canPlaceAt(world, x - 1, y, z)) {
             return true;
         } else if (canPlaceAt(world, x + 1, y, z)) {
