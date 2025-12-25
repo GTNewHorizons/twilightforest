@@ -625,7 +625,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
         int whatsMeta = worldObj.getBlockMetadata(dx, dy, dz);
         float whatsHardness = whatsThere.getBlockHardness(worldObj, dx, dy, dz);
 
-        if ((whatsThere != Blocks.air) && whatsHardness >= 0) {
+        if ((whatsThere != Blocks.air) && (whatsHardness >= 0)) {
             whatsThere.dropBlockAsItem(worldObj, dx, dy, dz, whatsMeta, 0);
             this.worldObj.setBlock(dx, dy, dz, Blocks.air, 0, 2);
 
