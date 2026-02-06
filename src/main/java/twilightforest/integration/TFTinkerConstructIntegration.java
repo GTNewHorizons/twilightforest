@@ -92,6 +92,55 @@ public class TFTinkerConstructIntegration {
 
         TConstructRegistry.registerActiveToolMod(new TFActiveToolMod());
 
+        // Register the smeltery materials BEFORE registering their respective toolparts and fluids
+
+        // Fiery Metal
+        Item materialItem = TFItems.fieryIngot;
+        TConstructClientRegistry.addMaterialRenderMapping(MaterialID.FieryMetal, "tinker", "fierymetal", true);
+        TConstructRegistry.addToolMaterial(
+                MaterialID.FieryMetal,
+                "FieryMetal",
+                3,
+                720, // TiC2 value untouched
+                720, // TiC2 value untouched
+                3,
+                1.2F, // Is 0.8 in TiC2, but in TiC1 metals' modifiers are always ≥1.0, so I used a netherrack value
+                      // to go with the fiery theme
+                0,
+                0f,
+                GOLD.toString(),
+                0x3C2323);
+        PatternBuilder.instance.registerFullMaterial(
+                new ItemStack((Item) materialItem, 1, 0),
+                2,
+                "FieryMetal",
+                new ItemStack(TinkerTools.toolShard, 1, MaterialID.FieryMetal),
+                new ItemStack(TinkerTools.toolRod, 1, MaterialID.FieryMetal),
+                MaterialID.FieryMetal);
+
+        // Knightmetal
+        materialItem = TFItems.knightMetal;
+        TConstructClientRegistry.addMaterialRenderMapping(MaterialID.Knightmetal, "tinker", "knightmetal", true);
+        TConstructRegistry.addToolMaterial(
+                MaterialID.Knightmetal,
+                "Knightmetal",
+                4,
+                900, // TiC2 value untouched
+                700, // TiC2 value untouched
+                3, // The converted value was 2.75. Might have to decrease later
+                1.25F, // TiC2 value untouched
+                0,
+                0f,
+                GREEN.toString(),
+                0xDBEEC1);
+        PatternBuilder.instance.registerFullMaterial(
+                new ItemStack((Item) materialItem, 1, 0),
+                2,
+                "Knightmetal",
+                new ItemStack(TinkerTools.toolShard, 1, MaterialID.Knightmetal),
+                new ItemStack(TinkerTools.toolRod, 1, MaterialID.Knightmetal),
+                MaterialID.Knightmetal);
+
         // Adding materials requiring smeltery
         if (TinkerSmeltery.smeltery != null) {
             // Register buckets
@@ -610,53 +659,6 @@ public class TFTinkerConstructIntegration {
             TConstructRegistry.addDefaultToolPartMaterial(MaterialID.FieryMetal);
             TConstructRegistry.addDefaultToolPartMaterial(MaterialID.Knightmetal);
         }
-
-        // Fiery Metal
-        Item materialItem = TFItems.fieryIngot;
-        TConstructClientRegistry.addMaterialRenderMapping(MaterialID.FieryMetal, "tinker", "fierymetal", true);
-        TConstructRegistry.addToolMaterial(
-                MaterialID.FieryMetal,
-                "FieryMetal",
-                3,
-                720, // TiC2 value untouched
-                720, // TiC2 value untouched
-                3,
-                1.2F, // Is 0.8 in TiC2, but in TiC1 metals' modifiers are always ≥1.0, so I used a netherrack value
-                      // to go with the fiery theme
-                0,
-                0f,
-                GOLD.toString(),
-                0x3C2323);
-        PatternBuilder.instance.registerFullMaterial(
-                new ItemStack((Item) materialItem, 1, 0),
-                2,
-                "FieryMetal",
-                new ItemStack(TinkerTools.toolShard, 1, MaterialID.FieryMetal),
-                new ItemStack(TinkerTools.toolRod, 1, MaterialID.FieryMetal),
-                MaterialID.FieryMetal);
-
-        // Knightmetal
-        materialItem = TFItems.knightMetal;
-        TConstructClientRegistry.addMaterialRenderMapping(MaterialID.Knightmetal, "tinker", "knightmetal", true);
-        TConstructRegistry.addToolMaterial(
-                MaterialID.Knightmetal,
-                "Knightmetal",
-                4,
-                900, // TiC2 value untouched
-                700, // TiC2 value untouched
-                3, // The converted value was 2.75. Might have to decrease later
-                1.25F, // TiC2 value untouched
-                0,
-                0f,
-                GREEN.toString(),
-                0xDBEEC1);
-        PatternBuilder.instance.registerFullMaterial(
-                new ItemStack((Item) materialItem, 1, 0),
-                2,
-                "Knightmetal",
-                new ItemStack(TinkerTools.toolShard, 1, MaterialID.Knightmetal),
-                new ItemStack(TinkerTools.toolRod, 1, MaterialID.Knightmetal),
-                MaterialID.Knightmetal);
 
         // Register rods
         String[] matNames = { "NagaScale", "Steeleaf" };
