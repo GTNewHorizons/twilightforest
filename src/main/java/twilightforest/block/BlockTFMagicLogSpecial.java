@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockMushroom;
+import net.minecraft.block.IGrowable;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -139,29 +141,34 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     private void doTreeOfTimeEffect(World world, int x, int y, int z, Random rand) {
         int numticks = 8 * 3 * this.tickRate(world);
 
-        int successes = 0;
-
         for (int i = 0; i < numticks; i++) {
             // find a nearby block
             int dx = rand.nextInt(32) - 16;
             int dy = rand.nextInt(32) - 16;
             int dz = rand.nextInt(32) - 16;
 
-            Block thereID = world.getBlock(x + dx, y + dy, z + dz);
+            // prevent chunk loads
+            if (!world.blockExists(x + dx, y + dy, z + dz)) {
+                continue;
+            }
 
-            if (thereID != Blocks.air && thereID.getTickRandomly()) {
-                world.scheduleBlockUpdate(x + dx, y + dy, z + dz, thereID, 20);
-                thereID.updateTick(world, x + dx, y + dy, z + dz, rand);
+            Block targetBlock = world.getBlock(x + dx, y + dy, z + dz);
 
-                // System.out.println("tree of time ticked a block at " + (x + dx) + ", " + (y + dy) + ", " + (z +
-                // dz) + " and the block was " + Blocks.blocksList[thereID] );
+            // plants only fools
+            if (!(targetBlock instanceof IGrowable)) {
+                continue;
+            }
 
-                successes++;
+            // except mushrooms
+            if (targetBlock instanceof BlockMushroom) {
+                continue;
+            }
+
+            if (targetBlock != Blocks.air && targetBlock.getTickRandomly()) {
+                world.scheduleBlockUpdate(x + dx, y + dy, z + dz, targetBlock, 20);
+                targetBlock.updateTick(world, x + dx, y + dy, z + dz, rand);
             }
         }
-
-        // System.out.println("Tree of time had " + successes + " successes out of " + numticks + "
-        // attempts");
     }
 
     /**
