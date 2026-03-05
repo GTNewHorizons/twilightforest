@@ -147,12 +147,16 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
             int dy = rand.nextInt(32) - 16;
             int dz = rand.nextInt(32) - 16;
 
+            int targetBlockX = x + dx;
+            int targetBlockY = y + dy;
+            int targetBlockZ = z + dz;
+
             // prevent chunk loads
-            if (!world.blockExists(x + dx, y + dy, z + dz)) {
+            if (!world.blockExists(targetBlockX, targetBlockY, targetBlockZ)) {
                 continue;
             }
 
-            Block targetBlock = world.getBlock(x + dx, y + dy, z + dz);
+            Block targetBlock = world.getBlock(targetBlockX, targetBlockY, targetBlockZ);
 
             // plants only fools
             if (!(targetBlock instanceof IGrowable)) {
@@ -165,8 +169,8 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
             }
 
             if (targetBlock.getTickRandomly()) {
-                world.scheduleBlockUpdate(x + dx, y + dy, z + dz, targetBlock, 20);
-                targetBlock.updateTick(world, x + dx, y + dy, z + dz, rand);
+                world.scheduleBlockUpdate(targetBlockX, targetBlockY, targetBlockZ, targetBlock, 20);
+                targetBlock.updateTick(world, targetBlockX, targetBlockY, targetBlockZ, rand);
             }
         }
     }
