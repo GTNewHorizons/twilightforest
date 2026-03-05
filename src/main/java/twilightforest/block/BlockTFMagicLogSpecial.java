@@ -164,7 +164,7 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
                 continue;
             }
 
-            if (targetBlock != Blocks.air && targetBlock.getTickRandomly()) {
+            if (targetBlock.getTickRandomly()) {
                 world.scheduleBlockUpdate(x + dx, y + dy, z + dz, targetBlock, 20);
                 targetBlock.updateTick(world, x + dx, y + dy, z + dz, rand);
             }
