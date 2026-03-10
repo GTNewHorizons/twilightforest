@@ -33,6 +33,9 @@ import twilightforest.TwilightForestMod;
 
 public class BlockTFPortal extends BlockBreakable {
 
+    private static final int PORTAL_MIN_SIZE = 2;
+    private static final int PORTAL_MAX_SIZE = 5;
+
     public BlockTFPortal() {
         super("TFPortal", Material.portal, false);
         this.setHardness(-1F);
@@ -90,114 +93,95 @@ public class BlockTFPortal extends BlockBreakable {
     }
 
     /**
-     * Changes the pool it's been given to all portal. No checks done, only does 4 squares.
+     * Changes the pool it's been given to all portal. Runs getPositionInPool again, no shape check, assumes square
      */
     public void transmuteWaterToPortal(World world, int dx, int dy, int dz) {
-        int px = dx;
-        int pz = dz;
 
-        // adjust so that the other 3 water squares are in the +x, +z directions.
-        if (world.getBlock(px - 1, dy, pz).getMaterial() == Material.water) {
-            px--;
-        }
-        if (world.getBlock(px, dy, pz - 1).getMaterial() == Material.water) {
-            pz--;
-        }
+        int[] positionInPool = getPositionInPool(world, dx, dy, dz);
+        int minX = dx - positionInPool[1];
+        int maxX = minX + positionInPool[0] - 1;
+        int minZ = dz - positionInPool[2];
+        int maxZ = minZ + positionInPool[0] - 1;
 
-        world.setBlock(px + 0, dy, pz + 0, TFBlocks.portal, 0, 2);
-        world.setBlock(px + 1, dy, pz + 0, TFBlocks.portal, 0, 2);
-        world.setBlock(px + 1, dy, pz + 1, TFBlocks.portal, 0, 2);
-        world.setBlock(px + 0, dy, pz + 1, TFBlocks.portal, 0, 2);
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                world.setBlock(x, dy, z, TFBlocks.portal, 0, 2);
+            }
+        }
 
         // System.out.println("Transmuting water to portal");
     }
 
     /**
-     * If this spot, or a spot in any one of the 8 directions around me is good, we're good.
+     * Get coordinates of item within the pool RET: {pool size, offset of generator in x, offset of generator in z}
      */
-    public static boolean isGoodPortalPool(World world, int dx, int dy, int dz) {
-        boolean flag = false;
+    public static int[] getPositionInPool(World world, int dx, int dy, int dz) {
+        if (world.getBlock(dx, dy, dz).getMaterial() != Material.water) return null;
+        final int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
 
-        flag |= isGoodPortalPoolStrict(world, dx + 0, dy, dz + 0);
+        int[] edgeOffsets = { -1, -1, -1, -1 };
 
-        flag |= isGoodPortalPoolStrict(world, dx - 1, dy, dz - 1);
-        flag |= isGoodPortalPoolStrict(world, dx + 0, dy, dz - 1);
-        flag |= isGoodPortalPoolStrict(world, dx + 1, dy, dz - 1);
+        // check for water in cardinal directions until we hit an edge
+        for (int i = 0; i < 4; i++) {
+            for (int d = 1; d <= PORTAL_MAX_SIZE; d++) {
+                if (world.getBlock(dx + d * dirs[i][0], dy, dz + d * dirs[i][1]).getMaterial() != Material.water) {
+                    edgeOffsets[i] = d - 1;
+                    break;
+                }
+            }
+        }
 
-        flag |= isGoodPortalPoolStrict(world, dx - 1, dy, dz + 0);
-        flag |= isGoodPortalPoolStrict(world, dx + 1, dy, dz + 0);
+        for (int d : edgeOffsets) {
+            // pool too big, didn't find an edge
+            if (d == -1) return null;
+        }
 
-        flag |= isGoodPortalPoolStrict(world, dx - 1, dy, dz + 1);
-        flag |= isGoodPortalPoolStrict(world, dx + 0, dy, dz + 1);
-        flag |= isGoodPortalPoolStrict(world, dx + 1, dy, dz + 1);
+        int dimx = 1 + edgeOffsets[0] + edgeOffsets[1];
+        int dimz = 1 + edgeOffsets[2] + edgeOffsets[3];
 
-        return flag;
+        // not a square
+        if (dimx != dimz) return null;
+
+        // pool too big or too small
+        if (dimx > PORTAL_MAX_SIZE || dimx < PORTAL_MIN_SIZE) return null;
+
+        return new int[] { dimx, edgeOffsets[0], edgeOffsets[2] };
     }
 
     /**
-     * Returns true only if there is water here, and at dx + 1, dy + 1, grass surrounding it, and solid beneath.
-     * 
-     * 
-     * GGGG G+wG GwwG GGGG
-     * 
-     * 
+     * Returns true if we're in a square pool within acceptable size range, with proper edges
      */
-    public static boolean isGoodPortalPoolStrict(World world, int dx, int dy, int dz) {
+    public static boolean isGoodPortalPool(World world, int dx, int dy, int dz) {
+        int[] positionInPool = getPositionInPool(world, dx, dy, dz);
+        if (positionInPool == null) return false;
+
         boolean flag = true;
+        int minX = dx - positionInPool[1];
+        int maxX = minX + positionInPool[0] - 1;
+        int minZ = dz - positionInPool[2];
+        int maxZ = minZ + positionInPool[0] - 1;
 
-        // 4 squares of water
-        flag &= world.getBlock(dx + 0, dy, dz + 0).getMaterial() == Material.water;
-        flag &= world.getBlock(dx + 1, dy, dz + 0).getMaterial() == Material.water;
-        flag &= world.getBlock(dx + 1, dy, dz + 1).getMaterial() == Material.water;
-        flag &= world.getBlock(dx + 0, dy, dz + 1).getMaterial() == Material.water;
+        // check water and pool floor
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                flag &= world.getBlock(x, dy, z).getMaterial() == Material.water;
+                flag &= world.getBlock(x, dy - 1, z).getMaterial().isSolid();
+            }
+        }
 
-        // System.out.println("water in 4 squares = " + flag);
-
-        // grass in the 12 squares surrounding
-        flag &= isGrassOrDirt(world, dx - 1, dy, dz - 1);
-        flag &= isGrassOrDirt(world, dx - 1, dy, dz + 0);
-        flag &= isGrassOrDirt(world, dx - 1, dy, dz + 1);
-        flag &= isGrassOrDirt(world, dx - 1, dy, dz + 2);
-
-        flag &= isGrassOrDirt(world, dx + 0, dy, dz - 1);
-        flag &= isGrassOrDirt(world, dx + 1, dy, dz - 1);
-
-        flag &= isGrassOrDirt(world, dx + 0, dy, dz + 2);
-        flag &= isGrassOrDirt(world, dx + 1, dy, dz + 2);
-
-        flag &= isGrassOrDirt(world, dx + 2, dy, dz - 1);
-        flag &= isGrassOrDirt(world, dx + 2, dy, dz + 0);
-        flag &= isGrassOrDirt(world, dx + 2, dy, dz + 1);
-        flag &= isGrassOrDirt(world, dx + 2, dy, dz + 2);
-
-        // System.out.println("grass surrounding = " + flag);
-
-        // solid underneath
-        flag &= world.getBlock(dx + 0, dy - 1, dz + 0).getMaterial().isSolid();
-        flag &= world.getBlock(dx + 1, dy - 1, dz + 0).getMaterial().isSolid();
-        flag &= world.getBlock(dx + 1, dy - 1, dz + 1).getMaterial().isSolid();
-        flag &= world.getBlock(dx + 0, dy - 1, dz + 1).getMaterial().isSolid();
-
-        // System.out.println("solid under = " + flag);
-
-        // 12 nature blocks above the grass?
-        flag &= isNatureBlock(world, dx - 1, dy + 1, dz - 1);
-        flag &= isNatureBlock(world, dx - 1, dy + 1, dz + 0);
-        flag &= isNatureBlock(world, dx - 1, dy + 1, dz + 1);
-        flag &= isNatureBlock(world, dx - 1, dy + 1, dz + 2);
-
-        flag &= isNatureBlock(world, dx + 0, dy + 1, dz - 1);
-        flag &= isNatureBlock(world, dx + 1, dy + 1, dz - 1);
-
-        flag &= isNatureBlock(world, dx + 0, dy + 1, dz + 2);
-        flag &= isNatureBlock(world, dx + 1, dy + 1, dz + 2);
-
-        flag &= isNatureBlock(world, dx + 2, dy + 1, dz - 1);
-        flag &= isNatureBlock(world, dx + 2, dy + 1, dz + 0);
-        flag &= isNatureBlock(world, dx + 2, dy + 1, dz + 1);
-        flag &= isNatureBlock(world, dx + 2, dy + 1, dz + 2);
-
-        // System.out.println("nature blocks = " + flag);
+        // check grass edges and nature blocks
+        for (int x = minX; x < maxX; x++) {
+            flag &= isGrassOrDirt(world, x, dy, minZ - 1);
+            flag &= isGrassOrDirt(world, x, dy, maxZ + 1);
+            flag &= isNatureBlock(world, x, dy + 1, minZ - 1);
+            flag &= isNatureBlock(world, x, dy + 1, maxZ + 1);
+        }
+        for (int z = minZ; z < maxZ; z++) {
+            flag &= isGrassOrDirt(world, minX - 1, dy, z);
+            flag &= isGrassOrDirt(world, maxX + 1, dy, z);
+            flag &= isNatureBlock(world, minX - 1, dy + 1, z);
+            flag &= isNatureBlock(world, maxX + 1, dy + 1, z);
+        }
 
         return flag;
     }
@@ -219,28 +203,28 @@ public class BlockTFPortal extends BlockBreakable {
     }
 
     /**
-     * Each twilight portal pool block should have grass or dirt on one side and a portal on the other. If this is not
-     * true, delete this block, presumably causing a chain reaction.
+     * Each twilight portal pool block should have (a) dirt or grass on two neighbouring sides and portal on the other
+     * two (b) dirt or grass on one side and portal on the other three (c) portal on all sides If this is not true,
+     * delete this block, presumably causing a chain reaction.
      */
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, Block notUsed) {
         boolean good = true;
+        int portalSides = 0;
+        if (world.getBlock(x - 1, y, z) == this) portalSides++;
+        if (world.getBlock(x + 1, y, z) == this) portalSides++;
+        if (world.getBlock(x, y, z - 1) == this) portalSides++;
+        if (world.getBlock(x, y, z + 1) == this) portalSides++;
 
-        if (world.getBlock(x - 1, y, z) == this) {
-            good &= isGrassOrDirt(world, x + 1, y, z);
-        } else if (world.getBlock(x + 1, y, z) == this) {
-            good &= isGrassOrDirt(world, x - 1, y, z);
-        } else {
-            good = false;
-        }
-
-        if (world.getBlock(x, y, z - 1) == this) {
-            good &= isGrassOrDirt(world, x, y, z + 1);
-        } else if (world.getBlock(x, y, z + 1) == this) {
-            good &= isGrassOrDirt(world, x, y, z - 1);
-        } else {
-            good = false;
-        }
+        if (portalSides == 4) good = true;
+        else if (portalSides == 3) {
+            good = isGrassOrDirt(world, x - 1, y, z) || isGrassOrDirt(world, x + 1, y, z)
+                    || isGrassOrDirt(world, x, y, z - 1)
+                    || isGrassOrDirt(world, x, y, z + 1);
+        } else if (portalSides == 2) {
+            good = (isGrassOrDirt(world, x - 1, y, z) || isGrassOrDirt(world, x + 1, y, z))
+                    && (isGrassOrDirt(world, x, y, z - 1) || isGrassOrDirt(world, x, y, z + 1));
+        } else good = false;
 
         // if we're not good, remove this block
         if (!good) {
