@@ -1,7 +1,5 @@
 package twilightforest.world;
 
-import java.util.Random;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
@@ -13,6 +11,17 @@ import twilightforest.biomes.TFBiomeHighlands;
 import twilightforest.block.TFBlocks;
 
 public class TFGenCaves extends MapGenCaves {
+
+    private final FastRandom caveRNG = new FastRandom(0L);
+    private final FastRandom mossRNG = new FastRandom(0L);
+
+    private int cachedBiomeChunkX = Integer.MIN_VALUE;
+    private int cachedBiomeChunkZ = Integer.MIN_VALUE;
+    private boolean cachedIsHighlands;
+
+    public TFGenCaves() {
+        this.rand = new FastRandom(0L);
+    }
 
     /**
      * Generates a larger initial cave node than usual. Called 25% of the time.
@@ -50,8 +59,8 @@ public class TFGenCaves extends MapGenCaves {
         double offsetCenterZ = centerZ * 16 + 8;
         float var23 = 0.0F;
         float var24 = 0.0F;
-        Random caveRNG = new Random(caveSeed);
-        Random mossRNG = new Random(caveSeed);
+        caveRNG.setSeed(caveSeed);
+        mossRNG.setSeed(caveSeed);
 
         // if (isHighlands) {
         // //System.out.println("Saying highlands and it's not");
@@ -263,9 +272,17 @@ public class TFGenCaves extends MapGenCaves {
     /**
      * Recursively called by generate() (generate) and optionally by itself.
      */
-    protected void func_151538_a(World par1World, int genX, int genZ, int centerX, int centerZ, Block[] blockStorage) {
+    protected void func_151538_a(World world, int genX, int genZ, int centerX, int centerZ, Block[] blockStorage) {
         int numberOfCaves = this.rand.nextInt(this.rand.nextInt(this.rand.nextInt(40) + 1) + 1);
-        boolean isHighlands = par1World.getBiomeGenForCoords(genX * 16, genZ * 16) instanceof TFBiomeHighlands;
+        boolean isHighlands;
+        if (genX == cachedBiomeChunkX && genZ == cachedBiomeChunkZ) {
+            isHighlands = cachedIsHighlands;
+        } else {
+            isHighlands = world.getBiomeGenForCoords(genX * 16, genZ * 16) instanceof TFBiomeHighlands;
+            cachedBiomeChunkX = genX;
+            cachedBiomeChunkZ = genZ;
+            cachedIsHighlands = isHighlands;
+        }
 
         if (this.rand.nextInt(15) != 0) {
             numberOfCaves = 0;

@@ -44,7 +44,7 @@ import twilightforest.block.TFBlocks;
 
 public class ChunkProviderTwilightForest implements IChunkProvider {
 
-    private Random rand;
+    private FastRandom rand;
     // private NoiseGeneratorOctaves noiseGen1;
     // private NoiseGeneratorOctaves noiseGen2;
     // private NoiseGeneratorOctaves noiseGen3;
@@ -94,7 +94,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         ravineGenerator = new TFGenRavine();
         unusedIntArray32x32 = new int[32][32];
         worldObj = world;
-        rand = new Random(l);
+        rand = new FastRandom(l);
         // noiseGen1 = new NoiseGeneratorOctaves(rand, 16);
         // noiseGen2 = new NoiseGeneratorOctaves(rand, 16);
         // noiseGen3 = new NoiseGeneratorOctaves(rand, 8);
@@ -829,6 +829,19 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
             }
         }
 
+        TFFeature nearFeature = TFFeature.getNearestFeature(chunkX, chunkZ, worldObj);
+        int hx = 0, hz = 0;
+        boolean isDarkTower = nearFeature == TFFeature.darkTower;
+        if (isDarkTower) {
+            int[] nearCenter = TFFeature.getNearestCenter(chunkX, chunkZ, worldObj);
+            hx = nearCenter[0];
+            hz = nearCenter[1];
+        }
+
+        double d = 0.03125D;
+        stoneNoise = noiseGen4
+                .generateNoiseOctaves(stoneNoise, chunkX * 16, chunkZ * 16, 0, 16, 16, 1, d * 2D, d * 2D, d * 2D);
+
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
 
@@ -850,19 +863,12 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                 // int thickness = thicks[qz + (qz) * 5];
 
                 // make sure we're not too close to the tower
-                TFFeature nearFeature = TFFeature.getNearestFeature(chunkX, chunkZ, worldObj);
-                if (nearFeature == TFFeature.darkTower) {
-                    // check for closeness
-                    int[] nearCenter = TFFeature.getNearestCenter(chunkX, chunkZ, worldObj);
-                    int hx = nearCenter[0];
-                    int hz = nearCenter[1];
-
+                if (isDarkTower) {
                     int dx = x - hx;
                     int dz = z - hz;
                     int dist = (int) Math.sqrt(dx * dx + dz * dz);
 
                     if (dist < 24) {
-
                         thickness -= (24 - dist);
                     }
                 }
@@ -870,19 +876,6 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                 boolean generateForest = thickness > 1;
 
                 if (generateForest) {
-                    double d = 0.03125D;
-                    stoneNoise = noiseGen4.generateNoiseOctaves(
-                            stoneNoise,
-                            chunkX * 16,
-                            chunkZ * 16,
-                            0,
-                            16,
-                            16,
-                            1,
-                            d * 2D,
-                            d * 2D,
-                            d * 2D);
-
                     // find the (current) top block
                     int topLevel = -1;
                     for (int y = 127; y >= 0; y--) {
