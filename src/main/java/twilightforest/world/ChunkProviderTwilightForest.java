@@ -5,7 +5,6 @@
 package twilightforest.world;
 
 import java.util.List;
-import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
@@ -761,10 +760,12 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         }
     }
 
+    private final FastRandom pseudoRandRNG = new FastRandom(0L);
+
     private float pseudoRand(int bx, int bz) {
-        Random rand = new Random(this.worldObj.getSeed() + (bx * 321534781) ^ (bz * 756839));
-        rand.setSeed(rand.nextLong());
-        return rand.nextFloat();
+        pseudoRandRNG.setSeed(this.worldObj.getSeed() + (bx * 321534781) ^ (bz * 756839));
+        pseudoRandRNG.setSeed(pseudoRandRNG.nextLong());
+        return pseudoRandRNG.nextFloat();
     }
 
     /**
@@ -827,6 +828,18 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                     }
                 }
             }
+        }
+
+        // Early exit if no dark forest biomes in the area
+        boolean hasDarkForest = false;
+        for (int i = 0; i < 5 * 5; i++) {
+            if (thicks[i] > 0) {
+                hasDarkForest = true;
+                break;
+            }
+        }
+        if (!hasDarkForest) {
+            return;
         }
 
         TFFeature nearFeature = TFFeature.getNearestFeature(chunkX, chunkZ, worldObj);
