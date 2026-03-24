@@ -1,7 +1,12 @@
 package twilightforest.block;
 
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBreakable;
@@ -27,14 +32,15 @@ import net.minecraft.world.WorldServer;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.Coord2D;
 import twilightforest.TFAchievementPage;
 import twilightforest.TFTeleporter;
 import twilightforest.TwilightForestMod;
 
 public class BlockTFPortal extends BlockBreakable {
 
-    private static final int PORTAL_MIN_SIZE = 2;
-    private static final int PORTAL_MAX_SIZE = 5;
+    private static final List<Coord2D> dirs = Arrays
+            .asList(new Coord2D(1, 0), new Coord2D(0, 1), new Coord2D(-1, 0), new Coord2D(0, -1));
 
     public BlockTFPortal() {
         super("TFPortal", Material.portal, false);
@@ -83,9 +89,10 @@ public class BlockTFPortal extends BlockBreakable {
      * the location of a pool with very specific parameters.
      */
     public boolean tryToCreatePortal(World world, int dx, int dy, int dz) {
-        if (isGoodPortalPool(world, dx, dy, dz)) {
+        Set<Coord2D> poolMap = generatePoolMap(world, dx, dy, dz);
+        if (poolMap != null) {
             world.addWeatherEffect(new EntityLightningBolt(world, dx, dy, dz));
-            transmuteWaterToPortal(world, dx, dy, dz);
+            transmuteWaterToPortal(world, dx, dy, dz, poolMap);
             return true;
         } else {
             return false;
@@ -93,97 +100,59 @@ public class BlockTFPortal extends BlockBreakable {
     }
 
     /**
-     * Changes the pool it's been given to all portal. Runs getPositionInPool again, no shape check, assumes square
+     * Changes the pool it's been given to all portal.
      */
-    public void transmuteWaterToPortal(World world, int dx, int dy, int dz) {
-
-        int[] positionInPool = getPositionInPool(world, dx, dy, dz);
-        int minX = dx - positionInPool[1];
-        int maxX = minX + positionInPool[0] - 1;
-        int minZ = dz - positionInPool[2];
-        int maxZ = minZ + positionInPool[0] - 1;
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                world.setBlock(x, dy, z, TFBlocks.portal, 0, 2);
-            }
+    public void transmuteWaterToPortal(World world, int dx, int dy, int dz, Set<Coord2D> poolMap) {
+        for (Coord2D c : poolMap) {
+            world.setBlock(c.x() + dx, dy, c.z() + dz, TFBlocks.portal, 0, 2);
         }
 
         // System.out.println("Transmuting water to portal");
     }
 
     /**
-     * Get coordinates of item within the pool RET: {pool size, offset of generator in x, offset of generator in z}
+     * Constructs a set of pool coordinates using flood fill from the generator block. Returns null if pool is too big
+     * or has invalid border.
      */
-    public static int[] getPositionInPool(World world, int dx, int dy, int dz) {
-        if (world.getBlock(dx, dy, dz).getMaterial() != Material.water) return null;
-        final int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+    public static Set<Coord2D> generatePoolMap(World world, int dx, int dy, int dz) {
 
-        int[] edgeOffsets = { -1, -1, -1, -1 };
+        Set<Coord2D> poolMap = new HashSet<>();
+        Deque<Coord2D> toProcess = new ArrayDeque<>();
+        Set<Coord2D> boundary = new HashSet<>();
+        int minX = 0, maxX = 0, minZ = 0, maxZ = 0;
+        toProcess.add(new Coord2D(0, 0));
 
-        // check for water in cardinal directions until we hit an edge
-        for (int i = 0; i < 4; i++) {
-            for (int d = 1; d <= PORTAL_MAX_SIZE; d++) {
-                if (world.getBlock(dx + d * dirs[i][0], dy, dz + d * dirs[i][1]).getMaterial() != Material.water) {
-                    edgeOffsets[i] = d - 1;
-                    break;
+        while (!toProcess.isEmpty()) {
+            Coord2D block = toProcess.removeLast();
+            int x = dx + block.x();
+            int z = dz + block.z();
+            if (world.getBlock(x, dy, z).getMaterial() == Material.water
+                    && world.getBlock(x, dy - 1, z).getMaterial().isSolid()) {
+                // duplicate protection - cheaper than toProcess.contains check later
+                if (!poolMap.add(block)) continue;
+
+                if (block.x() < minX) minX = block.x();
+                else if (block.x() > maxX) maxX = block.x();
+                if (block.z() < minZ) minZ = block.z();
+                else if (block.z() > maxZ) maxZ = block.z();
+                // cheaper to do this here than potentially building an invalid portal with 4 times the blocks
+                if (maxX - minX + 1 > TwilightForestMod.portalMaxSize
+                        || maxZ - minZ + 1 > TwilightForestMod.portalMaxSize)
+                    return null;
+
+                for (Coord2D d : dirs) {
+                    Coord2D neighbor = block.add(d);
+                    if (!poolMap.contains(neighbor) && !boundary.contains(neighbor)) {
+                        toProcess.add(neighbor);
+                    }
                 }
+            } else if (isGrassOrDirt(world, x, dy, z) && isNatureBlock(world, x, dy + 1, z)) {
+                boundary.add(block);
+            } else {
+                return null;
             }
         }
-
-        for (int d : edgeOffsets) {
-            // pool too big, didn't find an edge
-            if (d == -1) return null;
-        }
-
-        int dimx = 1 + edgeOffsets[0] + edgeOffsets[1];
-        int dimz = 1 + edgeOffsets[2] + edgeOffsets[3];
-
-        // not a square
-        if (dimx != dimz) return null;
-
-        // pool too big or too small
-        if (dimx > PORTAL_MAX_SIZE || dimx < PORTAL_MIN_SIZE) return null;
-
-        return new int[] { dimx, edgeOffsets[0], edgeOffsets[2] };
-    }
-
-    /**
-     * Returns true if we're in a square pool within acceptable size range, with proper edges
-     */
-    public static boolean isGoodPortalPool(World world, int dx, int dy, int dz) {
-        int[] positionInPool = getPositionInPool(world, dx, dy, dz);
-        if (positionInPool == null) return false;
-
-        boolean flag = true;
-        int minX = dx - positionInPool[1];
-        int maxX = minX + positionInPool[0] - 1;
-        int minZ = dz - positionInPool[2];
-        int maxZ = minZ + positionInPool[0] - 1;
-
-        // check water and pool floor
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                flag &= world.getBlock(x, dy, z).getMaterial() == Material.water;
-                flag &= world.getBlock(x, dy - 1, z).getMaterial().isSolid();
-            }
-        }
-
-        // check grass edges and nature blocks
-        for (int x = minX; x < maxX; x++) {
-            flag &= isGrassOrDirt(world, x, dy, minZ - 1);
-            flag &= isGrassOrDirt(world, x, dy, maxZ + 1);
-            flag &= isNatureBlock(world, x, dy + 1, minZ - 1);
-            flag &= isNatureBlock(world, x, dy + 1, maxZ + 1);
-        }
-        for (int z = minZ; z < maxZ; z++) {
-            flag &= isGrassOrDirt(world, minX - 1, dy, z);
-            flag &= isGrassOrDirt(world, maxX + 1, dy, z);
-            flag &= isNatureBlock(world, minX - 1, dy + 1, z);
-            flag &= isNatureBlock(world, maxX + 1, dy + 1, z);
-        }
-
-        return flag;
+        return poolMap;
     }
 
     /**
@@ -217,15 +186,14 @@ public class BlockTFPortal extends BlockBreakable {
         if (world.getBlock(x, y, z + 1) == this) portalSides++;
 
         if (portalSides == 4) good = true;
-        else if (portalSides == 3) {
-            good = isGrassOrDirt(world, x - 1, y, z) || isGrassOrDirt(world, x + 1, y, z)
-                    || isGrassOrDirt(world, x, y, z - 1)
-                    || isGrassOrDirt(world, x, y, z + 1);
-        } else if (portalSides == 2) {
-            good = (isGrassOrDirt(world, x - 1, y, z) || isGrassOrDirt(world, x + 1, y, z))
-                    && (isGrassOrDirt(world, x, y, z - 1) || isGrassOrDirt(world, x, y, z + 1));
-        } else good = false;
-
+        else {
+            int grassSides = 0;
+            if (isGrassOrDirt(world, x - 1, y, z)) grassSides++;
+            if (isGrassOrDirt(world, x + 1, y, z)) grassSides++;
+            if (isGrassOrDirt(world, x, y, z - 1)) grassSides++;
+            if (isGrassOrDirt(world, x, y, z + 1)) grassSides++;
+            good = ((portalSides + grassSides) == 4);
+        }
         // if we're not good, remove this block
         if (!good) {
             world.setBlock(x, y, z, Blocks.water, 0, 3);

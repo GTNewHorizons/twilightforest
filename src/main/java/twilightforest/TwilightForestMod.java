@@ -98,6 +98,7 @@ public class TwilightForestMod {
     public static boolean disableUncrafting;
     public static boolean oldMapGen;
     public static String portalCreationItemString;
+    public static int portalMaxSize;
 
     // integration
     public static boolean isGTNHLoaded = false;
@@ -1016,6 +1017,11 @@ public class TwilightForestMod {
                 Configuration.CATEGORY_GENERAL,
                 "PortalCreationItem",
                 "diamond").comment = "Item to create the Twilight Forest Portal.  Defaults to 'diamond'";
+        portalMaxSize = configFile.get(Configuration.CATEGORY_GENERAL, "portalMaxSize", 15).getInt();
+        configFile.get(
+                Configuration.CATEGORY_GENERAL,
+                "portalMaxSize",
+                15).comment = "Maximal size of water pool that can be turned into a portal. NxN square.";
 
         canopyCoverage = (float) (configFile.get("Performance", "CanopyCoverage", 1.7).getDouble(1.7));
         configFile.get(
