@@ -173,7 +173,7 @@ public class TFTeleporter extends Teleporter {
                 spiral = spiral.spiralNext();
             }
             // check layers from portal up, then from portal down
-            dy = (dy >= 0) ? ((dy < portalEmergenceVerticalTolerance) ? dy + 1 : 0) : dy - 1;
+            dy = (dy > 0) ? ((dy < portalEmergenceVerticalTolerance) ? dy + 1 : 0) : dy - 1;
         }
         return false;
     }
