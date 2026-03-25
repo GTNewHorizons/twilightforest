@@ -77,13 +77,17 @@ public class TFTeleporter extends Teleporter {
 
     /**
      * Find some safe coords within range of the destination coords, or return null.
-     * 
-     * This could sure be a more methodic algorithm
      */
     private ChunkCoordinates findSafeCoords(int range, int x, int z, Entity entity) {
+        if (isSafeBiomeAt(x, z, entity)) return new ChunkCoordinates(x, 100, z);
+        Coord2D coords = new Coord2D(0, 0);
+        int dx, dz;
+        // 25 tries covers a 2 level spiral
+        int step = range / 2;
         for (int i = 0; i < 25; i++) {
-            int dx = x + (rand.nextInt(range) - rand.nextInt(range));
-            int dz = z + (rand.nextInt(range) - rand.nextInt(range));
+            coords = coords.spiralNext(step);
+            dx = x + coords.x();
+            dz = z + coords.z();
             if (isSafeBiomeAt(dx, dz, entity)) {
                 return new ChunkCoordinates(dx, 100, dz);
             }

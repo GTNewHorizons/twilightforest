@@ -10,29 +10,33 @@ public record Coord2D(int x, int z) {
     }
 
     public Coord2D spiralNext() {
+        return spiralNext(1);
+    }
+
+    public Coord2D spiralNext(int step) {
         // next step in a CCW outward spiral
         // looks expensive to call a million times, actually isn't
         int x = this.x;
         int z = this.z;
 
-        if (x == 0 && z == 0) return new Coord2D(1, 0);
+        if (x == 0 && z == 0) return new Coord2D(step, 0);
 
         if (x == z) {
-            if (x > 0) return new Coord2D(x - 1, z);
-            else return new Coord2D(x + 1, z);
+            if (x > 0) return new Coord2D(x - step, z);
+            else return new Coord2D(x + step, z);
         }
 
         if (x == -z) {
-            if (x > 0) return new Coord2D(x + 1, z); // step into next radius here
-            else return new Coord2D(x, z - 1);
+            if (x > 0) return new Coord2D(x + step, z); // step into next radius here
+            else return new Coord2D(x, z - step);
         }
 
         if (x > z) {
-            if (x > -z) return new Coord2D(x, z + 1);
-            else return new Coord2D(x + 1, z);
+            if (x > -z) return new Coord2D(x, z + step);
+            else return new Coord2D(x + step, z);
         } else {
-            if (x > -z) return new Coord2D(x - 1, z);
-            else return new Coord2D(x, z - 1);
+            if (x > -z) return new Coord2D(x - step, z);
+            else return new Coord2D(x, z - step);
         }
     }
 
