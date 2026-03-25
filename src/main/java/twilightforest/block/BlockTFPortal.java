@@ -174,7 +174,8 @@ public class BlockTFPortal extends BlockBreakable {
     /**
      * Each twilight portal pool block should have (a) dirt or grass on two neighbouring sides and portal on the other
      * two (b) dirt or grass on one side and portal on the other three (c) portal on all sides If this is not true,
-     * delete this block, presumably causing a chain reaction.
+     * delete this block, presumably causing a chain reaction. Notably the original implementation didn't check for
+     * floor validity, so neither does this.
      */
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, Block notUsed) {
