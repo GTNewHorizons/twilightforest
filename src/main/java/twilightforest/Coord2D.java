@@ -13,9 +13,13 @@ public record Coord2D(int x, int z) {
         return spiralNext(1);
     }
 
+    /**
+     * Next step in a CCW outward spiral. Does not allow non-positive step size. Looks expensive to call a million
+     * times, actually isn't.
+     */
     public Coord2D spiralNext(int step) {
-        // next step in a CCW outward spiral
-        // looks expensive to call a million times, actually isn't
+        if (step <= 0) return null;
+
         int x = this.x;
         int z = this.z;
 

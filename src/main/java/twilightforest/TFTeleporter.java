@@ -130,8 +130,8 @@ public class TFTeleporter extends Teleporter {
             // spiral outward from entity position until we hit a column with portal in it
             //
             // this could potentially be further optimized if we assume that most people won't be making noodle portals
-            // then we could run a sparse check by making spiralNext take a step argument
-            // with step size 2 we only do 1/4 the work and still catch all default portals
+            // then we could run a sparse check by calling spiralNext with step size 2 
+            // we only do 1/4 the work and still catch all default portals
             // and only do a full spiral if it fails
             int x = spiral.x() + baseX;
             int z = spiral.z() + baseZ;
@@ -160,9 +160,9 @@ public class TFTeleporter extends Teleporter {
         // no portal found within range
         if (finalDist == -1) return false;
 
-        for (int dy = 1; dy > -portalEmergenceVerticalTolerance;) {
+        for (int dy = 1; dy >= -portalEmergenceVerticalTolerance;) {
             spiral = new Coord2D(0, 0);
-            while (spiral.rad() < TwilightForestMod.portalMaxSize) {
+            while (spiral.rad() <= TwilightForestMod.portalMaxSize) {
                 // spiral outward from portal column until we find a viable place to deposit entity
                 // checking a box 2*MS+1 x 2*PEVT+1 x 2*MS+1 around the portal block
                 // prioritizes space above portal

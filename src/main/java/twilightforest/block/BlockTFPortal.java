@@ -85,8 +85,8 @@ public class BlockTFPortal extends BlockBreakable {
     }
 
     /**
-     * The function name says it all. Tries to create a portal at the specified location. In this case, the location is
-     * the location of a pool with very specific parameters.
+     * The function name says it all. Tries to create a portal at the specified location. The location is the block
+     * where portal generator landed.
      */
     public boolean tryToCreatePortal(World world, int dx, int dy, int dz) {
         Set<Coord2D> poolMap = generatePoolMap(world, dx, dy, dz);
@@ -112,7 +112,7 @@ public class BlockTFPortal extends BlockBreakable {
 
     /**
      * Constructs a set of pool coordinates using flood fill from the generator block. Returns null if pool is too big
-     * or has invalid border.
+     * or has invalid border. Minimal accepted pool is 1x1.
      */
     public static Set<Coord2D> generatePoolMap(World world, int dx, int dy, int dz) {
 
