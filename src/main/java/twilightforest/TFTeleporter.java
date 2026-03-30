@@ -130,7 +130,7 @@ public class TFTeleporter extends Teleporter {
             // spiral outward from entity position until we hit a column with portal in it
             //
             // this could potentially be further optimized if we assume that most people won't be making noodle portals
-            // then we could run a sparse check by calling spiralNext with step size 2 
+            // then we could run a sparse check by calling spiralNext with step size 2
             // we only do 1/4 the work and still catch all default portals
             // and only do a full spiral if it fails
             int x = spiral.x() + baseX;
