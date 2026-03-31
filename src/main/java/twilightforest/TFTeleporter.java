@@ -23,6 +23,7 @@ public class TFTeleporter extends Teleporter {
 
     protected WorldServer myWorld;
     protected Random rand;
+    private final int portalEmergenceVerticalTolerance = 5;
 
     public TFTeleporter(WorldServer par1WorldServer) {
         super(par1WorldServer);
@@ -76,13 +77,17 @@ public class TFTeleporter extends Teleporter {
 
     /**
      * Find some safe coords within range of the destination coords, or return null.
-     * 
-     * This could sure be a more methodic algorithm
      */
     private ChunkCoordinates findSafeCoords(int range, int x, int z, Entity entity) {
+        if (isSafeBiomeAt(x, z, entity)) return new ChunkCoordinates(x, 100, z);
+        Coord2D coords = new Coord2D(0, 0);
+        int dx, dz;
+        // 25 tries covers a 2 level spiral
+        int step = range / 2;
         for (int i = 0; i < 25; i++) {
-            int dx = x + (rand.nextInt(range) - rand.nextInt(range));
-            int dz = z + (rand.nextInt(range) - rand.nextInt(range));
+            coords = coords.spiralNext(step);
+            dx = x + coords.x();
+            dz = z + coords.z();
             if (isSafeBiomeAt(dx, dz, entity)) {
                 return new ChunkCoordinates(dx, 100, dz);
             }
@@ -108,68 +113,88 @@ public class TFTeleporter extends Teleporter {
 
     @Override
     public boolean placeInExistingPortal(Entity entity, double par3, double par5, double par7, float par9) {
+        return placeInExistingPortal(entity);
+    }
 
-        int c = 200;
-        double d = -1D;
-        int i = 0;
-        int j = 0;
-        int k = 0;
-        int l = MathHelper.floor_double(entity.posX);
-        int i1 = MathHelper.floor_double(entity.posZ);
-        for (int j1 = l - c; j1 <= l + c; j1++) {
-            double d1 = (j1 + 0.5D) - entity.posX;
-            for (int j2 = i1 - c; j2 <= i1 + c; j2++) {
-                double d3 = (j2 + 0.5D) - entity.posZ;
-                for (int k2 = TFWorld.MAXHEIGHT - 1; k2 >= 0; k2--) {
-                    if (!isBlockPortal(myWorld, j1, k2, j2)) {
-                        continue;
-                    }
-                    for (; isBlockPortal(myWorld, j1, k2 - 1, j2); k2--) {}
-                    double d5 = (k2 + 0.5D) - entity.posY;
-                    double d7 = d1 * d1 + d5 * d5 + d3 * d3;
-                    if (d < 0.0D || d7 < d) {
-                        d = d7;
-                        i = j1;
-                        j = k2;
-                        k = j2;
-                    }
+    public boolean placeInExistingPortal(Entity entity) {
+        Coord2D spiral = new Coord2D(0, 0);
+        int portalX = 0;
+        int portalY = -1;
+        int portalZ = 0;
+        double finalDist = -1D;
+        int maxRad = 200;
+        int baseX = MathHelper.floor_double(entity.posX);
+        int baseZ = MathHelper.floor_double(entity.posZ);
+
+        while (spiral.rad() <= maxRad) {
+            // spiral outward from entity position until we hit a column with portal in it
+            //
+            // this could potentially be further optimized if we assume that most people won't be making noodle portals
+            // then we could run a sparse check by calling spiralNext with step size 2
+            // we only do 1/4 the work and still catch all default portals
+            // and only do a full spiral if it fails
+            int x = spiral.x() + baseX;
+            int z = spiral.z() + baseZ;
+            for (int y = TFWorld.MAXHEIGHT - 1; y >= 0; y--) {
+                // scan for portals from top of the world
+                if (!isBlockPortal(myWorld, x, y, z)) {
+                    continue;
                 }
-
+                // traverse to the bottom of portal stack
+                for (; isBlockPortal(myWorld, x, y - 1, z); y--) {}
+                double d1 = x + 0.5D - entity.posX;
+                double d3 = z + 0.5D - entity.posZ;
+                double d5 = y + 0.5D - entity.posY;
+                double sqDist = d1 * d1 + d3 * d3 + d5 * d5;
+                if (finalDist < 0 || sqDist < finalDist) {
+                    finalDist = sqDist;
+                    portalX = x;
+                    portalY = y;
+                    portalZ = z;
+                    maxRad = spiral.rad();
+                }
             }
-
+            spiral = spiral.spiralNext();
         }
 
-        if (d >= 0.0D) {
-            int k1 = i;
-            int l1 = j;
-            int i2 = k;
-            double portalX = k1 + 0.5D;
-            double portalY = l1 + 0.5D;
-            double portalZ = i2 + 0.5D;
-            if (isBlockPortal(myWorld, k1 - 1, l1, i2)) {
-                portalX -= 0.5D;
+        // no portal found within range
+        if (finalDist == -1) return false;
+
+        for (int dy = 1; dy >= -portalEmergenceVerticalTolerance;) {
+            spiral = new Coord2D(0, 0);
+            while (spiral.rad() <= TwilightForestMod.portalMaxSize) {
+                // spiral outward from portal column until we find a viable place to deposit entity
+                // checking a box 2*MS+1 x 2*PEVT+1 x 2*MS+1 around the portal block
+                // prioritizes space above portal
+                int x = portalX + spiral.x();
+                int y = portalY + dy;
+                int z = portalZ + spiral.z();
+                if (isSafeExit(x, y, z)) {
+                    entity.setLocationAndAngles(x + 0.5, y, z + 0.5, entity.rotationYaw, 0.0F);
+                    entity.motionX = entity.motionY = entity.motionZ = 0.0D;
+                    return true;
+                }
+                spiral = spiral.spiralNext();
             }
-            if (isBlockPortal(myWorld, k1 + 1, l1, i2)) {
-                portalX += 0.5D;
-            }
-            if (isBlockPortal(myWorld, k1, l1, i2 - 1)) {
-                portalZ -= 0.5D;
-            }
-            if (isBlockPortal(myWorld, k1, l1, i2 + 1)) {
-                portalZ += 0.5D;
-            }
-            int xOffset = 0;
-            int zOffset = 0;
-            while (xOffset == zOffset && xOffset == 0) {
-                xOffset = rand.nextInt(3) - rand.nextInt(3);
-                zOffset = rand.nextInt(3) - rand.nextInt(3);
-            }
-            entity.setLocationAndAngles(portalX + xOffset, portalY + 1, portalZ + zOffset, entity.rotationYaw, 0.0F);
-            entity.motionX = entity.motionY = entity.motionZ = 0.0D;
-            return true;
-        } else {
-            return false;
+            // check layers from portal up, then from portal down
+            dy = (dy > 0) ? ((dy < portalEmergenceVerticalTolerance) ? dy + 1 : 0) : dy - 1;
         }
+        return false;
+    }
+
+    private boolean isSafeExit(int x, int y, int z) {
+        // Must stand on solid ground
+        if (!myWorld.getBlock(x, y - 1, z).getMaterial().isSolid()) return false;
+
+        // Space for player
+        if (myWorld.getBlock(x, y, z).getMaterial().isSolid()) return false;
+        if (myWorld.getBlock(x, y + 1, z).getMaterial().isSolid()) return false;
+
+        // Must not be inside portal blocks
+        if (isBlockPortal(myWorld, x, y, z)) return false;
+        if (isBlockPortal(myWorld, x, y + 1, z)) return false;
+
+        return true;
     }
 
     /**
