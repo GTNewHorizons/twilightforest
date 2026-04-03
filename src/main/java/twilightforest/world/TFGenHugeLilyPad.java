@@ -10,13 +10,13 @@ import twilightforest.block.TFBlocks;
 
 /**
  * Generate huge lily pads
- * 
+ *
  * @author Ben
  *
  */
 public class TFGenHugeLilyPad extends WorldGenerator {
 
-    private Random rand = new Random();
+    private FastRandom rand = new FastRandom(0L);
 
     public boolean generate(World world, Random random, int x, int y, int z) {
         for (int i = 0; i < 10; i++) {
