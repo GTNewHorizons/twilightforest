@@ -50,7 +50,7 @@ public record Coord2D(int x, int z) {
     }
 
     private Coord2D spiralNextCW(int step) {
-        // always called with negative step
+        // always called with positive step
         int x = this.x;
         int z = this.z;
 
