@@ -5,7 +5,6 @@ import net.minecraft.block.BlockDispenser;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.AchievementPage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -405,7 +404,7 @@ public class TwilightForestMod {
     @EventHandler
     public void startServer(FMLServerStartingEvent event) {
         // dispenser behaviors
-        registerDispenseBehaviors(event.getServer());
+        registerDispenseBehaviors();
 
         // event.registerServerCommand(new CommandTFFeature());
         event.registerServerCommand(new CommandTFProgress());
@@ -949,9 +948,8 @@ public class TwilightForestMod {
     /**
      * Register all dispenser behaviors.
      */
-    private void registerDispenseBehaviors(MinecraftServer minecraftServer) {
-        BlockDispenser.dispenseBehaviorRegistry
-                .putObject(TFItems.spawnEgg, new BehaviorTFMobEggDispense(minecraftServer));
+    private void registerDispenseBehaviors() {
+        BlockDispenser.dispenseBehaviorRegistry.putObject(TFItems.spawnEgg, new BehaviorTFMobEggDispense());
     }
 
     /**
