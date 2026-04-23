@@ -97,6 +97,9 @@ public abstract class TFBiomeBase extends BiomeGenBase {
     public TFBiomeBase(int i) {
         super(i);
 
+        // Set default filler block meta to 0
+        this.field_76754_C = 0;
+
         bigMushroomGen = new WorldGenBigMushroom();
         birchGen = new WorldGenForest(false, false);
 
@@ -136,6 +139,7 @@ public abstract class TFBiomeBase extends BiomeGenBase {
 
         getTFBiomeDecorator().setTreesPerChunk(10);
         getTFBiomeDecorator().setGrassPerChunk(2);
+
     }
 
     @Override
