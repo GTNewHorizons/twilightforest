@@ -1,36 +1,19 @@
 package twilightforest.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 
-import twilightforest.block.TFBlocks;
+public class ItemBlockTFLeaves extends ItemBlockTFMeta {
 
-public class ItemBlockTFLeaves extends ItemBlock {
-
-    public ItemBlockTFLeaves(Block par1) {
-        super(par1);
+    public ItemBlockTFLeaves(Block leaves) {
+        super(leaves);
         setHasSubtypes(true);
         setMaxDamage(0);
     }
 
-    /**
-     * Gets an icon index based on an item's damage value
-     */
-    @Override
-    public IIcon getIconFromDamage(int par1) {
-        return TFBlocks.leaves.getIcon(2, par1);
-    }
-
     @Override
     public String getUnlocalizedName(ItemStack itemstack) {
-        int meta = itemstack.getItemDamage();
+        int meta = itemstack.getItemDamage() & 3;
         return super.getUnlocalizedName() + "." + meta;
-    }
-
-    @Override
-    public int getMetadata(int i) {
-        return i;
     }
 }
