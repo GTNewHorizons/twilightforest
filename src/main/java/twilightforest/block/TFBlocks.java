@@ -9,10 +9,9 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.BlockTFChest.WoodType;
 import twilightforest.item.ItemBlockTFCritter;
-import twilightforest.item.ItemBlockTFLeaves;
-import twilightforest.item.ItemBlockTFLog;
 import twilightforest.item.ItemBlockTFMeta;
 import twilightforest.item.ItemBlockTFNagastone;
+import twilightforest.item.ItemBlockTFTree;
 
 public class TFBlocks {
 
@@ -286,7 +285,7 @@ public class TFBlocks {
         castleUnlock = (new BlockTFCastleUnlock()).setBlockName("CastleUnlock");
 
         // register blocks with their pickup values
-        registerMyBlock(log, ItemBlockTFLog.class);
+        registerMyBlock(log, ItemBlockTFTree.class);
         registerMyBlock(planks);
         registerMyBlock(
                 woodenSlab,
@@ -341,7 +340,7 @@ public class TFBlocks {
         registerMyBlock(trappedChestMine);
         registerMyBlock(trappedChestSort);
         registerMyBlock(root);
-        registerMyBlock(leaves, ItemBlockTFLeaves.class);
+        registerMyBlock(leaves, ItemBlockTFTree.class);
         registerMyBlock(firefly, ItemBlockTFCritter.class);
         registerMyBlock(cicada, ItemBlockTFCritter.class);
         registerMyBlock(portal, ItemBlock.class);
@@ -370,9 +369,9 @@ public class TFBlocks {
         registerMyBlock(spiralStoneBricks);
         registerMyBlock(sapling);
         registerMyBlock(moonworm, ItemBlockTFCritter.class);
-        registerMyBlock(magicLog, ItemBlockTFLog.class);
-        registerMyBlock(magicLeaves, ItemBlockTFLeaves.class);
-        registerMyBlock(magicLogSpecial, ItemBlockTFLog.class);
+        registerMyBlock(magicLog, ItemBlockTFTree.class);
+        registerMyBlock(magicLeaves, ItemBlockTFTree.class);
+        registerMyBlock(magicLogSpecial, ItemBlockTFTree.class);
         registerMyBlock(towerWood);
         registerMyBlock(towerDevice);
         registerMyBlock(towerTranslucent);
@@ -389,7 +388,7 @@ public class TFBlocks {
                 ((BlockTFThorns) thorns).getNames());
         registerMyBlock(burntThorns, ItemBlock.class);
         registerMyBlock(thornRose, ItemBlock.class);
-        registerMyBlock(leaves3, ItemBlockTFLeaves.class);
+        registerMyBlock(leaves3, ItemBlockTFTree.class);
         registerMyBlock(deadrock, twilightforest.item.ItemBlockTFDeadrock.class, deadrock, BlockTFDeadrock.names);
         registerMyBlock(darkleaves, ItemBlock.class);
         registerMyBlock(auroraPillar, ItemBlock.class);
@@ -432,7 +431,7 @@ public class TFBlocks {
         registerMyBlock(forceField);
         registerMyBlock(cinderFurnace, ItemBlock.class);
         registerMyBlock(cinderFurnaceLit, ItemBlock.class);
-        registerMyBlock(cinderLog, ItemBlockTFLog.class);
+        registerMyBlock(cinderLog, ItemBlockTFTree.class);
         registerMyBlock(castleDoor);
         registerMyBlock(castleDoorVanished);
 
