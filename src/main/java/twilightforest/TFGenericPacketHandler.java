@@ -6,6 +6,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 
+import com.falsepattern.endlessids.mixin.helpers.ChunkBiomeHook;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -14,6 +16,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import twilightforest.client.renderer.TFWeatherRenderer;
+import twilightforest.compat.Mods;
 import twilightforest.entity.EntityTFProtectionBox;
 import twilightforest.world.WorldProviderTwilightForest;
 
@@ -68,7 +71,7 @@ public class TFGenericPacketHandler {
         int x = buf.readInt();
         int z = buf.readInt();
         // biome?
-        byte biomeID = buf.readByte();
+        int biomeID = buf.readInt();
 
         // FMLLog.info("Got tree of transformation effect packet for %d, %d, biomeid = %d", x, z, biomeID);
 
@@ -79,8 +82,13 @@ public class TFGenericPacketHandler {
         World worldObj = Minecraft.getMinecraft().theWorld;
 
         Chunk chunkAt = worldObj.getChunkFromBlockCoords(x, z);
+        int biomeIndex = (z & 15) << 4 | (x & 15);
 
-        chunkAt.getBiomeArray()[(z & 15) << 4 | (x & 15)] = biomeID;
+        if (Mods.endlessids.isLoaded()) {
+            ((ChunkBiomeHook) chunkAt).getBiomeShortArray()[biomeIndex] = (short) biomeID;
+        } else {
+            chunkAt.getBiomeArray()[biomeIndex] = (byte) biomeID;
+        }
 
         worldObj.markBlockRangeForRenderUpdate(x, 0, z, x, 255, z);
     }
@@ -196,13 +204,13 @@ public class TFGenericPacketHandler {
     /**
      * Make a FMLProxyPacket that contains the data we need to change a biome in the world.
      */
-    public static FMLProxyPacket makeBiomeChangePacket(int x, int z, byte biomeID) {
+    public static FMLProxyPacket makeBiomeChangePacket(int x, int z, int biomeID) {
         PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
 
         payload.writeByte(TRANSFORM_BIOME); // discriminator byte
         payload.writeInt(x);
         payload.writeInt(z);
-        payload.writeByte(biomeID);
+        payload.writeInt(biomeID);
 
         FMLProxyPacket pkt = new FMLProxyPacket(payload, TwilightForestMod.ID);
 

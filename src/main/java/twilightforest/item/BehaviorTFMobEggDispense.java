@@ -3,17 +3,9 @@ package twilightforest.item;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 
 public class BehaviorTFMobEggDispense extends BehaviorDefaultDispenseItem {
-
-    /** Reference to the MinecraftServer object. */
-    final MinecraftServer mcServer;
-
-    public BehaviorTFMobEggDispense(MinecraftServer server) {
-        this.mcServer = server;
-    }
 
     /**
      * Dispense the specified stack, play the dispense sound and spawn particles.

@@ -9,8 +9,9 @@ import org.lwjgl.opengl.GL11;
 
 public class ModelTFTrophyArmor extends ModelBiped {
 
-    private int boss = 0;
+    private final int boss;
     private int time = 0;
+    private ModelTFTowerBoss urGhastModel;
 
     public ModelTFTrophyArmor(int boss, float expand) {
         super(expand);
@@ -27,7 +28,7 @@ public class ModelTFTrophyArmor extends ModelBiped {
         this.bipedRightLeg.showModel = false;
         this.bipedLeftLeg.showModel = false;
 
-        switch (boss) {
+        switch (this.boss) {
             case 0 -> { // Hydra
                 ModelTFHydraHead hydraHeadModel = new ModelTFHydraHead();
                 hydraHeadModel.head.offsetY = -1.0f;
@@ -46,7 +47,7 @@ public class ModelTFTrophyArmor extends ModelBiped {
                 bipedHeadwear.showModel = true;
             }
             case 3 -> { // Ur-Ghast
-                ModelTFTowerBoss urGhastModel = new ModelTFTowerBoss();
+                urGhastModel = new ModelTFTowerBoss();
                 urGhastModel.body.offsetY = -1f;
                 bipedHead.addChild(urGhastModel.body);
             }
@@ -86,14 +87,14 @@ public class ModelTFTrophyArmor extends ModelBiped {
      * Sets the models various rotation angles then renders the model.
      */
     @Override
-    public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7) {
+    public void render(Entity entity, float par2, float par3, float par4, float par5, float par6, float par7) {
 
-        if (par1Entity != null) {
-            this.isSneak = par1Entity.isSneaking();
+        if (entity != null) {
+            this.isSneak = entity.isSneaking();
         }
 
-        if (par1Entity != null && par1Entity instanceof EntityLivingBase) {
-            this.heldItemRight = ((EntityLivingBase) par1Entity).getHeldItem() != null ? 1 : 0;
+        if (entity instanceof EntityLivingBase) {
+            this.heldItemRight = ((EntityLivingBase) entity).getHeldItem() != null ? 1 : 0;
         }
 
         float scale = 1.0f;
@@ -121,12 +122,9 @@ public class ModelTFTrophyArmor extends ModelBiped {
                 dZ = 0.0f;
             }
             case 3 -> { // Ur-Ghast
-                bipedHead = new ModelRenderer(this, 0, 0);
-                ModelTFTowerBoss urGhastModel = new ModelTFTowerBoss();
                 urGhastModel.body.offsetY = -1f;
-                urGhastModel.setRotationAngles(0.0F, 0, time, 0, 0.0F, 0.0625F, par1Entity);
+                urGhastModel.setRotationAngles(0.0F, 0, time, 0, 0.0F, 0.0625F, entity);
                 time++;
-                bipedHead.addChild(urGhastModel.body);
                 scale = 0.5f * 1.06f;
                 dX = 0.0f;
                 dY = 0.005f;
@@ -161,7 +159,7 @@ public class ModelTFTrophyArmor extends ModelBiped {
         GL11.glScalef(scale, scale, scale);
         GL11.glTranslatef(dX, dY, dZ);
 
-        super.render(par1Entity, par2, par3, par4, par5, par6, par7);
+        super.render(entity, par2, par3, par4, par5, par6, par7);
 
         GL11.glScalef(1 / scale, 1 / scale, 1 / scale);
         GL11.glTranslatef(-dX, -dY, -dZ);
