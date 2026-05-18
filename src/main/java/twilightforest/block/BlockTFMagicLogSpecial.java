@@ -21,6 +21,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 
+import com.falsepattern.endlessids.mixin.helpers.ChunkBiomeHook;
+
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -29,6 +31,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TFGenericPacketHandler;
 import twilightforest.TwilightForestMod;
 import twilightforest.biomes.TFBiomeBase;
+import twilightforest.compat.Mods;
 import twilightforest.item.ItemTFOreMagnet;
 import twilightforest.item.TFItems;
 
@@ -194,9 +197,14 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
                     // I wonder how possible it is to change this
 
                     Chunk chunkAt = world.getChunkFromBlockCoords(x + dx, z + dz);
+                    int biomeIndex = ((z + dz) & 15) << 4 | ((x + dx) & 15);
 
-                    chunkAt.getBiomeArray()[((z + dz) & 15) << 4
-                            | ((x + dx) & 15)] = (byte) TFBiomeBase.enchantedForest.biomeID;
+                    if (Mods.endlessids.isLoaded()) {
+                        ((ChunkBiomeHook) chunkAt)
+                                .getBiomeShortArray()[biomeIndex] = (short) TFBiomeBase.enchantedForest.biomeID;
+                    } else {
+                        chunkAt.getBiomeArray()[biomeIndex] = (byte) TFBiomeBase.enchantedForest.biomeID;
+                    }
 
                     world.markBlockForUpdate((x + dx), y, (z + dz));
 
@@ -205,7 +213,7 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
                     // send chunk?!
 
                     if (world instanceof WorldServer) {
-                        sendChangedBiome(world, x + dx, z + dz, chunkAt);
+                        sendChangedBiome(world, x + dx, z + dz);
                     }
 
                 }
@@ -217,9 +225,9 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     /**
      * Send a tiny update packet to the client to inform it of the changed biome
      */
-    private void sendChangedBiome(World world, int x, int z, Chunk chunkAt) {
+    private void sendChangedBiome(World world, int x, int z) {
         FMLProxyPacket message = TFGenericPacketHandler
-                .makeBiomeChangePacket(x, z, (byte) TFBiomeBase.enchantedForest.biomeID);
+                .makeBiomeChangePacket(x, z, TFBiomeBase.enchantedForest.biomeID);
 
         NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(
                 world.provider.dimensionId,

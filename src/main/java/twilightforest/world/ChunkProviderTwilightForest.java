@@ -29,11 +29,14 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.ChunkProviderEvent;
 
+import com.falsepattern.endlessids.mixin.helpers.ChunkBiomeHook;
+
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import twilightforest.TFFeature;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.TFBlocks;
+import twilightforest.compat.Mods;
 
 // Referenced classes of package net.minecraft.src:
 // IChunkProvider, MapGenCaves, MapGenStronghold, MapGenVillage,
@@ -146,9 +149,16 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         Chunk chunk = new Chunk(worldObj, blockStorage, metaStorage, cx, cz);
 
         // load in biomes, to prevent striping?!
-        byte[] chunkBiomes = chunk.getBiomeArray();
-        for (int i = 0; i < chunkBiomes.length; ++i) {
-            chunkBiomes[i] = (byte) this.biomesForGeneration[i].biomeID;
+        if (Mods.endlessids.isLoaded()) {
+            short[] chunkBiomes = ((ChunkBiomeHook) chunk).getBiomeShortArray();
+            for (int i = 0; i < chunkBiomes.length; ++i) {
+                chunkBiomes[i] = (short) this.biomesForGeneration[i].biomeID;
+            }
+        } else {
+            byte[] chunkBiomes = chunk.getBiomeArray();
+            for (int i = 0; i < chunkBiomes.length; ++i) {
+                chunkBiomes[i] = (byte) this.biomesForGeneration[i].biomeID;
+            }
         }
 
         chunk.generateSkylightMap();
