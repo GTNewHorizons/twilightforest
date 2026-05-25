@@ -33,6 +33,17 @@ public class FastRandom extends Random {
         return (int) (seed >>> (48 - bits));
     }
 
+    // Raw seed accessors, bypassing the XOR scramble in setSeed. For
+    // snapshot/restore across a reseed of this same instance.
+    public long getStateSeed() {
+        return seed;
+    }
+
+    public void setStateSeed(long rawSeed) {
+        this.seed = rawSeed & MASK;
+        this.haveNextNextGaussian = false;
+    }
+
     @Override
     public double nextGaussian() {
         if (haveNextNextGaussian) {

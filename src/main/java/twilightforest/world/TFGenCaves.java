@@ -109,30 +109,37 @@ public class TFGenCaves extends MapGenCaves {
             var23 += (caveRNG.nextFloat() - caveRNG.nextFloat()) * caveRNG.nextFloat() * 4.0F;
 
             if (!shouldStop && loopOne == var27 && caveSize > 1.0F && loopEnd > 0) {
+                long seedA = caveRNG.nextLong();
+                float sizeA = caveRNG.nextFloat() * 0.5F + 0.5F;
+                long savedCave = caveRNG.getStateSeed();
                 this.generateCaveNode(
-                        caveRNG.nextLong(),
+                        seedA,
                         centerX,
                         centerZ,
                         blockStorage,
                         randX,
                         randY,
                         randZ,
-                        caveRNG.nextFloat() * 0.5F + 0.5F,
+                        sizeA,
                         randPI - ((float) Math.PI / 2F),
                         angleToGenerate / 3.0F,
                         loopOne,
                         loopEnd,
                         1.0D,
                         isHighlands);
+                caveRNG.setStateSeed(savedCave);
+
+                long seedB = caveRNG.nextLong();
+                float sizeB = caveRNG.nextFloat() * 0.5F + 0.5F;
                 this.generateCaveNode(
-                        caveRNG.nextLong(),
+                        seedB,
                         centerX,
                         centerZ,
                         blockStorage,
                         randX,
                         randY,
                         randZ,
-                        caveRNG.nextFloat() * 0.5F + 0.5F,
+                        sizeB,
                         randPI + ((float) Math.PI / 2F),
                         angleToGenerate / 3.0F,
                         loopOne,
