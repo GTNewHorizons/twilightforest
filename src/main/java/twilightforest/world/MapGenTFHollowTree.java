@@ -24,6 +24,10 @@ import twilightforest.structures.hollowtree.StructureTFHollowTreeStart;
 
 public class MapGenTFHollowTree extends MapGenBase {
 
+    public MapGenTFHollowTree() {
+        this.rand = new FastRandom(0L);
+    }
+
     // public static final int SPAWN_CHANCE = 48;
     /**
      * Used to store a list of all structures that have been recursively generated. Used so that during recursive
@@ -37,13 +41,14 @@ public class MapGenTFHollowTree extends MapGenBase {
      */
     protected void func_151538_a(World world, final int chunkX, final int chunkZ, int centerX, int centerZ,
             Block[] blockData) {
-        if (!this.structureMap.containsKey(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ))) {
+        long key = ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ);
+        if (!this.structureMap.containsKey(key)) {
             this.rand.nextInt();
 
             try {
                 if (this.canSpawnStructureAtCoords(chunkX, chunkZ)) {
                     StructureStart structurestart = this.getStructureStart(chunkX, chunkZ);
-                    this.structureMap.put(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ), structurestart);
+                    this.structureMap.put(key, structurestart);
                 }
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception preparing hollow tree");
