@@ -66,9 +66,9 @@ public class ItemTFMagicMap extends ItemMap {
     }
 
     public void updateMapData(World world, Entity entity, TFMagicMapData mapData) {
-        if (world.provider.dimensionId == mapData.dimension && entity instanceof EntityPlayer) {
-            ChunkProviderTwilightForest chunkProvider = ((WorldProviderTwilightForest) world.provider)
-                    .getChunkProvider();
+        if (world.provider.dimensionId == mapData.dimension && entity instanceof EntityPlayer player
+                && world.provider instanceof WorldProviderTwilightForest tfProvider) {
+            ChunkProviderTwilightForest chunkProvider = tfProvider.getChunkProvider();
             short xSize = 128;
             short zSize = 128;
             int scaleFactor = 1 << mapData.scale;
@@ -79,7 +79,7 @@ public class ItemTFMagicMap extends ItemMap {
             int drawSize = 512 / scaleFactor;
             // int drawSize = 1024 / scaleFactor;
 
-            MapInfo mapInfo = mapData.func_82568_a((EntityPlayer) entity);
+            MapInfo mapInfo = mapData.func_82568_a(player);
             ++mapInfo.field_82569_d;
 
             for (int xStep = xDraw - drawSize + 1; xStep < xDraw + drawSize; ++xStep) {
