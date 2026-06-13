@@ -163,7 +163,8 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
             Block targetBlock = world.getBlock(targetBlockX, targetBlockY, targetBlockZ);
 
             // give any randomly-ticking block an extra tick, unless pack-excluded (TimeCoreExcludedBlocks)
-            if (targetBlock != Blocks.air && targetBlock.getTickRandomly() && !getExcludedBlocks().contains(targetBlock)) {
+            if (targetBlock != Blocks.air && targetBlock.getTickRandomly()
+                    && !getExcludedBlocks().contains(targetBlock)) {
                 targetBlock.updateTick(world, targetBlockX, targetBlockY, targetBlockZ, rand);
             }
         }
