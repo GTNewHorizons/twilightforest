@@ -1,12 +1,13 @@
 package twilightforest.block;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockMushroom;
-import net.minecraft.block.IGrowable;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -145,10 +146,10 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         int numticks = 8 * 3 * this.tickRate(world);
 
         for (int i = 0; i < numticks; i++) {
-            // find a nearby block
-            int dx = rand.nextInt(32) - 16;
-            int dy = rand.nextInt(32) - 16;
-            int dz = rand.nextInt(32) - 16;
+            // find a nearby block, offset [-16, +16] on each axis (matches upstream timeCoreRange = 16)
+            int dx = rand.nextInt(33) - 16;
+            int dy = rand.nextInt(33) - 16;
+            int dz = rand.nextInt(33) - 16;
 
             int targetBlockX = x + dx;
             int targetBlockY = y + dy;
@@ -161,21 +162,31 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
             Block targetBlock = world.getBlock(targetBlockX, targetBlockY, targetBlockZ);
 
-            // plants only fools
-            if (!(targetBlock instanceof IGrowable)) {
-                continue;
-            }
-
-            // except mushrooms
-            if (targetBlock instanceof BlockMushroom) {
-                continue;
-            }
-
-            if (targetBlock.getTickRandomly()) {
-                world.scheduleBlockUpdate(targetBlockX, targetBlockY, targetBlockZ, targetBlock, 20);
+            // give any randomly-ticking block an extra tick, unless pack-excluded (TimeCoreExcludedBlocks)
+            if (targetBlock.getTickRandomly() && !getExcludedBlocks().contains(targetBlock)) {
                 targetBlock.updateTick(world, targetBlockX, targetBlockY, targetBlockZ, rand);
             }
         }
+    }
+
+    /**
+     * Resolve the configured exclusion names to Block instances once, then reuse. Done lazily because all blocks must
+     * be registered before {@link Block#getBlockFromName} can find them.
+     */
+    private static Set<Block> excludedBlocks;
+
+    private static Set<Block> getExcludedBlocks() {
+        if (excludedBlocks == null) {
+            Set<Block> resolved = Collections.newSetFromMap(new IdentityHashMap<>());
+            for (String name : TwilightForestMod.timeCoreExcludedBlocks) {
+                Block block = Block.getBlockFromName(name);
+                if (block != null) {
+                    resolved.add(block);
+                }
+            }
+            excludedBlocks = resolved;
+        }
+        return excludedBlocks;
     }
 
     /**
