@@ -2,14 +2,14 @@
 
 dependencies {
     compileOnly("thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev") {transitive = false}
-    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.54-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.92-GTNH:dev")
     compileOnly("com.github.GTNewHorizons:Battlegear2:1.4.3:api") {} //For TiC to work
-    compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.8.91-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.8.103-GTNH:dev")
     devOnlyNonPublishable("ganymedes01.etfuturum:Et-Futurum-Requiem:2.6.2.6-GTNH:dev")
     compileOnly("curse.maven:skinport-234948:3212017")
-    compileOnly("com.github.GTNewHorizons:Mobs-Info:0.5.10-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:Mobs-Info:0.5.17-GTNH:dev")
     compileOnly("com.falsepattern:endlessids-mc1.7.10:1.7.1:dev")
 
     // For Thaumcraft runtime
-    compileOnly ("com.github.GTNewHorizons:Baubles-Expanded:2.2.11-GTNH:dev")
+    compileOnly ("com.github.GTNewHorizons:Baubles-Expanded:2.2.21-GTNH:dev")
 }
