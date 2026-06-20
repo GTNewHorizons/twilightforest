@@ -21,8 +21,8 @@ public class TFMajorFeatureProviders {
 
     public static StructureComponent getTFMajorFeature(World world, Random rand, TFFeature feature, int x, int y,
             int z) {
-        for (TFMajorFeatureProvider provider : providers) {
-            StructureComponent tfMajorFeature = provider.getComponent(world, rand, feature, x, y, z);
+        for (int i = 0; i < providers.size(); i++) {
+            StructureComponent tfMajorFeature = providers.get(i).getComponent(world, rand, feature, x, y, z);
             if (tfMajorFeature != null) {
                 return tfMajorFeature;
             }
