@@ -11,6 +11,8 @@ public class ModelTFTrophyArmor extends ModelBiped {
 
     private final int boss;
     private ModelTFTowerBoss urGhastModel;
+    private float urGhastAnimTime = 0.0F;
+    private float lastAgeInTicks = 0.0F;
 
     public ModelTFTrophyArmor(int boss, float expand) {
         super(expand);
@@ -122,7 +124,11 @@ public class ModelTFTrophyArmor extends ModelBiped {
             }
             case 3 -> { // Ur-Ghast
                 urGhastModel.body.offsetY = -1f;
-                urGhastModel.setRotationAngles(0.0F, 0, par4, 0, 0.0F, 0.0625F, entity);
+                float ageDelta = Math.max(0.0F, par4 - lastAgeInTicks);
+                lastAgeInTicks = par4;
+                // 5x is a hand-picked "angry" speedup
+                urGhastAnimTime += ageDelta * (this.isSneak ? 5.0F : 1.0F);
+                urGhastModel.setRotationAngles(0.0F, 0, urGhastAnimTime, 0, 0.0F, 0.0625F, entity);
                 scale = 0.5f * 1.06f;
                 dX = 0.0f;
                 dY = 0.005f;
