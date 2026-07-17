@@ -2,6 +2,7 @@ package twilightforest;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -28,6 +29,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -55,6 +57,7 @@ import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.biomes.TFBiomeBase;
@@ -67,6 +70,7 @@ import twilightforest.integration.TFBaublesIntegration;
 import twilightforest.item.ItemTFPhantomArmor;
 import twilightforest.item.TFItems;
 import twilightforest.world.ChunkProviderTwilightForest;
+import twilightforest.world.TFWeatherData;
 import twilightforest.world.TFWorldChunkManager;
 import twilightforest.world.WorldProviderTwilightForest;
 
@@ -77,6 +81,7 @@ public class TFEventListener {
 
     public static String fileName = "tf";
     public static String fileNameBackup = "tfback";
+    private static Field worldInfoField = null;
 
     protected HashMap<String, InventoryPlayer> playerKeepsMap = new HashMap<>();
     protected HashMap<String, ItemStack[]> playerBaublesMap = new HashMap<>();
@@ -1049,12 +1054,48 @@ public class TFEventListener {
     @SubscribeEvent
     public void worldLoaded(WorldEvent.Load event) {
         // check rule
-        if (!event.world.isRemote && !event.world.getGameRules().hasRule(TwilightForestMod.ENFORCED_PROGRESSION_RULE)) {
+        World world = event.world;
+        if (!world.isRemote && !world.getGameRules().hasRule(TwilightForestMod.ENFORCED_PROGRESSION_RULE)) {
             FMLLog.info(
                     "[TwilightForest] Loaded a world with the tfEnforcedProgression game rule not defined.  Defining it.");
 
-            event.world.getGameRules().addGameRule(TwilightForestMod.ENFORCED_PROGRESSION_RULE, "true");
+            world.getGameRules().addGameRule(TwilightForestMod.ENFORCED_PROGRESSION_RULE, "true");
         }
+        if (world.isRemote) return;
+        if (!(world.provider instanceof WorldProviderTwilightForest provider)) return;
+        try {
+            WorldInfo worldInfo = new WorldInfo(world.getWorldInfo().cloneNBTCompound(null));
+
+            TFWeatherData data = TFWeatherData.get(world);
+            worldInfo.setWorldTime(data.worldTime);
+            worldInfo.setRaining(data.raining);
+            worldInfo.setRainTime(data.rainTime);
+            worldInfo.setThundering(data.thundering);
+            worldInfo.setThunderTime(data.thunderTime);
+
+            if (worldInfoField == null) {
+                worldInfoField = ReflectionHelper.findField(World.class, "worldInfo", "field_72986_A");
+            }
+            worldInfoField.set(world, worldInfo);
+
+        } catch (Exception e) {
+            FMLLog.severe("[TwilightForest] Failed to decouple WorldInfo for dimension " + provider.dimensionId, e);
+        }
+    }
+
+    @SubscribeEvent
+    public void worldSave(WorldEvent.Save event) {
+        World world = event.world;
+        if (world.isRemote) return;
+        if (!(world.provider instanceof WorldProviderTwilightForest)) return;
+        TFWeatherData data = TFWeatherData.get(world);
+        WorldInfo worldInfo = world.getWorldInfo();
+        data.worldTime = worldInfo.getWorldTime();
+        data.raining = worldInfo.isRaining();
+        data.rainTime = worldInfo.getRainTime();
+        data.thundering = worldInfo.isThundering();
+        data.thunderTime = worldInfo.getThunderTime();
+        data.markDirty();
     }
 
     /**

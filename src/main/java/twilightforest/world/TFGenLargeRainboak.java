@@ -23,7 +23,7 @@ public class TFGenLargeRainboak extends TFTreeGenerator {
     static final byte[] otherCoordPairs = new byte[] { (byte) 2, (byte) 0, (byte) 0, (byte) 1, (byte) 2, (byte) 1 };
 
     /** random seed for GenBigTree */
-    Random rand = new Random();
+    FastRandom rand = new FastRandom(0L);
 
     /** Reference to the World object. */
     World worldObj;

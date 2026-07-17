@@ -1,7 +1,5 @@
 package twilightforest.world;
 
-import java.util.Random;
-
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.MathHelper;
@@ -15,13 +13,17 @@ public class TFGenRavine extends MapGenBase {
 
     private float[] field_35627_a;
 
+    private final FastRandom ravineRNG = new FastRandom(0L);
+
     public TFGenRavine() {
         field_35627_a = new float[1024];
+        this.rand = new FastRandom(0L);
     }
 
     protected void generateRavine(long l, int i, int j, Block[] blockStorage, double d, double d1, double d2, float f,
             float f1, float f2, int k, int i1, double d3) {
-        Random random = new Random(l);
+        ravineRNG.setSeed(l);
+        FastRandom random = ravineRNG;
         double d4 = i * 16 + 8;
         double d5 = j * 16 + 8;
         float f3 = 0.0F;

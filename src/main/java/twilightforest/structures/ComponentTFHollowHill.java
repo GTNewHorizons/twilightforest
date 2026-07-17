@@ -166,9 +166,17 @@ public class ComponentTFHollowHill extends StructureTFComponent {
             Random stalRNG = new Random(world.getSeed() + dx * dz);
 
             // make the actual stalactite
-            TFGenCaveStalactite stalag = TFGenCaveStalactite.makeRandomOreStalactite(stalRNG, hillSize);
+            TFGenCaveStalactite stalag = makeRandomOreStalactite(stalRNG);
             stalag.generate(world, stalRNG, dx, dy, dz);
         }
+    }
+
+    protected int getHillSize() {
+        return hillSize;
+    }
+
+    protected TFGenCaveStalactite makeRandomOreStalactite(Random stalRNG) {
+        return TFGenCaveStalactite.makeRandomOreStalactite(stalRNG, hillSize);
     }
 
     /**

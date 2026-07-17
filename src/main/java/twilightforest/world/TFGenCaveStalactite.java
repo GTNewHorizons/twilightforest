@@ -180,12 +180,16 @@ public class TFGenCaveStalactite extends TFGenerator {
                 }
 
                 for (int dy = 0; dy != (spikeLength * dir); dy += dir) {
-                    setBlock(world, x + dx, y + dy, z + dz, blockID);
+                    placeStalactiteBlock(world, x + dx, y + dy, z + dz);
                 }
             }
         }
 
         return true;
+    }
+
+    protected void placeStalactiteBlock(World world, int x, int y, int z) {
+        setBlock(world, x, y, z, blockID);
     }
 
 }

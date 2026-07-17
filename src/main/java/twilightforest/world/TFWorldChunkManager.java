@@ -192,6 +192,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
      */
     @SuppressWarnings("rawtypes")
     public boolean areBiomesViable(int par1, int par2, int par3, List par4List) {
+        IntCache.resetIntCache();
         int i = par1 - par3 >> 2;
         int j = par2 - par3 >> 2;
         int k = par1 + par3 >> 2;
@@ -216,6 +217,7 @@ public class TFWorldChunkManager extends WorldChunkManager {
      */
     @SuppressWarnings("rawtypes")
     public ChunkPosition findBiomePosition(int par1, int par2, int par3, List par4List, Random par5Random) {
+        IntCache.resetIntCache();
         int i = par1 - par3 >> 2;
         int j = par2 - par3 >> 2;
         int k = par1 + par3 >> 2;

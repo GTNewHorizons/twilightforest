@@ -5,7 +5,6 @@
 package twilightforest.world;
 
 import java.util.List;
-import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
@@ -29,11 +28,14 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.ChunkProviderEvent;
 
+import com.falsepattern.endlessids.mixin.helpers.ChunkBiomeHook;
+
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import twilightforest.TFFeature;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.TFBlocks;
+import twilightforest.compat.Mods;
 
 // Referenced classes of package net.minecraft.src:
 // IChunkProvider, MapGenCaves, MapGenStronghold, MapGenVillage,
@@ -44,7 +46,7 @@ import twilightforest.block.TFBlocks;
 
 public class ChunkProviderTwilightForest implements IChunkProvider {
 
-    private Random rand;
+    private FastRandom rand;
     // private NoiseGeneratorOctaves noiseGen1;
     // private NoiseGeneratorOctaves noiseGen2;
     // private NoiseGeneratorOctaves noiseGen3;
@@ -94,7 +96,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         ravineGenerator = new TFGenRavine();
         unusedIntArray32x32 = new int[32][32];
         worldObj = world;
-        rand = new Random(l);
+        rand = new FastRandom(l);
         // noiseGen1 = new NoiseGeneratorOctaves(rand, 16);
         // noiseGen2 = new NoiseGeneratorOctaves(rand, 16);
         // noiseGen3 = new NoiseGeneratorOctaves(rand, 8);
@@ -146,9 +148,16 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         Chunk chunk = new Chunk(worldObj, blockStorage, metaStorage, cx, cz);
 
         // load in biomes, to prevent striping?!
-        byte[] chunkBiomes = chunk.getBiomeArray();
-        for (int i = 0; i < chunkBiomes.length; ++i) {
-            chunkBiomes[i] = (byte) this.biomesForGeneration[i].biomeID;
+        if (Mods.endlessids.isLoaded()) {
+            short[] chunkBiomes = ((ChunkBiomeHook) chunk).getBiomeShortArray();
+            for (int i = 0; i < chunkBiomes.length; ++i) {
+                chunkBiomes[i] = (short) this.biomesForGeneration[i].biomeID;
+            }
+        } else {
+            byte[] chunkBiomes = chunk.getBiomeArray();
+            for (int i = 0; i < chunkBiomes.length; ++i) {
+                chunkBiomes[i] = (byte) this.biomesForGeneration[i].biomeID;
+            }
         }
 
         chunk.generateSkylightMap();
@@ -761,10 +770,12 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         }
     }
 
+    private final FastRandom pseudoRandRNG = new FastRandom(0L);
+
     private float pseudoRand(int bx, int bz) {
-        Random rand = new Random(this.worldObj.getSeed() + (bx * 321534781) ^ (bz * 756839));
-        rand.setSeed(rand.nextLong());
-        return rand.nextFloat();
+        pseudoRandRNG.setSeed(this.worldObj.getSeed() + (bx * 321534781) ^ (bz * 756839));
+        pseudoRandRNG.setSeed(pseudoRandRNG.nextLong());
+        return pseudoRandRNG.nextFloat();
     }
 
     /**
@@ -829,6 +840,31 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
             }
         }
 
+        // Early exit if no dark forest biomes in the area
+        boolean hasDarkForest = false;
+        for (int i = 0; i < 5 * 5; i++) {
+            if (thicks[i] > 0) {
+                hasDarkForest = true;
+                break;
+            }
+        }
+        if (!hasDarkForest) {
+            return;
+        }
+
+        TFFeature nearFeature = TFFeature.getNearestFeature(chunkX, chunkZ, worldObj);
+        int hx = 0, hz = 0;
+        boolean isDarkTower = nearFeature == TFFeature.darkTower;
+        if (isDarkTower) {
+            int[] nearCenter = TFFeature.getNearestCenter(chunkX, chunkZ, worldObj);
+            hx = nearCenter[0];
+            hz = nearCenter[1];
+        }
+
+        double d = 0.03125D;
+        stoneNoise = noiseGen4
+                .generateNoiseOctaves(stoneNoise, chunkX * 16, chunkZ * 16, 0, 16, 16, 1, d * 2D, d * 2D, d * 2D);
+
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
 
@@ -850,19 +886,12 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                 // int thickness = thicks[qz + (qz) * 5];
 
                 // make sure we're not too close to the tower
-                TFFeature nearFeature = TFFeature.getNearestFeature(chunkX, chunkZ, worldObj);
-                if (nearFeature == TFFeature.darkTower) {
-                    // check for closeness
-                    int[] nearCenter = TFFeature.getNearestCenter(chunkX, chunkZ, worldObj);
-                    int hx = nearCenter[0];
-                    int hz = nearCenter[1];
-
+                if (isDarkTower) {
                     int dx = x - hx;
                     int dz = z - hz;
                     int dist = (int) Math.sqrt(dx * dx + dz * dz);
 
                     if (dist < 24) {
-
                         thickness -= (24 - dist);
                     }
                 }
@@ -870,19 +899,6 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                 boolean generateForest = thickness > 1;
 
                 if (generateForest) {
-                    double d = 0.03125D;
-                    stoneNoise = noiseGen4.generateNoiseOctaves(
-                            stoneNoise,
-                            chunkX * 16,
-                            chunkZ * 16,
-                            0,
-                            16,
-                            16,
-                            1,
-                            d * 2D,
-                            d * 2D,
-                            d * 2D);
-
                     // find the (current) top block
                     int topLevel = -1;
                     for (int y = 127; y >= 0; y--) {

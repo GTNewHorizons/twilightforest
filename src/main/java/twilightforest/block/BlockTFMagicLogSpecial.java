@@ -1,12 +1,13 @@
 package twilightforest.block;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockMushroom;
-import net.minecraft.block.IGrowable;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -21,6 +22,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 
+import com.falsepattern.endlessids.mixin.helpers.ChunkBiomeHook;
+
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -29,6 +32,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TFGenericPacketHandler;
 import twilightforest.TwilightForestMod;
 import twilightforest.biomes.TFBiomeBase;
+import twilightforest.compat.Mods;
 import twilightforest.item.ItemTFOreMagnet;
 import twilightforest.item.TFItems;
 
@@ -142,10 +146,10 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         int numticks = 8 * 3 * this.tickRate(world);
 
         for (int i = 0; i < numticks; i++) {
-            // find a nearby block
-            int dx = rand.nextInt(32) - 16;
-            int dy = rand.nextInt(32) - 16;
-            int dz = rand.nextInt(32) - 16;
+            // find a nearby block, offset [-16, +16] on each axis (matches upstream timeCoreRange = 16)
+            int dx = rand.nextInt(33) - 16;
+            int dy = rand.nextInt(33) - 16;
+            int dz = rand.nextInt(33) - 16;
 
             int targetBlockX = x + dx;
             int targetBlockY = y + dy;
@@ -158,21 +162,31 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
             Block targetBlock = world.getBlock(targetBlockX, targetBlockY, targetBlockZ);
 
-            // plants only fools
-            if (!(targetBlock instanceof IGrowable)) {
-                continue;
-            }
-
-            // except mushrooms
-            if (targetBlock instanceof BlockMushroom) {
-                continue;
-            }
-
-            if (targetBlock.getTickRandomly()) {
-                world.scheduleBlockUpdate(targetBlockX, targetBlockY, targetBlockZ, targetBlock, 20);
+            // give any randomly-ticking block an extra tick, unless pack-excluded (TimeCoreExcludedBlocks)
+            if (targetBlock.getTickRandomly() && !getExcludedBlocks().contains(targetBlock)) {
                 targetBlock.updateTick(world, targetBlockX, targetBlockY, targetBlockZ, rand);
             }
         }
+    }
+
+    /**
+     * Resolve the configured exclusion names to Block instances once, then reuse. Done lazily because all blocks must
+     * be registered before {@link Block#getBlockFromName} can find them.
+     */
+    private static Set<Block> excludedBlocks;
+
+    private static Set<Block> getExcludedBlocks() {
+        if (excludedBlocks == null) {
+            Set<Block> resolved = Collections.newSetFromMap(new IdentityHashMap<>());
+            for (String name : TwilightForestMod.timeCoreExcludedBlocks) {
+                Block block = Block.getBlockFromName(name);
+                if (block != null) {
+                    resolved.add(block);
+                }
+            }
+            excludedBlocks = resolved;
+        }
+        return excludedBlocks;
     }
 
     /**
@@ -194,9 +208,14 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
                     // I wonder how possible it is to change this
 
                     Chunk chunkAt = world.getChunkFromBlockCoords(x + dx, z + dz);
+                    int biomeIndex = ((z + dz) & 15) << 4 | ((x + dx) & 15);
 
-                    chunkAt.getBiomeArray()[((z + dz) & 15) << 4
-                            | ((x + dx) & 15)] = (byte) TFBiomeBase.enchantedForest.biomeID;
+                    if (Mods.endlessids.isLoaded()) {
+                        ((ChunkBiomeHook) chunkAt)
+                                .getBiomeShortArray()[biomeIndex] = (short) TFBiomeBase.enchantedForest.biomeID;
+                    } else {
+                        chunkAt.getBiomeArray()[biomeIndex] = (byte) TFBiomeBase.enchantedForest.biomeID;
+                    }
 
                     world.markBlockForUpdate((x + dx), y, (z + dz));
 
@@ -205,7 +224,7 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
                     // send chunk?!
 
                     if (world instanceof WorldServer) {
-                        sendChangedBiome(world, x + dx, z + dz, chunkAt);
+                        sendChangedBiome(world, x + dx, z + dz);
                     }
 
                 }
@@ -217,9 +236,9 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     /**
      * Send a tiny update packet to the client to inform it of the changed biome
      */
-    private void sendChangedBiome(World world, int x, int z, Chunk chunkAt) {
+    private void sendChangedBiome(World world, int x, int z) {
         FMLProxyPacket message = TFGenericPacketHandler
-                .makeBiomeChangePacket(x, z, (byte) TFBiomeBase.enchantedForest.biomeID);
+                .makeBiomeChangePacket(x, z, TFBiomeBase.enchantedForest.biomeID);
 
         NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(
                 world.provider.dimensionId,

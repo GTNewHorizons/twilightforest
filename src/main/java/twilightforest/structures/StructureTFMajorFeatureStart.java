@@ -17,6 +17,7 @@ import net.minecraft.world.gen.structure.StructureStrongholdPieces;
 import twilightforest.TFFeature;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.TFBlocks;
+import twilightforest.integration.structures.TFMajorFeatureProviders;
 import twilightforest.structures.courtyard.ComponentTFNagaCourtyardMain;
 import twilightforest.structures.courtyard.TFNagaCourtyardPieces;
 import twilightforest.structures.darktower.ComponentTFDarkTowerMain;
@@ -127,6 +128,11 @@ public class StructureTFMajorFeatureStart extends StructureStart {
      * @return The first component we should add to our structure
      */
     public StructureComponent makeFirstComponent(World world, Random rand, TFFeature feature, int x, int y, int z) {
+
+        StructureComponent componentOverride = TFMajorFeatureProviders.getTFMajorFeature(world, rand, feature, x, y, z);
+        if (componentOverride != null) {
+            return componentOverride;
+        }
 
         if (feature == TFFeature.nagaCourtyard) {
             // return new ComponentTFNagaCourtyard(world, rand, 0, x, y, z);

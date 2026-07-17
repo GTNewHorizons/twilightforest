@@ -98,6 +98,7 @@ public class TwilightForestMod {
     public static boolean oldMapGen;
     public static String portalCreationItemString;
     public static int portalMaxSize;
+    public static java.util.Set<String> timeCoreExcludedBlocks;
 
     // integration
     public static boolean isGTNHLoaded = false;
@@ -1020,6 +1021,15 @@ public class TwilightForestMod {
                 Configuration.CATEGORY_GENERAL,
                 "portalMaxSize",
                 15).comment = "Maximal size of water pool that can be turned into a portal. NxN square.";
+
+        String[] timeCoreExcludedDefault = { "minecraft:portal" };
+        String[] timeCoreExcludedNames = configFile
+                .get(Configuration.CATEGORY_GENERAL, "TimeCoreExcludedBlocks", timeCoreExcludedDefault).getStringList();
+        configFile.get(
+                Configuration.CATEGORY_GENERAL,
+                "TimeCoreExcludedBlocks",
+                timeCoreExcludedDefault).comment = "Registry names of blocks the Tree of Time will NOT give extra random ticks to (e.g. 'minecraft:portal'). Format: 'modid:blockname'.";
+        timeCoreExcludedBlocks = new java.util.HashSet<>(java.util.Arrays.asList(timeCoreExcludedNames));
 
         canopyCoverage = (float) (configFile.get("Performance", "CanopyCoverage", 1.7).getDouble(1.7));
         configFile.get(
