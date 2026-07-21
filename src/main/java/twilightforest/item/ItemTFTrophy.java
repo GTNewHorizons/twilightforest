@@ -33,6 +33,7 @@ public class ItemTFTrophy extends ItemArmor {
             "questingRamTrophy" };
     private static final String[] armorTextures = new String[] { "hydra4", "nagahead", "twilightlich64", "towerboss",
             "snowqueen", "minoshroomtaur", "phantomtrophy", "yetialpha", "questram" };
+    private static final int UR_GHAST_DAMAGE = 3;
     public IIcon[] trophyIcons;
 
     public ItemTFTrophy() {
@@ -190,7 +191,7 @@ public class ItemTFTrophy extends ItemArmor {
         int damage = stack.getItemDamage();
 
         // ur-ghast trophy bares its "attacking" face while sneaking
-        if (damage == 3 && entity.isSneaking()) {
+        if (damage == UR_GHAST_DAMAGE && entity.isSneaking()) {
             return TwilightForestMod.MODEL_DIR + "towerboss_fire.png";
         }
 
