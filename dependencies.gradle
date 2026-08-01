@@ -9,6 +9,7 @@ dependencies {
     compileOnly("curse.maven:skinport-234948:3212017")
     compileOnly("com.github.GTNewHorizons:Mobs-Info:0.5.17-GTNH:dev")
     compileOnly("com.falsepattern:endlessids-mc1.7.10:1.7.1:dev")
+    implementation("com.github.GTNewHorizons:GTNHLib:0.11.34:dev")
 
     // For Thaumcraft runtime
     compileOnly ("com.github.GTNewHorizons:Baubles-Expanded:2.2.21-GTNH:dev")

@@ -13,6 +13,9 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
+import com.gtnewhorizon.gtnhlib.api.IFlowerPottable;
+
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
@@ -29,7 +32,8 @@ import twilightforest.world.TFGenSortingTree;
 import twilightforest.world.TFGenTreeOfTime;
 import twilightforest.world.TFGenTreeOfTransformation;
 
-public class BlockTFSapling extends BlockSapling {
+@Optional.Interface(iface = "com.gtnewhorizon.gtnhlib.api.IFlowerPottable", modid = "gtnhlib")
+public class BlockTFSapling extends BlockSapling implements IFlowerPottable {
 
     private IIcon[] icons;
     private String[] iconNames = new String[] { "sapling_oak", "sapling_canopy", "sapling_mangrove", "sapling_darkwood",
@@ -150,5 +154,4 @@ public class BlockTFSapling extends BlockSapling {
         itemList.add(new ItemStack(item, 1, 8));
         itemList.add(new ItemStack(item, 1, 9));
     }
-
 }
