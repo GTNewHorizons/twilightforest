@@ -7,9 +7,13 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
+import com.gtnewhorizon.gtnhlib.api.IFlowerPottable;
+
+import cpw.mods.fml.common.Optional;
 import twilightforest.item.TFItems;
 
-public class BlockTFHugeWaterLily extends BlockBush {
+@Optional.Interface(iface = "com.gtnewhorizon.gtnhlib.api.IFlowerPottable", modid = "gtnhlib")
+public class BlockTFHugeWaterLily extends BlockBush implements IFlowerPottable {
 
     protected BlockTFHugeWaterLily() {
         super(Material.plants);
