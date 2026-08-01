@@ -7,6 +7,8 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,6 +16,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.ColorizerFoliage;
@@ -24,13 +27,17 @@ import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import com.gtnewhorizon.gtnhlib.api.IFlowerPottable;
+
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import twilightforest.TwilightForestMod;
 import twilightforest.item.TFItems;
 import twilightforest.world.TFGenBigMushgloom;
 
-public class BlockTFPlant extends BlockBush implements IShearable {
+@Optional.Interface(iface = "com.gtnewhorizon.gtnhlib.api.IFlowerPottable", modid = "gtnhlib")
+public class BlockTFPlant extends BlockBush implements IShearable, IFlowerPottable {
 
     boolean[] isGrassColor = { false, false, false, false, true, true, false, false, true, false, true, false, false,
             false, false, false };
@@ -512,4 +519,25 @@ public class BlockTFPlant extends BlockBush implements IShearable {
         return false;
     }
 
+    @Override
+    public boolean isFlowerPottable(int meta) {
+        return meta == META_FIDDLEHEAD || meta == META_MUSHGLOOM;
+    }
+
+    @Override
+    public boolean renderFlowerPot(NBTTagCompound compound, IBlockAccess blockAccess, Block block, int x, int y, int z,
+            RenderBlocks render) {
+        Tessellator tess = Tessellator.instance;
+        int meta = blockAccess.getBlockMetadata(x, y, z);
+        tess.addTranslation(0, 4F / 16F, 0);
+
+        int color = block.colorMultiplier(blockAccess, x, y, z);
+        if (color != 16777215) {
+            tess.setColorOpaque_F((color >> 16 & 255) / 255.0F, (color >> 8 & 255) / 255.0F, (color & 255) / 255.0F);
+        }
+
+        render.drawCrossedSquares(render.getBlockIconFromSideAndMetadata(block, 0, meta), x, y, z, 0.4F);
+        tess.addTranslation(0, -4F / 16F, 0);
+        return true;
+    }
 }
