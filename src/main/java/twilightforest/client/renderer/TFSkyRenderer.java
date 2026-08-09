@@ -205,7 +205,7 @@ public class TFSkyRenderer extends IRenderHandler {
         GL11.glPopMatrix();
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glColor3f(0.0F, 0.0F, 0.0F);
-        double var25 = mc.thePlayer.getPosition(partialTicks).yCoord - TFWorld.SEALEVEL;
+        double var25 = mc.renderViewEntity.getPosition(partialTicks).yCoord - TFWorld.SEALEVEL;
 
         if (var25 < 0.0D) {
             GL11.glPushMatrix();
