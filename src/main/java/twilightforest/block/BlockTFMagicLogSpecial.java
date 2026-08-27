@@ -135,7 +135,7 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
         if (woodType == META_TIME) {
             ItemStack heldItem = player.getHeldItem();
-            if (Mods.gregtech.isLoaded() && heldItem != null && GregTechCompat.isSoftMallet(heldItem)) {
+            if (Mods.gregtech_nh.isLoaded() && heldItem != null && GregTechCompat.isSoftMallet(heldItem)) {
                 if (!world.isRemote && GregTechCompat.damageSoftMallet(heldItem, player)) {
                     world.setBlockMetadataWithNotify(x, y, z, woodType | (orient ^ 4), 3);
                 }
@@ -173,12 +173,12 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
     private static final class GregTechCompat {
 
-        @Optional.Method(modid = "gregtech")
+        @Optional.Method(modid = "gregtech_nh")
         private static boolean isSoftMallet(ItemStack stack) {
             return GTUtility.isStackInList(stack, GregTechAPI.sSoftMalletList);
         }
 
-        @Optional.Method(modid = "gregtech")
+        @Optional.Method(modid = "gregtech_nh")
         private static boolean damageSoftMallet(ItemStack stack, EntityPlayer player) {
             return GTModHandler.damageOrDechargeItem(stack, 1, 1000, player);
         }

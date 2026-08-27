@@ -11,7 +11,7 @@ public enum Mods {
     NEI("NotEnoughItems"),
     baubles("baubles"),
     thaumcraft("thaumcraft"),
-    gregtech("gregtech"),
+    gregtech_nh("gregtech_nh"),
     endlessids("endlessids"),
     ticon("TConstruct"),
     tgregworks("TGregworks"),
