@@ -25,6 +25,7 @@ import net.minecraft.world.chunk.Chunk;
 import com.falsepattern.endlessids.mixin.helpers.ChunkBiomeHook;
 
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
@@ -172,10 +173,12 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
     private static final class GregTechCompat {
 
+        @Optional.Method(modid = "gregtech")
         private static boolean isSoftMallet(ItemStack stack) {
             return GTUtility.isStackInList(stack, GregTechAPI.sSoftMalletList);
         }
 
+        @Optional.Method(modid = "gregtech")
         private static boolean damageSoftMallet(ItemStack stack, EntityPlayer player) {
             return GTModHandler.damageOrDechargeItem(stack, 1, 1000, player);
         }
