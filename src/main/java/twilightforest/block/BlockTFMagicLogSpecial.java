@@ -29,6 +29,9 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import gregtech.api.GregTechAPI;
+import gregtech.api.util.GTModHandler;
+import gregtech.api.util.GTUtility;
 import twilightforest.TFGenericPacketHandler;
 import twilightforest.TwilightForestMod;
 import twilightforest.biomes.TFBiomeBase;
@@ -73,9 +76,8 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
             };
         } else {
             return switch (woodType) {
-                default -> orient == 0 && (side == 1 || side == 0) ? SPR_TIMETOP
-                        : (orient == 4 && (side == 5 || side == 4) ? SPR_TIMETOP
-                                : (orient == 8 && (side == 2 || side == 3) ? SPR_TIMETOP : SPR_TIMECLOCK));
+                default -> (side == 1 || side == 0) ? SPR_TIMETOP
+                        : (isTimeClockDisabled(orient) ? SPR_TIMECLOCKOFF : SPR_TIMECLOCK);
                 case META_TRANS -> orient == 0 && (side == 1 || side == 0) ? SPR_TRANSTOP
                         : (orient == 4 && (side == 5 || side == 4) ? SPR_TRANSTOP
                                 : (orient == 8 && (side == 2 || side == 3) ? SPR_TRANSTOP : SPR_TRANSHEART));
@@ -92,16 +94,20 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     @Override
     public void updateTick(World world, int x, int y, int z, Random rand) {
         int meta = world.getBlockMetadata(x, y, z);
+        int orient = meta & 12;
+        int woodType = meta & 3;
 
-        if ((meta & 12) == 12) {
+        if (woodType == META_TIME ? isTimeClockDisabled(orient) : orient == 12) {
             // block is off, do not tick
             return;
         }
         if (!world.isRemote) {
-            switch (meta & 3) {
+            switch (woodType) {
                 case 0 -> {
                     // tree of time effect
-                    world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.click", 0.1F, 0.5F);
+                    if (!isTimeClockMuted(orient)) {
+                        world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.click", 0.1F, 0.5F);
+                    }
                     doTreeOfTimeEffect(world, x, y, z, rand);
                 }
                 case 1 ->
@@ -126,6 +132,23 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         int orient = meta & 12;
         int woodType = meta & 3;
 
+        if (woodType == META_TIME) {
+            ItemStack heldItem = player.getHeldItem();
+            if (Mods.gregtech.isLoaded() && heldItem != null && GregTechCompat.isSoftMallet(heldItem)) {
+                if (!world.isRemote && GregTechCompat.damageSoftMallet(heldItem, player)) {
+                    world.setBlockMetadataWithNotify(x, y, z, woodType | (orient ^ 4), 3);
+                }
+                return true;
+            }
+
+            int newOrient = orient ^ 12;
+            world.setBlockMetadataWithNotify(x, y, z, woodType | newOrient, 3);
+            if (!isTimeClockDisabled(newOrient)) {
+                world.scheduleBlockUpdate(x, y, z, this, this.tickRate(world));
+            }
+            return true;
+        }
+
         if (orient == 0) {
             // turn off
             world.setBlockMetadataWithNotify(x, y, z, woodType | 12, 3);
@@ -137,6 +160,25 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
             return true;
         }
         return false;
+    }
+
+    private static boolean isTimeClockDisabled(int orient) {
+        return (orient & 8) != 0;
+    }
+
+    private static boolean isTimeClockMuted(int orient) {
+        return orient == 4 || orient == 8;
+    }
+
+    private static final class GregTechCompat {
+
+        private static boolean isSoftMallet(ItemStack stack) {
+            return GTUtility.isStackInList(stack, GregTechAPI.sSoftMalletList);
+        }
+
+        private static boolean damageSoftMallet(ItemStack stack, EntityPlayer player) {
+            return GTModHandler.damageOrDechargeItem(stack, 1, 1000, player);
+        }
     }
 
     /**
