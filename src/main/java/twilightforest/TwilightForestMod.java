@@ -63,6 +63,7 @@ import twilightforest.tileentity.TileEntityTFPoppingJet;
 import twilightforest.tileentity.TileEntityTFReverter;
 import twilightforest.tileentity.TileEntityTFSmoker;
 import twilightforest.tileentity.TileEntityTFSnowQueenSpawner;
+import twilightforest.tileentity.TileEntityTFTimewoodClock;
 import twilightforest.tileentity.TileEntityTFTowerBossSpawner;
 import twilightforest.tileentity.TileEntityTFTowerBuilder;
 import twilightforest.tileentity.TileEntityTFTrophy;
@@ -944,6 +945,7 @@ public class TwilightForestMod {
         GameRegistry.registerTileEntity(TileEntityTFCReactorActive.class, "Active Carminite Reactor");
         GameRegistry.registerTileEntity(TileEntityTFCinderFurnace.class, "Cinder Furnace");
         GameRegistry.registerTileEntity(TileEntityTFChest.class, "TF Chest");
+        GameRegistry.registerTileEntity(TileEntityTFTimewoodClock.class, "Timewood Clock");
     }
 
     /**
