@@ -15,6 +15,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Facing;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -93,12 +94,23 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
+    public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side) {
+        int meta = world.getBlockMetadata(x, y, z);
+        if ((meta & 3) == META_TIME && side != 0 && side != 1 && isBlockIndirectlyPowered(world, x, y, z)) {
+            return SPR_TIMECLOCKOFF;
+        }
+        return getIcon(side, meta);
+    }
+
+    @Override
     public void updateTick(World world, int x, int y, int z, Random rand) {
         int meta = world.getBlockMetadata(x, y, z);
         int orient = meta & 12;
         int woodType = meta & 3;
 
-        if (woodType == META_TIME ? isTimeClockDisabled(orient) : orient == 12) {
+        if (woodType == META_TIME ? isTimeClockDisabled(orient) || world.isBlockIndirectlyGettingPowered(x, y, z)
+                : orient == 12) {
             // block is off, do not tick
             return;
         }
@@ -123,6 +135,18 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
             }
         }
         world.scheduleBlockUpdate(x, y, z, this, this.tickRate(world));
+    }
+
+    @Override
+    public void onNeighborBlockChange(World world, int x, int y, int z, Block neighbor) {
+        int meta = world.getBlockMetadata(x, y, z);
+        if ((meta & 3) != META_TIME) {
+            return;
+        }
+        world.markBlockForUpdate(x, y, z);
+        if (!world.isRemote && !isTimeClockDisabled(meta & 12) && !world.isBlockIndirectlyGettingPowered(x, y, z)) {
+            world.scheduleBlockUpdate(x, y, z, this, this.tickRate(world));
+        }
     }
 
     @Override
@@ -169,6 +193,32 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
     private static boolean isTimeClockMuted(int orient) {
         return orient == 4 || orient == 8;
+    }
+
+    private static boolean isBlockIndirectlyPowered(IBlockAccess world, int x, int y, int z) {
+        return getIndirectPowerLevel(world, x, y - 1, z, 0) > 0 || getIndirectPowerLevel(world, x, y + 1, z, 1) > 0
+                || getIndirectPowerLevel(world, x, y, z - 1, 2) > 0
+                || getIndirectPowerLevel(world, x, y, z + 1, 3) > 0
+                || getIndirectPowerLevel(world, x - 1, y, z, 4) > 0
+                || getIndirectPowerLevel(world, x + 1, y, z, 5) > 0;
+    }
+
+    private static int getIndirectPowerLevel(IBlockAccess world, int x, int y, int z, int side) {
+        Block block = world.getBlock(x, y, z);
+        if (!block.shouldCheckWeakPower(world, x, y, z, side)) {
+            return block.isProvidingWeakPower(world, x, y, z, side);
+        }
+        int power = 0;
+        for (int i = 0; i < 6; i++) {
+            power = Math.max(
+                    power,
+                    world.isBlockProvidingPowerTo(
+                            x + Facing.offsetsXForSide[i],
+                            y + Facing.offsetsYForSide[i],
+                            z + Facing.offsetsZForSide[i],
+                            i));
+        }
+        return power;
     }
 
     private static final class GregTechCompat {
