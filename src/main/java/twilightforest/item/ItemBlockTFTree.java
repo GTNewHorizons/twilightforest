@@ -9,6 +9,7 @@ import net.minecraft.util.StatCollector;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.compat.Mods;
 
 public class ItemBlockTFTree extends ItemBlockTFMeta {
 
@@ -28,7 +29,9 @@ public class ItemBlockTFTree extends ItemBlockTFMeta {
         super.addInformation(stack, player, list, advanced);
         if ((stack.getItemDamage() & 3) == 0) {
             list.add(StatCollector.translateToLocal("tile.TFMagicLogSpecial.0.tooltip.redstone"));
-            list.add(StatCollector.translateToLocal("tile.TFMagicLogSpecial.0.tooltip.softMallet"));
+            if (Mods.gregtech_nh.isLoaded()) {
+                list.add(StatCollector.translateToLocal("tile.TFMagicLogSpecial.0.tooltip.softMallet"));
+            }
         }
     }
 }
