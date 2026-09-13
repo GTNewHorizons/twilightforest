@@ -15,6 +15,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -39,6 +40,7 @@ import twilightforest.biomes.TFBiomeBase;
 import twilightforest.compat.Mods;
 import twilightforest.item.ItemTFOreMagnet;
 import twilightforest.item.TFItems;
+import twilightforest.tileentity.TileEntityTFTimewoodClock;
 
 public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
@@ -55,6 +57,21 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     @Override
     public void onBlockAdded(World world, int x, int y, int z) {
         world.scheduleBlockUpdate(x, y, z, this, this.tickRate(world));
+    }
+
+    @Override
+    public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int meta) {
+        return (meta & 3) == META_TIME ? META_TIME : super.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, meta);
+    }
+
+    @Override
+    public boolean hasTileEntity(int metadata) {
+        return (metadata & 3) == META_TIME;
+    }
+
+    @Override
+    public TileEntity createTileEntity(World world, int metadata) {
+        return new TileEntityTFTimewoodClock();
     }
 
     @Override
@@ -98,6 +115,10 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         int orient = meta & 12;
         int woodType = meta & 3;
 
+        if (woodType == META_TIME) {
+            orient = normalizeTimeClockState(world, x, y, z, orient);
+        }
+
         if (woodType == META_TIME ? isTimeClockDisabled(orient) : orient == 12) {
             // block is off, do not tick
             return;
@@ -106,7 +127,8 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
             switch (woodType) {
                 case 0 -> {
                     // tree of time effect
-                    if (!isTimeClockMuted(orient)) {
+                    TileEntityTFTimewoodClock clock = getTimewoodClock(world, x, y, z);
+                    if (clock == null || !clock.isMuted()) {
                         world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.click", 0.1F, 0.5F);
                     }
                     doTreeOfTimeEffect(world, x, y, z, rand);
@@ -134,10 +156,14 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         int woodType = meta & 3;
 
         if (woodType == META_TIME) {
+            orient = normalizeTimeClockState(world, x, y, z, orient);
             ItemStack heldItem = player.getHeldItem();
             if (Mods.gregtech_nh.isLoaded() && heldItem != null && GregTechCompat.isSoftMallet(heldItem)) {
                 if (!world.isRemote && GregTechCompat.damageSoftMallet(heldItem, player)) {
-                    world.setBlockMetadataWithNotify(x, y, z, woodType | (orient ^ 4), 3);
+                    TileEntityTFTimewoodClock clock = getTimewoodClock(world, x, y, z);
+                    if (clock != null) {
+                        clock.setMuted(!clock.isMuted());
+                    }
                 }
                 return true;
             }
@@ -167,8 +193,24 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         return (orient & 8) != 0;
     }
 
-    private static boolean isTimeClockMuted(int orient) {
-        return orient == 4 || orient == 8;
+    private static int normalizeTimeClockState(World world, int x, int y, int z, int orient) {
+        if (orient != 4 && orient != 8) {
+            return orient;
+        }
+        int normalized = orient == 8 ? 12 : 0;
+        if (!world.isRemote) {
+            TileEntityTFTimewoodClock clock = getTimewoodClock(world, x, y, z);
+            if (clock != null) {
+                clock.setMuted(true);
+            }
+            world.setBlockMetadataWithNotify(x, y, z, normalized, 3);
+        }
+        return normalized;
+    }
+
+    private static TileEntityTFTimewoodClock getTimewoodClock(World world, int x, int y, int z) {
+        TileEntity tileEntity = world.getTileEntity(x, y, z);
+        return tileEntity instanceof TileEntityTFTimewoodClock ? (TileEntityTFTimewoodClock) tileEntity : null;
     }
 
     private static final class GregTechCompat {
