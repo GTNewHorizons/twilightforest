@@ -132,6 +132,12 @@ public class TFRecipes {
         for (ItemStack stack : stairs) {
             OreDictionary.registerOre("stairWood", stack);
         }
+        for (ItemStack stack : trapdoors) {
+            OreDictionary.registerOre("trapdoorWood", stack);
+        }
+        for (Item item : doors) {
+            OreDictionary.registerOre("doorWood", item);
+        }
 
         for (int i = 0; i < doors.length; i++) {
             if (!TwilightForestMod.isGTNHLoaded) {
