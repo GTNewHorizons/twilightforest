@@ -76,6 +76,11 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     }
 
     @Override
+    protected boolean canSilkHarvest() {
+        return true;
+    }
+
+    @Override
     public Item getItemDropped(int par1, Random rand, int par3) {
         return Item.getItemFromBlock(TFBlocks.magicLog); // change into normal magic log
     }
