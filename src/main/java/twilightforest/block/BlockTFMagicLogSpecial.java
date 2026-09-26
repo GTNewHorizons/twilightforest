@@ -474,21 +474,21 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
                     }
 
                     IInventory thisChest = Blocks.chest.func_149951_m(world, tx, ty, tz);
-                    IInventory testChest = te instanceof IInventory ? (IInventory) te : null;
-
-                    // make sure we haven't counted this chest
-                    if (thisChest != null && !checkIfChestsContains(chests, testChest)) {
-                        int itemsInChest = 0;
-                        for (int i = 0; i < thisChest.getSizeInventory(); i++) {
-                            if (thisChest.getStackInSlot(i) != null) {
-                                itemsInChest++;
-                                itemCount++;
+                    if (te instanceof IInventory teInventory) {
+                        // make sure we haven't counted this chest
+                        if (thisChest != null && !checkIfChestsContains(chests, teInventory)) {
+                            int itemsInChest = 0;
+                            for (int i = 0; i < thisChest.getSizeInventory(); i++) {
+                                if (thisChest.getStackInSlot(i) != null) {
+                                    itemsInChest++;
+                                    itemCount++;
+                                }
                             }
-                        }
 
-                        // only add non-empty chests
-                        if (itemsInChest > 0) {
-                            chests.add(thisChest);
+                            // only add non-empty chests
+                            if (itemsInChest > 0) {
+                                chests.add(thisChest);
+                            }
                         }
                     }
                 }
