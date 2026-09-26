@@ -26,7 +26,6 @@ import net.minecraft.world.chunk.Chunk;
 
 import com.falsepattern.endlessids.mixin.helpers.ChunkBiomeHook;
 
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -417,6 +416,15 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     /**
      * The sorting tree finds two chests nearby and then attempts to sort a random item.
      */
+
+    // Compare stacks first
+    private boolean canMergeStacks(ItemStack a, ItemStack b) {
+        if (a == null || b == null) return false;
+        if (a.getItem() != b.getItem()) return false;
+        if (a.getItemDamage() != b.getItemDamage()) return false;
+        return ItemStack.areItemStackTagsEqual(a, b);
+    }
+
     private void doSortingTreeEffect(World world, int x, int y, int z, Random rand) {
         // find all the chests nearby
         int XSEARCH = 16;
@@ -426,29 +434,61 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
         ArrayList<IInventory> chests = new ArrayList<>();
         int itemCount = 0;
 
-        for (int sx = x - XSEARCH; sx < x + XSEARCH; sx++) {
-            for (int sy = y - YSEARCH; sy < y + YSEARCH; sy++) {
-                for (int sz = z - ZSEARCH; sz < z + ZSEARCH; sz++) {
-                    if (world.getBlock(sx, sy, sz) == Blocks.chest) {
-                        IInventory thisChest = Blocks.chest.func_149951_m(world, sx, sy, sz);
+        int minX = x - XSEARCH;
+        int maxX = x + XSEARCH;
+        int minY = y - YSEARCH;
+        int maxY = y + YSEARCH;
+        int minZ = z - ZSEARCH;
+        int maxZ = z + ZSEARCH;
 
-                        // make sure we haven't counted this chest
-                        if (thisChest != null
-                                && !checkIfChestsContains(chests, (IInventory) world.getTileEntity(sx, sy, sz))) {
-                            int itemsInChest = 0;
+        int minChunkX = minX >> 4;
+        int maxChunkX = maxX >> 4;
+        int minChunkZ = minZ >> 4;
+        int maxChunkZ = maxZ >> 4;
 
-                            // count items
-                            for (int i = 0; i < thisChest.getSizeInventory(); i++) {
-                                if (thisChest.getStackInSlot(i) != null) {
-                                    itemsInChest++;
-                                    itemCount++;
-                                }
+        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                if (!world.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+                    continue;
+                }
+
+                Chunk chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
+
+                for (Object obj : chunk.chunkTileEntityMap.values()) {
+                    // only scan TE
+                    if (!(obj instanceof TileEntity)) {
+                        continue;
+                    }
+
+                    TileEntity te = (TileEntity) obj;
+                    int tx = te.xCoord;
+                    int ty = te.yCoord;
+                    int tz = te.zCoord;
+
+                    if (tx < minX || tx > maxX || ty < minY || ty > maxY || tz < minZ || tz > maxZ) {
+                        continue;
+                    }
+
+                    if (world.getBlock(tx, ty, tz) != Blocks.chest) {
+                        continue;
+                    }
+
+                    IInventory thisChest = Blocks.chest.func_149951_m(world, tx, ty, tz);
+                    IInventory testChest = te instanceof IInventory ? (IInventory) te : null;
+                    
+                    // make sure we haven't counted this chest
+                    if (thisChest != null && !checkIfChestsContains(chests, testChest)) {
+                        int itemsInChest = 0;
+                        for (int i = 0; i < thisChest.getSizeInventory(); i++) {
+                            if (thisChest.getStackInSlot(i) != null) {
+                                itemsInChest++;
+                                itemCount++;
                             }
+                        }
 
-                            // only add non-empty chests
-                            if (itemsInChest > 0) {
-                                chests.add(thisChest);
-                            }
+                        // only add non-empty chests
+                        if (itemsInChest > 0) {
+                            chests.add(thisChest);
                         }
                     }
                 }
@@ -533,11 +573,11 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
                     for (int slotNum = 0; slotNum < chest.getSizeInventory(); slotNum++) {
                         ItemStack currentItem = chest.getStackInSlot(slotNum);
 
-                        if (currentItem != null && currentItem != beingSorted && beingSorted.isItemEqual(currentItem)) {
+                        if (currentItem != null && currentItem != beingSorted
+                                && canMergeStacks(beingSorted, currentItem)) {
                             if (currentItem.stackSize <= (beingSorted.getMaxStackSize() - beingSorted.stackSize)) {
                                 chest.setInventorySlotContents(slotNum, null);
                                 beingSorted.stackSize += currentItem.stackSize;
-                                currentItem.stackSize = 0;
                             }
                         }
                     }
@@ -547,16 +587,12 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
     }
 
     private boolean isSortingMatch(ItemStack beingSorted, ItemStack currentItem) {
-        return getCreativeTab(currentItem.getItem()).equals(getCreativeTab(beingSorted.getItem()));
-    }
-
-    private Object getCreativeTab(Item item) {
-        try {
-            return ObfuscationReflectionHelper.getPrivateValue(Item.class, item, 0);
-        } catch (IllegalArgumentException | SecurityException e) {
-            e.printStackTrace();
+        if (beingSorted == null || currentItem == null) {
+            return false;
         }
-        return null;
+        CreativeTabs tabA = beingSorted.getItem().getCreativeTab();
+        CreativeTabs tabB = currentItem.getItem().getCreativeTab();
+        return tabA != null && tabA == tabB;
     }
 
     /**
