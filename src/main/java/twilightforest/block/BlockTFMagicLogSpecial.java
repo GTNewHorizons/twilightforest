@@ -419,9 +419,9 @@ public class BlockTFMagicLogSpecial extends BlockTFMagicLog {
 
     // Compare stacks first
     private boolean canMergeStacks(ItemStack a, ItemStack b) {
-        if (a == null || b == null) return false;
-        if (a.getItem() != b.getItem()) return false;
-        if (a.getItemDamage() != b.getItemDamage()) return false;
+        if (a == null || b == null || (a.getItem() != b.getItem()) || (a.getItemDamage() != b.getItemDamage())) {
+            return false;
+        }
         return ItemStack.areItemStackTagsEqual(a, b);
     }
 
