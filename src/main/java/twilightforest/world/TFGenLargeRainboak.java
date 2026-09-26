@@ -3,6 +3,7 @@ package twilightforest.world;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -394,9 +395,10 @@ public class TFGenLargeRainboak extends TFTreeGenerator {
     boolean validTreeLocation() {
         int[] var1 = new int[] { this.basePos[0], this.basePos[1], this.basePos[2] };
         int[] var2 = new int[] { this.basePos[0], this.basePos[1] + this.heightLimit - 1, this.basePos[2] };
-        Block var3 = this.worldObj.getBlock(this.basePos[0], this.basePos[1] - 1, this.basePos[2]);
+        Material materialUnder = this.worldObj.getBlock(this.basePos[0], this.basePos[1] - 1, this.basePos[2])
+                .getMaterial();
 
-        if (var3 != Blocks.dirt && var3 != Blocks.grass) {
+        if (materialUnder != Material.grass && materialUnder != Material.ground) {
             return false;
         } else {
             int var4 = this.checkBlockLine(var1, var2);

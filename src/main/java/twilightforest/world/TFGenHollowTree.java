@@ -3,6 +3,7 @@ package twilightforest.world;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.ChunkCoordinates;
@@ -79,8 +80,8 @@ public class TFGenHollowTree extends TFGenerator {
         // make a tree!
 
         // check if we're on dirt or grass
-        Block j1 = world.getBlock(x, y - 1, z);
-        if (j1 != Blocks.grass && j1 != Blocks.dirt) {
+        Material materialUnder = world.getBlock(x, y - 1, z).getMaterial();
+        if (materialUnder != Material.grass && materialUnder != Material.ground) {
             return false;
         }
 
