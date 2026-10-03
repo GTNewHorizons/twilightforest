@@ -2,7 +2,7 @@ package twilightforest.world;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
@@ -39,8 +39,9 @@ public class TFGenLargeWinter extends TFTreeGenerator {
         }
 
         // check if we're on dirt or grass
-        Block blockUnder = world.getBlock(x, y - 1, z);
-        if (blockUnder != Blocks.grass && blockUnder != Blocks.dirt || y >= world.getHeight() - treeHeight) {
+        Material materialUnder = world.getBlock(x, y - 1, z).getMaterial();
+        if ((materialUnder != Material.grass && materialUnder != Material.ground)
+                || y >= world.getHeight() - treeHeight) {
             return false;
         }
 
