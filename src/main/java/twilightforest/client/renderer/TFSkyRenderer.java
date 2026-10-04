@@ -7,6 +7,7 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IRenderHandler;
@@ -15,9 +16,17 @@ import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import twilightforest.biomes.TFBiomeGlacier;
 import twilightforest.world.TFWorld;
 
 public class TFSkyRenderer extends IRenderHandler {
+
+    private static final int AURORA_FADE_TICKS = 60;
+
+    private static final int AURORA_SAMPLE_RADIUS = 32;
+    private static final int AURORA_SAMPLE_STEP = 8;
+
+    private static AuroraShaderProgram AURORA_SHADER;
 
     /** The star GL Call list */
     private int starGLCallList;
@@ -27,6 +36,10 @@ public class TFSkyRenderer extends IRenderHandler {
 
     /** OpenGL sky list 2 */
     private int glSkyList2;
+
+    private long lastAuroraTick = Long.MIN_VALUE;
+    private float auroraStrength = 0.0F;
+    private float prevAuroraStrength = 0.0F;
 
     @SideOnly(Side.CLIENT)
     public TFSkyRenderer() {
@@ -250,8 +263,102 @@ public class TFSkyRenderer extends IRenderHandler {
         GL11.glTranslatef(0.0F, -((float) (var25 - 16.0D)), 0.0F);
         GL11.glCallList(this.glSkyList2);
         GL11.glPopMatrix();
+
+        this.renderAurora(world, mc, partialTicks);
+
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDepthMask(true);
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void renderAurora(WorldClient world, Minecraft mc, float partialTicks) {
+        this.updateAuroraStrength(world, mc);
+
+        if (this.auroraStrength <= 0 && this.prevAuroraStrength <= 0) {
+            return;
+        }
+
+        if (AURORA_SHADER == null) {
+            AURORA_SHADER = new AuroraShaderProgram(
+                    "/assets/twilightforest/shaders/aurora.vsh",
+                    "/assets/twilightforest/shaders/aurora.fsh");
+        }
+        if (!AURORA_SHADER.isValid()) {
+            return;
+        }
+
+        float alpha = (this.prevAuroraStrength + (this.auroraStrength - this.prevAuroraStrength) * partialTicks)
+                / AURORA_FADE_TICKS
+                * 0.5F;
+
+        if (alpha <= 0.0F) {
+            return;
+        }
+
+        Vec3 camPos = mc.renderViewEntity.getPosition(partialTicks);
+        float scale = 2048.0F * (mc.gameSettings.renderDistanceChunks / 32.0F);
+        float y = (float) (TFWorld.MAXHEIGHT - camPos.yCoord);
+
+        Tessellator tessellator = Tessellator.instance;
+        GL11.glPushMatrix();
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_ALPHA_TEST);
+        GL11.glDisable(GL11.GL_CULL_FACE);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        AURORA_SHADER.bind();
+        AURORA_SHADER.setUniform1i("SeedContext", (int) Math.abs(world.getSeed()));
+        AURORA_SHADER
+                .setUniform3f("PositionContext", (float) camPos.xCoord, (float) camPos.yCoord, (float) camPos.zCoord);
+        AURORA_SHADER.setUniform1f("GameTime", ((float) world.getTotalWorldTime() + partialTicks) / 18000.0F);
+
+        tessellator.startDrawingQuads();
+        tessellator.setColorRGBA_F(1.0F, 1.0F, 1.0F, alpha);
+        tessellator.addVertex(-scale, y, scale);
+        tessellator.addVertex(-scale, y, -scale);
+        tessellator.addVertex(scale, y, -scale);
+        tessellator.addVertex(scale, y, scale);
+        tessellator.draw();
+
+        AURORA_SHADER.unbind();
+
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GL11.glEnable(GL11.GL_CULL_FACE);
+        GL11.glPopMatrix();
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void updateAuroraStrength(WorldClient world, Minecraft mc) {
+        long worldTick = world.getTotalWorldTime();
+        if (worldTick == this.lastAuroraTick) {
+            return;
+        }
+        this.lastAuroraTick = worldTick;
+        this.prevAuroraStrength = this.auroraStrength;
+
+        int px = MathHelper.floor_double(mc.renderViewEntity.posX);
+        int pz = MathHelper.floor_double(mc.renderViewEntity.posZ);
+
+        int total = 0;
+        int glacierCount = 0;
+        for (int dx = -AURORA_SAMPLE_RADIUS; dx <= AURORA_SAMPLE_RADIUS; dx += AURORA_SAMPLE_STEP) {
+            for (int dz = -AURORA_SAMPLE_RADIUS; dz <= AURORA_SAMPLE_RADIUS; dz += AURORA_SAMPLE_STEP) {
+                ++total;
+                if (world.getBiomeGenForCoords(px + dx, pz + dz) instanceof TFBiomeGlacier) {
+                    ++glacierCount;
+                }
+            }
+        }
+
+        float target = (float) glacierCount / (float) total * AURORA_FADE_TICKS;
+
+        if (this.auroraStrength < target) {
+            this.auroraStrength = Math.min(this.auroraStrength + 1.0F, target);
+        } else if (this.auroraStrength > target) {
+            this.auroraStrength = Math.max(this.auroraStrength - 1.0F, target);
+        }
     }
 
     private float getRealCelestialAngle(World world, float partialTicks) {
