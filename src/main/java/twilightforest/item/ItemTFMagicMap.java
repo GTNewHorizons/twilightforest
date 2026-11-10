@@ -73,7 +73,6 @@ public class ItemTFMagicMap extends ItemMap {
         if (this.biomeFreqCache == null) {
             this.biomeFreqCache = new int[TwilightForestMod.maxBiomeIDs];
         }
-        Arrays.fill(this.biomeFreqCache, 0);
         return this.biomeFreqCache;
     }
 
@@ -112,6 +111,8 @@ public class ItemTFMagicMap extends ItemMap {
                             int xStep2;
 
                             int biomeID;
+                            int minBiomeID = Integer.MAX_VALUE;
+                            int maxBiomeID = -1;
 
                             final boolean isInRange = xOffset * xOffset + zOffset * zOffset < drawSize * drawSize;
                             for (xStep2 = 0; xStep2 < scaleFactor; ++xStep2) {
@@ -119,6 +120,8 @@ public class ItemTFMagicMap extends ItemMap {
                                     biomeID = world.getBiomeGenForCoords(xDraw2 + xStep2, zDraw2 + zStep2).biomeID;
 
                                     biomeFrequencies[biomeID]++;
+                                    if (biomeID < minBiomeID) minBiomeID = biomeID;
+                                    if (biomeID > maxBiomeID) maxBiomeID = biomeID;
 
                                     // make rivers and streams 3x more prominent
                                     if (biomeID == BiomeGenBase.river.biomeID
@@ -149,11 +152,14 @@ public class ItemTFMagicMap extends ItemMap {
                             byte biomeIDToShow = 0;
                             int highestFrequency = 0;
 
-                            for (int i = 0; i < TwilightForestMod.maxBiomeIDs; i++) {
-                                if (biomeFrequencies[i] > highestFrequency) {
-                                    biomeIDToShow = (byte) i;
-                                    highestFrequency = biomeFrequencies[i];
+                            if (maxBiomeID >= 0) {
+                                for (int i = minBiomeID; i <= maxBiomeID; i++) {
+                                    if (biomeFrequencies[i] > highestFrequency) {
+                                        biomeIDToShow = (byte) i;
+                                        highestFrequency = biomeFrequencies[i];
+                                    }
                                 }
+                                Arrays.fill(biomeFrequencies, minBiomeID, maxBiomeID + 1, 0);
                             }
 
                             // increase biomeID by one so we can properly show oceans
