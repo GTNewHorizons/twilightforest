@@ -1,5 +1,7 @@
 package twilightforest.item;
 
+import java.util.Arrays;
+
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -65,21 +67,31 @@ public class ItemTFMagicMap extends ItemMap {
         return mapData;
     }
 
+    private int[] biomeFreqCache;
+
+    private int[] getBiomeFreqCache() {
+        if (this.biomeFreqCache == null) {
+            this.biomeFreqCache = new int[TwilightForestMod.maxBiomeIDs];
+        }
+        Arrays.fill(this.biomeFreqCache, 0);
+        return this.biomeFreqCache;
+    }
+
     public void updateMapData(World world, Entity entity, TFMagicMapData mapData) {
         if (world.provider.dimensionId == mapData.dimension && entity instanceof EntityPlayer player
                 && world.provider instanceof WorldProviderTwilightForest tfProvider) {
-            ChunkProviderTwilightForest chunkProvider = tfProvider.getChunkProvider();
-            short xSize = 128;
-            short zSize = 128;
-            int scaleFactor = 1 << mapData.scale;
-            int xCenter = mapData.xCenter;
-            int zCenter = mapData.zCenter;
-            int xDraw = MathHelper.floor_double(entity.posX - (double) xCenter) / scaleFactor + xSize / 2;
-            int zDraw = MathHelper.floor_double(entity.posZ - (double) zCenter) / scaleFactor + zSize / 2;
-            int drawSize = 512 / scaleFactor;
+            final ChunkProviderTwilightForest chunkProvider = tfProvider.getChunkProvider();
+            final short xSize = 128;
+            final short zSize = 128;
+            final int scaleFactor = 1 << mapData.scale;
+            final int xCenter = mapData.xCenter;
+            final int zCenter = mapData.zCenter;
+            final int xDraw = MathHelper.floor_double(entity.posX - (double) xCenter) / scaleFactor + xSize / 2;
+            final int zDraw = MathHelper.floor_double(entity.posZ - (double) zCenter) / scaleFactor + zSize / 2;
+            final int drawSize = 512 / scaleFactor;
             // int drawSize = 1024 / scaleFactor;
 
-            MapInfo mapInfo = mapData.func_82568_a(player);
+            final MapInfo mapInfo = mapData.func_82568_a(player);
             ++mapInfo.field_82569_d;
 
             for (int xStep = xDraw - drawSize + 1; xStep < xDraw + drawSize; ++xStep) {
@@ -89,17 +101,19 @@ public class ItemTFMagicMap extends ItemMap {
 
                     for (int zStep = zDraw - drawSize - 1; zStep < zDraw + drawSize; ++zStep) {
                         if (xStep >= 0 && zStep >= -1 && xStep < xSize && zStep < zSize) {
-                            int xOffset = xStep - xDraw;
-                            int zOffset = zStep - zDraw;
-                            boolean var20 = xOffset * xOffset + zOffset * zOffset > (drawSize - 2) * (drawSize - 2);
-                            int xDraw2 = (xCenter / scaleFactor + xStep - xSize / 2) * scaleFactor;
-                            int zDraw2 = (zCenter / scaleFactor + zStep - zSize / 2) * scaleFactor;
-                            int[] biomeFrequencies = new int[TwilightForestMod.maxBiomeIDs];
+                            final int xOffset = xStep - xDraw;
+                            final int zOffset = zStep - zDraw;
+                            final boolean var20 = xOffset * xOffset + zOffset * zOffset
+                                    > (drawSize - 2) * (drawSize - 2);
+                            final int xDraw2 = (xCenter / scaleFactor + xStep - xSize / 2) * scaleFactor;
+                            final int zDraw2 = (zCenter / scaleFactor + zStep - zSize / 2) * scaleFactor;
+                            final int[] biomeFrequencies = getBiomeFreqCache();
                             int zStep2;
                             int xStep2;
 
                             int biomeID;
 
+                            final boolean isInRange = xOffset * xOffset + zOffset * zOffset < drawSize * drawSize;
                             for (xStep2 = 0; xStep2 < scaleFactor; ++xStep2) {
                                 for (zStep2 = 0; zStep2 < scaleFactor; ++zStep2) {
                                     biomeID = world.getBiomeGenForCoords(xDraw2 + xStep2, zDraw2 + zStep2).biomeID;
@@ -113,10 +127,9 @@ public class ItemTFMagicMap extends ItemMap {
                                     }
                                     // add in TF features
                                     if (world.getWorldChunkManager() instanceof TFWorldChunkManager tfManager) {
-
                                         if (tfManager.isInFeatureChunk(world, xDraw2 + xStep2, zDraw2 + zStep2)
                                                 && zStep >= 0
-                                                && xOffset * xOffset + zOffset * zOffset < drawSize * drawSize) {
+                                                && isInRange) {
                                             mapData.addFeatureToMap(
                                                     TFFeature.getNearestFeature(
                                                             (xDraw2 + xStep2) >> 4,
@@ -146,8 +159,7 @@ public class ItemTFMagicMap extends ItemMap {
                             // increase biomeID by one so we can properly show oceans
                             biomeIDToShow++;
 
-                            if (zStep >= 0 && xOffset * xOffset + zOffset * zOffset < drawSize * drawSize
-                                    && (!var20 || (xStep + zStep & 1) != 0)) {
+                            if (zStep >= 0 && isInRange && (!var20 || (xStep + zStep & 1) != 0)) {
                                 byte existingColor = mapData.colors[xStep + zStep * xSize];
 
                                 if (existingColor != biomeIDToShow) {
