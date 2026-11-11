@@ -27,6 +27,7 @@ public class TFRecipes {
         // ore dictionary
         OreDictionary.registerOre("logWood", new ItemStack(TFBlocks.log, 1, OreDictionary.WILDCARD_VALUE));
         OreDictionary.registerOre("logWood", new ItemStack(TFBlocks.magicLog, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre("slabWood", new ItemStack(TFBlocks.woodenSlab, 1, OreDictionary.WILDCARD_VALUE));
         for (int i = 0; i < 10; i++) OreDictionary.registerOre("treeSapling", new ItemStack(TFBlocks.sapling, 1, i));
         OreDictionary.registerOre("treeLeaves", new ItemStack(TFBlocks.leaves, 1, OreDictionary.WILDCARD_VALUE));
         OreDictionary.registerOre("treeLeaves", new ItemStack(TFBlocks.magicLeaves, 1, OreDictionary.WILDCARD_VALUE));
@@ -128,6 +129,18 @@ public class TFRecipes {
         Block[] trappedChests = new Block[] { TFBlocks.trappedChestTwilight, TFBlocks.trappedChestCanopy,
                 TFBlocks.trappedChestMangrove, TFBlocks.trappedChestDarkwood, TFBlocks.trappedChestTime,
                 TFBlocks.trappedChestTrans, TFBlocks.trappedChestMine, TFBlocks.trappedChestSort };
+
+        // register OreDictionary for TF wooden items
+        for (ItemStack stack : stairs) {
+            OreDictionary.registerOre("stairWood", stack);
+        }
+        for (ItemStack stack : trapdoors) {
+            OreDictionary.registerOre("trapdoorWood", stack);
+        }
+        for (Item item : doors) {
+            OreDictionary.registerOre("doorWood", item);
+        }
+
         for (int i = 0; i < doors.length; i++) {
             if (!TwilightForestMod.isGTNHLoaded) {
                 GameRegistry.addRecipe(
