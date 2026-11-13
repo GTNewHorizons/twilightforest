@@ -17,6 +17,8 @@ import twilightforest.TwilightForestMod;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.client.renderer.TFSkyRenderer;
 import twilightforest.client.renderer.TFWeatherRenderer;
+import twilightforest.compat.AngelicaWeatherBridge;
+import twilightforest.compat.Mods;
 
 /**
  * @author Ben
@@ -237,7 +239,8 @@ public class WorldProviderTwilightForest extends WorldProviderSurface {
     @SideOnly(Side.CLIENT)
     public IRenderHandler getWeatherRenderer() {
         if (super.getWeatherRenderer() == null) {
-            this.setWeatherRenderer(new TFWeatherRenderer());
+            this.setWeatherRenderer(
+                    Mods.angelicaWeather.isLoaded() ? AngelicaWeatherBridge.create() : new TFWeatherRenderer());
         }
 
         return super.getWeatherRenderer();
