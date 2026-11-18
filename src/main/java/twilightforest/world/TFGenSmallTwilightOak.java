@@ -3,6 +3,7 @@ package twilightforest.world;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
@@ -76,9 +77,11 @@ public class TFGenSmallTwilightOak extends TFTreeGenerator {
                 return false;
             } else {
                 Block blockUsing = world.getBlock(x, y - 1, z);
+                Material materialUnder = blockUsing.getMaterial();
 
-                if ((blockUsing == Blocks.grass || blockUsing == Blocks.dirt) && y < world.getHeight() - height - 1) {
-                    this.setBlock(world, x, y - 1, z, Blocks.dirt);
+                if ((materialUnder == Material.grass || materialUnder == Material.ground)
+                        && y < world.getHeight() - height - 1) {
+                    blockUsing.onPlantGrow(world, x, y - 1, z, x, y, z);
                     width = 3;
                     byte var18 = 0;
                     int treeWidth;

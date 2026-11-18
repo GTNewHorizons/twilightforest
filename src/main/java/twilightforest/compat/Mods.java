@@ -9,7 +9,7 @@ public enum Mods {
     GTNH("dreamcraft"),
     skinport("skinport"),
     NEI("NotEnoughItems"),
-    baubles("baubles"),
+    baubles("Baubles"),
     thaumcraft("thaumcraft"),
     gregtech_nh("gregtech_nh"),
     endlessids("endlessids"),
