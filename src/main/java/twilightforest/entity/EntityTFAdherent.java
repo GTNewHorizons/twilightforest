@@ -70,10 +70,10 @@ public class EntityTFAdherent extends EntityMob implements IRangedAttackMob, ITF
     @Override
     protected void dropFewItems(boolean hitByPlayer, int looting) {
         if (hitByPlayer) {
-            ItemStack item = new ItemStack(TFItems.metaItem, 1 + looting, 0);
-            int dropCount = this.rand.nextInt(3);
+            int dropCount = this.rand.nextInt(3) * (1 + looting);
 
-            for (int i = 0; i < dropCount; ++i) {
+            if (dropCount > 0) {
+                ItemStack item = new ItemStack(TFItems.metaItem, dropCount, 0);
                 this.entityDropItem(item, 1f);
             }
         }

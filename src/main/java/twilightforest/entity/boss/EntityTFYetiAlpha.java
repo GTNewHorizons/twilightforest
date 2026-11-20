@@ -259,17 +259,12 @@ public class EntityTFYetiAlpha extends EntityMob implements IRangedAttackMob {
         Item fur = getDropItem();
         if (fur != null) {
             int drops = 6 + rand.nextInt(6 + looting);
-            for (int d = 0; d < drops; d++) {
-                this.dropItem(fur, 1);
-            }
-
+            this.dropItem(fur, drops);
         }
 
         Item bombs = TFItems.iceBomb;
         int drops = 6 + rand.nextInt(6 + looting);
-        for (int d = 0; d < drops; d++) {
-            this.dropItem(bombs, 1);
-        }
+        this.dropItem(bombs, drops);
 
         // trophy
         this.entityDropItem(new ItemStack(TFItems.trophy, 1, 7), 0);

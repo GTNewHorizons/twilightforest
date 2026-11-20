@@ -160,12 +160,10 @@ public class EntityTFMinotaur extends EntityMob implements ITFCharger {
     protected void dropFewItems(boolean par1, int par2) {
         int numDrops = this.rand.nextInt(2) + this.rand.nextInt(1 + par2);
 
-        for (int i = 0; i < numDrops; ++i) {
-            if (this.isBurning()) {
-                this.dropItem(TFItems.meefSteak, 1);
-            } else {
-                this.dropItem(TFItems.meefRaw, 1);
-            }
+        if (this.isBurning()) {
+            this.dropItem(TFItems.meefSteak, numDrops);
+        } else {
+            this.dropItem(TFItems.meefRaw, numDrops);
         }
     }
 

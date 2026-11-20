@@ -138,15 +138,11 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         }
 
         totalDrops = this.rand.nextInt(4 + par2) + 1;
-        for (int i = 0; i < totalDrops; ++i) {
-            this.dropItem(Items.ender_pearl, 1);
-        }
+        this.dropItem(Items.ender_pearl, totalDrops);
 
         // bones
         totalDrops = this.rand.nextInt(5 + par2) + 5;
-        for (int i = 0; i < totalDrops; ++i) {
-            this.dropItem(Items.bone, 1);
-        }
+        this.dropItem(Items.bone, totalDrops);
 
         // trophy
         this.entityDropItem(new ItemStack(TFItems.trophy, 1, 2), 0);

@@ -123,20 +123,11 @@ public class EntityTFSkeletonDruid extends EntityMob implements IRangedAttackMob
      * par2 - Level of Looting used to kill this mob.
      */
     protected void dropFewItems(boolean par1, int lootingModifier) {
-        int numberOfItemsToDrop;
-        int i;
+        int numberOfItemsToDrop = this.rand.nextInt(3 + lootingModifier);
+        this.dropItem(TFItems.torchberries, numberOfItemsToDrop);
 
         numberOfItemsToDrop = this.rand.nextInt(3 + lootingModifier);
-
-        for (i = 0; i < numberOfItemsToDrop; ++i) {
-            this.dropItem(TFItems.torchberries, 1);
-        }
-
-        numberOfItemsToDrop = this.rand.nextInt(3 + lootingModifier);
-
-        for (i = 0; i < numberOfItemsToDrop; ++i) {
-            this.dropItem(Items.bone, 1);
-        }
+        this.dropItem(Items.bone, numberOfItemsToDrop);
     }
 
     /**

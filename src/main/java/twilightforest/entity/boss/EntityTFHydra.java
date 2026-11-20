@@ -1040,18 +1040,13 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
      */
     @Override
     protected void dropFewItems(boolean par1, int par2) {
-
         // chops
-        int totalDrops = this.rand.nextInt(3 + par2) + 5;
-        for (int i = 0; i < totalDrops; ++i) {
-            this.dropItem(TFItems.hydraChop, 5);
-        }
+        int totalDrops = (this.rand.nextInt(3 + par2) + 5) * 5;
+        this.dropItem(TFItems.hydraChop, totalDrops);
 
         // blood
         totalDrops = this.rand.nextInt(4 + par2) + 7;
-        for (int i = 0; i < totalDrops; ++i) {
-            this.dropItem(TFItems.fieryBlood, 1);
-        }
+        this.dropItem(TFItems.fieryBlood, totalDrops);
 
         // trophy
         this.dropItem(TFItems.trophy, 1);

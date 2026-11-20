@@ -81,20 +81,15 @@ public class EntityTFDeer extends EntityCow {
     @Override
     protected void dropFewItems(boolean par1, int par2) {
         int var3 = this.rand.nextInt(3) + this.rand.nextInt(1 + par2);
-        int var4;
 
-        for (var4 = 0; var4 < var3; ++var4) {
-            this.dropItem(Items.leather, 1);
-        }
+        this.dropItem(Items.leather, var3);
 
         var3 = this.rand.nextInt(3) + 1 + this.rand.nextInt(1 + par2);
 
-        for (var4 = 0; var4 < var3; ++var4) {
-            if (this.isBurning()) {
-                this.dropItem(TFItems.venisonCooked, 1);
-            } else {
-                this.dropItem(TFItems.venisonRaw, 1);
-            }
+        if (this.isBurning()) {
+            this.dropItem(TFItems.venisonCooked, var3);
+        } else {
+            this.dropItem(TFItems.venisonRaw, var3);
         }
     }
 

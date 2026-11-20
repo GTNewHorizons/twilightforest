@@ -352,16 +352,12 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
         dropBow();
 
         // ice cubes
-        int totalDrops = this.rand.nextInt(4 + par2) + 1;
-        for (int i = 0; i < totalDrops; ++i) {
-            this.dropItem(Item.getItemFromBlock(Blocks.packed_ice), 7);
-        }
+        int totalDrops = (this.rand.nextInt(4 + par2) + 1) * 7;
+        this.dropItem(Item.getItemFromBlock(Blocks.packed_ice), totalDrops);
 
         // snowballs
-        totalDrops = this.rand.nextInt(5 + par2) + 5;
-        for (int i = 0; i < totalDrops; ++i) {
-            this.dropItem(Items.snowball, 16);
-        }
+        totalDrops = (this.rand.nextInt(5 + par2) + 5) * 16;
+        this.dropItem(Items.snowball, totalDrops);
 
         // trophy
         this.entityDropItem(new ItemStack(TFItems.trophy, 1, 4), 0);
