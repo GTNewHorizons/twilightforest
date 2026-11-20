@@ -191,19 +191,11 @@ public class EntityTFTowerGolem extends EntityMob {
      * par2 - Level of Looting used to kill this mob.
      */
     protected void dropFewItems(boolean par1, int par2) {
-        int var4;
+        int var4 = this.rand.nextInt(3);
+        this.dropItem(Items.iron_ingot, var4);
 
         var4 = this.rand.nextInt(3);
-
-        for (int i = 0; i < var4; ++i) {
-            this.dropItem(Items.iron_ingot, 1);
-        }
-
-        var4 = this.rand.nextInt(3);
-
-        for (int i = 0; i < var4; ++i) {
-            this.dropItem(Item.getItemFromBlock(TFBlocks.towerWood), 1);
-        }
+        this.dropItem(Item.getItemFromBlock(TFBlocks.towerWood), var4);
     }
 
     /**

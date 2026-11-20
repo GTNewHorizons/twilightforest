@@ -880,10 +880,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
         Item i = getDropItem();
         if (i != null) {
             int j = 6 + rand.nextInt(6);
-            for (int k = 0; k < j; k++) {
-                this.dropItem(i, 1);
-            }
-
+            this.dropItem(i, j);
         }
 
         // trophy

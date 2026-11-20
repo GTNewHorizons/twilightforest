@@ -49,10 +49,7 @@ public class EntityTFMinoshroom extends EntityTFMinotaur {
     @Override
     protected void dropFewItems(boolean par1, int par2) {
         int numDrops = this.rand.nextInt(4) + 2 + this.rand.nextInt(1 + par2);
-
-        for (int i = 0; i < numDrops; ++i) {
-            this.dropItem(TFItems.meefStroganoff, 1);
-        }
+        this.dropItem(TFItems.meefStroganoff, numDrops);
 
         // trophy
         this.entityDropItem(new ItemStack(TFItems.trophy, 1, 5), 0);
