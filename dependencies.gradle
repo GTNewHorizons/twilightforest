@@ -6,6 +6,7 @@ dependencies {
     compileOnly("com.github.GTNewHorizons:Battlegear2:1.4.3:api") {} //For TiC to work
     compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.8.160-GTNH:dev")
     devOnlyNonPublishable("ganymedes01.etfuturum:Et-Futurum-Requiem:2.6.2.6-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:Angelica:2.2.46:api") {transitive = false}
     compileOnly("curse.maven:skinport-234948:3212017")
     compileOnly("com.github.GTNewHorizons:Mobs-Info:0.6.0-GTNH:dev")
     compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.54.229:dev") { transitive = false }
