@@ -39,6 +39,13 @@ import twilightforest.entity.passive.EntityTFMobileFirefly;
 
 public abstract class TFBiomeBase extends BiomeGenBase {
 
+    private static final int LEGACY_BIOME_ID_LIMIT = 256;
+    private static final int SEA_LEVEL = 32;
+    private static final int WORLD_HEIGHT = 256;
+    private static final int CHUNK_WIDTH = 16;
+    private static final int BEDROCK_DEPTH_VARIATION = 5;
+    private static final float SPAWN_CHANCE = 0.12F;
+
     static {
         assignBlankBiomeIds();
         areThereBiomeIdConflicts();
@@ -94,8 +101,8 @@ public abstract class TFBiomeBase extends BiomeGenBase {
      */
     protected List<SpawnListEntry> undergroundMonsterList;
 
-    public TFBiomeBase(int i) {
-        super(i);
+    public TFBiomeBase(int id) {
+        super(id);
 
         // Set default filler block meta to 0
         this.field_76754_C = 0;
@@ -106,6 +113,15 @@ public abstract class TFBiomeBase extends BiomeGenBase {
         // try to stop world leaks
         this.worldGeneratorBigTree = null;
 
+        configureCreatureSpawns();
+        configureUndergroundSpawns();
+        configureCaveSpawns();
+
+        getTFBiomeDecorator().setTreesPerChunk(10);
+        getTFBiomeDecorator().setGrassPerChunk(2);
+    }
+
+    private void configureCreatureSpawns() {
         // remove normal monster spawns
         spawnableMonsterList.clear();
         // remove squids
@@ -122,9 +138,10 @@ public abstract class TFBiomeBase extends BiomeGenBase {
         spawnableCreatureList.add(new SpawnListEntry(twilightforest.entity.passive.EntityTFSquirrel.class, 10, 2, 4));
         spawnableCreatureList.add(new SpawnListEntry(twilightforest.entity.passive.EntityTFBunny.class, 10, 4, 5));
         spawnableCreatureList.add(new SpawnListEntry(twilightforest.entity.passive.EntityTFRaven.class, 10, 1, 2));
+    }
 
+    private void configureUndergroundSpawns() {
         undergroundMonsterList = new ArrayList<>();
-
         undergroundMonsterList.add(new SpawnListEntry(EntitySpider.class, 10, 4, 4));
         undergroundMonsterList.add(new SpawnListEntry(EntityZombie.class, 10, 4, 4));
         undergroundMonsterList.add(new SpawnListEntry(EntitySkeleton.class, 10, 4, 4));
@@ -132,14 +149,12 @@ public abstract class TFBiomeBase extends BiomeGenBase {
         undergroundMonsterList.add(new SpawnListEntry(EntitySlime.class, 10, 4, 4));
         undergroundMonsterList.add(new SpawnListEntry(EntityEnderman.class, 1, 1, 4));
         undergroundMonsterList.add(new SpawnListEntry(EntityTFKobold.class, 10, 4, 8));
+    }
 
-        this.spawnableCaveCreatureList.clear();
-        this.spawnableCaveCreatureList.add(new BiomeGenBase.SpawnListEntry(EntityBat.class, 10, 8, 8));
-        this.spawnableCaveCreatureList.add(new SpawnListEntry(EntityTFMobileFirefly.class, 10, 8, 8));
-
-        getTFBiomeDecorator().setTreesPerChunk(10);
-        getTFBiomeDecorator().setGrassPerChunk(2);
-
+    private void configureCaveSpawns() {
+        spawnableCaveCreatureList.clear();
+        spawnableCaveCreatureList.add(new SpawnListEntry(EntityBat.class, 10, 8, 8));
+        spawnableCaveCreatureList.add(new SpawnListEntry(EntityTFMobileFirefly.class, 10, 8, 8));
     }
 
     @Override
@@ -153,7 +168,7 @@ public abstract class TFBiomeBase extends BiomeGenBase {
     @Override
     public float getSpawningChance() {
         // okay, 20% more animals
-        return 0.12F;
+        return SPAWN_CHANCE;
     }
 
     /**
@@ -170,93 +185,101 @@ public abstract class TFBiomeBase extends BiomeGenBase {
 
     /**
      * Forest trees all over
-     * 
+     *
      * used to be getRandomWorldGenForTrees()
      */
     public WorldGenAbstractTree func_150567_a(Random random) {
         if (random.nextInt(5) == 0) {
             return birchGen;
         }
-        if (random.nextInt(10) == 0) {
-            return new WorldGenBigTree(false);
-        } else {
-            return worldGeneratorTrees;
-        }
+        return random.nextInt(10) == 0 ? new WorldGenBigTree(false) : worldGeneratorTrees;
     }
 
     /**
      * Ferns!
      */
     public WorldGenerator getRandomWorldGenForGrass(Random par1Random) {
-        if (par1Random.nextInt(4) == 0) {
-            return new WorldGenTallGrass(Blocks.tallgrass, 2);
-        } else {
-            return new WorldGenTallGrass(Blocks.tallgrass, 1);
-        }
+        return new WorldGenTallGrass(Blocks.tallgrass, par1Random.nextInt(4) == 0 ? 2 : 1);
     }
 
     /**
      * If any biome IDs are -1, find an open ID for them.
      */
     public static boolean assignBlankBiomeIds() {
+        BiomeGenBase[] registeredBiomes = BiomeGenBase.getBiomeGenArray();
+        boolean[] usedIDs = new boolean[registeredBiomes.length];
+        checkUsedIDs(usedIDs, registeredBiomes);
+
+        int[] biomeIDs = getConfiguredBiomeIds();
+
+        // reserve explicit IDs before auto assigning blanks, even if their biomes arent registered yet
+        for (int biomeID : biomeIDs) {
+            if (biomeID >= 0 && biomeID < usedIDs.length) {
+                usedIDs[biomeID] = true;
+            }
+        }
+
         boolean assigned = false;
+        for (int i = 0; i < biomeIDs.length; i++) {
+            if (biomeIDs[i] == -1) {
+                biomeIDs[i] = findNextOpenBiomeId(usedIDs);
+                assigned |= biomeIDs[i] != -1;
+            }
+        }
 
-        boolean[] usedIDs = new boolean[BiomeGenBase.getBiomeGenArray().length];
-
-        checkUsedIDs(usedIDs);
-
-        TwilightForestMod.idBiomeLake = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeLake);
-        TwilightForestMod.idBiomeTwilightForest = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeTwilightForest);
-        TwilightForestMod.idBiomeTwilightForestVariant = assignIdIfNeeded(
-                usedIDs,
-                TwilightForestMod.idBiomeTwilightForestVariant);
-        TwilightForestMod.idBiomeHighlands = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeHighlands);
-        TwilightForestMod.idBiomeMushrooms = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeMushrooms);
-        TwilightForestMod.idBiomeSwamp = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeSwamp);
-        TwilightForestMod.idBiomeStream = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeStream);
-        TwilightForestMod.idBiomeSnowfield = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeSnowfield);
-        TwilightForestMod.idBiomeGlacier = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeGlacier);
-        TwilightForestMod.idBiomeClearing = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeClearing);
-        TwilightForestMod.idBiomeOakSavanna = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeOakSavanna);
-        TwilightForestMod.idBiomeFireflyForest = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeFireflyForest);
-        TwilightForestMod.idBiomeDeepMushrooms = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeDeepMushrooms);
-        TwilightForestMod.idBiomeDarkForestCenter = assignIdIfNeeded(
-                usedIDs,
-                TwilightForestMod.idBiomeDarkForestCenter);
-        TwilightForestMod.idBiomeHighlandsCenter = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeHighlandsCenter);
-        TwilightForestMod.idBiomeDarkForest = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeDarkForest);
-        TwilightForestMod.idBiomeEnchantedForest = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeEnchantedForest);
-        TwilightForestMod.idBiomeFireSwamp = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeFireSwamp);
-        TwilightForestMod.idBiomeThornlands = assignIdIfNeeded(usedIDs, TwilightForestMod.idBiomeThornlands);
-
+        setConfiguredBiomeIds(biomeIDs);
+        TwilightForestMod.hasAssignedBiomeID |= assigned;
         return assigned;
+    }
+
+    private static int[] getConfiguredBiomeIds() {
+        return new int[] { TwilightForestMod.idBiomeLake, TwilightForestMod.idBiomeTwilightForest,
+                TwilightForestMod.idBiomeTwilightForestVariant, TwilightForestMod.idBiomeHighlands,
+                TwilightForestMod.idBiomeMushrooms, TwilightForestMod.idBiomeSwamp, TwilightForestMod.idBiomeStream,
+                TwilightForestMod.idBiomeSnowfield, TwilightForestMod.idBiomeGlacier, TwilightForestMod.idBiomeClearing,
+                TwilightForestMod.idBiomeOakSavanna, TwilightForestMod.idBiomeFireflyForest,
+                TwilightForestMod.idBiomeDeepMushrooms, TwilightForestMod.idBiomeDarkForestCenter,
+                TwilightForestMod.idBiomeHighlandsCenter, TwilightForestMod.idBiomeDarkForest,
+                TwilightForestMod.idBiomeEnchantedForest, TwilightForestMod.idBiomeFireSwamp,
+                TwilightForestMod.idBiomeThornlands };
+    }
+
+    private static void setConfiguredBiomeIds(int[] ids) {
+        TwilightForestMod.idBiomeLake = ids[0];
+        TwilightForestMod.idBiomeTwilightForest = ids[1];
+        TwilightForestMod.idBiomeTwilightForestVariant = ids[2];
+        TwilightForestMod.idBiomeHighlands = ids[3];
+        TwilightForestMod.idBiomeMushrooms = ids[4];
+        TwilightForestMod.idBiomeSwamp = ids[5];
+        TwilightForestMod.idBiomeStream = ids[6];
+        TwilightForestMod.idBiomeSnowfield = ids[7];
+        TwilightForestMod.idBiomeGlacier = ids[8];
+        TwilightForestMod.idBiomeClearing = ids[9];
+        TwilightForestMod.idBiomeOakSavanna = ids[10];
+        TwilightForestMod.idBiomeFireflyForest = ids[11];
+        TwilightForestMod.idBiomeDeepMushrooms = ids[12];
+        TwilightForestMod.idBiomeDarkForestCenter = ids[13];
+        TwilightForestMod.idBiomeHighlandsCenter = ids[14];
+        TwilightForestMod.idBiomeDarkForest = ids[15];
+        TwilightForestMod.idBiomeEnchantedForest = ids[16];
+        TwilightForestMod.idBiomeFireSwamp = ids[17];
+        TwilightForestMod.idBiomeThornlands = ids[18];
     }
 
     /**
      * Populate the array with whether there is a biome using that ID
      */
-    private static void checkUsedIDs(boolean[] usedIDs) {
+    private static void checkUsedIDs(boolean[] usedIDs, BiomeGenBase[] registeredBiomes) {
         for (int i = 0; i < usedIDs.length; i++) {
-            usedIDs[i] = (BiomeGenBase.getBiomeGenArray()[i] != null);
+            usedIDs[i] = registeredBiomes[i] != null;
         }
-    }
-
-    /**
-     * Return a new biome ID if the given id is -1
-     */
-    private static int assignIdIfNeeded(boolean[] usedIDs, int biomeID) {
-        if (biomeID == -1) {
-            biomeID = findNextOpenBiomeId(usedIDs);
-            TwilightForestMod.hasAssignedBiomeID = true;
-        }
-        return biomeID;
     }
 
     /**
      * Find an open biome ID
      */
     private static int findNextOpenBiomeId(boolean[] usedIDs) {
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < Math.min(LEGACY_BIOME_ID_LIMIT, usedIDs.length); i++) {
             if (!usedIDs[i]) {
                 usedIDs[i] = true;
                 return i;
@@ -275,38 +298,28 @@ public abstract class TFBiomeBase extends BiomeGenBase {
      */
     public static boolean areThereBiomeIdConflicts() {
         boolean conflict = TwilightForestMod.hasBiomeIdConflicts;
+        boolean[] seenIDs = new boolean[BiomeGenBase.getBiomeGenArray().length];
 
-        // FMLLog.info("[TwilightForest] Starting biome conflict detection. Conflict = " + conflict);
-
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeLake);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeTwilightForest);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeTwilightForestVariant);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeHighlands);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeMushrooms);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeSwamp);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeStream);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeSnowfield);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeGlacier);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeClearing);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeOakSavanna);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeFireflyForest);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeDeepMushrooms);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeDarkForestCenter);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeHighlandsCenter);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeDarkForest);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeEnchantedForest);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeFireSwamp);
-        conflict |= isConflictAtBiomeID(TwilightForestMod.idBiomeThornlands);
+        for (int id : getConfiguredBiomeIds()) {
+            if (id < 0 || id >= seenIDs.length) {
+                FMLLog.warning("[TwilightForest] Invalid biome ID %d in the Twilight Forest config.", id);
+                conflict = true;
+                continue;
+            }
+            if (seenIDs[id]) {
+                FMLLog.warning("[TwilightForest] Multiple Twilight Forest biomes are configured with ID %d.", id);
+                conflict = true;
+            }
+            seenIDs[id] = true;
+            conflict |= isConflictAtBiomeID(id);
+        }
 
         if (conflict) {
             FMLLog.warning(
                     "[TwilightForest] Biome ID conflict detected.  Edit the Twilight Forest config to give all biomes unique IDs.");
-        } else {
-            // FMLLog.info("[TwilightForest] No biome ID conflicts detected! You're safe!");
         }
 
         TwilightForestMod.hasBiomeIdConflicts |= conflict;
-
         return conflict;
     }
 
@@ -314,18 +327,21 @@ public abstract class TFBiomeBase extends BiomeGenBase {
      * Check the ID for conflicts
      */
     public static boolean isConflictAtBiomeID(int id) {
-        BiomeGenBase biomeAt = BiomeGenBase.getBiome(id);
-
-        if (biomeAt == null || biomeAt instanceof TFBiomeBase) {
-            // FMLLog.warning("[TwilightForest] Biome ID %d contains a biome named %s.", id, biomeAt);
-            return false;
-        } else {
-            FMLLog.warning(
-                    "[TwilightForest] Biome ID conflict.  Biome ID %d contains a biome named %s, but Twilight Forest is set to use that ID.",
-                    id,
-                    biomeAt.biomeName);
+        if (id < 0 || id >= BiomeGenBase.getBiomeGenArray().length) {
+            FMLLog.warning("[TwilightForest] Invalid biome ID %d in the Twilight Forest config.", id);
             return true;
         }
+
+        BiomeGenBase biomeAt = BiomeGenBase.getBiome(id);
+        if (biomeAt == null || biomeAt instanceof TFBiomeBase) {
+            return false;
+        }
+
+        FMLLog.warning(
+                "[TwilightForest] Biome ID conflict.  Biome ID %d contains a biome named %s, but Twilight Forest is set to use that ID.",
+                id,
+                biomeAt.biomeName);
+        return true;
     }
 
     /**
@@ -353,39 +369,6 @@ public abstract class TFBiomeBase extends BiomeGenBase {
         BiomeDictionary.registerBiomeType(thornlands, Type.HILLS, Type.DEAD, Type.DRY, Type.WASTELAND);
     }
 
-    // /**
-    // * Provides the basic grass color based on the biome temperature and rainfall
-    // */
-    // @SideOnly(Side.CLIENT)
-    // @Override
-    // public int getBiomeGrassColor(int x, int y, int z)
-    // {
-    // // I hate to be grumpy, but using events for this is a waste of memory and GC resources
-    // double d0 = (double)MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
-    // double d1 = (double)MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
-    // return ColorizerGrass.getGrassColor(d0, d1);
-    // }
-
-    // /**
-    // * Provides the basic foliage color based on the biome temperature and rainfall
-    // */
-    // @SideOnly(Side.CLIENT)
-    // @Override
-    // public int getBiomeFoliageColor(int x, int y, int z)
-    // {
-    // // I hate to be grumpy, but using events for this is a waste of memory and GC resources
-    // double d0 = (double)MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
-    // double d1 = (double)MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
-    // return ColorizerFoliage.getFoliageColor(d0, d1);
-    // }
-
-    // @SideOnly(Side.CLIENT)
-    // public int getWaterColorMultiplier()
-    // {
-    // // I hate to be grumpy, but using events for this is a waste of memory and GC resources
-    // return this.waterColorMultiplier;
-    // }
-
     public void genTerrainBlocks(World world, Random rand, Block[] blockStorage, byte[] metaStorage, int x, int z,
             double stoneNoise) {
         this.genTwilightBiomeTerrain(world, rand, blockStorage, metaStorage, x, z, stoneNoise);
@@ -402,16 +385,15 @@ public abstract class TFBiomeBase extends BiomeGenBase {
         byte fillerMeta = (byte) (this.field_76754_C & 255);
         int currentFillerDepth = -1;
         int maxFillerDepth = (int) (stoneNoise / 3.0D + 3.0D + rand.nextDouble() * 0.25D);
-        int maskX = x & 15;
-        int maskZ = z & 15;
-        int worldHeight = blockStorage.length / 256;
+        int maskX = x & (CHUNK_WIDTH - 1);
+        int maskZ = z & (CHUNK_WIDTH - 1);
+        int worldHeight = blockStorage.length / (CHUNK_WIDTH * CHUNK_WIDTH);
+        int columnOffset = (maskZ * CHUNK_WIDTH + maskX) * worldHeight;
 
-        int seaLevel = 32;
+        for (int y = WORLD_HEIGHT - 1; y >= 0; --y) {
+            int index = columnOffset + y;
 
-        for (int y = 255; y >= 0; --y) {
-            int index = (maskZ * 16 + maskX) * worldHeight + y;
-
-            if (y <= 0 + rand.nextInt(5)) {
+            if (y <= rand.nextInt(BEDROCK_DEPTH_VARIATION)) {
                 blockStorage[index] = Blocks.bedrock;
             } else {
                 Block currentBlock = blockStorage[index];
@@ -430,14 +412,14 @@ public abstract class TFBiomeBase extends BiomeGenBase {
                                 topMeta = 0;
                                 fillerBlock = Blocks.stone;
                                 fillerMeta = 0;
-                            } else if (y >= (seaLevel - 5) && y <= seaLevel) {
+                            } else if (y >= (SEA_LEVEL - 5) && y <= SEA_LEVEL) {
                                 topBlock = this.topBlock;
                                 topMeta = (byte) (this.field_150604_aj & 255);
                                 fillerBlock = this.fillerBlock;
                                 fillerMeta = (byte) (this.field_76754_C & 255);
                             }
 
-                            if (y < (seaLevel - 1) && (topBlock == null || topBlock.getMaterial() == Material.air)) {
+                            if (y < (SEA_LEVEL - 1) && (topBlock == null || topBlock.getMaterial() == Material.air)) {
                                 if (this.getFloatTemperature(x, y, z) < 0.15F) {
                                     topBlock = Blocks.ice;
                                     topMeta = 0;
@@ -449,10 +431,10 @@ public abstract class TFBiomeBase extends BiomeGenBase {
 
                             currentFillerDepth = maxFillerDepth;
 
-                            if (y >= (seaLevel - 2)) {
+                            if (y >= (SEA_LEVEL - 2)) {
                                 blockStorage[index] = topBlock;
                                 metaStorage[index] = topMeta;
-                            } else if (y < (seaLevel - 8) - maxFillerDepth) {
+                            } else if (y < (SEA_LEVEL - 8) - maxFillerDepth) {
                                 topBlock = null;
                                 fillerBlock = Blocks.stone;
                                 fillerMeta = 0;
@@ -467,12 +449,15 @@ public abstract class TFBiomeBase extends BiomeGenBase {
                             metaStorage[index] = fillerMeta;
 
                             if (currentFillerDepth == 0 && fillerBlock == Blocks.sand) {
-                                currentFillerDepth = rand.nextInt(4) + Math.max(0, y - (seaLevel - 1));
+                                currentFillerDepth = rand.nextInt(4) + Math.max(0, y - (SEA_LEVEL - 1));
                                 fillerBlock = Blocks.sandstone;
                                 fillerMeta = 0;
                             }
                         }
                     }
+                } else {
+                    // air pockets end the surface layer, dont continue filler below caves
+                    currentFillerDepth = -1;
                 }
             }
         }
@@ -497,20 +482,20 @@ public abstract class TFBiomeBase extends BiomeGenBase {
      * biomes.
      */
     public boolean doesPlayerHaveRequiredAchievement(EntityPlayer player) {
+        Achievement requiredAchievement = getRequiredAchievement();
+        if (requiredAchievement == null) {
+            return true;
+        }
 
-        if (getRequiredAchievement() != null && player instanceof EntityPlayerMP
-                && ((EntityPlayerMP) player).func_147099_x() != null) {
+        if (player instanceof EntityPlayerMP) {
             StatisticsFile stats = ((EntityPlayerMP) player).func_147099_x();
-
-            return stats.hasAchievementUnlocked(this.getRequiredAchievement());
-        } else if (getRequiredAchievement() != null && player instanceof EntityClientPlayerMP
-                && ((EntityClientPlayerMP) player).getStatFileWriter() != null) {
-                    StatFileWriter stats = ((EntityClientPlayerMP) player).getStatFileWriter();
-
-                    return stats.hasAchievementUnlocked(this.getRequiredAchievement());
-                } else {
-                    return true;
-                }
+            return stats == null || stats.hasAchievementUnlocked(requiredAchievement);
+        }
+        if (player instanceof EntityClientPlayerMP) {
+            StatFileWriter stats = ((EntityClientPlayerMP) player).getStatFileWriter();
+            return stats == null || stats.hasAchievementUnlocked(requiredAchievement);
+        }
+        return true;
     }
 
     /**
