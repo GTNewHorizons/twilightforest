@@ -34,6 +34,8 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
     static final int RADIUS = (int) ((((ROW_OF_CELLS - 2) / 2.0F) * 12.0F) + 8);
     static final int DIAMETER = 2 * RADIUS + 1;
 
+    static final float HEDGE_FLOOF = 0.5f;
+
     private static final int DEFAULT_TABLE_WIDTH = ROW_OF_CELLS * 2 - 1;
     private static final int CELL_SPACING = 6;
     private static final int TERRACE_SIZE = 3;
