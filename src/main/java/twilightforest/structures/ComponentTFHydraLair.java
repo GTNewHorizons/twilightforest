@@ -12,12 +12,19 @@ import twilightforest.block.TFBlocks;
 
 public class ComponentTFHydraLair extends ComponentTFHollowHill {
 
-    public ComponentTFHydraLair() {
-        super();
-    }
+    private static final int HILL_SIZE = 2;
+    private static final int HILL_Y_OFFSET = 2;
+    private static final int STALACTITE_COUNT = 64;
+    private static final int STALAGMITE_COUNT = 8;
+    private static final int STALACTITE_Y = 1;
+    private static final int BOSS_SPAWNER_POSITION = 27;
+    private static final int BOSS_SPAWNER_Y = 3;
+    private static final int BOSS_SPAWNER_META = 2;
+
+    public ComponentTFHydraLair() {}
 
     public ComponentTFHydraLair(World world, Random rand, int i, int x, int y, int z) {
-        super(world, rand, i, 2, x, y + 2, z);
+        super(world, rand, i, HILL_SIZE, x, y + HILL_Y_OFFSET, z);
     }
 
     /**
@@ -32,28 +39,34 @@ public class ComponentTFHydraLair extends ComponentTFHollowHill {
      */
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        int stalacts = 64;
-        int stalags = 8;
-
         // fill in features
         // ore or glowing stalactites! (smaller, less plentiful)
-        for (int i = 0; i < stalacts; i++) {
+        for (int i = 0; i < STALACTITE_COUNT; i++) {
             int[] dest = getCoordsInHill2D(rand);
-            generateOreStalactite(world, dest[0], 1, dest[1], sbb);
+            generateOreStalactite(world, dest[0], STALACTITE_Y, dest[1], sbb);
         }
+
         // stone stalactites!
-        for (int i = 0; i < stalacts; i++) {
+        for (int i = 0; i < STALACTITE_COUNT; i++) {
             int[] dest = getCoordsInHill2D(rand);
-            generateBlockStalactite(world, Blocks.stone, 1.0F, true, dest[0], 1, dest[1], sbb);
+            generateBlockStalactite(world, Blocks.stone, 1.0F, true, dest[0], STALACTITE_Y, dest[1], sbb);
         }
+
         // stone stalagmites!
-        for (int i = 0; i < stalags; i++) {
+        for (int i = 0; i < STALAGMITE_COUNT; i++) {
             int[] dest = getCoordsInHill2D(rand);
-            generateBlockStalactite(world, Blocks.stone, 0.9F, false, dest[0], 1, dest[1], sbb);
+            generateBlockStalactite(world, Blocks.stone, 0.9F, false, dest[0], STALACTITE_Y, dest[1], sbb);
         }
 
         // boss spawner seems important
-        placeBlockAtCurrentPosition(world, TFBlocks.bossSpawner, 2, 27, 3, 27, sbb);
+        placeBlockAtCurrentPosition(
+                world,
+                TFBlocks.bossSpawner,
+                BOSS_SPAWNER_META,
+                BOSS_SPAWNER_POSITION,
+                BOSS_SPAWNER_Y,
+                BOSS_SPAWNER_POSITION,
+                sbb);
 
         return true;
     }

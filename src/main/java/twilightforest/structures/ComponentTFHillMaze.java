@@ -11,102 +11,84 @@ import twilightforest.block.TFBlocks;
 
 public class ComponentTFHillMaze extends StructureTFComponent {
 
+    private static final int FLOOR_LEVEL = 1;
+    private static final int SMALL_MAZE_SIZE = 11;
+    private static final int MEDIUM_MAZE_SIZE = 19;
+    private static final int LARGE_MAZE_SIZE = 27;
+    private static final int ROOM_SPACING = 3;
+    private static final int ROOM_BLOCK_SPACING = 4;
+    private static final int ROOM_BLOCK_OFFSET = 2;
+    private static final int ROOM_DECORATION_DIAMETER = 8;
+    private static final float TORCH_RARITY = 0.05F;
+
+    private int hillSize;
+
     public ComponentTFHillMaze() {
         super();
     }
 
-    private static final int FLOOR_LEVEL = 1;
-    private int hillSize;
-
     public ComponentTFHillMaze(int i, int x, int y, int z, int hsize) {
         super(i);
-        this.hillSize = hsize;
+        hillSize = hsize;
+        setCoordBaseMode(0);
 
-        this.setCoordBaseMode(0);
-
-        this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(
-                x,
-                y,
-                z,
-                -getRadius(),
-                0,
-                -getRadius(),
-                getRadius() * 2,
-                5,
-                getRadius() * 2,
-                0);
+        int radius = getRadius();
+        boundingBox = StructureTFComponent
+                .getComponentToAddBoundingBox(x, y, z, -radius, 0, -radius, radius * 2, 5, radius * 2, 0);
     }
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
+        int diameter = getDiameter();
+
         // clear the area
-        fillWithBlocks(world, sbb, 0, 1, 0, getDiameter(), 3, getDiameter(), Blocks.air, Blocks.air, false);
-        fillWithBlocks(
-                world,
-                sbb,
-                0,
-                0,
-                0,
-                getDiameter(),
-                0,
-                getDiameter(),
-                TFBlocks.mazestone,
-                TFBlocks.mazestone,
-                false);
-        fillWithBlocks(
-                world,
-                sbb,
-                0,
-                4,
-                0,
-                getDiameter(),
-                4,
-                getDiameter(),
-                TFBlocks.mazestone,
-                TFBlocks.mazestone,
-                true);
+        fillWithBlocks(world, sbb, 0, 1, 0, diameter, 3, diameter, Blocks.air, Blocks.air, false);
+        fillWithBlocks(world, sbb, 0, 0, 0, diameter, 0, diameter, TFBlocks.mazestone, TFBlocks.mazestone, false);
+        fillWithBlocks(world, sbb, 0, 4, 0, diameter, 4, diameter, TFBlocks.mazestone, TFBlocks.mazestone, true);
 
         // make maze object
-        TFMaze maze = new TFMaze(getMazeSize(), getMazeSize());
-
+        int mazeSize = getMazeSize();
+        TFMaze maze = new TFMaze(mazeSize, mazeSize);
         maze.wallBlockID = TFBlocks.mazestone;
         maze.wallBlockMeta = 3;
-        maze.torchRarity = 0.05F;
+        maze.torchRarity = TORCH_RARITY;
 
         // set the seed to a fixed value based on this maze's x and z
-        maze.setSeed(world.getSeed() + this.boundingBox.minX * this.boundingBox.minZ);
+        maze.setSeed(world.getSeed() + boundingBox.minX * boundingBox.minZ);
 
-        int nrooms = getMazeSize() / 3;
-        int[] rcoords = new int[nrooms * 2];
+        int roomCount = mazeSize / ROOM_SPACING;
+        int[] roomCoordinates = new int[roomCount * 2];
 
         // add rooms, trying to keep them separate from existing rooms
-        for (int i = 0; i < nrooms; i++) {
-            int rx, rz;
+        for (int i = 0; i < roomCount; i++) {
+            int roomX;
+            int roomZ;
             do {
-                rx = maze.rand.nextInt(getMazeSize() - 2) + 1;
-                rz = maze.rand.nextInt(getMazeSize() - 2) + 1;
-            } while (isNearRoom(rx, rz, rcoords));
+                roomX = maze.rand.nextInt(mazeSize - 2) + 1;
+                roomZ = maze.rand.nextInt(mazeSize - 2) + 1;
+            } while (isNearRoom(roomX, roomZ, roomCoordinates));
 
-            maze.carveRoom1(rx, rz);
+            maze.carveRoom1(roomX, roomZ);
 
-            rcoords[i * 2] = rx;
-            rcoords[i * 2 + 1] = rz;
+            roomCoordinates[i * 2] = roomX;
+            roomCoordinates[i * 2 + 1] = roomZ;
         }
 
         // make actual maze
         maze.generateRecursiveBacktracker(0, 0);
-
         maze.add4Exits();
+        maze.copyToStructure(world, 0, FLOOR_LEVEL, 0, this, sbb);
 
-        maze.copyToStructure(world, 0, 1, 0, this, sbb);
-
-        decorate3x3Rooms(world, rcoords, sbb);
-
+        decorate3x3Rooms(world, roomCoordinates, sbb);
         return true;
     }
 
     public int getMazeSize() {
-        return hillSize == 1 ? 11 : hillSize == 2 ? 19 : 27;
+        return switch (hillSize) {
+            case 1 -> SMALL_MAZE_SIZE;
+            case 2 -> MEDIUM_MAZE_SIZE;
+            default -> LARGE_MAZE_SIZE;
+        };
     }
 
     public int getRadius() {
@@ -127,15 +109,15 @@ public class ComponentTFHillMaze extends StructureTFComponent {
             return true;
         }
 
-        for (int i = 0; i < rcoords.length / 2; i++) {
-            int rx = rcoords[i * 2];
-            int rz = rcoords[i * 2 + 1];
+        for (int i = 0; i < rcoords.length; i += 2) {
+            int rx = rcoords[i];
+            int rz = rcoords[i + 1];
 
             if (rx == 0 && rz == 0) {
                 continue;
             }
 
-            if (Math.abs(dx - rx) < 3 && Math.abs(dz - rz) < 3) {
+            if (Math.abs(dx - rx) < ROOM_SPACING && Math.abs(dz - rz) < ROOM_SPACING) {
                 return true;
             }
         }
@@ -143,13 +125,13 @@ public class ComponentTFHillMaze extends StructureTFComponent {
     }
 
     void decorate3x3Rooms(World world, int[] rcoords, StructureBoundingBox sbb) {
-        for (int i = 0; i < rcoords.length / 2; i++) {
-            int dx = rcoords[i * 2];
-            int dz = rcoords[i * 2 + 1];
+        for (int i = 0; i < rcoords.length; i += 2) {
+            int dx = rcoords[i];
+            int dz = rcoords[i + 1];
 
-            // MAGIC NUMBERS!!! convert the maze coordinates into coordinates for our structure
-            dx = dx * 4 + 2;
-            dz = dz * 4 + 2;
+            // convert the maze coords into coords for the structure
+            dx = dx * ROOM_BLOCK_SPACING + ROOM_BLOCK_OFFSET;
+            dz = dz * ROOM_BLOCK_SPACING + ROOM_BLOCK_OFFSET;
 
             decorate3x3Room(world, dx, dz, sbb);
         }
@@ -157,25 +139,24 @@ public class ComponentTFHillMaze extends StructureTFComponent {
 
     /**
      * Decorates a room in the maze. Makes assumptions that the room is 3x3 cells and thus 11x11 blocks large.
-     * 
+     *
      * @param rand
      * @param world
      * @param sbb
-     * 
      * @param dx
      * @param dy
      */
     void decorate3x3Room(World world, int x, int z, StructureBoundingBox sbb) {
         // make a new RNG for this room!
-        Random roomRNG = new Random(world.getSeed() ^ x + z);
+        Random roomRNG = new Random(world.getSeed() ^ (x + z));
 
         // all rooms should have 1 spawner
-        roomSpawner(world, roomRNG, x, z, 8, sbb);
+        roomSpawner(world, roomRNG, x, z, ROOM_DECORATION_DIAMETER, sbb);
 
         // and 1-2 chests
-        roomTreasure(world, roomRNG, x, z, 8, sbb);
+        roomTreasure(world, roomRNG, x, z, ROOM_DECORATION_DIAMETER, sbb);
         if (roomRNG.nextInt(4) == 0) {
-            roomTreasure(world, roomRNG, x, z, 8, sbb);
+            roomTreasure(world, roomRNG, x, z, ROOM_DECORATION_DIAMETER, sbb);
         }
     }
 
@@ -183,8 +164,8 @@ public class ComponentTFHillMaze extends StructureTFComponent {
      * Place a spawner within diameter / 2 squares of the specified x and z coordinates
      */
     private void roomSpawner(World world, Random rand, int x, int z, int diameter, StructureBoundingBox sbb) {
-        int rx = x + rand.nextInt(diameter) - (diameter / 2);
-        int rz = z + rand.nextInt(diameter) - (diameter / 2);
+        int rx = randomRoomCoordinate(rand, x, diameter);
+        int rz = randomRoomCoordinate(rand, z, diameter);
 
         String mobID = switch (rand.nextInt(3)) {
             case 1 -> "Skeleton";
@@ -199,9 +180,13 @@ public class ComponentTFHillMaze extends StructureTFComponent {
      * Place a treasure chest within diameter / 2 squares of the specified x and z coordinates
      */
     private void roomTreasure(World world, Random rand, int x, int z, int diameter, StructureBoundingBox sbb) {
-        int rx = x + rand.nextInt(diameter) - (diameter / 2);
-        int rz = z + rand.nextInt(diameter) - (diameter / 2);
+        int rx = randomRoomCoordinate(rand, x, diameter);
+        int rz = randomRoomCoordinate(rand, z, diameter);
 
         placeTreasureAtCurrentPosition(world, rand, rx, FLOOR_LEVEL, rz, TFTreasure.labyrinth_room, sbb);
+    }
+
+    private static int randomRoomCoordinate(Random rand, int center, int diameter) {
+        return center + rand.nextInt(diameter) - diameter / 2;
     }
 }
