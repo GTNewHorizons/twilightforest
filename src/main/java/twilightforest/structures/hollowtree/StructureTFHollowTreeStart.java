@@ -10,11 +10,15 @@ import twilightforest.world.TFWorld;
 
 public class StructureTFHollowTreeStart extends StructureStart {
 
+    private static final int CHUNK_CENTER_OFFSET = 8;
+
     public StructureTFHollowTreeStart() {}
 
     public StructureTFHollowTreeStart(World world, Random rand, int chunkX, int chunkZ) {
-        int x = (chunkX << 4) + 8;
-        int z = (chunkZ << 4) + 8;
+        super(chunkX, chunkZ);
+
+        int x = (chunkX << 4) + CHUNK_CENTER_OFFSET;
+        int z = (chunkZ << 4) + CHUNK_CENTER_OFFSET;
         int y = TFWorld.SEALEVEL + 1;// world.getTopSolidOrLiquidBlock(x, z);
 
         StructureTFComponent trunk = new ComponentTFHollowTreeTrunk(world, rand, 0, x, y, z);
@@ -22,5 +26,4 @@ public class StructureTFHollowTreeStart extends StructureStart {
         trunk.buildComponent(trunk, components, rand);
         updateBoundingBox();
     }
-
 }

@@ -3,6 +3,7 @@ package twilightforest.structures.hollowtree;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -14,6 +15,30 @@ import twilightforest.world.TFGenerator;
 public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBranch {
 
     private static final int LEAF_DUNGEON_CHANCE = 8;
+    private static final int LEAF_DUNGEON_RADIUS = 4;
+    private static final int DUNGEON_COMPONENT_OFFSET = 1;
+    private static final int MEDIUM_BRANCH_COMPONENT_OFFSET = 2;
+
+    private static final int MEDIUM_BRANCH_RANDOM_DIVISOR = 6;
+    private static final int MEDIUM_BRANCH_BASE_DIVISOR = 8;
+    private static final double MEDIUM_BRANCH_ORIGIN_MIN = 0.3D;
+    private static final double MEDIUM_BRANCH_ORIGIN_VARIATION = 0.3D;
+    private static final double MEDIUM_BRANCH_ANGLE_VARIATION = 0.225D;
+    private static final double MEDIUM_BRANCH_LENGTH_RATIO = 0.6D;
+
+    private static final int LOG_METADATA = 12;
+    private static final int REINFORCEMENT_COUNT = 4;
+    private static final int SMALL_BRANCH_COUNT_VARIATIONS = 2;
+    private static final int MIN_SMALL_BRANCH_COUNT = 1;
+    private static final float SMALL_BRANCH_ORIGIN_MIN = 0.25F;
+    private static final float SMALL_BRANCH_ORIGIN_VARIATION = 0.25F;
+    private static final float SMALL_BRANCH_ANGLE_VARIATION = 0.25F;
+    private static final float SMALL_BRANCH_LENGTH_RATIO = 0.3F;
+    private static final float MIN_SMALL_BRANCH_LENGTH = 2.0F;
+    private static final int END_LEAF_RADIUS = 3;
+
+    private static final String NBT_HAS_LEAF_DUNGEON = "hasLeafDungeon";
+
     public boolean hasLeafDungeon = false;
 
     public ComponentTFHollowTreeLargeBranch() {
@@ -23,6 +48,18 @@ public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBr
     protected ComponentTFHollowTreeLargeBranch(int i, int sx, int sy, int sz, double length, double angle, double tilt,
             boolean leafy) {
         super(i, sx, sy, sz, length, angle, tilt, leafy);
+    }
+
+    @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setBoolean(NBT_HAS_LEAF_DUNGEON, hasLeafDungeon);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        hasLeafDungeon = nbt.getBoolean(NBT_HAS_LEAF_DUNGEON);
     }
 
     /**
@@ -35,51 +72,41 @@ public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBr
         // go about halfway out and make a few medium branches.
         // the number of medium branches we can support depends on the length of the big branch
         // every other branch switches sides
-        int numMedBranches = rand.nextInt((int) (length / 6)) + (int) (length / 8);
+        int randomRange = Math.max(1, (int) (length / MEDIUM_BRANCH_RANDOM_DIVISOR));
+        int numMedBranches = rand.nextInt(randomRange) + (int) (length / MEDIUM_BRANCH_BASE_DIVISOR);
 
-        for (int i = 0; i <= numMedBranches; i++) {
-
-            double outVar = (rand.nextDouble() * 0.3) + 0.3;
-            double angleVar = rand.nextDouble() * 0.225 * ((i & 1) == 0 ? 1.0 : -1.0);
-            ChunkCoordinates bsrc = TFGenerator
+        for (int i = 0; i < numMedBranches; i++) {
+            double outVar = rand.nextDouble() * MEDIUM_BRANCH_ORIGIN_VARIATION + MEDIUM_BRANCH_ORIGIN_MIN;
+            double angleVar = rand.nextDouble() * MEDIUM_BRANCH_ANGLE_VARIATION * ((i & 1) == 0 ? 1.0D : -1.0D);
+            ChunkCoordinates branchSource = TFGenerator
                     .translateCoords(src.posX, src.posY, src.posZ, length * outVar, angle, tilt);
 
             makeMedBranch(
                     list,
                     rand,
-                    index + 2 + i,
-                    bsrc.posX,
-                    bsrc.posY,
-                    bsrc.posZ,
-                    length * 0.6,
+                    index + MEDIUM_BRANCH_COMPONENT_OFFSET + i,
+                    branchSource.posX,
+                    branchSource.posY,
+                    branchSource.posZ,
+                    length * MEDIUM_BRANCH_LENGTH_RATIO,
                     angle + angleVar,
                     tilt,
                     leafy);
         }
 
-        // // make 1-2 small ones near the base
-        // int numSmallBranches = rand.nextInt(2) + 1;
-        // for(int i = 0; i <= numSmallBranches; i++) {
-        //
-        // double outVar = (rand.nextDouble() * 0.25) + 0.25;
-        // double angleVar = rand.nextDouble() * 0.25 * ((i & 1) == 0 ? 1.0 : -1.0);
-        // ChunkCoordinates bsrc = TFGenerator.translateCoords(src.posX, src.posY, src.posZ, length * outVar, angle,
-        // tilt);
-        //
-        // makeSmallBranch(list, rand, index + numMedBranches + 1 + i, bsrc.posX, bsrc.posY, bsrc.posZ, Math.max(length
-        // * 0.3, 2), angle + angleVar, tilt, leafy);
-        // }
-
-        this.hasLeafDungeon = (rand.nextInt(LEAF_DUNGEON_CHANCE) == 0);
-
-        if (this.hasLeafDungeon) {
-            makeLeafDungeon(list, rand, index + 1, dest.posX, dest.posY, dest.posZ);
+        hasLeafDungeon = rand.nextInt(LEAF_DUNGEON_CHANCE) == 0;
+        if (hasLeafDungeon) {
+            makeLeafDungeon(list, rand, index + DUNGEON_COMPONENT_OFFSET, dest.posX, dest.posY, dest.posZ);
         }
-
     }
 
     public void makeLeafDungeon(List list, Random rand, int index, int x, int y, int z) {
-        ComponentTFHollowTreeLeafDungeon dungeon = new ComponentTFHollowTreeLeafDungeon(index, x, y, z, 4);
+        ComponentTFHollowTreeLeafDungeon dungeon = new ComponentTFHollowTreeLeafDungeon(
+                index,
+                x,
+                y,
+                z,
+                LEAF_DUNGEON_RADIUS);
         list.add(dungeon);
         dungeon.buildComponent(this, list, rand);
     }
@@ -99,28 +126,13 @@ public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBr
         branch.buildComponent(this, list, rand);
     }
 
-    // public void makeSmallBranch(List list, Random rand, int index, int x, int y, int z, double branchLength, double
-    // branchRotation, double branchAngle, boolean leafy) {
-    // ComponentTFHollowTreeSmallBranch branch = new ComponentTFHollowTreeSmallBranch(index, x, y, z, branchLength,
-    // branchRotation, branchAngle, leafy);
-    // list.add(branch);
-    // branch.buildComponent(this, list, rand);
-    // }
-
     /**
      * Draw this branch
      */
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-
-        ChunkCoordinates rsrc = new ChunkCoordinates(
-                src.posX - boundingBox.minX,
-                src.posY - boundingBox.minY,
-                src.posZ - boundingBox.minZ);
-        ChunkCoordinates rdest = new ChunkCoordinates(
-                dest.posX - boundingBox.minX,
-                dest.posY - boundingBox.minY,
-                dest.posZ - boundingBox.minZ);
+        ChunkCoordinates rsrc = toLocalCoordinates(src);
+        ChunkCoordinates rdest = toLocalCoordinates(dest);
 
         // main branch
         drawBresehnam(
@@ -133,11 +145,11 @@ public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBr
                 rdest.posY,
                 rdest.posZ,
                 TFBlocks.log,
-                12);
+                LOG_METADATA);
 
         // reinforce it
-        int reinforcements = 4;
-        for (int i = 0; i <= reinforcements; i++) {
+        // four unique offsets
+        for (int i = 0; i < REINFORCEMENT_COUNT; i++) {
             int vx = (i & 2) == 0 ? 1 : 0;
             int vy = (i & 1) == 0 ? 1 : -1;
             int vz = (i & 2) == 0 ? 0 : 1;
@@ -151,35 +163,33 @@ public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBr
                     rdest.posY,
                     rdest.posZ,
                     TFBlocks.log,
-                    12);
+                    LOG_METADATA);
         }
 
         // make 1-2 small branches near the base
-        Random decoRNG = new Random(
-                world.getSeed() + (this.boundingBox.minX * 321534781) ^ (this.boundingBox.minZ * 756839));
-        int numSmallBranches = decoRNG.nextInt(2) + 1;
-        for (int i = 0; i <= numSmallBranches; i++) {
-
-            double outVar = (decoRNG.nextFloat() * 0.25F) + 0.25F;
-            double angleVar = decoRNG.nextFloat() * 0.25F * ((i & 1) == 0 ? 1.0F : -1.0F);
-            ChunkCoordinates bsrc = TFGenerator
+        Random decoRNG = createDecorationRandom(world);
+        int numSmallBranches = decoRNG.nextInt(SMALL_BRANCH_COUNT_VARIATIONS) + MIN_SMALL_BRANCH_COUNT;
+        for (int i = 0; i < numSmallBranches; i++) {
+            double outVar = decoRNG.nextFloat() * SMALL_BRANCH_ORIGIN_VARIATION + SMALL_BRANCH_ORIGIN_MIN;
+            double angleVar = decoRNG.nextFloat() * SMALL_BRANCH_ANGLE_VARIATION * ((i & 1) == 0 ? 1.0F : -1.0F);
+            ChunkCoordinates branchSource = TFGenerator
                     .translateCoords(rsrc.posX, rsrc.posY, rsrc.posZ, length * outVar, angle, tilt);
 
             drawSmallBranch(
                     world,
                     sbb,
-                    bsrc.posX,
-                    bsrc.posY,
-                    bsrc.posZ,
-                    Math.max(length * 0.3F, 2F),
+                    branchSource.posX,
+                    branchSource.posY,
+                    branchSource.posZ,
+                    Math.max(length * SMALL_BRANCH_LENGTH_RATIO, MIN_SMALL_BRANCH_LENGTH),
                     angle + angleVar,
                     tilt,
                     leafy);
         }
 
-        if (leafy && !this.hasLeafDungeon) {
+        if (leafy && !hasLeafDungeon) {
             // leaf blob at the end
-            makeLeafBlob(world, sbb, rdest.posX, rdest.posY, rdest.posZ, 3);
+            makeLeafBlob(world, sbb, rdest.posX, rdest.posY, rdest.posZ, END_LEAF_RADIUS);
         }
 
         return true;
