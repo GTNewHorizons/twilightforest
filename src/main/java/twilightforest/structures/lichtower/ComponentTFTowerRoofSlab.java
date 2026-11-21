@@ -24,7 +24,6 @@ public class ComponentTFTowerRoofSlab extends ComponentTFTowerRoof {
 
         // just hang out at the very top of the tower
         makeCapBB(wing);
-
     }
 
     /**
@@ -32,42 +31,38 @@ public class ComponentTFTowerRoofSlab extends ComponentTFTowerRoof {
      */
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        int slabMeta = 2;
-        return makePyramidCap(world, slabMeta, sbb);
+        return makePyramidCap(world, 2, sbb);
     }
 
     protected boolean makePyramidCap(World world, int slabMeta, StructureBoundingBox sbb) {
-        for (int y = 0; y <= height; y++) {
-            int min = 2 * y;
-            int max = size - (2 * y) - 1;
-            for (int x = min; x <= max; x++) {
-                for (int z = min; z <= max; z++) {
-                    if (x == min || x == max || z == min || z == max) {
-                        placeBlockAtCurrentPosition(world, Blocks.wooden_slab, slabMeta, x, y, z, sbb);
-                    } else {
-                        placeBlockAtCurrentPosition(world, Blocks.planks, slabMeta, x, y, z, sbb);
-                    }
-                }
-            }
-        }
+        generateCap(world, slabMeta, sbb, false);
         return true;
     }
 
     protected boolean makeConnectedCap(World world, int slabMeta, StructureBoundingBox sbb) {
-        for (int y = 0; y < height; y++) {
-            int min = 2 * y;
-            int max = size - (2 * y) - 1;
-            for (int x = 0; x <= max; x++) {
-                for (int z = min; z <= max; z++) {
-                    if (x == max || z == min || z == max) {
-                        placeBlockAtCurrentPosition(world, Blocks.wooden_slab, slabMeta, x, y, z, sbb);
-                    } else {
-                        placeBlockAtCurrentPosition(world, Blocks.planks, slabMeta, x, y, z, sbb);
-                    }
-                }
-            }
-        }
+        generateCap(world, slabMeta, sbb, true);
         return true;
     }
 
+    private void generateCap(World world, int slabMeta, StructureBoundingBox sbb, boolean connected) {
+        // connected caps extend to the rear edge and stop one layer below pyramid caps
+        int maxY = connected ? height - 1 : height;
+        for (int y = 0; y <= maxY; y++) {
+            int min = 2 * y;
+            int max = size - min - 1;
+            for (int x = connected ? 0 : min; x <= max; x++) {
+                for (int z = min; z <= max; z++) {
+                    boolean edge = x == max || z == min || z == max || (!connected && x == min);
+                    placeBlockAtCurrentPosition(
+                            world,
+                            edge ? Blocks.wooden_slab : Blocks.planks,
+                            slabMeta,
+                            x,
+                            y,
+                            z,
+                            sbb);
+                }
+            }
+        }
+    }
 }

@@ -24,7 +24,6 @@ public class ComponentTFTowerRoofGableForwards extends ComponentTFTowerRoof {
 
         // just hang out at the very top of the tower
         this.makeAttachedOverhangBB(wing);
-
     }
 
     /**
@@ -32,22 +31,14 @@ public class ComponentTFTowerRoofGableForwards extends ComponentTFTowerRoof {
      */
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        int slabMeta = 2;
+        final int slabMeta = 2;
         int slopeChange = slopeChangeForSize(size);
         for (int y = 0; y <= height; y++) {
-            int min, max;
-            if (y < slopeChange) {
-                min = y;
-                max = size - y - 1;
-            } else {
-                min = (y + slopeChange) / 2;
-                max = size - ((y + slopeChange) / 2) - 1;
-            }
+            int min = y < slopeChange ? y : (y + slopeChange) / 2;
+            int max = size - min - 1;
             for (int x = 0; x <= size - 2; x++) {
                 for (int z = min; z <= max; z++) {
-                    if (z == min || z == max) {
-                        placeBlockAtCurrentPosition(world, Blocks.planks, slabMeta, x, y, z, sbb);
-                    } else if (x < size - 2) {
+                    if (x < size - 2 || z == min || z == max) {
                         placeBlockAtCurrentPosition(world, Blocks.planks, slabMeta, x, y, z, sbb);
                     }
                 }
@@ -57,7 +48,7 @@ public class ComponentTFTowerRoofGableForwards extends ComponentTFTowerRoof {
         // put on the little figurehead-like "cap"
 
         // where is even the top of our roof?
-        int top = (size + 1) - slopeChange;
+        int top = size + 1 - slopeChange;
         int zMid = size / 2;
 
         placeBlockAtCurrentPosition(world, Blocks.wooden_slab, slabMeta | 0xA, size - 1, top - 1, zMid, sbb);

@@ -24,9 +24,7 @@ public class ComponentTFTowerOutbuilding extends ComponentTFTowerWing {
      * NO BEARDS!
      */
     @Override
-    public void makeABeard(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        return;
-    }
+    public void makeABeard(StructureComponent parent, List<StructureComponent> list, Random rand) {}
 
     /**
      * Outbuildings should not make new wings close to the ground.
@@ -34,21 +32,16 @@ public class ComponentTFTowerOutbuilding extends ComponentTFTowerWing {
     @Override
     public boolean makeTowerWing(List<StructureComponent> list, Random rand, int index, int x, int y, int z,
             int wingSize, int wingHeight, int direction) {
-        if (y > 7) {
-            return super.makeTowerWing(list, rand, index, x, y, z, wingSize, wingHeight, direction);
-        } else {
-            return false;
-        }
+        return y > 7 && super.makeTowerWing(list, rand, index, x, y, z, wingSize, wingHeight, direction);
     }
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        for (int x = 0; x < this.size; x++) {
-            for (int z = 0; z < this.size; z++) {
-                this.func_151554_b(world, Blocks.cobblestone, 0, x, -1, z, sbb);
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
+                func_151554_b(world, Blocks.cobblestone, 0, x, -1, z, sbb);
             }
         }
         return super.addComponentParts(world, rand, sbb);
     }
-
 }
