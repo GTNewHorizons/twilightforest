@@ -1,4 +1,3 @@
-
 package twilightforest.structures;
 
 import java.util.Random;

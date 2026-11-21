@@ -7,11 +7,16 @@ import twilightforest.biomes.TFBiomeBase;
 
 /**
  * Puts key biomes in the proper positions
- * 
+ *
  * @author Ben
  *
  */
 public class GenLayerTFKeyBiomes extends GenLayer {
+
+    private static final int GRID_SIZE = 4;
+    private static final int GRID_MASK = GRID_SIZE - 1;
+    private static final int REGION_SHIFT = 3;
+    private static final int KEY_BIOME_COUNT = 4;
 
     public GenLayerTFKeyBiomes(long l, GenLayer genlayer) {
         super(l);
@@ -22,36 +27,36 @@ public class GenLayerTFKeyBiomes extends GenLayer {
         super(l);
     }
 
+    @Override
     public int[] getInts(int x, int z, int width, int depth) {
-        int[] src = this.parent.getInts(x, z, width, depth);
+        int[] src = parent.getInts(x, z, width, depth);
         int[] dest = IntCache.getIntCache(width * depth);
-        for (int dz = 0; dz < depth; dz++) {
-            for (int dx = 0; dx < width; dx++) {
+        System.arraycopy(src, 0, dest, 0, width * depth);
+
+        if (width == 0 || depth == 0) {
+            return dest;
+        }
+
+        long endX = (long) x + width;
+        long endZ = (long) z + depth;
+
+        // each 4x4 grid has exactly 1 possible ke -biome position
+        for (long gridZ = (long) z & ~((long) GRID_MASK); gridZ < endZ; gridZ += GRID_SIZE) {
+            for (long gridX = (long) x & ~((long) GRID_MASK); gridX < endX; gridX += GRID_SIZE) {
                 // get offsets
-                initChunkSeed(((dx + x) | 3), ((dz + z) | 3));
+                initChunkSeed((int) (gridX | GRID_MASK), (int) (gridZ | GRID_MASK));
+                int keyX = (int) gridX + nextInt(GRID_MASK) + 1;
+                int keyZ = (int) gridZ + nextInt(GRID_MASK) + 1;
 
-                int ox = this.nextInt(3) + 1;
-                int oz = this.nextInt(3) + 1;
-
-                if (((dx + x) & 3) == ox && ((dz + z) & 3) == oz) {
-                    // determine which of the 4
-                    if (((dx + x) & 4) == 0) {
-                        if (((dz + z) & 4) == 0) {
-                            dest[dx + dz * width] = getKeyBiomeFor(dx + x, dz + z, 0);
-                        } else {
-                            dest[dx + dz * width] = getKeyBiomeFor(dx + x, dz + z, 1);
-                        }
-                    } else {
-                        if (((dz + z) & 4) == 0) {
-                            dest[dx + dz * width] = getKeyBiomeFor(dx + x, dz + z, 2);
-                        } else {
-                            dest[dx + dz * width] = getKeyBiomeFor(dx + x, dz + z, 3);
-                        }
-                    }
-
-                } else {
-                    dest[dx + dz * width] = src[dx + dz * width];
+                int dx = keyX - x;
+                int dz = keyZ - z;
+                if (dx < 0 || dx >= width || dz < 0 || dz >= depth) {
+                    continue;
                 }
+
+                // determine which of the 4
+                int index = ((keyX & GRID_SIZE) >>> 1) | ((keyZ & GRID_SIZE) >>> 2);
+                dest[dx + dz * width] = getKeyBiomeFor(keyX, keyZ, index);
             }
         }
 
@@ -64,15 +69,15 @@ public class GenLayerTFKeyBiomes extends GenLayer {
      */
     private int getKeyBiomeFor(int mapX, int mapZ, int index) {
 
-        int regionX = (mapX + 4) >> 3;
-        int regionZ = (mapZ + 4) >> 3;
+        int regionX = (mapX + GRID_SIZE) >> REGION_SHIFT;
+        int regionZ = (mapZ + GRID_SIZE) >> REGION_SHIFT;
 
         this.initChunkSeed(regionX, regionZ);
-        int offset = this.nextInt(4);
+        int offset = this.nextInt(KEY_BIOME_COUNT);
 
         // do we need to shuffle this better?
         // the current version just "rotates" the 4 key biomes
-        return switch ((index + offset) % 4) {
+        return switch ((index + offset) % KEY_BIOME_COUNT) {
             default -> TFBiomeBase.glacier.biomeID;
             case 1 -> TFBiomeBase.fireSwamp.biomeID;
             case 2 -> TFBiomeBase.darkForestCenter.biomeID;

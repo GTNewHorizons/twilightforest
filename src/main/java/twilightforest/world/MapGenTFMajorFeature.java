@@ -1,5 +1,8 @@
 package twilightforest.world;
 
+import java.util.Collection;
+import java.util.List;
+
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.MapGenStructureData;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -40,12 +43,12 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     public int getSpawnListIndexAt(int x, int y, int z) {
         int highestIndex = -1;
 
-        for (StructureStart start : structureMap.values()) {
+        for (StructureStart start : getStructureStarts()) {
             if (!containsXZ(start, x, z)) {
                 continue;
             }
 
-            for (StructureComponent component : start.getComponents()) {
+            for (StructureComponent component : getStructureComponents(start)) {
                 if (!containsXYZ(component, x, y, z)) {
                     continue;
                 }
@@ -64,12 +67,12 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     public StructureBoundingBox getSBBAt(int x, int y, int z) {
         StructureBoundingBox found = null;
 
-        for (StructureStart start : structureMap.values()) {
+        for (StructureStart start : getStructureStarts()) {
             if (!containsXZ(start, x, z)) {
                 continue;
             }
 
-            for (StructureComponent component : start.getComponents()) {
+            for (StructureComponent component : getStructureComponents(start)) {
                 if (containsXYZ(component, x, y, z)) {
                     found = component.getBoundingBox();
                 }
@@ -80,12 +83,12 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     }
 
     public boolean isBlockProtectedAt(int x, int y, int z) {
-        for (StructureStart start : structureMap.values()) {
+        for (StructureStart start : getStructureStarts()) {
             if (!containsXZ(start, x, z)) {
                 continue;
             }
 
-            for (StructureComponent component : start.getComponents()) {
+            for (StructureComponent component : getStructureComponents(start)) {
                 if (!containsXYZ(component, x, y, z)) {
                     continue;
                 }
@@ -103,7 +106,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     public void setStructureConquered(int x, int y, int z, boolean conquered) {
         MapGenStructureData data = null;
 
-        for (StructureStart start : structureMap.values()) {
+        for (StructureStart start : getStructureStarts()) {
             if (!containsXZ(start, x, z) || !(start instanceof StructureTFMajorFeatureStart)) {
                 continue;
             }
@@ -129,7 +132,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     }
 
     public boolean isStructureConquered(int x, int y, int z) {
-        for (StructureStart start : structureMap.values()) {
+        for (StructureStart start : getStructureStarts()) {
             if (containsXZ(start, x, z) && start instanceof StructureTFMajorFeatureStart
                     && ((StructureTFMajorFeatureStart) start).isConquered) {
                 return true;
@@ -144,7 +147,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
             return false;
         }
 
-        for (StructureStart start : structureMap.values()) {
+        for (StructureStart start : getStructureStarts()) {
             if (containsXZ(start, x, z) && start instanceof StructureTFMajorFeatureStart
                     && ((StructureTFMajorFeatureStart) start).isLocked(lockIndex)) {
                 return true;
@@ -171,11 +174,16 @@ public class MapGenTFMajorFeature extends MapGenStructure {
             return null;
         }
 
-        return findIntersectingStructureBox(x - range, z - range, x + range, z + range);
+        // keep the search box valid even if the requested range exceeds integer coords
+        return findIntersectingStructureBox(
+                clampToInt((long) x - range),
+                clampToInt((long) z - range),
+                clampToInt((long) x + range),
+                clampToInt((long) z + range));
     }
 
     private StructureBoundingBox findIntersectingStructureBox(int minX, int minZ, int maxX, int maxZ) {
-        for (StructureStart start : structureMap.values()) {
+        for (StructureStart start : getStructureStarts()) {
             if (intersectsXZ(start, minX, minZ, maxX, maxZ)) {
                 return start.getBoundingBox();
             }
@@ -197,6 +205,20 @@ public class MapGenTFMajorFeature extends MapGenStructure {
     private static boolean containsXYZ(StructureComponent component, int x, int y, int z) {
         return component != null && component.getBoundingBox() != null
                 && component.getBoundingBox().isVecInside(x, y, z);
+    }
+
+    private static int clampToInt(long value) {
+        return (int) Math.max(Integer.MIN_VALUE, Math.min(Integer.MAX_VALUE, value));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Collection<StructureStart> getStructureStarts() {
+        return structureMap.values();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<StructureComponent> getStructureComponents(StructureStart start) {
+        return start.getComponents();
     }
 
     private MapGenStructureData getOrCreateStructureData() {

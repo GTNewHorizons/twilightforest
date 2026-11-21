@@ -8,6 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.structure.MapGenStructureIO;
+import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.StructureStart;
 import net.minecraft.world.gen.structure.StructureStrongholdPieces;
@@ -40,10 +41,16 @@ import twilightforest.world.TFWorldChunkManager;
 
 public class StructureTFMajorFeatureStart extends StructureStart {
 
+    private static final int CHUNK_SHIFT = 4;
+    private static final int CHUNK_CENTER_OFFSET = 8;
+    private static final int BIOME_HEIGHT_MULTIPLIER = 8;
     private static final int STRONGHOLD_Y_OFFSET = -33;
     private static final int DARK_FOREST_TOWER_Y_OFFSET = 4;
+    private static final String CONQUERED_NBT_KEY = "Conquered";
+    private static final String FEATURE_ID_NBT_KEY = "FeatureID";
+    private static final String LOCKS_NBT_KEY = "Locks";
 
-    public static int NUM_LOCKS = 4;
+    public static final int NUM_LOCKS = 4;
 
     public TFFeature feature;
     public boolean isConquered;
@@ -77,16 +84,20 @@ public class StructureTFMajorFeatureStart extends StructureStart {
     public StructureTFMajorFeatureStart() {}
 
     public StructureTFMajorFeatureStart(World world, Random random, int chunkX, int chunkZ) {
+        super(chunkX, chunkZ);
+
         // preserve the original initilisation and call order for worldgen compatibility
         StructureStrongholdPieces.prepareStructurePieces();
 
-        int x = (chunkX << 4) + 8;
-        int z = (chunkZ << 4) + 8;
+        int x = (chunkX << CHUNK_SHIFT) + CHUNK_CENTER_OFFSET;
+        int z = (chunkZ << CHUNK_SHIFT) + CHUNK_CENTER_OFFSET;
         int y = TFWorld.SEALEVEL + 1;
 
         feature = TFFeature.getFeatureDirectlyAt(chunkX, chunkZ, world);
         StructureComponent root = makeFirstComponent(world, random, feature, x, y, z);
         if (root == null) {
+            // mapGenStructure serialises even when they have no components
+            boundingBox = new StructureBoundingBox(x, y, z, x, y, z);
             return;
         }
 
@@ -190,7 +201,7 @@ public class StructureTFMajorFeatureStart extends StructureStart {
             return;
         }
 
-        int offsetY = (int) ((biome.rootHeight + biome.heightVariation) * 8);
+        int offsetY = (int) ((biome.rootHeight + biome.heightVariation) * BIOME_HEIGHT_MULTIPLIER);
         if (biome == TFBiomeBase.darkForest) {
             offsetY += DARK_FOREST_TOWER_Y_OFFSET;
         }
@@ -206,7 +217,8 @@ public class StructureTFMajorFeatureStart extends StructureStart {
             boundingBox.offset(0, offsetY, 0);
         }
 
-        for (StructureComponent component : components) {
+        for (Object entry : components) {
+            StructureComponent component = (StructureComponent) entry;
             if (component != null && component.getBoundingBox() != null) {
                 component.getBoundingBox().offset(0, offsetY, 0);
             }
@@ -216,23 +228,23 @@ public class StructureTFMajorFeatureStart extends StructureStart {
     @Override
     public void func_143022_a(NBTTagCompound nbt) {
         super.func_143022_a(nbt);
-        nbt.setBoolean("Conquered", isConquered);
-        nbt.setInteger("FeatureID", feature != null ? feature.featureID : TFFeature.nothing.featureID);
-        nbt.setByteArray("Locks", lockBytes != null ? lockBytes : new byte[NUM_LOCKS]);
+        nbt.setBoolean(CONQUERED_NBT_KEY, isConquered);
+        nbt.setInteger(FEATURE_ID_NBT_KEY, feature != null ? feature.featureID : TFFeature.nothing.featureID);
+        nbt.setByteArray(LOCKS_NBT_KEY, lockBytes != null ? lockBytes : new byte[NUM_LOCKS]);
     }
 
     @Override
     public void func_143017_b(NBTTagCompound nbt) {
         super.func_143017_b(nbt);
-        isConquered = nbt.getBoolean("Conquered");
+        isConquered = nbt.getBoolean(CONQUERED_NBT_KEY);
 
-        int featureID = nbt.getInteger("FeatureID");
+        int featureID = nbt.getInteger(FEATURE_ID_NBT_KEY);
         feature = featureID >= 0 && featureID < TFFeature.featureList.length ? TFFeature.featureList[featureID] : null;
         if (feature == null) {
             feature = TFFeature.nothing;
         }
 
-        byte[] savedLocks = nbt.getByteArray("Locks");
+        byte[] savedLocks = nbt.getByteArray(LOCKS_NBT_KEY);
         lockBytes = savedLocks.length >= NUM_LOCKS ? savedLocks : Arrays.copyOf(savedLocks, NUM_LOCKS);
     }
 
