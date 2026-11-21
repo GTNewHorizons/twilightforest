@@ -1,4 +1,3 @@
-
 package twilightforest.structures.lichtower;
 
 import java.util.Random;

@@ -1,4 +1,3 @@
-
 package twilightforest.structures.lichtower;
 
 import net.minecraft.world.gen.structure.StructureBoundingBox;

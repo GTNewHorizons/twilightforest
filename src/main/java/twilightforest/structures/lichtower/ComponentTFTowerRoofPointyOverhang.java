@@ -1,4 +1,3 @@
-
 package twilightforest.structures.lichtower;
 
 public class ComponentTFTowerRoofPointyOverhang extends ComponentTFTowerRoofPointy {
