@@ -15,10 +15,16 @@ import twilightforest.world.TFWorld;
 
 public class TFBiomeThornlands extends TFBiomeBase {
 
-    private TFGenThorns tfGenThorns;
+    private static final int THORN_ATTEMPTS = 128;
+    private static final int CHUNK_SIZE = 16;
+    private static final int CHUNK_OFFSET = 8;
+    private static final int DISABLED_TREE_COUNT = -999;
+    private static final int DISABLED_CACTUS_COUNT = -9999;
 
-    public TFBiomeThornlands(int i) {
-        super(i);
+    private final TFGenThorns tfGenThorns;
+
+    public TFBiomeThornlands(int biomeId) {
+        super(biomeId);
 
         this.topBlock = TFBlocks.deadrock;
         this.field_150604_aj = 0;
@@ -28,27 +34,29 @@ public class TFBiomeThornlands extends TFBiomeBase {
         this.temperature = 0.3F;
         this.rainfall = 0.2F;
 
-        getTFBiomeDecorator().canopyPerChunk = -999;
-        getTFBiomeDecorator().setTreesPerChunk(-999);
-        this.theBiomeDecorator.deadBushPerChunk = 2;
-        this.theBiomeDecorator.cactiPerChunk = -9999;
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        decorator.canopyPerChunk = DISABLED_TREE_COUNT;
+        decorator.setTreesPerChunk(DISABLED_TREE_COUNT);
+        decorator.deadBushPerChunk = 2;
+        decorator.cactiPerChunk = DISABLED_CACTUS_COUNT;
         this.spawnableCreatureList.clear();
 
         this.tfGenThorns = new TFGenThorns();
 
-        this.theBiomeDecorator.generateLakes = false;
+        decorator.generateLakes = false;
     }
 
+    @Override
     public void decorate(World world, Random rand, int mapX, int mapZ) {
         super.decorate(world, rand, mapX, mapZ);
 
         // add thorns!
-        for (int i = 0; i < 128; i++) {
-            int rx = mapX + rand.nextInt(16) + 8;
-            int rz = mapZ + rand.nextInt(16) + 8;
-            int ry = getGroundLevel(world, rx, rz);
+        for (int i = 0; i < THORN_ATTEMPTS; i++) {
+            int x = mapX + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+            int z = mapZ + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+            int y = getGroundLevel(world, x, z);
 
-            this.tfGenThorns.generate(world, rand, rx, ry, rz);
+            this.tfGenThorns.generate(world, rand, x, y, z);
         }
     }
 
@@ -57,27 +65,35 @@ public class TFBiomeThornlands extends TFBiomeBase {
         // gravel we got
         Chunk chunk = world.getChunkFromBlockCoords(x, z);
         int lastDirt = TFWorld.SEALEVEL;
+        int localX = x & (CHUNK_SIZE - 1);
+        int localZ = z & (CHUNK_SIZE - 1);
+
         for (int y = TFWorld.SEALEVEL; y < TFWorld.CHUNKHEIGHT - 1; y++) {
-            Block blockID = chunk.getBlock(x & 15, y, z & 15);
+            Block block = chunk.getBlock(localX, y, localZ);
             // grass = return immediately
-            if (blockID == Blocks.grass) {
+            if (block == Blocks.grass) {
                 return y + 1;
-            } else if (blockID == Blocks.dirt || blockID == Blocks.stone
-                    || blockID == Blocks.gravel
-                    || blockID == Blocks.sandstone
-                    || blockID == Blocks.sand
-                    || blockID == Blocks.clay
-                    || blockID == TFBlocks.deadrock) {
-                        lastDirt = y + 1;
-                    }
+            } else if (isValidGroundBlock(block)) {
+                lastDirt = y + 1;
+            }
         }
 
         return lastDirt;
     }
 
+    private static boolean isValidGroundBlock(Block block) {
+        return block == Blocks.dirt || block == Blocks.stone
+                || block == Blocks.gravel
+                || block == Blocks.sandstone
+                || block == Blocks.sand
+                || block == Blocks.clay
+                || block == TFBlocks.deadrock;
+    }
+
     /**
      * Return a block if you want it to replace stone in the terrain generation
      */
+    @Override
     public Block getStoneReplacementBlock() {
         return TFBlocks.deadrock;
     }
@@ -85,10 +101,12 @@ public class TFBiomeThornlands extends TFBiomeBase {
     /**
      * Metadata for the stone replacement block
      */
+    @Override
     public byte getStoneReplacementMeta() {
         return 2;
     }
 
+    @Override
     protected Achievement getRequiredAchievement() {
         return TFAchievementPage.twilightProgressGlacier;
     }

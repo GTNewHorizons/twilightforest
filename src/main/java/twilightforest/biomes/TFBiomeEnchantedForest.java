@@ -20,14 +20,25 @@ import twilightforest.world.TFWorld;
 
 public class TFBiomeEnchantedForest extends TFBiomeBase {
 
+    private static final int COLOR_CENTER_SPACING = 256;
+    private static final int COLOR_CENTER_OFFSET = 8;
+    private static final int COLOR_RING_STEP = 64;
+    private static final int COLOR_RING_PERIOD = 512;
+    private static final int MAX_COLOR_COMPONENT = 255;
+    private static final int COLOR_FLICKER_RANGE = 32;
+    private static final int COLOR_FLICKER_OFFSET = 16;
+    private static final int VINES_PER_CHUNK = 20;
+    private static final int TALL_FERNS_PER_CHUNK = 20;
+
     Random colorRNG;
 
-    public TFBiomeEnchantedForest(int i) {
-        super(i);
+    public TFBiomeEnchantedForest(int biomeId) {
+        super(biomeId);
         colorRNG = new Random();
 
-        getTFBiomeDecorator().setGrassPerChunk(12);
-        getTFBiomeDecorator().setFlowersPerChunk(8);
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        decorator.setGrassPerChunk(12);
+        decorator.setFlowersPerChunk(8);
     }
 
     /**
@@ -44,100 +55,107 @@ public class TFBiomeEnchantedForest extends TFBiomeBase {
     @Override
     public int getBiomeFoliageColor(int x, int y, int z) {
         return (super.getBiomeFoliageColor(x, y, z) & 0xFFFF00) + getEnchantedColor(x, z);
-
-        // return (ColorizerGrass.getGrassColor(colorRNG.nextFloat(), colorRNG.nextFloat()) & 0xFFFF00) +
-        // colorRNG.nextInt(256);
     }
 
     /**
      * Find a number between 0 and 255. currently returns concentric circles from the biome center
      */
     private int getEnchantedColor(int x, int z) {
-        // center of the biome is at % 256 - 8
-        int cx = 256 * Math.round((x - 8) / 256F) + 8;
-        int cz = 256 * Math.round((z - 8) / 256F) + 8;
+        // colour rings are centered on coordinates congruent to 8 256
+        int centerX = COLOR_CENTER_SPACING * Math.round((x - COLOR_CENTER_OFFSET) / (float) COLOR_CENTER_SPACING)
+                + COLOR_CENTER_OFFSET;
+        int centerZ = COLOR_CENTER_SPACING * Math.round((z - COLOR_CENTER_OFFSET) / (float) COLOR_CENTER_SPACING)
+                + COLOR_CENTER_OFFSET;
 
-        int dist = (int) MathHelper.sqrt_float((cx - x) * (cx - x) + (cz - z) * (cz - z));
-        int color = dist * 64;
-        color %= 512;
+        int distance = (int) MathHelper.sqrt_float((centerX - x) * (centerX - x) + (centerZ - z) * (centerZ - z));
+        int color = (distance * COLOR_RING_STEP) % COLOR_RING_PERIOD;
 
-        if (color > 255) {
-            color = 511 - color;
+        if (color > MAX_COLOR_COMPONENT) {
+            color = COLOR_RING_PERIOD - 1 - color;
         }
+        color = MAX_COLOR_COMPONENT - color;
 
-        color = 255 - color;
+        int flicker = colorRNG.nextInt(COLOR_FLICKER_RANGE) - COLOR_FLICKER_OFFSET;
+        int flickeredColor = color + flicker;
 
-        int randomFlicker = colorRNG.nextInt(32) - 16;
-
-        if (0 < color + randomFlicker && color + randomFlicker > 255) {
-            color += randomFlicker;
-        }
-
-        return color;
+        // apply flicker only when the result stays within the blue colour channel
+        return flickeredColor >= 0 && flickeredColor <= MAX_COLOR_COMPONENT ? flickeredColor : color;
     }
 
     /**
-     * Occasional shrub, no big trees
+     * Occasional rainboaks, birches and big trees
      */
+    @Override
     public WorldGenAbstractTree func_150567_a(Random random) {
         if (random.nextInt(15) == 0) {
             return new TFGenSmallRainboak();
-        } else if (random.nextInt(50) == 0) {
-            return new TFGenLargeRainboak();
-        } else if (random.nextInt(5) == 0) {
-            return birchGen;
-        } else if (random.nextInt(10) == 0) {
-            return new WorldGenBigTree(false);
-        } else {
-            return worldGeneratorTrees;
         }
+        if (random.nextInt(50) == 0) {
+            return new TFGenLargeRainboak();
+        }
+        if (random.nextInt(5) == 0) {
+            return birchGen;
+        }
+        if (random.nextInt(10) == 0) {
+            return new WorldGenBigTree(false);
+        }
+        return worldGeneratorTrees;
     }
 
     /**
      * EVEN MOAR FERNZ!
      */
-    public WorldGenerator getRandomWorldGenForGrass(Random par1Random) {
-        if (par1Random.nextInt(3) > 0) {
+    @Override
+    public WorldGenerator getRandomWorldGenForGrass(Random random) {
+        if (random.nextInt(3) > 0) {
             return new WorldGenTallGrass(Blocks.tallgrass, 2);
-        } else if (par1Random.nextInt(3) == 0) {
-            return new WorldGenTallGrass(TFBlocks.plant, BlockTFPlant.META_FIDDLEHEAD);
-        } else {
-            return new WorldGenTallGrass(Blocks.tallgrass, 1);
         }
+        if (random.nextInt(3) == 0) {
+            return new WorldGenTallGrass(TFBlocks.plant, BlockTFPlant.META_FIDDLEHEAD);
+        }
+        return new WorldGenTallGrass(Blocks.tallgrass, 1);
     }
 
     /**
      * Decorate this biome with extra decorations!
      */
     @Override
-    public void decorate(World par1World, Random par2Random, int par3, int par4) {
-        WorldGenVines worldgenvines = new WorldGenVines();
+    public void decorate(World world, Random random, int mapX, int mapZ) {
+        generateVines(world, random, mapX, mapZ);
+        generateTallFerns(world, random, mapX, mapZ);
+        super.decorate(world, random, mapX, mapZ);
+    }
 
-        for (int i = 0; i < 20; i++) {
-            int j = par3 + par2Random.nextInt(16) + 8;
-            byte byte0 = (byte) TFWorld.SEALEVEL;
-            int k = par4 + par2Random.nextInt(16) + 8;
-            worldgenvines.generate(par1World, par2Random, j, byte0, k);
+    private void generateVines(World world, Random random, int mapX, int mapZ) {
+        WorldGenVines vineGenerator = new WorldGenVines();
+        for (int i = 0; i < VINES_PER_CHUNK; i++) {
+            int x = mapX + random.nextInt(16) + 8;
+            byte y = (byte) TFWorld.SEALEVEL;
+            int z = mapZ + random.nextInt(16) + 8;
+            vineGenerator.generate(world, random, x, y, z);
         }
+    }
 
+    private void generateTallFerns(World world, Random random, int mapX, int mapZ) {
         // tall ferns
         genTallFlowers.func_150548_a(3);
 
-        for (int i = 0; i < 20; ++i) {
-            int rx = par3 + par2Random.nextInt(16) + 8;
-            int rz = par4 + par2Random.nextInt(16) + 8;
-            int ry = par2Random.nextInt(par1World.getHeightValue(rx, rz) + 32);
-            genTallFlowers.generate(par1World, par2Random, rx, ry, rz);
+        for (int i = 0; i < TALL_FERNS_PER_CHUNK; i++) {
+            int x = mapX + random.nextInt(16) + 8;
+            int z = mapZ + random.nextInt(16) + 8;
+            int y = random.nextInt(world.getHeightValue(x, z) + 32);
+            genTallFlowers.generate(world, random, x, y, z);
         }
-
-        super.decorate(par1World, par2Random, par3, par4);
     }
 
     /**
      * Customize flower colors
      */
-    public String func_150572_a(Random p_150572_1_, int p_150572_2_, int p_150572_3_, int p_150572_4_) {
-        return p_150572_1_.nextInt(3) > 0 ? BlockFlower.field_149859_a[1]
-                : p_150572_1_.nextBoolean() ? BlockFlower.field_149859_a[2] : BlockFlower.field_149859_a[3];
+    @Override
+    public String func_150572_a(Random random, int x, int y, int z) {
+        if (random.nextInt(3) > 0) {
+            return BlockFlower.field_149859_a[1];
+        }
+        return random.nextBoolean() ? BlockFlower.field_149859_a[2] : BlockFlower.field_149859_a[3];
     }
 }

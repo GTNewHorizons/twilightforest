@@ -20,12 +20,20 @@ import twilightforest.world.TFWorld;
 public class TFBiomeFireflyForest extends TFBiomeTwilightForest {
 
     private static final int LAMPPOST_CHANCE = 4;
+    private static final int MUSHGLOOM_CHANCE = 24;
+    private static final int PUMPKIN_CHANCE = 32;
+    private static final int HANGING_LAMP_ATTEMPTS = 30;
+    private static final int CHUNK_SIZE = 16;
+    private static final int CHUNK_OFFSET = 8;
+    private static final int FLOWER_HEIGHT_OFFSET = 32;
+    private static final double FLOWER_NOISE_SCALE = 48.0D;
+
     TFGenHangingLamps tfGenHangingLamps;
     TFGenLampposts tfGenLampposts;
     WorldGenTallGrass worldGenMushgloom;
 
-    public TFBiomeFireflyForest(int i) {
-        super(i);
+    public TFBiomeFireflyForest(int biomeId) {
+        super(biomeId);
 
         this.worldGenMushgloom = new WorldGenTallGrass(TFBlocks.plant, BlockTFPlant.META_MUSHGLOOM);
         this.tfGenHangingLamps = new TFGenHangingLamps();
@@ -34,11 +42,10 @@ public class TFBiomeFireflyForest extends TFBiomeTwilightForest {
         this.temperature = 0.5F;
         this.rainfall = 1.0F;
 
-        this.theBiomeDecorator.flowersPerChunk = 4;
-        this.theBiomeDecorator.grassPerChunk = 1;
-
-        this.getTFBiomeDecorator().setTreesPerChunk(2);
-
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        decorator.flowersPerChunk = 4;
+        decorator.grassPerChunk = 1;
+        decorator.setTreesPerChunk(2);
     }
 
     /**
@@ -46,75 +53,81 @@ public class TFBiomeFireflyForest extends TFBiomeTwilightForest {
      */
     @Override
     public void decorate(World world, Random rand, int mapX, int mapZ) {
+        generateTallFlowers(world, rand, mapX, mapZ);
+        super.decorate(world, rand, mapX, mapZ);
+        generateMushglooms(world, rand, mapX, mapZ);
+        generateHangingLamps(world, rand, mapX, mapZ);
+        generateLampposts(world, rand, mapX, mapZ);
+        generatePumpkins(world, rand, mapX, mapZ);
+    }
+
+    private void generateTallFlowers(World world, Random rand, int mapX, int mapZ) {
         int flowerCycles = rand.nextInt(3) - 1;
 
-        int successfulFlowers = 0;
+        // the original range, -1 to 1 permits at most one flower attempt
+        if (flowerCycles <= 0) {
+            return;
+        }
 
-        while (successfulFlowers < flowerCycles) {
-            int flowerType = rand.nextInt(3);
-
-            if (flowerType == 0) {
+        switch (rand.nextInt(3)) {
+            case 0:
                 genTallFlowers.func_150548_a(1);
-            } else if (flowerType == 1) {
-                genTallFlowers.func_150548_a(4);
-            } else if (flowerType == 2) {
-                genTallFlowers.func_150548_a(5);
-            }
-
-            int tallFlowerTries = 0;
-
-            while (true) {
-                if (tallFlowerTries < 1) {
-                    int k1 = mapX + rand.nextInt(16) + 8;
-                    int i2 = mapZ + rand.nextInt(16) + 8;
-                    int l1 = rand.nextInt(world.getHeightValue(k1, i2) + 32);
-
-                    if (!genTallFlowers.generate(world, rand, k1, l1, i2)) {
-                        ++tallFlowerTries;
-                        continue;
-                    }
-                }
-
-                ++successfulFlowers;
                 break;
-            }
+            case 1:
+                genTallFlowers.func_150548_a(4);
+                break;
+            default:
+                genTallFlowers.func_150548_a(5);
+                break;
         }
 
-        super.decorate(world, rand, mapX, mapZ);
+        int x = randomChunkCoordinate(rand, mapX);
+        int z = randomChunkCoordinate(rand, mapZ);
+        int y = rand.nextInt(world.getHeightValue(x, z) + FLOWER_HEIGHT_OFFSET);
+        genTallFlowers.generate(world, rand, x, y, z);
+    }
 
-        if (rand.nextInt(24) == 0) {
-            int rx = mapX + rand.nextInt(16) + 8;
-            int rz = mapZ + rand.nextInt(16) + 8;
-            int ry = getGroundLevel(world, rx, rz);
+    private void generateMushglooms(World world, Random rand, int mapX, int mapZ) {
+        if (rand.nextInt(MUSHGLOOM_CHANCE) == 0) {
+            int x = randomChunkCoordinate(rand, mapX);
+            int z = randomChunkCoordinate(rand, mapZ);
+            int y = getGroundLevel(world, x, z);
             // mushglooms
-            this.worldGenMushgloom.generate(world, rand, rx, ry, rz);
+            worldGenMushgloom.generate(world, rand, x, y, z);
         }
+    }
 
+    private void generateHangingLamps(World world, Random rand, int mapX, int mapZ) {
         // hanging lamps
-        for (int i = 0; i < 30; i++) {
-            int rx = mapX + rand.nextInt(16) + 8;
-            int rz = mapZ + rand.nextInt(16) + 8;
-            int ry = TFWorld.SEALEVEL + rand.nextInt(TFWorld.CHUNKHEIGHT - TFWorld.SEALEVEL);
-
-            this.tfGenHangingLamps.generate(world, rand, rx, ry, rz);
+        for (int i = 0; i < HANGING_LAMP_ATTEMPTS; i++) {
+            int x = randomChunkCoordinate(rand, mapX);
+            int z = randomChunkCoordinate(rand, mapZ);
+            int y = TFWorld.SEALEVEL + rand.nextInt(TFWorld.CHUNKHEIGHT - TFWorld.SEALEVEL);
+            tfGenHangingLamps.generate(world, rand, x, y, z);
         }
+    }
 
+    private void generateLampposts(World world, Random rand, int mapX, int mapZ) {
         if (rand.nextInt(LAMPPOST_CHANCE) == 0) {
-            int rx = mapX + rand.nextInt(16) + 8;
-            int rz = mapZ + rand.nextInt(16) + 8;
-            int ry = getGroundLevel(world, rx, rz);
-
-            this.tfGenLampposts.generate(world, rand, rx, ry, rz);
+            int x = randomChunkCoordinate(rand, mapX);
+            int z = randomChunkCoordinate(rand, mapZ);
+            int y = getGroundLevel(world, x, z);
+            tfGenLampposts.generate(world, rand, x, y, z);
         }
+    }
 
+    private void generatePumpkins(World world, Random rand, int mapX, int mapZ) {
         // extra pumpkins (should they be lit?)
-        if (rand.nextInt(32) == 0) {
-            int rx = mapX + rand.nextInt(16) + 8;
-            int rz = mapZ + rand.nextInt(16) + 8;
-            int ry = getGroundLevel(world, rx, rz);
-            (new WorldGenPumpkin()).generate(world, rand, rx, ry, rz);
+        if (rand.nextInt(PUMPKIN_CHANCE) == 0) {
+            int x = randomChunkCoordinate(rand, mapX);
+            int z = randomChunkCoordinate(rand, mapZ);
+            int y = getGroundLevel(world, x, z);
+            new WorldGenPumpkin().generate(world, rand, x, y, z);
         }
+    }
 
+    private int randomChunkCoordinate(Random rand, int mapCoordinate) {
+        return mapCoordinate + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
     }
 
     public int getGroundLevel(World world, int x, int z) {
@@ -138,9 +151,10 @@ public class TFBiomeFireflyForest extends TFBiomeTwilightForest {
     /**
      * Every color flower!
      */
-    public String func_150572_a(Random p_150572_1_, int p_150572_2_, int p_150572_3_, int p_150572_4_) {
+    @Override
+    public String func_150572_a(Random rand, int x, int y, int z) {
         double flowerVar = MathHelper.clamp_double(
-                (1.0D + plantNoise.func_151601_a((double) p_150572_2_ / 48.0D, (double) p_150572_4_ / 48.0D)) / 2.0D,
+                (1.0D + plantNoise.func_151601_a(x / FLOWER_NOISE_SCALE, z / FLOWER_NOISE_SCALE)) / 2.0D,
                 0.0D,
                 0.9999D);
         int flowerIndex = (int) (flowerVar * (double) BlockFlower.field_149859_a.length);
