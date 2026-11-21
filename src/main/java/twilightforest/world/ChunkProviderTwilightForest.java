@@ -35,6 +35,14 @@ import twilightforest.compat.Mods;
 public class ChunkProviderTwilightForest implements IChunkProvider {
 
     private static final int CHUNK_SIZE = 16;
+    private static final int CHUNK_CENTER_OFFSET = CHUNK_SIZE / 2;
+    private static final int NOISE_CELL_SIZE = 4;
+    private static final int DENSITY_CELL_HEIGHT = 8;
+    private static final int BIOME_BLEND_RADIUS = 2;
+    private static final int BIOME_WEIGHT_DIAMETER = BIOME_BLEND_RADIUS * 2 + 1;
+    private static final int WATER_LAKE_CHANCE = 4;
+    private static final int LAVA_LAKE_CHANCE = 32;
+    private static final int DUNGEON_ATTEMPTS = 8;
     private static final int BIOME_SAMPLES = 10;
     private static final int NOISE_SAMPLES = 5;
     private static final int NOISE_HEIGHT = 33;
@@ -62,7 +70,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
     private final NoiseGeneratorPerlin surfaceNoiseGenerator;
 
     private final double[] terrainDensity = new double[NOISE_SAMPLES * NOISE_SAMPLES * NOISE_HEIGHT];
-    private final float[] biomeWeight = new float[25];
+    private final float[] biomeWeight = new float[BIOME_WEIGHT_DIAMETER * BIOME_WEIGHT_DIAMETER];
     private double[] stoneNoise = new double[CHUNK_SIZE * CHUNK_SIZE];
     private double[] depthNoise;
     private double[] interpolationNoise;
@@ -89,9 +97,10 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         this.interpolationNoiseGenerator = new NoiseGeneratorOctaves(rand, 8);
         this.surfaceNoiseGenerator = new NoiseGeneratorPerlin(rand, 4);
 
-        for (int z = -2; z <= 2; z++) {
-            for (int x = -2; x <= 2; x++) {
-                biomeWeight[x + 2 + (z + 2) * 5] = 10.0F / MathHelper.sqrt_float(x * x + z * z + 0.2F);
+        for (int z = -BIOME_BLEND_RADIUS; z <= BIOME_BLEND_RADIUS; z++) {
+            for (int x = -BIOME_BLEND_RADIUS; x <= BIOME_BLEND_RADIUS; x++) {
+                biomeWeight[x + BIOME_BLEND_RADIUS + (z + BIOME_BLEND_RADIUS) * BIOME_WEIGHT_DIAMETER] = 10.0F
+                        / MathHelper.sqrt_float(x * x + z * z + 0.2F);
             }
         }
     }
@@ -149,14 +158,14 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
     public void generateTerrain2(int chunkX, int chunkZ, Block[] blocks) {
         biomesForGeneration = worldObj.getWorldChunkManager().getBiomesForGeneration(
                 biomesForGeneration,
-                chunkX * 4 - 2,
-                chunkZ * 4 - 2,
+                chunkX * NOISE_CELL_SIZE - BIOME_BLEND_RADIUS,
+                chunkZ * NOISE_CELL_SIZE - BIOME_BLEND_RADIUS,
                 BIOME_SAMPLES,
                 BIOME_SAMPLES);
-        calculateTerrainDensity(chunkX * 4, chunkZ * 4);
+        calculateTerrainDensity(chunkX * NOISE_CELL_SIZE, chunkZ * NOISE_CELL_SIZE);
 
-        for (int cellX = 0; cellX < 4; cellX++) {
-            for (int cellZ = 0; cellZ < 4; cellZ++) {
+        for (int cellX = 0; cellX < NOISE_CELL_SIZE; cellX++) {
+            for (int cellZ = 0; cellZ < NOISE_CELL_SIZE; cellZ++) {
                 int corner00 = (cellX * NOISE_SAMPLES + cellZ) * NOISE_HEIGHT;
                 int corner01 = corner00 + NOISE_HEIGHT;
                 int corner10 = ((cellX + 1) * NOISE_SAMPLES + cellZ) * NOISE_HEIGHT;
@@ -167,25 +176,25 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                     double density01 = terrainDensity[corner01 + sampleY];
                     double density10 = terrainDensity[corner10 + sampleY];
                     double density11 = terrainDensity[corner11 + sampleY];
-                    double step00 = (terrainDensity[corner00 + sampleY + 1] - density00) * 0.125D;
-                    double step01 = (terrainDensity[corner01 + sampleY + 1] - density01) * 0.125D;
-                    double step10 = (terrainDensity[corner10 + sampleY + 1] - density10) * 0.125D;
-                    double step11 = (terrainDensity[corner11 + sampleY + 1] - density11) * 0.125D;
+                    double step00 = (terrainDensity[corner00 + sampleY + 1] - density00) / DENSITY_CELL_HEIGHT;
+                    double step01 = (terrainDensity[corner01 + sampleY + 1] - density01) / DENSITY_CELL_HEIGHT;
+                    double step10 = (terrainDensity[corner10 + sampleY + 1] - density10) / DENSITY_CELL_HEIGHT;
+                    double step11 = (terrainDensity[corner11 + sampleY + 1] - density11) / DENSITY_CELL_HEIGHT;
 
-                    for (int subY = 0; subY < 8; subY++) {
+                    for (int subY = 0; subY < DENSITY_CELL_HEIGHT; subY++) {
                         double left = density00;
                         double right = density01;
-                        double leftStep = (density10 - density00) * 0.25D;
-                        double rightStep = (density11 - density01) * 0.25D;
-                        int y = sampleY * 8 + subY;
+                        double leftStep = (density10 - density00) / NOISE_CELL_SIZE;
+                        double rightStep = (density11 - density01) / NOISE_CELL_SIZE;
+                        int y = sampleY * DENSITY_CELL_HEIGHT + subY;
 
-                        for (int subX = 0; subX < 4; subX++) {
-                            int x = cellX * 4 + subX;
-                            int base = columnIndex(x, cellZ * 4) + y;
-                            double zStep = (right - left) * 0.25D;
+                        for (int subX = 0; subX < NOISE_CELL_SIZE; subX++) {
+                            int x = cellX * NOISE_CELL_SIZE + subX;
+                            int base = columnIndex(x, cellZ * NOISE_CELL_SIZE) + y;
+                            double zStep = (right - left) / NOISE_CELL_SIZE;
                             double density = left - zStep;
 
-                            for (int subZ = 0; subZ < 4; subZ++) {
+                            for (int subZ = 0; subZ < NOISE_CELL_SIZE; subZ++) {
                                 density += zStep;
                                 blocks[base + subZ * TFWorld.CHUNKHEIGHT] = density > 0.0D ? Blocks.stone
                                         : y < TERRAIN_SEA_LEVEL ? Blocks.water : null;
@@ -228,13 +237,14 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                 float totalVariation = 0.0F;
                 float totalHeight = 0.0F;
                 float totalWeight = 0.0F;
-                BiomeGenBase center = biomesForGeneration[sampleX + 2 + (sampleZ + 2) * BIOME_SAMPLES];
+                BiomeGenBase center = biomesForGeneration[sampleX + BIOME_BLEND_RADIUS
+                        + (sampleZ + BIOME_BLEND_RADIUS) * BIOME_SAMPLES];
 
-                for (int offsetX = -2; offsetX <= 2; offsetX++) {
-                    for (int offsetZ = -2; offsetZ <= 2; offsetZ++) {
+                for (int offsetX = -BIOME_BLEND_RADIUS; offsetX <= BIOME_BLEND_RADIUS; offsetX++) {
+                    for (int offsetZ = -BIOME_BLEND_RADIUS; offsetZ <= BIOME_BLEND_RADIUS; offsetZ++) {
                         BiomeGenBase biome = biomesForGeneration[sampleX + offsetX
-                                + 2
-                                + (sampleZ + offsetZ + 2) * BIOME_SAMPLES];
+                                + BIOME_BLEND_RADIUS
+                                + (sampleZ + offsetZ + BIOME_BLEND_RADIUS) * BIOME_SAMPLES];
                         float rootHeight = biome.rootHeight;
                         float variation = biome.heightVariation;
 
@@ -243,7 +253,8 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                             variation = 1.0F + variation * 4.0F;
                         }
 
-                        float weight = biomeWeight[offsetX + 2 + (offsetZ + 2) * 5] / (rootHeight + 2.0F);
+                        float weight = biomeWeight[offsetX + BIOME_BLEND_RADIUS
+                                + (offsetZ + BIOME_BLEND_RADIUS) * BIOME_WEIGHT_DIAMETER] / (rootHeight + 2.0F);
                         if (biome.rootHeight > center.rootHeight) {
                             weight /= 2.0F;
                         }
@@ -342,6 +353,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                 scale * 2.0D,
                 1.0D);
 
+        // the X Z arguments are intentionally swapped to match the biome terrain array layout
         for (int z = 0; z < CHUNK_SIZE; z++) {
             for (int x = 0; x < CHUNK_SIZE; x++) {
                 biomes[x + z * CHUNK_SIZE].genTerrainBlocks(
@@ -738,7 +750,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         boolean disableLakes = generatedStructure || !decorationsAllowed;
         hollowTreeGenerator.generateStructuresInChunk(worldObj, rand, chunkX, chunkZ);
 
-        if (!disableLakes && rand.nextInt(4) == 0 && biome.theBiomeDecorator.generateLakes) {
+        if (!disableLakes && rand.nextInt(WATER_LAKE_CHANCE) == 0 && biome.theBiomeDecorator.generateLakes) {
             new WorldGenLakes(Blocks.water).generate(
                     worldObj,
                     rand,
@@ -747,7 +759,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
                     blockZ + rand.nextInt(CHUNK_SIZE) + 8);
         }
 
-        if (!disableLakes && rand.nextInt(32) == 0) {
+        if (!disableLakes && rand.nextInt(LAVA_LAKE_CHANCE) == 0) {
             int lakeX = blockX + rand.nextInt(CHUNK_SIZE) + 8;
             int lakeY = rand.nextInt(rand.nextInt(TFWorld.CHUNKHEIGHT - 8) + 8);
             int lakeZ = blockZ + rand.nextInt(CHUNK_SIZE) + 8;
@@ -756,7 +768,7 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
             }
         }
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < DUNGEON_ATTEMPTS; i++) {
             new WorldGenDungeons().generate(
                     worldObj,
                     rand,
@@ -766,8 +778,15 @@ public class ChunkProviderTwilightForest implements IChunkProvider {
         }
 
         biome.decorate(worldObj, rand, blockX, blockZ);
-        SpawnerAnimals.performWorldGenSpawning(worldObj, biome, blockX + 8, blockZ + 8, CHUNK_SIZE, CHUNK_SIZE, rand);
-        generateSnowAndIce(blockX + 8, blockZ + 8);
+        SpawnerAnimals.performWorldGenSpawning(
+                worldObj,
+                biome,
+                blockX + CHUNK_CENTER_OFFSET,
+                blockZ + CHUNK_CENTER_OFFSET,
+                CHUNK_SIZE,
+                CHUNK_SIZE,
+                rand);
+        generateSnowAndIce(blockX + CHUNK_CENTER_OFFSET, blockZ + CHUNK_CENTER_OFFSET);
     }
 
     private void generateSnowAndIce(int startX, int startZ) {
