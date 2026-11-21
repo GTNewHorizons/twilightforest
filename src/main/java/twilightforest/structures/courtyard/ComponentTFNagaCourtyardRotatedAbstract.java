@@ -41,8 +41,7 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
     public ComponentTFNagaCourtyardRotatedAbstract(int i, int x, int y, int z, int rotation) {
         super(i);
         this.coordBaseMode = rotation;
-
-        this.initRotation();
+        initRotation();
     }
 
     /**
@@ -54,113 +53,87 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
             case 0:
                 horizontalColumnsOrient4 = 8;
                 horizontalColumnsOrient8 = 4;
-
-                rotatedStairs0 = 3;
-                rotatedStairs1 = 2;
-                rotatedStairs2 = 0;
-                rotatedStairs3 = 1;
-                rotatedStairs4 = 7;
-                rotatedStairs5 = 6;
-                rotatedStairs6 = 4;
-                rotatedStairs7 = 5;
-
-                EtchedNagastoneNorth = ForgeDirection.WEST;
-                EtchedNagastoneSouth = ForgeDirection.EAST;
-                EtchedNagastoneWest = ForgeDirection.SOUTH;
-                EtchedNagastoneEast = ForgeDirection.NORTH;
-
-                NagastoneNorth = Yaw.WEST;
-                NagastoneSouth = Yaw.EAST;
-                NagastoneWest = Yaw.SOUTH;
-                NagastoneEast = Yaw.NORTH;
+                setStairs(3, 2, 0, 1, 7, 6, 4, 5);
+                setEtchedDirections(
+                        ForgeDirection.WEST,
+                        ForgeDirection.EAST,
+                        ForgeDirection.SOUTH,
+                        ForgeDirection.NORTH);
+                setNagastoneYaws(Yaw.WEST, Yaw.EAST, Yaw.SOUTH, Yaw.NORTH);
                 break;
             case 1:
                 horizontalColumnsOrient4 = 4;
                 horizontalColumnsOrient8 = 8;
-
-                rotatedStairs0 = 0;
-                rotatedStairs1 = 1;
-                rotatedStairs2 = 2;
-                rotatedStairs3 = 3;
-                rotatedStairs4 = 4;
-                rotatedStairs5 = 5;
-                rotatedStairs6 = 6;
-                rotatedStairs7 = 7;
-
-                EtchedNagastoneNorth = ForgeDirection.SOUTH;
-                EtchedNagastoneSouth = ForgeDirection.NORTH;
-                EtchedNagastoneWest = ForgeDirection.EAST;
-                EtchedNagastoneEast = ForgeDirection.WEST;
-
-                NagastoneNorth = Yaw.NORTH;
-                NagastoneSouth = Yaw.SOUTH;
-                NagastoneWest = Yaw.WEST;
-                NagastoneEast = Yaw.EAST;
+                setStairs(0, 1, 2, 3, 4, 5, 6, 7);
+                setEtchedDirections(
+                        ForgeDirection.SOUTH,
+                        ForgeDirection.NORTH,
+                        ForgeDirection.EAST,
+                        ForgeDirection.WEST);
+                setNagastoneYaws(Yaw.NORTH, Yaw.SOUTH, Yaw.WEST, Yaw.EAST);
                 break;
             case 2:
                 horizontalColumnsOrient4 = 8;
                 horizontalColumnsOrient8 = 4;
-
-                rotatedStairs0 = 2;
-                rotatedStairs1 = 3;
-                rotatedStairs2 = 1;
-                rotatedStairs3 = 0;
-                rotatedStairs4 = 6;
-                rotatedStairs5 = 7;
-                rotatedStairs6 = 5;
-                rotatedStairs7 = 4;
-
-                EtchedNagastoneNorth = ForgeDirection.EAST;
-                EtchedNagastoneSouth = ForgeDirection.WEST;
-                EtchedNagastoneWest = ForgeDirection.NORTH;
-                EtchedNagastoneEast = ForgeDirection.SOUTH;
-
-                NagastoneNorth = Yaw.EAST;
-                NagastoneSouth = Yaw.WEST;
-                NagastoneWest = Yaw.NORTH;
-                NagastoneEast = Yaw.SOUTH;
+                setStairs(2, 3, 1, 0, 6, 7, 5, 4);
+                setEtchedDirections(
+                        ForgeDirection.EAST,
+                        ForgeDirection.WEST,
+                        ForgeDirection.NORTH,
+                        ForgeDirection.SOUTH);
+                setNagastoneYaws(Yaw.EAST, Yaw.WEST, Yaw.NORTH, Yaw.SOUTH);
                 break;
             case 3:
                 horizontalColumnsOrient4 = 4;
                 horizontalColumnsOrient8 = 8;
-
-                rotatedStairs0 = 1;
-                rotatedStairs1 = 0;
-                rotatedStairs2 = 3;
-                rotatedStairs3 = 2;
-                rotatedStairs4 = 5;
-                rotatedStairs5 = 4;
-                rotatedStairs6 = 7;
-                rotatedStairs7 = 6;
-
-                EtchedNagastoneNorth = ForgeDirection.NORTH;
-                EtchedNagastoneSouth = ForgeDirection.SOUTH;
-                EtchedNagastoneWest = ForgeDirection.WEST;
-                EtchedNagastoneEast = ForgeDirection.EAST;
-
-                NagastoneNorth = Yaw.SOUTH;
-                NagastoneSouth = Yaw.NORTH;
-                NagastoneWest = Yaw.EAST;
-                NagastoneEast = Yaw.WEST;
+                setStairs(1, 0, 3, 2, 5, 4, 7, 6);
+                setEtchedDirections(
+                        ForgeDirection.NORTH,
+                        ForgeDirection.SOUTH,
+                        ForgeDirection.WEST,
+                        ForgeDirection.EAST);
+                setNagastoneYaws(Yaw.SOUTH, Yaw.NORTH, Yaw.EAST, Yaw.WEST);
                 break;
         }
     }
 
+    private void setStairs(int stair0, int stair1, int stair2, int stair3, int stair4, int stair5, int stair6,
+            int stair7) {
+        rotatedStairs0 = stair0;
+        rotatedStairs1 = stair1;
+        rotatedStairs2 = stair2;
+        rotatedStairs3 = stair3;
+        rotatedStairs4 = stair4;
+        rotatedStairs5 = stair5;
+        rotatedStairs6 = stair6;
+        rotatedStairs7 = stair7;
+    }
+
+    private void setEtchedDirections(ForgeDirection north, ForgeDirection south, ForgeDirection west,
+            ForgeDirection east) {
+        EtchedNagastoneNorth = north;
+        EtchedNagastoneSouth = south;
+        EtchedNagastoneWest = west;
+        EtchedNagastoneEast = east;
+    }
+
+    private void setNagastoneYaws(Yaw north, Yaw south, Yaw west, Yaw east) {
+        NagastoneNorth = north;
+        NagastoneSouth = south;
+        NagastoneWest = west;
+        NagastoneEast = east;
+    }
+
     @Override
-    public boolean addComponentParts(World p_74875_1_, Random p_74875_2_, StructureBoundingBox p_74875_3_) {
+    public boolean addComponentParts(World world, Random random, StructureBoundingBox box) {
         // TODO Auto-generated method stub
         return false;
     }
 
-    /**
-     * Load from NBT
-     */
+    // load from nbt
     @Override
-    protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
-        super.func_143011_b(par1NBTTagCompound);
-        // We should be good to go as coordBaseMode is loaded by
-        // net.minecraft.world.gen.structure.StructureComponent
-        // #func_143009_a(World, NBTTagCompound) (the caller of func_143011_b)
-        this.initRotation();
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        initRotation();
     }
 }

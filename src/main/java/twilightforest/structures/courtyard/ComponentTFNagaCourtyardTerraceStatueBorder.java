@@ -18,17 +18,22 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
 
     public ComponentTFNagaCourtyardTerraceStatueBorder(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
-        this.coordBaseMode = rotation;
         this.boundingBox = new StructureBoundingBox(x, y - 1, z - 1, x + 5, y + 5, z + 7);
     }
 
     @Override
-    public boolean addComponentParts(World world, Random random, StructureBoundingBox structureBoundingBox) {
+    public boolean addComponentParts(World world, Random random, StructureBoundingBox box) {
+        buildGroundStairs(world, box);
+        buildBorders(world, box);
+        buildColumns(world, box);
+        return true;
+    }
 
+    private void buildGroundStairs(World world, StructureBoundingBox box) {
         // ground stairs
-        this.fillWithMetadataBlocks(
+        fillWithMetadataBlocks(
                 world,
-                structureBoundingBox,
+                box,
                 4,
                 0,
                 1,
@@ -40,9 +45,9 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
                 Blocks.stone_brick_stairs,
                 rotatedStairs3,
                 true);
-        this.fillWithMetadataBlocks(
+        fillWithMetadataBlocks(
                 world,
-                structureBoundingBox,
+                box,
                 4,
                 0,
                 2,
@@ -54,9 +59,9 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
                 TFBlocks.nagastoneStairsRight,
                 rotatedStairs3,
                 true);
-        this.fillWithMetadataBlocks(
+        fillWithMetadataBlocks(
                 world,
-                structureBoundingBox,
+                box,
                 4,
                 0,
                 5,
@@ -68,11 +73,13 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
                 TFBlocks.nagastoneStairsLeft,
                 rotatedStairs3,
                 true);
+    }
 
+    private void buildBorders(World world, StructureBoundingBox box) {
         // borders
-        this.fillWithMetadataBlocks(
+        fillWithMetadataBlocks(
                 world,
-                structureBoundingBox,
+                box,
                 0,
                 1,
                 1,
@@ -84,68 +91,40 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
                 TFBlocks.nagastoneBody,
                 1,
                 true);
-        for (int i = 1; i <= 7; i++) this.placeBlockAtCurrentPosition(
-                world,
-                TFBlocks.nagastoneBody,
-                0,
-                1,
-                i,
-                BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneWest),
-                structureBoundingBox);
-        this.placeBlockAtCurrentPosition(
-                world,
-                Blocks.stone_brick_stairs,
-                rotatedStairs1,
-                1,
-                1,
-                0,
-                structureBoundingBox);
-        this.placeBlockAtCurrentPosition(
+
+        int westMetadata = BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneWest);
+        for (int i = 1; i <= 7; i++) {
+            placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, westMetadata, 1, 1, i, box);
+        }
+
+        placeBlockAtCurrentPosition(world, Blocks.stone_brick_stairs, rotatedStairs1, 1, 1, 0, box);
+        placeBlockAtCurrentPosition(
                 world,
                 TFBlocks.nagastoneHead,
                 BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneSouth),
                 1,
                 1,
                 1,
-                structureBoundingBox);
-        this.placeBlockAtCurrentPosition(
-                world,
-                Blocks.stone_brick_stairs,
-                rotatedStairs0,
-                1,
-                1,
-                2,
-                structureBoundingBox);
-        this.placeBlockAtCurrentPosition(
-                world,
-                Blocks.stone_brick_stairs,
-                rotatedStairs1,
-                1,
-                1,
-                6,
-                structureBoundingBox);
-        this.placeBlockAtCurrentPosition(
+                box);
+        placeBlockAtCurrentPosition(world, Blocks.stone_brick_stairs, rotatedStairs0, 1, 1, 2, box);
+        placeBlockAtCurrentPosition(world, Blocks.stone_brick_stairs, rotatedStairs1, 1, 1, 6, box);
+        placeBlockAtCurrentPosition(
                 world,
                 TFBlocks.nagastoneHead,
                 BlockTFNagastone2.GetMetadata(Direction.SIDE, NagastoneSouth),
                 1,
                 1,
                 7,
-                structureBoundingBox);
-        this.placeBlockAtCurrentPosition(
-                world,
-                Blocks.stone_brick_stairs,
-                rotatedStairs0,
-                1,
-                1,
-                8,
-                structureBoundingBox);
+                box);
+        placeBlockAtCurrentPosition(world, Blocks.stone_brick_stairs, rotatedStairs0, 1, 1, 8, box);
+    }
 
+    private void buildColumns(World world, StructureBoundingBox box) {
         // columns
-        this.placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, 0, 4, 0, 0, structureBoundingBox);
-        this.fillWithMetadataBlocks(
+        placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, 0, 4, 0, 0, box);
+        fillWithMetadataBlocks(
                 world,
-                structureBoundingBox,
+                box,
                 4,
                 1,
                 0,
@@ -157,12 +136,10 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
                 TFBlocks.nagastonePillar,
                 0,
                 false);
-        this.placeBlockAtCurrentPosition(world, Blocks.stone_slab, 5, 4, 6, 0, structureBoundingBox);
-        this.placeBlockAtCurrentPosition(world, Blocks.fence, 0, 5, 4, 0, structureBoundingBox);
-        this.placeBlockAtCurrentPosition(world, Blocks.fence, 0, 4, 4, 1, structureBoundingBox);
-        this.placeBlockAtCurrentPosition(world, Blocks.torch, 5, 5, 5, 0, structureBoundingBox);
-        this.placeBlockAtCurrentPosition(world, Blocks.torch, 5, 4, 5, 1, structureBoundingBox);
-
-        return true;
+        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 5, 4, 6, 0, box);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, 5, 4, 0, box);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, 4, 4, 1, box);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 5, 5, 5, 0, box);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 5, 4, 5, 1, box);
     }
 }
