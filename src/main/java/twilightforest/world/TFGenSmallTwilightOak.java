@@ -12,16 +12,20 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenSmallTwilightOak extends TFTreeGenerator {
 
+    private static final int HEIGHT_VARIATION = 3;
+    private static final int CANOPY_DEPTH = 3;
+    private static final int WORLD_HEIGHT_LIMIT = 256;
+
     /** The minimum height of a generated tree. */
     protected final int minTreeHeight;
 
-    public TFGenSmallTwilightOak(boolean par1) {
-        this(par1, 4);
+    public TFGenSmallTwilightOak(boolean notify) {
+        this(notify, 4);
     }
 
-    public TFGenSmallTwilightOak(boolean par1, int par2) {
-        super(par1);
-        this.minTreeHeight = par2;
+    public TFGenSmallTwilightOak(boolean notify, int minTreeHeight) {
+        super(notify);
+        this.minTreeHeight = minTreeHeight;
 
         treeBlock = TFBlocks.log;
         treeMeta = 0;
@@ -32,99 +36,84 @@ public class TFGenSmallTwilightOak extends TFTreeGenerator {
         rootMeta = BlockTFRoots.ROOT_META;
     }
 
+    @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
-        int height = rand.nextInt(3) + this.minTreeHeight;
-        boolean allClear = true;
+        int height = rand.nextInt(HEIGHT_VARIATION) + minTreeHeight;
 
-        if (y >= 1 && y + height + 1 <= world.getHeight()) {
-            int cy;
-            byte width;
-            int cz;
-            Block blockID;
-
-            for (cy = y; cy <= y + 1 + height; ++cy) {
-                width = 1;
-
-                if (cy == y) {
-                    width = 0;
-                }
-
-                if (cy >= y + 1 + height - 2) {
-                    width = 2;
-                }
-
-                for (int cx = x - width; cx <= x + width && allClear; ++cx) {
-                    for (cz = z - width; cz <= z + width && allClear; ++cz) {
-                        if (cy >= 0 && cy < 256) {
-                            blockID = world.getBlock(cx, cy, cz);
-
-                            Block block = blockID;
-
-                            if (blockID != Blocks.air && !block.isLeaves(world, cx, cy, cz)
-                                    && blockID != Blocks.grass
-                                    && blockID != Blocks.dirt
-                                    && !block.isWood(world, cx, cy, cz)) {
-                                allClear = false;
-                            }
-                        } else {
-                            allClear = false;
-                        }
-                    }
-                }
-            }
-
-            if (!allClear) {
-                return false;
-            } else {
-                Block blockUsing = world.getBlock(x, y - 1, z);
-                Material materialUnder = blockUsing.getMaterial();
-
-                if ((materialUnder == Material.grass || materialUnder == Material.ground)
-                        && y < world.getHeight() - height - 1) {
-                    blockUsing.onPlantGrow(world, x, y - 1, z, x, y, z);
-                    width = 3;
-                    byte var18 = 0;
-                    int treeWidth;
-                    int tx;
-                    int var15;
-
-                    for (cz = y - width + height; cz <= y + height; ++cz) {
-                        int number = cz - (y + height);
-                        treeWidth = var18 + 1 - number / 2;
-
-                        for (tx = x - treeWidth; tx <= x + treeWidth; ++tx) {
-                            var15 = tx - x;
-
-                            for (int tz = z - treeWidth; tz <= z + treeWidth; ++tz) {
-                                int var17 = tz - z;
-
-                                Block block = world.getBlock(tx, cz, tz);
-
-                                if ((Math.abs(var15) != treeWidth || Math.abs(var17) != treeWidth
-                                        || rand.nextInt(2) != 0 && number != 0)
-                                        && (block == null || block.canBeReplacedByLeaves(world, tx, cz, tz))) {
-                                    this.setBlockAndMetadata(world, tx, cz, tz, this.leafBlock, this.leafMeta);
-                                }
-                            }
-                        }
-                    }
-
-                    for (cz = 0; cz < height; ++cz) {
-                        blockID = world.getBlock(x, y + cz, z);
-
-                        Block block = blockID;
-
-                        if (blockID == Blocks.air || block == null || block.isLeaves(world, x, y + cz, z)) {
-                            this.setBlockAndMetadata(world, x, y + cz, z, this.treeBlock, this.treeMeta);
-                        }
-                    }
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        } else {
+        if (y < 1 || y + height + 1 > world.getHeight() || !hasRoomForTree(world, x, y, z, height)) {
             return false;
+        }
+
+        Block soil = world.getBlock(x, y - 1, z);
+        Material soilMaterial = soil.getMaterial();
+        if ((soilMaterial != Material.grass && soilMaterial != Material.ground)
+                || y >= world.getHeight() - height - 1) {
+            return false;
+        }
+
+        soil.onPlantGrow(world, x, y - 1, z, x, y, z);
+        generateCanopy(world, rand, x, y, z, height);
+        generateTrunk(world, x, y, z, height);
+        return true;
+    }
+
+    private boolean hasRoomForTree(World world, int x, int y, int z, int height) {
+        for (int blockY = y; blockY <= y + height + 1; blockY++) {
+            int radius = 1;
+            if (blockY == y) {
+                radius = 0;
+            }
+            if (blockY >= y + height - 1) {
+                radius = 2;
+            }
+
+            for (int blockX = x - radius; blockX <= x + radius; blockX++) {
+                for (int blockZ = z - radius; blockZ <= z + radius; blockZ++) {
+                    if (blockY < 0 || blockY >= WORLD_HEIGHT_LIMIT) {
+                        return false;
+                    }
+
+                    Block block = world.getBlock(blockX, blockY, blockZ);
+                    if (block != Blocks.air && !block.isLeaves(world, blockX, blockY, blockZ)
+                            && block != Blocks.grass
+                            && block != Blocks.dirt
+                            && !block.isWood(world, blockX, blockY, blockZ)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private void generateCanopy(World world, Random rand, int x, int y, int z, int height) {
+        for (int leafY = y + height - CANOPY_DEPTH; leafY <= y + height; leafY++) {
+            int layer = leafY - (y + height);
+            int radius = 1 - layer / 2;
+
+            for (int leafX = x - radius; leafX <= x + radius; leafX++) {
+                int offsetX = leafX - x;
+                for (int leafZ = z - radius; leafZ <= z + radius; leafZ++) {
+                    int offsetZ = leafZ - z;
+                    Block block = world.getBlock(leafX, leafY, leafZ);
+
+                    // keep the random roll before the layer check so the original rng sequence is kept
+                    if ((Math.abs(offsetX) != radius || Math.abs(offsetZ) != radius
+                            || rand.nextInt(2) != 0 && layer != 0)
+                            && (block == null || block.canBeReplacedByLeaves(world, leafX, leafY, leafZ))) {
+                        setBlockAndMetadata(world, leafX, leafY, leafZ, leafBlock, leafMeta);
+                    }
+                }
+            }
+        }
+    }
+
+    private void generateTrunk(World world, int x, int y, int z, int height) {
+        for (int offsetY = 0; offsetY < height; offsetY++) {
+            Block block = world.getBlock(x, y + offsetY, z);
+            if (block == Blocks.air || block == null || block.isLeaves(world, x, y + offsetY, z)) {
+                setBlockAndMetadata(world, x, y + offsetY, z, treeBlock, treeMeta);
+            }
         }
     }
 }

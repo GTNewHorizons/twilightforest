@@ -11,6 +11,9 @@ import twilightforest.block.TFBlocks;
 
 public abstract class TFTreeGenerator extends WorldGenAbstractTree {
 
+    private static final int LEAF_CORNER_HACK_COORDINATE = 3;
+    private static final int LEAF_CORNER_HACK_DISTANCE = 6;
+
     protected Block treeBlock = TFBlocks.log;
     protected int treeMeta = 3;
     protected int branchMeta = 15;
@@ -23,46 +26,52 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
         this(false);
     }
 
-    public TFTreeGenerator(boolean par1) {
-        super(par1);
+    public TFTreeGenerator(boolean notify) {
+        super(notify);
     }
 
     /**
      * Build a root, but don't let it stick out too far into thin air because that's weird
      */
     protected void buildRoot(World world, int x, int y, int z, double offset, int b) {
-        ChunkCoordinates dest = translateCoords(x, y - b - 2, z, 5, 0.3 * b + offset, 0.8);
+        ChunkCoordinates destination = translateCoords(x, y - b - 2, z, 5, 0.3 * b + offset, 0.8);
 
         // go through block by block and stop drawing when we head too far into open air
-        ChunkCoordinates[] lineArray = getBresehnamArrayCoords(x, y - b - 2, z, dest.posX, dest.posY, dest.posZ);
-        for (ChunkCoordinates coord : lineArray) {
-            this.placeRootBlock(world, coord.posX, coord.posY, coord.posZ, rootBlock, rootMeta);
+        ChunkCoordinates[] rootLine = getBresehnamArrayCoords(
+                x,
+                y - b - 2,
+                z,
+                destination.posX,
+                destination.posY,
+                destination.posZ);
+        for (ChunkCoordinates coordinate : rootLine) {
+            placeRootBlock(world, coordinate.posX, coordinate.posY, coordinate.posZ, rootBlock, rootMeta);
         }
     }
 
     /**
      * Function used to actually place root blocks if they're not going to break anything important
      */
-    protected void placeRootBlock(World world, int x, int y, int z, Block rootBlock2, int meta) {
+    protected void placeRootBlock(World world, int x, int y, int z, Block rootBlock, int meta) {
         if (canRootGrowIn(world, x, y, z)) {
-            this.setBlockAndMetadata(world, x, y, z, rootBlock2, meta);
+            setBlockAndMetadata(world, x, y, z, rootBlock, meta);
         }
     }
 
     public static boolean canRootGrowIn(World world, int x, int y, int z) {
-        Block blockID = world.getBlock(x, y, z);
+        Block block = world.getBlock(x, y, z);
 
-        if (blockID == Blocks.air) {
+        if (block == Blocks.air) {
             // roots can grow through air if they are near a solid block
             return isNearSolid(world, x, y, z);
-        } else {
-            return blockID != Blocks.bedrock && blockID != Blocks.obsidian && blockID != TFBlocks.shield;
         }
+
+        return block != Blocks.bedrock && block != Blocks.obsidian && block != TFBlocks.shield;
     }
 
     /**
      * Moves distance along the vector.
-     * 
+     *
      * This goofy function takes a float between 0 and 1 for the angle, where 0 is 0 degrees, .5 is 180 degrees and 1
      * and 360 degrees. For the tilt, it takes a float between 0 and 1 where 0 is straight up, 0.5 is straight out and 1
      * is straight down.
@@ -128,9 +137,9 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
      */
     protected void drawBresehnam(World world, int x1, int y1, int z1, int x2, int y2, int z2, Block blockValue,
             int metaValue) {
-        ChunkCoordinates[] lineArray = getBresehnamArrayCoords(x1, y1, z1, x2, y2, z2);
-        for (ChunkCoordinates pixel : lineArray) {
-            setBlockAndMetadata(world, pixel.posX, pixel.posY, pixel.posZ, blockValue, metaValue);
+        ChunkCoordinates[] line = getBresehnamArrayCoords(x1, y1, z1, x2, y2, z2);
+        for (ChunkCoordinates coordinate : line) {
+            setBlockAndMetadata(world, coordinate.posX, coordinate.posY, coordinate.posZ, blockValue, metaValue);
         }
     }
 
@@ -140,13 +149,13 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
     public void makeLeafCircle(World world, int sx, int sy, int sz, int rad, Block blockValue, int metaValue,
             boolean useHack) {
         // trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dz = 0; dz <= rad; dz++) {
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dz = 0; dz <= rad; dz++) {
                 int dist = Math.max(dx, dz) + (Math.min(dx, dz) >> 1);
 
                 // hack! I keep getting failing leaves at a certain position.
-                if (useHack && dx == 3 && dz == 3) {
-                    dist = 6;
+                if (useHack && dx == LEAF_CORNER_HACK_COORDINATE && dz == LEAF_CORNER_HACK_COORDINATE) {
+                    dist = LEAF_CORNER_HACK_DISTANCE;
                 }
 
                 // if we're inside the blob, fill it
@@ -167,8 +176,8 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
     public void makeLeafCircle2(World world, int sx, int sy, int sz, int rad, Block blockValue, int metaValue,
             boolean useHack) {
         // trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dz = 0; dz <= rad; dz++) {
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dz = 0; dz <= rad; dz++) {
                 // int dist = Math.max(dx, dz) + (int)(Math.min(dx, dz) * 0.6F);
                 //
                 // //hack! I keep getting failing leaves at a certain position.
@@ -193,18 +202,11 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
      */
     public void drawLeafBlob(World world, int sx, int sy, int sz, int rad, Block blockValue, int metaValue) {
         // then trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dy = 0; dy <= rad; dy++) {
-                for (byte dz = 0; dz <= rad; dz++) {
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dy = 0; dy <= rad; dy++) {
+                for (int dz = 0; dz <= rad; dz++) {
                     // determine how far we are from the center.
-                    int dist = 0;
-                    if (dx >= dy && dx >= dz) {
-                        dist = dx + (Math.max(dy, dz) >> 1) + (Math.min(dy, dz) >> 2);
-                    } else if (dy >= dx && dy >= dz) {
-                        dist = dy + (Math.max(dx, dz) >> 1) + (Math.min(dx, dz) >> 2);
-                    } else {
-                        dist = dz + (Math.max(dx, dy) >> 1) + (Math.min(dx, dy) >> 2);
-                    }
+                    int dist = approximateBlobDistance(dx, dy, dz);
 
                     // if we're inside the blob, fill it
                     if (dist <= rad) {
@@ -223,15 +225,20 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
         }
     }
 
+    private static int approximateBlobDistance(int dx, int dy, int dz) {
+        int largest = Math.max(dx, Math.max(dy, dz));
+        int smallest = Math.min(dx, Math.min(dy, dz));
+        int middle = dx + dy + dz - largest - smallest;
+        return largest + (middle >> 1) + (smallest >> 2);
+    }
+
     /**
      * Put a leaf only in spots where leaves can go!
      */
     public void putLeafBlock(World world, int x, int y, int z, Block blockValue, int metaValue) {
-        Block whatsThere = world.getBlock(x, y, z);
-        Block block = whatsThere;
-
-        if (block == null || block.canBeReplacedByLeaves(world, x, y, z)) {
-            this.setBlockAndMetadata(world, x, y, z, blockValue, metaValue);
+        Block existing = world.getBlock(x, y, z);
+        if (existing == null || existing.canBeReplacedByLeaves(world, x, y, z)) {
+            setBlockAndMetadata(world, x, y, z, blockValue, metaValue);
         }
     }
 }
