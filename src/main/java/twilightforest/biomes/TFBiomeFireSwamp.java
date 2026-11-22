@@ -8,6 +8,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenShrub;
 import net.minecraft.world.gen.feature.WorldGenVines;
+import net.minecraft.world.gen.feature.WorldGenerator;
 
 import twilightforest.TFAchievementPage;
 import twilightforest.TFFeature;
@@ -22,6 +23,11 @@ public class TFBiomeFireSwamp extends TFBiomeBase {
     private static final int CHUNK_WIDTH = 16;
     private static final int CHUNK_DECORATION_OFFSET = 8;
     private static final int PROGRESSION_INTERVAL = 60;
+    private static final int SMOKER_CHANCE = 4;
+    private static final int HINT_MONSTER_CHANCE = 4;
+    private static final int FIRE_DURATION = 8;
+    private static final int GRASS_COLOR = 0x572E23;
+    private static final int FOLIAGE_COLOR = 0x64260F;
 
     protected TFBiomeFireSwamp(int biomeId) {
         super(biomeId);
@@ -67,31 +73,31 @@ public class TFBiomeFireSwamp extends TFBiomeBase {
         generateFireJets(world, random, mapX, mapZ);
     }
 
-    private void generateVines(World world, Random random, int mapX, int mapZ) {
+    private static void generateVines(World world, Random random, int mapX, int mapZ) {
         WorldGenVines vines = new WorldGenVines();
 
         for (int i = 0; i < VINES_PER_CHUNK; i++) {
-            int x = mapX + random.nextInt(CHUNK_WIDTH) + CHUNK_DECORATION_OFFSET;
-            byte y = (byte) TFWorld.SEALEVEL;
-            int z = mapZ + random.nextInt(CHUNK_WIDTH) + CHUNK_DECORATION_OFFSET;
-            vines.generate(world, random, x, y, z);
+            generateAtRandomPosition(world, random, mapX, mapZ, vines);
         }
     }
 
-    private void generateFireJets(World world, Random random, int mapX, int mapZ) {
+    private static void generateFireJets(World world, Random random, int mapX, int mapZ) {
         TFGenFireJet smoker = new TFGenFireJet(TFBlocks.fireJet, BlockTFFireJet.META_SMOKER);
-        if (random.nextInt(4) == 0) {
-            int x = mapX + random.nextInt(CHUNK_WIDTH) + CHUNK_DECORATION_OFFSET;
-            byte y = (byte) TFWorld.SEALEVEL;
-            int z = mapZ + random.nextInt(CHUNK_WIDTH) + CHUNK_DECORATION_OFFSET;
-            smoker.generate(world, random, x, y, z);
+        if (random.nextInt(SMOKER_CHANCE) == 0) {
+            generateAtRandomPosition(world, random, mapX, mapZ, smoker);
         }
 
         TFGenFireJet fireJet = new TFGenFireJet(TFBlocks.fireJet, BlockTFFireJet.META_JET_IDLE);
+        generateAtRandomPosition(world, random, mapX, mapZ, fireJet);
+    }
+
+    private static void generateAtRandomPosition(World world, Random random, int mapX, int mapZ,
+            WorldGenerator generator) {
         int x = mapX + random.nextInt(CHUNK_WIDTH) + CHUNK_DECORATION_OFFSET;
+        // preserve the original byte cast so vine and fire jet heights dont change
         byte y = (byte) TFWorld.SEALEVEL;
         int z = mapZ + random.nextInt(CHUNK_WIDTH) + CHUNK_DECORATION_OFFSET;
-        fireJet.generate(world, random, x, y, z);
+        generator.generate(world, random, x, y, z);
     }
 
     /**
@@ -99,7 +105,7 @@ public class TFBiomeFireSwamp extends TFBiomeBase {
      */
     @Override
     public int getBiomeGrassColor(int x, int y, int z) {
-        return 0x572E23;
+        return GRASS_COLOR;
     }
 
     /**
@@ -107,7 +113,7 @@ public class TFBiomeFireSwamp extends TFBiomeBase {
      */
     @Override
     public int getBiomeFoliageColor(int x, int y, int z) {
-        return 0x64260F;
+        return FOLIAGE_COLOR;
     }
 
     /**
@@ -127,10 +133,10 @@ public class TFBiomeFireSwamp extends TFBiomeBase {
             return;
         }
 
-        player.setFire(8);
+        player.setFire(FIRE_DURATION);
 
         // hint monster?
-        if (world.rand.nextInt(4) == 0) {
+        if (world.rand.nextInt(HINT_MONSTER_CHANCE) == 0) {
             TFFeature.hydraLair.trySpawnHintMonster(world, player);
         }
     }

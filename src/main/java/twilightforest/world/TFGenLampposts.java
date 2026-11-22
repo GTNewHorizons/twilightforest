@@ -14,7 +14,7 @@ public class TFGenLampposts extends TFGenerator {
     @Override
     public boolean generate(World world, Random random, int x, int y, int z) {
         // we should start on a grass block
-        if (world.getBlock(x, y - 1, z) != Blocks.grass) {
+        if (y < 1 || y >= world.getHeight() || world.getBlock(x, y - 1, z) != Blocks.grass) {
             return false;
         }
 
@@ -22,7 +22,7 @@ public class TFGenLampposts extends TFGenerator {
         int height = 1 + random.nextInt(MAX_POST_HEIGHT);
 
         // is it air or replaceable above our grass block
-        if (!hasRoomForLamppost(world, x, y, z, height)) {
+        if (y + height >= world.getHeight() || !hasRoomForLamppost(world, x, y, z, height)) {
             return false;
         }
 
@@ -38,7 +38,7 @@ public class TFGenLampposts extends TFGenerator {
         return true;
     }
 
-    private boolean hasRoomForLamppost(World world, int x, int y, int z, int height) {
+    private static boolean hasRoomForLamppost(World world, int x, int y, int z, int height) {
         // include the jars position
         for (int offset = 0; offset <= height; offset++) {
             int blockY = y + offset;

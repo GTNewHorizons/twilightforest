@@ -16,39 +16,70 @@ import twilightforest.block.TFBlocks;
  */
 public class TFGenHugeLilyPad extends WorldGenerator {
 
-    private FastRandom rand = new FastRandom(0L);
+    private static final int GENERATION_ATTEMPTS = 10;
+    private static final int HORIZONTAL_SPREAD = 8;
+    private static final int VERTICAL_SPREAD = 4;
+    private static final int PAD_WIDTH = 2;
+    private static final long ORIENTATION_SEED = 8890919293L;
 
+    private static final long ORIENTATION_X_FACTOR;
+    private static final long ORIENTATION_Z_FACTOR;
+
+    static {
+        // these 2 draws originally repeated with the same seed for every placed pad
+        FastRandom seedRandom = new FastRandom(ORIENTATION_SEED);
+        ORIENTATION_X_FACTOR = seedRandom.nextLong();
+        ORIENTATION_Z_FACTOR = seedRandom.nextLong();
+    }
+
+    private final FastRandom orientationRandom = new FastRandom(0L);
+
+    @Override
     public boolean generate(World world, Random random, int x, int y, int z) {
-        for (int i = 0; i < 10; i++) {
-            int dx = x + random.nextInt(8) - random.nextInt(8);
-            int dy = y + random.nextInt(4) - random.nextInt(4);
-            int dz = z + random.nextInt(8) - random.nextInt(8);
+        for (int attempt = 0; attempt < GENERATION_ATTEMPTS; attempt++) {
+            int padX = x + random.nextInt(HORIZONTAL_SPREAD) - random.nextInt(HORIZONTAL_SPREAD);
+            int padY = y + random.nextInt(VERTICAL_SPREAD) - random.nextInt(VERTICAL_SPREAD);
+            int padZ = z + random.nextInt(HORIZONTAL_SPREAD) - random.nextInt(HORIZONTAL_SPREAD);
 
-            dx = (dx >> 1) << 1;
-            dz = (dz >> 1) << 1;
+            // align the 2x2 pad to even coords, including for -X and -Z
+            padX &= ~1;
+            padZ &= ~1;
 
-            if (shouldPlacePadAt(world, dx, dy, dz)) {
-                // this seems like a difficult way to generate 2 pseudorandom bits
-                rand.setSeed(8890919293L);
-                rand.setSeed((dx * rand.nextLong()) ^ (dz * rand.nextLong()) ^ 8890919293L);
-                int orient = rand.nextInt(4) << 2;
-
-                world.setBlock(dx, dy, dz, TFBlocks.hugeLilyPad, 0 | orient, 2);
-                world.setBlock(dx + 1, dy, dz, TFBlocks.hugeLilyPad, 1 | orient, 2);
-                world.setBlock(dx + 1, dy, dz + 1, TFBlocks.hugeLilyPad, 2 | orient, 2);
-                world.setBlock(dx, dy, dz + 1, TFBlocks.hugeLilyPad, 3 | orient, 2);
+            if (!shouldPlacePadAt(world, padX, padY, padZ)) {
+                continue;
             }
+
+            // this seems like a difficult way to generate 2 pseudorandom bits
+            int orientation = getOrientation(padX, padZ);
+
+            world.setBlock(padX, padY, padZ, TFBlocks.hugeLilyPad, orientation, 2);
+            world.setBlock(padX + 1, padY, padZ, TFBlocks.hugeLilyPad, 1 | orientation, 2);
+            world.setBlock(padX + 1, padY, padZ + 1, TFBlocks.hugeLilyPad, 2 | orientation, 2);
+            world.setBlock(padX, padY, padZ + 1, TFBlocks.hugeLilyPad, 3 | orientation, 2);
         }
         return true;
     }
 
-    private boolean shouldPlacePadAt(World world, int dx, int dy, int dz) {
-        return world.isAirBlock(dx, dy, dz) && world.getBlock(dx, dy - 1, dz).getMaterial() == Material.water
-                && world.isAirBlock(dx + 1, dy, dz)
-                && world.getBlock(dx + 1, dy - 1, dz).getMaterial() == Material.water
-                && world.isAirBlock(dx, dy, dz + 1)
-                && world.getBlock(dx, dy - 1, dz + 1).getMaterial() == Material.water
-                && world.isAirBlock(dx + 1, dy, dz + 1)
-                && world.getBlock(dx + 1, dy - 1, dz + 1).getMaterial() == Material.water;
+    private int getOrientation(int x, int z) {
+        orientationRandom.setSeed((x * ORIENTATION_X_FACTOR) ^ (z * ORIENTATION_Z_FACTOR) ^ ORIENTATION_SEED);
+        return orientationRandom.nextInt(4) << 2;
+    }
+
+    private static boolean shouldPlacePadAt(World world, int x, int y, int z) {
+        if (y <= 0 || y >= world.getHeight()) {
+            return false;
+        }
+
+        for (int offsetZ = 0; offsetZ < PAD_WIDTH; offsetZ++) {
+            for (int offsetX = 0; offsetX < PAD_WIDTH; offsetX++) {
+                int blockX = x + offsetX;
+                int blockZ = z + offsetZ;
+                if (!world.isAirBlock(blockX, y, blockZ)
+                        || world.getBlock(blockX, y - 1, blockZ).getMaterial() != Material.water) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

@@ -22,7 +22,7 @@ public class TFGenHugeWaterLily extends WorldGenerator {
 
     @Override
     public boolean generate(World world, Random random, int x, int y, int z) {
-        for (int i = 0; i < GENERATION_ATTEMPTS; i++) {
+        for (int attempt = 0; attempt < GENERATION_ATTEMPTS; attempt++) {
             int dx = x + random.nextInt(HORIZONTAL_SPREAD) - random.nextInt(HORIZONTAL_SPREAD);
             int dy = y + random.nextInt(VERTICAL_SPREAD) - random.nextInt(VERTICAL_SPREAD);
             int dz = z + random.nextInt(HORIZONTAL_SPREAD) - random.nextInt(HORIZONTAL_SPREAD);
@@ -35,7 +35,9 @@ public class TFGenHugeWaterLily extends WorldGenerator {
         return true;
     }
 
-    private boolean shouldPlacePadAt(World world, int x, int y, int z) {
-        return world.isAirBlock(x, y, z) && world.getBlock(x, y - 1, z).getMaterial() == Material.water;
+    private static boolean shouldPlacePadAt(World world, int x, int y, int z) {
+        return y > 0 && y < world.getHeight()
+                && world.isAirBlock(x, y, z)
+                && world.getBlock(x, y - 1, z).getMaterial() == Material.water;
     }
 }
