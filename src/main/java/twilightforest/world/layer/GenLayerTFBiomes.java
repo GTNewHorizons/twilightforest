@@ -12,9 +12,7 @@ import twilightforest.biomes.TFBiomeBase;
  * @author Ben
  *
  */
-public class GenLayerTFBiomes extends GenLayer {
-
-    private static final int RARE_BIOME_CHANCE = 15;
+public class GenLayerTFBiomes extends GenLayerTFBiomeSelection {
 
     // keep these arrays per instance and mutable for compatibility with biome customisation
     protected BiomeGenBase[] commonBiomes = { TFBiomeBase.twilightForest, TFBiomeBase.twilightForest2,
@@ -34,6 +32,21 @@ public class GenLayerTFBiomes extends GenLayer {
 
     @Override
     public int[] getInts(int x, int z, int width, int depth) {
+        return selectBiomes(x, z, width, depth, commonBiomes, rareBiomes);
+    }
+}
+
+// both biome selection variants must use an identical seed and random draw
+abstract class GenLayerTFBiomeSelection extends GenLayer {
+
+    private static final int RARE_BIOME_CHANCE = 15;
+
+    protected GenLayerTFBiomeSelection(long seed) {
+        super(seed);
+    }
+
+    protected final int[] selectBiomes(int x, int z, int width, int depth, BiomeGenBase[] commonBiomes,
+            BiomeGenBase[] rareBiomes) {
         int[] biomes = IntCache.getIntCache(width * depth);
 
         for (int dz = 0; dz < depth; dz++) {

@@ -54,17 +54,13 @@ public class GenLayerTFBiomeBorders extends GenLayer {
                     continue;
                 }
 
-                if (onBorder(
+                output[outputRow + dx] = onBorder(
                         center,
                         center,
                         input[index - 1],
                         input[index + 1],
                         input[index - inputWidth],
-                        input[index + inputWidth])) {
-                    output[outputRow + dx] = borderBiome;
-                } else {
-                    output[outputRow + dx] = center;
-                }
+                        input[index + inputWidth]) ? borderBiome : center;
             }
         }
 

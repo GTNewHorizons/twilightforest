@@ -43,18 +43,17 @@ public class GenLayerTFCompanionBiomes extends GenLayer {
                 int up = input[index - parentWidth];
                 int down = input[index + parentWidth];
 
-                int biome = center;
                 if (isKey(fireSwampId, center, right, left, up, down)) {
-                    biome = swampId;
+                    output[outputRow + dx] = swampId;
                 } else if (isKey(glacierId, center, right, left, up, down)) {
-                    biome = snowId;
+                    output[outputRow + dx] = snowId;
                 } else if (isKey(darkForestCenterId, center, right, left, up, down)) {
-                    biome = darkForestId;
+                    output[outputRow + dx] = darkForestId;
                 } else if (isKey(highlandsCenterId, center, right, left, up, down)) {
-                    biome = highlandsId;
+                    output[outputRow + dx] = highlandsId;
+                } else {
+                    output[outputRow + dx] = center;
                 }
-
-                output[outputRow + dx] = biome;
             }
         }
 

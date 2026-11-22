@@ -6,11 +6,11 @@ import twilightforest.biomes.TFBiomeBase;
 
 public class GenLayerTFCheckBad extends GenLayer {
 
-    private String stage;
+    private final String stage;
 
     public GenLayerTFCheckBad(long par1, GenLayer par3GenLayer, String stage) {
         super(par1);
-        super.parent = par3GenLayer;
+        this.parent = par3GenLayer;
 
         this.stage = stage;
     }
@@ -24,8 +24,8 @@ public class GenLayerTFCheckBad extends GenLayer {
                 System.err.printf(
                         "Got a bad ID, %d at %d, %d while checking during stage %s\n",
                         input[i],
-                        x,
-                        z,
+                        x + i % width,
+                        z + i / width,
                         this.stage);
             }
         }

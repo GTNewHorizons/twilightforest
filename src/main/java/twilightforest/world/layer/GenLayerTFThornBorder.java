@@ -35,14 +35,7 @@ public class GenLayerTFThornBorder extends GenLayer {
                 int center = input[index];
 
                 // thorn border requires also checking diagonally
-                if (center != highlandsCenterId
-                        && (input[index - 1] == highlandsCenterId || input[index + 1] == highlandsCenterId
-                                || input[index - inputWidth] == highlandsCenterId
-                                || input[index + inputWidth] == highlandsCenterId
-                                || input[index - inputWidth - 1] == highlandsCenterId
-                                || input[index - inputWidth + 1] == highlandsCenterId
-                                || input[index + inputWidth - 1] == highlandsCenterId
-                                || input[index + inputWidth + 1] == highlandsCenterId)) {
+                if (center != highlandsCenterId && touchesBiome(input, index, inputWidth, highlandsCenterId)) {
                     output[outputRow + dx] = thornlandsId;
                 } else {
                     output[outputRow + dx] = center;
@@ -51,5 +44,15 @@ public class GenLayerTFThornBorder extends GenLayer {
         }
 
         return output;
+    }
+
+    private static boolean touchesBiome(int[] biomes, int index, int stride, int biomeId) {
+        return biomes[index - 1] == biomeId || biomes[index + 1] == biomeId
+                || biomes[index - stride] == biomeId
+                || biomes[index + stride] == biomeId
+                || biomes[index - stride - 1] == biomeId
+                || biomes[index - stride + 1] == biomeId
+                || biomes[index + stride - 1] == biomeId
+                || biomes[index + stride + 1] == biomeId;
     }
 }

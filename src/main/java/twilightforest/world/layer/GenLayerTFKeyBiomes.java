@@ -40,7 +40,7 @@ public class GenLayerTFKeyBiomes extends GenLayer {
         long endX = (long) x + width;
         long endZ = (long) z + depth;
 
-        // each 4x4 grid has exactly 1 possible ke -biome position
+        // each 4x4 grid has exactly one possible key-biome position
         for (long gridZ = (long) z & ~((long) GRID_MASK); gridZ < endZ; gridZ += GRID_SIZE) {
             for (long gridX = (long) x & ~((long) GRID_MASK); gridX < endX; gridX += GRID_SIZE) {
                 // get offsets
@@ -72,8 +72,8 @@ public class GenLayerTFKeyBiomes extends GenLayer {
         int regionX = (mapX + GRID_SIZE) >> REGION_SHIFT;
         int regionZ = (mapZ + GRID_SIZE) >> REGION_SHIFT;
 
-        this.initChunkSeed(regionX, regionZ);
-        int offset = this.nextInt(KEY_BIOME_COUNT);
+        initChunkSeed(regionX, regionZ);
+        int offset = nextInt(KEY_BIOME_COUNT);
 
         // do we need to shuffle this better?
         // the current version just "rotates" the 4 key biomes

@@ -23,6 +23,7 @@ public class GenLayerTFRiverMix extends GenLayer {
      */
     @Override
     public void initWorldGenSeed(long worldSeed) {
+        // preserve both initialisations, the river layer also references the biome layer
         biomeLayer.initWorldGenSeed(worldSeed);
         riverLayer.initWorldGenSeed(worldSeed);
         super.initWorldGenSeed(worldSeed);

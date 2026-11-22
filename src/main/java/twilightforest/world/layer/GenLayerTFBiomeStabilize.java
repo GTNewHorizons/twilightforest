@@ -35,7 +35,7 @@ public class GenLayerTFBiomeStabilize extends GenLayer {
                 continue;
             }
 
-            int centerZ = dz + NEIGHBOR_RADIUS + (zOffset == GRID_MASK ? 1 : -zOffset);
+            int centerZ = dz + NEIGHBOR_RADIUS + getCenterOffset(zOffset);
             int centerRow = centerZ * parentWidth;
 
             for (int dx = 0; dx < width; dx++) {
@@ -43,12 +43,16 @@ public class GenLayerTFBiomeStabilize extends GenLayer {
                 if (xOffset == UNSTABILIZED_OFFSET) {
                     output[outputRow + dx] = input[inputRow + dx];
                 } else {
-                    int centerX = dx + NEIGHBOR_RADIUS + (xOffset == GRID_MASK ? 1 : -xOffset);
+                    int centerX = dx + NEIGHBOR_RADIUS + getCenterOffset(xOffset);
                     output[outputRow + dx] = input[centerRow + centerX];
                 }
             }
         }
 
         return output;
+    }
+
+    private static int getCenterOffset(int offset) {
+        return offset == GRID_MASK ? 1 : -offset;
     }
 }

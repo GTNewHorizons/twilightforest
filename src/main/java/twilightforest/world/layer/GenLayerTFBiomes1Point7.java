@@ -2,7 +2,6 @@ package twilightforest.world.layer;
 
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.layer.GenLayer;
-import net.minecraft.world.gen.layer.IntCache;
 
 import twilightforest.biomes.TFBiomeBase;
 
@@ -12,9 +11,7 @@ import twilightforest.biomes.TFBiomeBase;
  * @author Ben
  *
  */
-public class GenLayerTFBiomes1Point7 extends GenLayer {
-
-    private static final int RARE_BIOME_CHANCE = 15;
+public class GenLayerTFBiomes1Point7 extends GenLayerTFBiomeSelection {
 
     // keep these arrays per instance and mutable for compatibility with biome customisation
     protected BiomeGenBase[] commonBiomes = { TFBiomeBase.twilightForest, TFBiomeBase.twilightForest2,
@@ -33,17 +30,6 @@ public class GenLayerTFBiomes1Point7 extends GenLayer {
 
     @Override
     public int[] getInts(int x, int z, int width, int depth) {
-        int[] biomes = IntCache.getIntCache(width * depth);
-
-        for (int dz = 0; dz < depth; dz++) {
-            int rowOffset = dz * width;
-            for (int dx = 0; dx < width; dx++) {
-                initChunkSeed(x + dx, z + dz);
-                BiomeGenBase[] candidates = nextInt(RARE_BIOME_CHANCE) == 0 ? rareBiomes : commonBiomes;
-                biomes[rowOffset + dx] = candidates[nextInt(candidates.length)].biomeID;
-            }
-        }
-
-        return biomes;
+        return selectBiomes(x, z, width, depth, commonBiomes, rareBiomes);
     }
 }
