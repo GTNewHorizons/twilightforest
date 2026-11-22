@@ -8,19 +8,19 @@ import net.minecraft.tileentity.TileEntity;
 
 public class TileEntityTFCake extends TileEntity {
 
-    private boolean isSprinkled;
+    private static final String NBT_SPRINKLED = "Sprinkled";
 
-    public TileEntityTFCake() {
-        super();
-        isSprinkled = false;
-    }
+    private boolean isSprinkled;
 
     public boolean getSprinkled() {
         return isSprinkled;
     }
 
-    public void setSprinkled(boolean b) {
-        isSprinkled = b;
+    public void setSprinkled(boolean sprinkled) {
+        if (isSprinkled != sprinkled) {
+            isSprinkled = sprinkled;
+            markDirty();
+        }
     }
 
     @Override
@@ -47,7 +47,7 @@ public class TileEntityTFCake extends TileEntity {
     @Override
     public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
         super.readFromNBT(par1NBTTagCompound);
-        if (par1NBTTagCompound.hasKey("Sprinkled")) isSprinkled = par1NBTTagCompound.getBoolean("Sprinkled");
+        if (par1NBTTagCompound.hasKey(NBT_SPRINKLED)) isSprinkled = par1NBTTagCompound.getBoolean(NBT_SPRINKLED);
     }
 
     /**
@@ -56,26 +56,17 @@ public class TileEntityTFCake extends TileEntity {
     @Override
     public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
         super.writeToNBT(par1NBTTagCompound);
-        par1NBTTagCompound.setBoolean("Sprinkled", isSprinkled);
+        par1NBTTagCompound.setBoolean(NBT_SPRINKLED, isSprinkled);
     }
 
     /**
      * Determines if this TileEntity requires update calls.
-     * 
-     * @return True if you want updateEntity() to be called, false if not
+     *
+     * @return False, since the cake has no per-tick behavior
      */
     @Override
     public boolean canUpdate() {
-        return true;
-    }
-
-    /**
-     * Allows the entity to update its state. Overridden in most subclasses, e.g. the mob spawner uses this to count
-     * ticks and creates a new spawn inside its implementation.
-     */
-    @Override
-    public void updateEntity() {
-        super.updateEntity();
+        return false;
     }
 
 }

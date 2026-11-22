@@ -2,6 +2,10 @@ package twilightforest.tileentity;
 
 public class TileEntityTFMoonworm extends TileEntityTFCritter {
 
+    private static final int FULL_ROTATION = 360;
+    private static final int ROTATION_STEP = 90;
+    private static final int ROTATION_DELAY = 200;
+
     public int yawDelay;
     public int currentYaw;
     public int desiredYaw;
@@ -10,8 +14,6 @@ public class TileEntityTFMoonworm extends TileEntityTFCritter {
         super();
 
         currentYaw = -1;
-        yawDelay = 0;
-        desiredYaw = 0;
     }
 
     /**
@@ -23,7 +25,7 @@ public class TileEntityTFMoonworm extends TileEntityTFCritter {
         super.updateEntity();
 
         if (currentYaw == -1) {
-            currentYaw = worldObj.rand.nextInt(4) * 90;
+            currentYaw = worldObj.rand.nextInt(4) * ROTATION_STEP;
         }
 
         if (yawDelay > 0) {
@@ -31,13 +33,13 @@ public class TileEntityTFMoonworm extends TileEntityTFCritter {
         } else {
             if (desiredYaw == 0) {
                 // make it rotate!
-                yawDelay = 200 + worldObj.rand.nextInt(200);
-                desiredYaw = worldObj.rand.nextInt(4) * 90;
+                yawDelay = ROTATION_DELAY + worldObj.rand.nextInt(ROTATION_DELAY);
+                desiredYaw = worldObj.rand.nextInt(4) * ROTATION_STEP;
             }
 
             currentYaw++;
 
-            if (currentYaw > 360) {
+            if (currentYaw > FULL_ROTATION) {
                 currentYaw = 0;
             }
 

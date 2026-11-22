@@ -27,60 +27,49 @@ public class TileEntityTFChest extends TileEntityChest {
      */
     @Override
     public void checkForAdjacentChests() {
-        if (!this.adjacentChestChecked) {
-            this.adjacentChestChecked = true;
-            this.adjacentChestZNeg = null;
-            this.adjacentChestXPos = null;
-            this.adjacentChestXNeg = null;
-            this.adjacentChestZPos = null;
+        if (this.adjacentChestChecked) {
+            return;
+        }
 
-            if (this.func_145977_a(this.xCoord - 1, this.yCoord, this.zCoord)) {
-                this.adjacentChestXNeg = (TileEntityTFChest) this.worldObj
-                        .getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord);
-            }
+        this.adjacentChestChecked = true;
+        // preserve the vanilla adjacency lookup and neighbour notification order
+        this.adjacentChestZNeg = null;
+        this.adjacentChestXPos = null;
+        this.adjacentChestXNeg = null;
+        this.adjacentChestZPos = null;
 
-            if (this.func_145977_a(this.xCoord + 1, this.yCoord, this.zCoord)) {
-                this.adjacentChestXPos = (TileEntityTFChest) this.worldObj
-                        .getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord);
-            }
+        this.adjacentChestXNeg = getAdjacentChest(xCoord - 1, yCoord, zCoord);
+        this.adjacentChestXPos = getAdjacentChest(xCoord + 1, yCoord, zCoord);
+        this.adjacentChestZNeg = getAdjacentChest(xCoord, yCoord, zCoord - 1);
+        this.adjacentChestZPos = getAdjacentChest(xCoord, yCoord, zCoord + 1);
 
-            if (this.func_145977_a(this.xCoord, this.yCoord, this.zCoord - 1)) {
-                this.adjacentChestZNeg = (TileEntityTFChest) this.worldObj
-                        .getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1);
-            }
-
-            if (this.func_145977_a(this.xCoord, this.yCoord, this.zCoord + 1)) {
-                this.adjacentChestZPos = (TileEntityTFChest) this.worldObj
-                        .getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1);
-            }
-
-            if (this.adjacentChestZNeg instanceof TileEntityTFChest) {
-                ((TileEntityTFChest) this.adjacentChestZNeg).func_145978_a(this, 0);
-            }
-
-            if (this.adjacentChestZPos instanceof TileEntityTFChest) {
-                ((TileEntityTFChest) this.adjacentChestZPos).func_145978_a(this, 2);
-            }
-
-            if (this.adjacentChestXPos instanceof TileEntityTFChest) {
-                ((TileEntityTFChest) this.adjacentChestXPos).func_145978_a(this, 1);
-            }
-
-            if (this.adjacentChestXNeg instanceof TileEntityTFChest) {
-                ((TileEntityTFChest) this.adjacentChestXNeg).func_145978_a(this, 3);
-            }
+        if (this.adjacentChestZNeg instanceof TileEntityTFChest chest) {
+            chest.func_145978_a(this, 0);
+        }
+        if (this.adjacentChestZPos instanceof TileEntityTFChest chest) {
+            chest.func_145978_a(this, 2);
+        }
+        if (this.adjacentChestXPos instanceof TileEntityTFChest chest) {
+            chest.func_145978_a(this, 1);
+        }
+        if (this.adjacentChestXNeg instanceof TileEntityTFChest chest) {
+            chest.func_145978_a(this, 3);
         }
     }
 
-    private boolean func_145977_a(int p_145977_1_, int p_145977_2_, int p_145977_3_) {
-        if (this.worldObj == null) {
-            return false;
-        } else {
-            Block block = this.worldObj.getBlock(p_145977_1_, p_145977_2_, p_145977_3_);
-            Block thisBlock = this.getBlockType();
-            return block instanceof BlockTFChest && thisBlock instanceof BlockTFChest
-                    && ((BlockTFChest) block).getWoodType() == ((BlockTFChest) thisBlock).getWoodType();
+    private TileEntityTFChest getAdjacentChest(int x, int y, int z) {
+        if (worldObj == null) {
+            return null;
         }
+
+        Block adjacentBlock = worldObj.getBlock(x, y, z);
+        Block block = getBlockType();
+        if (!(adjacentBlock instanceof BlockTFChest) || !(block instanceof BlockTFChest)
+                || ((BlockTFChest) adjacentBlock).getWoodType() != ((BlockTFChest) block).getWoodType()) {
+            return null;
+        }
+
+        return worldObj.getTileEntity(x, y, z) instanceof TileEntityTFChest chest ? chest : null;
     }
 
     private void func_145978_a(TileEntityTFChest p_145978_1_, int p_145978_2_) {

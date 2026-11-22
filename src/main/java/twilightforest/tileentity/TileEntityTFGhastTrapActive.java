@@ -20,6 +20,19 @@ public class TileEntityTFGhastTrapActive extends TileEntity {
 
     public Random rand = new Random();
 
+    private void spawnTrapParticle(double motionX, double motionY, double motionZ) {
+        TwilightForestMod.proxy.spawnParticle(
+                worldObj,
+                "ghasttrap",
+                xCoord + 0.5D,
+                yCoord + 1.0D,
+                zCoord + 0.5D,
+                motionX,
+                motionY,
+                motionZ);
+    }
+
+    @Override
     public boolean canUpdate() {
         return true;
     }
@@ -50,60 +63,12 @@ public class TileEntityTFGhastTrapActive extends TileEntity {
                 double dy = 20D;
                 double dz = Math.sin(counter / 10.0) * 2.5;
 
-                TwilightForestMod.proxy.spawnParticle(
-                        this.worldObj,
-                        "ghasttrap",
-                        this.xCoord + 0.5D,
-                        this.yCoord + 1.0D,
-                        this.zCoord + 0.5D,
-                        dx,
-                        dy,
-                        dz);
-                TwilightForestMod.proxy.spawnParticle(
-                        this.worldObj,
-                        "ghasttrap",
-                        this.xCoord + 0.5D,
-                        this.yCoord + 1.0D,
-                        this.zCoord + 0.5D,
-                        -dx,
-                        dy,
-                        -dz);
-                TwilightForestMod.proxy.spawnParticle(
-                        this.worldObj,
-                        "ghasttrap",
-                        this.xCoord + 0.5D,
-                        this.yCoord + 1.0D,
-                        this.zCoord + 0.5D,
-                        -dx,
-                        dy / 2,
-                        dz);
-                TwilightForestMod.proxy.spawnParticle(
-                        this.worldObj,
-                        "ghasttrap",
-                        this.xCoord + 0.5D,
-                        this.yCoord + 1.0D,
-                        this.zCoord + 0.5D,
-                        dx,
-                        dy / 2,
-                        -dz);
-                TwilightForestMod.proxy.spawnParticle(
-                        this.worldObj,
-                        "ghasttrap",
-                        this.xCoord + 0.5D,
-                        this.yCoord + 1.0D,
-                        this.zCoord + 0.5D,
-                        dx / 2,
-                        dy / 4,
-                        dz / 2);
-                TwilightForestMod.proxy.spawnParticle(
-                        this.worldObj,
-                        "ghasttrap",
-                        this.xCoord + 0.5D,
-                        this.yCoord + 1.0D,
-                        this.zCoord + 0.5D,
-                        -dx / 2,
-                        dy / 4,
-                        -dz / 2);
+                spawnTrapParticle(dx, dy, dz);
+                spawnTrapParticle(-dx, dy, -dz);
+                spawnTrapParticle(-dx, dy / 2, dz);
+                spawnTrapParticle(dx, dy / 2, -dz);
+                spawnTrapParticle(dx / 2, dy / 4, dz / 2);
+                spawnTrapParticle(-dx / 2, dy / 4, -dz / 2);
             }
 
             // appropriate sound
@@ -150,34 +115,24 @@ public class TileEntityTFGhastTrapActive extends TileEntity {
             List<EntityGhast> nearbyGhasts = worldObj.getEntitiesWithinAABB(EntityGhast.class, aabb);
 
             for (EntityGhast ghast : nearbyGhasts) {
-                // stop boss tantrum
-                if (ghast instanceof EntityTFUrGhast) {
+                boolean isBoss = ghast instanceof EntityTFUrGhast;
+                if (isBoss) {
+                    // stop boss tantrum
                     ((EntityTFUrGhast) ghast).stopTantrum();
-
-                    // move boss to this point
-                    ghast.motionX = (ghast.posX - this.xCoord - 0.5) * -0.1;
-                    ghast.motionY = (ghast.posY - this.yCoord - 2.5) * -0.1;
-                    ghast.motionZ = (ghast.posZ - this.zCoord - 0.5) * -0.1;
-
-                    if (rand.nextInt(10) == 0) {
-                        ghast.attackEntityFrom(DamageSource.generic, 3);
-                    }
-
-                } else {
-                    // move ghasts to this point
-                    ghast.motionX = (ghast.posX - this.xCoord - 0.5) * -0.1;
-                    ghast.motionY = (ghast.posY - this.yCoord - 1.5) * -0.1;
-                    ghast.motionZ = (ghast.posZ - this.zCoord - 0.5) * -0.1;
-
-                    if (rand.nextInt(10) == 0) {
-                        ghast.attackEntityFrom(DamageSource.generic, 10);
-                    }
                 }
 
-                if (ghast instanceof EntityTFTowerGhast) {
-                    ((EntityTFTowerGhast) ghast).setInTrap();
+                // pull regular ghasts and the ur ghast toward their original target heights
+                ghast.motionX = (ghast.posX - this.xCoord - 0.5) * -0.1;
+                ghast.motionY = (ghast.posY - this.yCoord - (isBoss ? 2.5 : 1.5)) * -0.1;
+                ghast.motionZ = (ghast.posZ - this.zCoord - 0.5) * -0.1;
+
+                if (rand.nextInt(10) == 0) {
+                    ghast.attackEntityFrom(DamageSource.generic, isBoss ? 3 : 10);
                 }
 
+                if (ghast instanceof EntityTFTowerGhast towerGhast) {
+                    towerGhast.setInTrap();
+                }
             }
 
             if (counter >= 120) {

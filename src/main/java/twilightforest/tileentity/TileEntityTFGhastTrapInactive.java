@@ -15,6 +15,8 @@ import twilightforest.entity.EntityTFMiniGhast;
 
 public class TileEntityTFGhastTrapInactive extends TileEntity {
 
+    private static final int MAX_CHARGE = 3;
+
     int counter;
     Random rand = new Random();
 
@@ -22,7 +24,7 @@ public class TileEntityTFGhastTrapInactive extends TileEntity {
 
     /**
      * Determines if this TileEntity requires update calls.
-     * 
+     *
      * @return True if you want updateEntity() to be called, false if not
      */
     @Override
@@ -51,14 +53,14 @@ public class TileEntityTFGhastTrapInactive extends TileEntity {
             if (ghast.deathTime > 0) {
                 this.makeParticlesTo(ghast);
 
-                if (!dyingGhasts.contains(ghast)) {
+                if (dyingGhasts.size() < MAX_CHARGE && !dyingGhasts.contains(ghast)) {
                     dyingGhasts.add(ghast);
                 }
             }
         }
 
         // display charge level, up to 3
-        int chargeLevel = Math.min(3, dyingGhasts.size());
+        int chargeLevel = Math.min(MAX_CHARGE, dyingGhasts.size());
 
         counter++;
 
@@ -144,7 +146,7 @@ public class TileEntityTFGhastTrapInactive extends TileEntity {
     }
 
     public boolean isCharged() {
-        return dyingGhasts.size() >= 3;
+        return dyingGhasts.size() >= MAX_CHARGE;
     }
 
 }

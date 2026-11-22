@@ -13,6 +13,10 @@ import twilightforest.block.TFBlocks;
 public class TileEntityTFReverter extends TileEntity {
 
     private static final int REVERT_CHANCE = 10;
+    private static final int SLOW_SCAN_INTERVAL_TICKS = 20;
+    private static final int SLOW_SCAN_THRESHOLD = 20;
+    private static final int OUTLINE_COUNT = 12;
+    private static final int OUTLINE_PARTICLES = 16;
 
     public int radius = 4;
     public int diameter = 2 * radius + 1;
@@ -28,7 +32,7 @@ public class TileEntityTFReverter extends TileEntity {
 
     /**
      * Determines if this TileEntity requires update calls.
-     * 
+     *
      * @return True if you want updateEntity() to be called, false if not
      */
     @Override
@@ -42,50 +46,51 @@ public class TileEntityTFReverter extends TileEntity {
      */
     @Override
     public void updateEntity() {
-        if (this.anyPlayerInRange()) {
-            this.tickCount++;
+        if (!anyPlayerInRange()) {
+            // remove the snapshot when the last player leaves the area
+            blockData = null;
+            metaData = null;
+            tickCount = 0;
+            return;
+        }
 
-            if (this.worldObj.isRemote) {
-                double var1 = (float) this.xCoord + this.worldObj.rand.nextFloat();
-                double var3 = (float) this.yCoord + this.worldObj.rand.nextFloat();
-                double var5 = (float) this.zCoord + this.worldObj.rand.nextFloat();
-                // this.worldObj.spawnParticle("smoke", var1, var3, var5, 0.0D, 0.0D, 0.0D);
-                this.worldObj.spawnParticle("reddust", var1, var3, var5, 0.0D, 0.0D, 0.0D);
-
-                // occasionally make a little red dust line to outline our radius
-                if (this.rand.nextInt(10) == 0) {
-                    makeRandomOutline();
-                    makeRandomOutline();
-                    makeRandomOutline();
-                }
-            } else {
-
-                // new plan, take a snapshot of the world when we are first activated, and then rapidly revert
-                // changes
-                if (blockData == null || metaData == null) {
-                    captureBlockData();
-                    this.slowScan = true;
-                }
-
-                if (!this.slowScan || this.tickCount % 20 == 0) {
-                    if (scanAndRevertChanges()) {
-                        this.slowScan = false;
-                        this.ticksSinceChange = 0;
-                    } else {
-                        ticksSinceChange++;
-
-                        if (ticksSinceChange > 20) {
-                            this.slowScan = true;
-                        }
-                    }
-                }
-            }
+        tickCount++;
+        if (worldObj.isRemote) {
+            spawnClientParticles();
         } else {
-            // remove data
-            this.blockData = null;
-            this.metaData = null;
+            updateReversion();
+        }
+    }
 
-            this.tickCount = 0;
+    private void spawnClientParticles() {
+        double x = (float) xCoord + worldObj.rand.nextFloat();
+        double y = (float) yCoord + worldObj.rand.nextFloat();
+        double z = (float) zCoord + worldObj.rand.nextFloat();
+        // this.worldObj.spawnParticle("smoke", var1, var3, var5, 0.0D, 0.0D, 0.0D);
+        worldObj.spawnParticle("reddust", x, y, z, 0.0D, 0.0D, 0.0D);
+
+        // occasionally make a little red dust line to outline our radius
+        if (rand.nextInt(REVERT_CHANCE) == 0) {
+            makeRandomOutline();
+            makeRandomOutline();
+            makeRandomOutline();
+        }
+    }
+
+    private void updateReversion() {
+        // take a snapshot when first activated, then revert subsequent changes
+        if (blockData == null || metaData == null) {
+            captureBlockData();
+            slowScan = true;
+        }
+
+        if (!slowScan || tickCount % SLOW_SCAN_INTERVAL_TICKS == 0) {
+            if (scanAndRevertChanges()) {
+                slowScan = false;
+                ticksSinceChange = 0;
+            } else if (++ticksSinceChange > SLOW_SCAN_THRESHOLD) {
+                slowScan = true;
+            }
         }
     }
 
@@ -93,7 +98,7 @@ public class TileEntityTFReverter extends TileEntity {
      * Display a random one of the 12 possible outlines
      */
     private void makeRandomOutline() {
-        makeOutline(this.rand.nextInt(12));
+        makeOutline(this.rand.nextInt(OUTLINE_COUNT));
     }
 
     /**
@@ -188,7 +193,7 @@ public class TileEntityTFReverter extends TileEntity {
      */
     protected void drawParticleLine(double srcX, double srcY, double srcZ, double destX, double destY, double destZ) {
         // make particle trail
-        int particles = 16;
+        int particles = OUTLINE_PARTICLES;
         for (int i = 0; i < particles; i++) {
             double trailFactor = i / (particles - 1.0D);
 
@@ -209,7 +214,7 @@ public class TileEntityTFReverter extends TileEntity {
                     Block blockID = worldObj.getBlock(this.xCoord + x, this.yCoord + y, this.zCoord + z);
                     byte meta = (byte) worldObj.getBlockMetadata(this.xCoord + x, this.yCoord + y, this.zCoord + z);
 
-                    if (blockData[index] != blockID) {
+                    if (blockData[index] != blockID || metaData[index] != meta) {
                         if (revertBlock(
                                 this.xCoord + x,
                                 this.yCoord + y,
@@ -278,26 +283,20 @@ public class TileEntityTFReverter extends TileEntity {
                         && replaceMeta != BlockTFTowerTranslucent.META_REVERTER_REPLACEMENT)) {
             return true;
         }
-        if (thereBlockID == Blocks.redstone_lamp && replaceBlockID == Blocks.lit_redstone_lamp) {
+        if ((thereBlockID == Blocks.redstone_lamp && replaceBlockID == Blocks.lit_redstone_lamp)
+                || (thereBlockID == Blocks.lit_redstone_lamp && replaceBlockID == Blocks.redstone_lamp)) {
             return true;
         }
-        if (thereBlockID == Blocks.lit_redstone_lamp && replaceBlockID == Blocks.redstone_lamp) {
+        if (thereBlockID == Blocks.water || thereBlockID == Blocks.flowing_water
+                || replaceBlockID == Blocks.water
+                || replaceBlockID == Blocks.flowing_water) {
             return true;
         }
-        if (thereBlockID == Blocks.water || replaceBlockID == Blocks.flowing_water) {
-            return true;
-        }
-        if (thereBlockID == Blocks.flowing_water || replaceBlockID == Blocks.water) {
-            return true;
-        }
-        if (replaceBlockID == Blocks.tnt) {
-            return true;
-        }
-
-        return false;
+        return replaceBlockID == Blocks.tnt;
     }
 
     private void captureBlockData() {
+        diameter = radius * 2 + 1;
         blockData = new Block[diameter * diameter * diameter];
         metaData = new byte[diameter * diameter * diameter];
 
