@@ -269,10 +269,16 @@ public class TFFeature {
     private long lastSpawnedHintMonsterTime;
 
     public TFFeature(int parID, int parSize, String parName) {
+        if (parID < 0 || parID >= FEATURE_LIST_SIZE) {
+            throw new IllegalArgumentException("Feature ID is out of bounds: " + parID);
+        }
+        if (parSize < 0) {
+            throw new IllegalArgumentException("Feature radius can't be negative: " + parSize);
+        }
         this.featureID = parID;
-        TFFeature.featureList[parID] = this;
+        featureList[parID] = this;
         this.size = parSize;
-        this.name = parName;
+        this.name = java.util.Objects.requireNonNull(parName, "Feature name");
         this.areChunkDecorationsEnabled = false;
         this.isStructureEnabled = true;
         this.isTerrainAltered = false;
@@ -545,7 +551,8 @@ public class TFFeature {
         if (mapX < 0 || mapZ < 0 || mapZ >= preset.length || mapX >= preset[mapZ].length) {
             return nothing;
         }
-        return featureList[preset[mapZ][mapX]];
+        TFFeature feature = featureList[preset[mapZ][mapX]];
+        return feature != null ? feature : nothing;
     }
 
     // @return The feature nearest to the specified chunk coordinates
@@ -707,18 +714,15 @@ public class TFFeature {
     }
 
     public boolean doesPlayerHaveRequiredAchievement(EntityPlayer player) {
-        if (this.requiredAchievement != null) {
-            // can we get the player's stats here at all?
-            if (player instanceof EntityPlayerMP && ((EntityPlayerMP) player).func_147099_x() != null) {
-                StatisticsFile stats = ((EntityPlayerMP) player).func_147099_x();
-
-                return stats.hasAchievementUnlocked(this.requiredAchievement);
-            } else {
-                return false; // cannot get stats
-            }
-        } else {
+        if (requiredAchievement == null) {
             return true; // no required achievement
         }
+        // can we get the player's stats here at all?
+        if (!(player instanceof EntityPlayerMP serverPlayer)) {
+            return false; // cannot get stats
+        }
+        StatisticsFile stats = serverPlayer.func_147099_x();
+        return stats != null && stats.hasAchievementUnlocked(requiredAchievement);
     }
 
     // Try to spawn a hint monster near the specified player
@@ -733,6 +737,9 @@ public class TFFeature {
 
     // Try several times to spawn a hint monster
     public void trySpawnHintMonster(World world, EntityPlayer player, int x, int y, int z) {
+        if (world == null || world.isRemote || player == null) {
+            return;
+        }
         // check if the timer is valid
         long currentTime = world.getTotalWorldTime();
 
@@ -797,42 +804,22 @@ public class TFFeature {
      * Create a hint book for the specified feature. Only features with block protection will need this.
      */
     public ItemStack createHintBook() {
-        String bookType;
-        int pageCount;
-
-        if (this == lichTower) {
-            bookType = "lichTower";
-            pageCount = 4;
-        } else if (this == labyrinth) {
-            bookType = "labyrinth";
-            pageCount = 5;
-        } else if (this == hydraLair) {
-            bookType = "hydraLair";
-            pageCount = 4;
-        } else if (this == tfStronghold) {
-            bookType = "stronghold";
-            pageCount = 5;
-        } else if (this == darkTower) {
-            bookType = "darkTower";
-            pageCount = 3;
-        } else if (this == yetiCave) {
-            bookType = "yetiCave";
-            pageCount = 4;
-        } else if (this == iceTower) {
-            bookType = "iceTower";
-            pageCount = 3;
-        } else if (this == trollCave) {
-            bookType = "trollCave";
-            pageCount = 3;
-        } else {
-            bookType = "default";
-            pageCount = 2;
-        }
+        HintBookInfo info = switch (featureID) {
+            case 6 -> new HintBookInfo("lichTower", 4);
+            case 13 -> new HintBookInfo("labyrinth", 5);
+            case 12 -> new HintBookInfo("hydraLair", 4);
+            case 15 -> new HintBookInfo("stronghold", 5);
+            case 14 -> new HintBookInfo("darkTower", 3);
+            case 17 -> new HintBookInfo("yetiCave", 4);
+            case 7 -> new HintBookInfo("iceTower", 3);
+            case 18 -> new HintBookInfo("trollCave", 3);
+            default -> new HintBookInfo("default", 2);
+        };
 
         ItemStack book = new ItemStack(Items.written_book);
         NBTTagList pages = new NBTTagList();
-        String bookPrefix = HINT_BOOK_PREFIX + bookType + ".";
-        for (int page = 0; page < pageCount; page++) {
+        String bookPrefix = HINT_BOOK_PREFIX + info.type + ".";
+        for (int page = 0; page < info.pageCount; page++) {
             pages.appendTag(new NBTTagString(formatBook(bookPrefix + page)));
         }
 
@@ -842,4 +829,14 @@ public class TFFeature {
         return book;
     }
 
+    private static final class HintBookInfo {
+
+        private final String type;
+        private final int pageCount;
+
+        private HintBookInfo(String type, int pageCount) {
+            this.type = type;
+            this.pageCount = pageCount;
+        }
+    }
 }

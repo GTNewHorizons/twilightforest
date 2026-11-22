@@ -12,14 +12,14 @@ import net.minecraft.item.ItemStack;
 
 /**
  * This is not much more than a list of TFTreasureEntries.
- * 
+ *
  * @author Ben
  *
  */
 public class TFTreasureTable {
 
     private static final int DEFAULT_RARITY = 10;
-    protected ArrayList<TFTreasureItem> list;
+    protected final ArrayList<TFTreasureItem> list;
 
     public TFTreasureTable() {
         this.list = new ArrayList<>();
@@ -27,7 +27,7 @@ public class TFTreasureTable {
 
     /**
      * Adds the item onto this list to be generated at normal rarity (10), in the specified quantity
-     * 
+     *
      * @param item
      * @param quantity
      */
@@ -37,7 +37,7 @@ public class TFTreasureTable {
 
     /**
      * Adds the item onto the list, with the values specified
-     * 
+     *
      * @param item
      * @param quantity
      * @param rarity
@@ -48,7 +48,7 @@ public class TFTreasureTable {
 
     /**
      * Adds the ItemStack onto this list to be generated at normal rarity (10), in the quantity the itemstack contains
-     * 
+     *
      * @param itemstack
      */
     public void add(ItemStack itemstack) {
@@ -68,8 +68,9 @@ public class TFTreasureTable {
      */
     public void addEnchanted(ItemStack itemstack, Enchantment ench1, int enchLevel1) {
         if (itemstack != null) {
-            itemstack.addEnchantment(ench1, enchLevel1);
-            list.add(new TFTreasureItem(itemstack, DEFAULT_RARITY));
+            ItemStack enchanted = itemstack.copy();
+            enchanted.addEnchantment(ench1, enchLevel1);
+            list.add(new TFTreasureItem(enchanted, DEFAULT_RARITY));
         }
     }
 
@@ -87,9 +88,10 @@ public class TFTreasureTable {
     public void addEnchanted(ItemStack itemstack, Enchantment ench1, int enchLevel1, Enchantment ench2,
             int enchLevel2) {
         if (itemstack != null) {
-            itemstack.addEnchantment(ench1, enchLevel1);
-            itemstack.addEnchantment(ench2, enchLevel2);
-            list.add(new TFTreasureItem(itemstack, DEFAULT_RARITY));
+            ItemStack enchanted = itemstack.copy();
+            enchanted.addEnchantment(ench1, enchLevel1);
+            enchanted.addEnchantment(ench2, enchLevel2);
+            list.add(new TFTreasureItem(enchanted, DEFAULT_RARITY));
         }
     }
 
@@ -98,19 +100,24 @@ public class TFTreasureTable {
      */
     public void addEnchanted(ItemStack itemstack, Enchantment ench1, int enchLevel1, Enchantment ench2, int enchLevel2,
             Enchantment ench3, int enchLevel3) {
-        itemstack.addEnchantment(ench1, enchLevel1);
-        itemstack.addEnchantment(ench2, enchLevel2);
-        itemstack.addEnchantment(ench3, enchLevel3);
-        list.add(new TFTreasureItem(itemstack, DEFAULT_RARITY));
+        if (itemstack != null) {
+            ItemStack enchanted = itemstack.copy();
+            enchanted.addEnchantment(ench1, enchLevel1);
+            enchanted.addEnchantment(ench2, enchLevel2);
+            enchanted.addEnchantment(ench3, enchLevel3);
+            list.add(new TFTreasureItem(enchanted, DEFAULT_RARITY));
+        }
     }
 
     /**
      * Adds the item with a random enchantment level
      */
     public void addRandomEnchanted(ItemStack itemstack, int randomLevel) {
-        TFTreasureItem treasure = new TFTreasureItem(itemstack, DEFAULT_RARITY);
-        treasure.setRandomEnchantmentLevel(randomLevel);
-        list.add(treasure);
+        if (itemstack != null) {
+            TFTreasureItem treasure = new TFTreasureItem(itemstack, DEFAULT_RARITY);
+            treasure.setRandomEnchantmentLevel(randomLevel);
+            list.add(treasure);
+        }
     }
 
     /**
@@ -124,7 +131,7 @@ public class TFTreasureTable {
 
     /**
      * Adds the block onto this list to be generated at normal rarity (10), in the specified quantity
-     * 
+     *
      * @param block
      * @param quantity
      */
@@ -134,7 +141,7 @@ public class TFTreasureTable {
 
     /**
      * Adds the block onto the list, with the values specified
-     * 
+     *
      * @param block
      * @param quantity
      * @param rarity
@@ -145,7 +152,7 @@ public class TFTreasureTable {
 
     /**
      * What is the total of all the rarity entries in our table?
-     * 
+     *
      * @return
      */
     protected int total() {
@@ -159,7 +166,15 @@ public class TFTreasureTable {
     }
 
     public ItemStack getRandomItem(Random rand) {
-        int value = rand.nextInt(total());
+        if (list.isEmpty()) {
+            // some treasure types intentionally have no entries in a tier
+            return null;
+        }
+        int totalWeight = total();
+        if (totalWeight <= 0) {
+            throw new IllegalStateException("Treasure table has no positive total rarity");
+        }
+        int value = rand.nextInt(totalWeight);
 
         for (TFTreasureItem item : list) {
             if (item.getRarity() > value) {
