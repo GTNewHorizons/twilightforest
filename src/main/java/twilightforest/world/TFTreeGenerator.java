@@ -137,10 +137,73 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
      */
     protected void drawBresehnam(World world, int x1, int y1, int z1, int x2, int y2, int z2, Block blockValue,
             int metaValue) {
-        ChunkCoordinates[] line = getBresehnamArrayCoords(x1, y1, z1, x2, y2, z2);
-        for (ChunkCoordinates coordinate : line) {
-            setBlockAndMetadata(world, coordinate.posX, coordinate.posY, coordinate.posZ, blockValue, metaValue);
+        // draw in the same order as getBresehnamArrayCoords without allocating an array
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+        int dz = z2 - z1;
+        int stepX = dx < 0 ? -1 : 1;
+        int stepY = dy < 0 ? -1 : 1;
+        int stepZ = dz < 0 ? -1 : 1;
+        int lengthX = Math.abs(dx);
+        int lengthY = Math.abs(dy);
+        int lengthZ = Math.abs(dz);
+        int doubleX = lengthX << 1;
+        int doubleY = lengthY << 1;
+        int doubleZ = lengthZ << 1;
+
+        if (lengthX >= lengthY && lengthX >= lengthZ) {
+            int errorY = doubleY - lengthX;
+            int errorZ = doubleZ - lengthX;
+            for (int step = 0; step < lengthX; step++) {
+                setBlockAndMetadata(world, x1, y1, z1, blockValue, metaValue);
+                if (errorY > 0) {
+                    y1 += stepY;
+                    errorY -= doubleX;
+                }
+                if (errorZ > 0) {
+                    z1 += stepZ;
+                    errorZ -= doubleX;
+                }
+                errorY += doubleY;
+                errorZ += doubleZ;
+                x1 += stepX;
+            }
+        } else if (lengthY >= lengthX && lengthY >= lengthZ) {
+            int errorX = doubleX - lengthY;
+            int errorZ = doubleZ - lengthY;
+            for (int step = 0; step < lengthY; step++) {
+                setBlockAndMetadata(world, x1, y1, z1, blockValue, metaValue);
+                if (errorX > 0) {
+                    x1 += stepX;
+                    errorX -= doubleY;
+                }
+                if (errorZ > 0) {
+                    z1 += stepZ;
+                    errorZ -= doubleY;
+                }
+                errorX += doubleX;
+                errorZ += doubleZ;
+                y1 += stepY;
+            }
+        } else {
+            int errorY = doubleY - lengthZ;
+            int errorX = doubleX - lengthZ;
+            for (int step = 0; step < lengthZ; step++) {
+                setBlockAndMetadata(world, x1, y1, z1, blockValue, metaValue);
+                if (errorY > 0) {
+                    y1 += stepY;
+                    errorY -= doubleZ;
+                }
+                if (errorX > 0) {
+                    x1 += stepX;
+                    errorX -= doubleZ;
+                }
+                errorY += doubleY;
+                errorX += doubleX;
+                z1 += stepZ;
+            }
         }
+        setBlockAndMetadata(world, x1, y1, z1, blockValue, metaValue);
     }
 
     /**

@@ -82,8 +82,10 @@ public class MapGenTFHollowTree extends MapGenBase {
         boolean generated = false;
 
         for (StructureStart structureStart : structureMap.values()) {
-            if (!structureStart.isSizeableStructure() || !structureStart.getBoundingBox()
-                    .intersectsWith(mapX, mapZ, mapX + CHUNK_MAX_OFFSET, mapZ + CHUNK_MAX_OFFSET)) {
+            if (structureStart == null || !structureStart.isSizeableStructure()
+                    || structureStart.getBoundingBox() == null
+                    || !structureStart.getBoundingBox()
+                            .intersectsWith(mapX, mapZ, mapX + CHUNK_MAX_OFFSET, mapZ + CHUNK_MAX_OFFSET)) {
                 continue;
             }
 

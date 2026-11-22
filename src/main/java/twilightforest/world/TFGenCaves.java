@@ -12,6 +12,9 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenCaves extends MapGenCaves {
 
+    // cave water checks must use the same column stride as the chunk block array
+    private static final int WATER_SCAN_LIMIT = 128;
+
     private final FastRandom caveRNG = new FastRandom(0L);
     private final FastRandom mossRNG = new FastRandom(0L);
 
@@ -25,7 +28,7 @@ public class TFGenCaves extends MapGenCaves {
 
     /**
      * Generates a larger initial cave node than usual. Called 25% of the time.
-     * 
+     *
      * @param isHighlands
      */
     protected void generateLargeCaveNode(long caveSeed, int centerX, int centerZ, Block[] blockStorage, double randX,
@@ -49,7 +52,7 @@ public class TFGenCaves extends MapGenCaves {
 
     /**
      * Generates a node in the current cave system recursion tree.
-     * 
+     *
      * @param isHighlands
      */
     protected void generateCaveNode(long caveSeed, int centerX, int centerZ, Block[] blockStorage, double randX,
@@ -200,9 +203,9 @@ public class TFGenCaves extends MapGenCaves {
                     for (genX = minX; !hasHitWater && genX < maxX; ++genX) {
                         for (genZ = minZ; !hasHitWater && genZ < maxZ; ++genZ) {
                             for (int genY = minY + 1; !hasHitWater && genY >= maxY - 1; --genY) {
-                                int waterIndex = (genX * 16 + genZ) * 128 + genY;
+                                int waterIndex = (genX * 16 + genZ) * TFWorld.CHUNKHEIGHT + genY;
 
-                                if (genY >= 0 && genY < 128) {
+                                if (genY >= 0 && genY < WATER_SCAN_LIMIT) {
                                     if (isOceanBlock(blockStorage, waterIndex, genX, genY, genZ, centerX, centerZ)) {
                                         hasHitWater = true;
                                     }

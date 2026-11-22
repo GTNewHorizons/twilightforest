@@ -52,13 +52,9 @@ public class TFWorldChunkManager extends WorldChunkManager {
 
     public TFWorldChunkManager(long seed, WorldType worldType) {
         this();
-        GenLayer[] layers;
-        // new world gen!
-        if (TwilightForestMod.oldMapGen) {
-            layers = GenLayerTF.makeTheWorldOldMapGen(seed);
-        } else {
-            layers = GenLayerTF.makeTheWorld(seed);
-        }
+        // new world gen! the order of each pipeline, its seeds and both indices must be stable
+        GenLayer[] layers = TwilightForestMod.oldMapGen ? GenLayerTF.makeTheWorldOldMapGen(seed)
+                : GenLayerTF.makeTheWorld(seed);
         unzoomedBiomes = layers[0];
         zoomedBiomes = layers[1];
     }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package twilightforest.world;
 
@@ -85,19 +85,14 @@ public class WorldProviderTwilightForest extends WorldProviderSurface {
      */
     @Override
     public IChunkProvider createChunkGenerator() {
-        // save chunk generator?
+        // reuse the providers cached instance so structure and population state is not split
         if (this.chunkProvider == null) {
             this.chunkProvider = new ChunkProviderTwilightForest(
                     worldObj,
                     worldObj.getSeed(),
                     worldObj.getWorldInfo().isMapFeaturesEnabled());
-            return this.chunkProvider;
-        } else {
-            return new ChunkProviderTwilightForest(
-                    worldObj,
-                    worldObj.getSeed(),
-                    worldObj.getWorldInfo().isMapFeaturesEnabled());
         }
+        return this.chunkProvider;
     }
 
     public ChunkProviderTwilightForest getChunkProvider() {

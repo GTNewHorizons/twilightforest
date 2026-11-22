@@ -9,6 +9,12 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenTreeOfTime extends TFGenHollowTree {
 
+    private static final int TREE_HEIGHT = 8;
+    private static final int TRUNK_RADIUS = 1;
+    private static final int TINY_CROWN_RADIUS = 4;
+    private static final int CROWN_HEIGHT_ALLOWANCE = TINY_CROWN_RADIUS + 2;
+    private static final int MIN_CROWN_BRANCHES = 1;
+
     public TFGenTreeOfTime(boolean par1) {
         super(par1);
 
@@ -19,13 +25,14 @@ public class TFGenTreeOfTime extends TFGenHollowTree {
         this.leafMeta = 0;
     }
 
+    @Override
     public boolean generate(World world, Random random, int x, int y, int z) {
-
-        int height = 8;
-        int diameter = 1;
+        int height = TREE_HEIGHT;
+        int diameter = TRUNK_RADIUS;
 
         // do we have enough height?
-        if (y < 1 || y + height + diameter > world.getHeight()) {
+        // crown branches and their leaf blobs can extend above the 8 block trunk
+        if (y < 1 || (long) y + height + CROWN_HEIGHT_ALLOWANCE >= world.getHeight()) {
             // System.out.println("Failed with hollow tree of height " +
             // height);
             return false;
@@ -61,8 +68,8 @@ public class TFGenTreeOfTime extends TFGenHollowTree {
      * issues
      */
     protected void buildTinyCrown(World world, Random random, int x, int y, int z, int diameter, int height) {
-        int crownRadius = 4;
-        int bvar = 1;
+        int crownRadius = TINY_CROWN_RADIUS;
+        int bvar = MIN_CROWN_BRANCHES;
 
         // 3-5 medium branches starting at the bottom of the crown
         buildBranchRing(
