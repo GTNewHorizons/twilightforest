@@ -142,7 +142,7 @@ public class TFGenHollowTree extends TFGenerator {
     private void addTrunkInsects(World world, Random random, int x, int y, int z, int diameter, int height,
             boolean fireflies) {
         int count = random.nextInt(3 * diameter) + 5;
-        // preserve the inclusive loop,  determines existing insect counts and rng order
+        // preserve the inclusive loop, determines existing insect counts and rng order
         for (int i = 0; i <= count; i++) {
             int insectHeight = (int) (height * random.nextDouble() * 0.9) + (height / 10);
             double insectAngle = random.nextDouble();
