@@ -38,7 +38,7 @@ public class EntityTFLichMinion extends EntityZombie {
 
     /**
      * Called when we get attacked.
-     * 
+     *
      * If we are hit by a lich, still take the damage, but attack stronger and move faster.
      */
     @Override
@@ -49,7 +49,9 @@ public class EntityTFLichMinion extends EntityZombie {
             if (par1DamageSource.getEntity() instanceof EntityTFLich) {
                 // return to previous target
                 setAttackTarget(prevTarget);
-                setRevengeTarget(prevTarget);
+                if (prevTarget != null && prevTarget.isEntityAlive()) {
+                    setRevengeTarget(prevTarget);
+                }
                 // but speed up
                 addPotionEffect(new PotionEffect(Potion.moveSpeed.id, 200, 4));
                 addPotionEffect(new PotionEffect(Potion.damageBoost.id, 200, 1));
@@ -65,12 +67,13 @@ public class EntityTFLichMinion extends EntityZombie {
      */
     @Override
     public void onLivingUpdate() {
-        if (master == null) {
-            findNewMaster();
-        }
-        // if we still don't have a master, or ours is dead, die.
-        if (master == null || master.isDead) {
-            this.setHealth(0);
+        if (!this.worldObj.isRemote) {
+            if (master == null) {
+                findNewMaster();
+            }
+            if (master == null || master.isDead) {
+                this.setHealth(0);
+            }
         }
         super.onLivingUpdate();
     }

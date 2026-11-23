@@ -1,58 +1,97 @@
 package twilightforest.entity.ai;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.event.ForgeEventFactory;
 
 import twilightforest.entity.EntityTFRedcap;
 
 public class EntityAITFRedcapPlantTNT extends EntityAITFRedcapBase {
 
-    public EntityAITFRedcapPlantTNT(EntityTFRedcap entityTFRedcap) {
-        this.entityObj = entityTFRedcap;
+    private int plantCooldown;
+
+    public EntityAITFRedcapPlantTNT(EntityTFRedcap redcap) {
+        this.entityObj = redcap;
+        this.setMutexBits(3);
     }
 
     @Override
     public boolean shouldExecute() {
-        EntityLivingBase attackTarget = this.entityObj.getAttackTarget();
-
-        if (attackTarget != null && entityObj.getTntLeft() > 0
-                && entityObj.getDistanceSqToEntity(attackTarget) < 25
-                && !isTargetLookingAtMe(attackTarget)
-                && !isLitTNTNearby(8)
-                && findBlockTNTNearby(5) == null) {
-            // System.out.println("Redcap can plant TNT");
-            return true;
-        } else {
+        if (this.plantCooldown > 0) {
+            --this.plantCooldown;
             return false;
         }
+        if (this.entityObj.worldObj.isRemote
+                || !this.entityObj.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
+                || this.entityObj.getTntLeft() <= 0) {
+            return false;
+        }
+
+        EntityLivingBase target = this.entityObj.getAttackTarget();
+        if (target == null || !target.isEntityAlive()
+                || this.entityObj.getDistanceSqToEntity(target) >= 25.0D
+                || this.isTargetLookingAtMe(target)
+                || this.isLitTNTNearby(8)) {
+            return false;
+        }
+        return this.findBlockTNTNearby(5) == null;
     }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
     @Override
     public void startExecuting() {
-        int entityPosX = MathHelper.floor_double(this.entityObj.posX);
-        int entityPosY = MathHelper.floor_double(this.entityObj.posY);
-        int entityPosZ = MathHelper.floor_double(this.entityObj.posZ);
-
-        // System.out.println("Redcap trying to plant TNT");
-
-        this.entityObj.setCurrentItemOrArmor(0, EntityTFRedcap.heldTNT);
-
-        if (this.entityObj.worldObj.isAirBlock(entityPosX, entityPosY, entityPosZ)) {
-            entityObj.setTntLeft(entityObj.getTntLeft() - 1);
-            entityObj.playLivingSound();
-            entityObj.worldObj.setBlock(entityPosX, entityPosY, entityPosZ, Blocks.tnt, 0, 3);
-        }
+        this.plantCooldown = 40;
+        this.entityObj.setCurrentItemOrArmor(0, EntityTFRedcap.heldTNT.copy());
+        this.tryPlantTNT();
     }
 
-    /**
-     * Resets the task
-     */
+    @Override
+    public boolean continueExecuting() {
+        return false;
+    }
+
     @Override
     public void resetTask() {
-        this.entityObj.setCurrentItemOrArmor(0, entityObj.getPick());
+        this.entityObj.setCurrentItemOrArmor(0, this.entityObj.getPick().copy());
+    }
+
+    private void tryPlantTNT() {
+        if (!(this.entityObj.worldObj instanceof WorldServer world)
+                || !world.getGameRules().getGameRuleBooleanValue("mobGriefing")
+                || this.entityObj.getTntLeft() <= 0) {
+            return;
+        }
+
+        int x = MathHelper.floor_double(this.entityObj.posX);
+        int y = MathHelper.floor_double(this.entityObj.posY);
+        int z = MathHelper.floor_double(this.entityObj.posZ);
+        if (!world.blockExists(x, y, z) || !world.isAirBlock(x, y, z)) {
+            return;
+        }
+
+        EntityPlayer actor = FakePlayerFactory.getMinecraft(world);
+        ItemStack tnt = EntityTFRedcap.heldTNT.copy();
+        if (!actor.canPlayerEdit(x, y, z, 1, tnt) || !world.canMineBlock(actor, x, y, z)) {
+            return;
+        }
+
+        BlockSnapshot snapshot = BlockSnapshot.getBlockSnapshot(world, x, y, z);
+        if (!world.setBlock(x, y, z, Blocks.tnt, 0, 3)) {
+            return;
+        }
+        if (ForgeEventFactory.onPlayerBlockPlace(actor, snapshot, ForgeDirection.UP).isCanceled()) {
+            snapshot.restore(true, false);
+            return;
+        }
+
+        // inventory is consumed only after world placement and protection checks succeed
+        this.entityObj.setTntLeft(this.entityObj.getTntLeft() - 1);
+        this.entityObj.playLivingSound();
     }
 }

@@ -17,17 +17,19 @@ import twilightforest.TwilightForestMod;
 
 /**
  * This class holds the state data for a single hydra head
- * 
+ *
  * @author Ben
  *
  */
 public class HydraHeadContainer {
 
     // balancing factors
-    private static int FLAME_BURN_FACTOR = 3;
-    private static int FLAME_DAMAGE = 19;
-    private static int BITE_DAMAGE = 48;
-    private static double FLAME_BREATH_TRACKING_SPEED = 0.04D;
+    private static final int FLAME_BURN_FACTOR = 3;
+    private static final int FLAME_DAMAGE = 19;
+    private static final int BITE_DAMAGE = 48;
+    private static final double NORMAL_FLAME_TRACKING_SPEED = 0.04D;
+    private static final double HARD_FLAME_TRACKING_SPEED = 0.1D;
+    private static final int NECK_SEGMENT_COUNT = 5;
 
     public static final int NEXT_AUTOMATIC = -1;
 
@@ -57,6 +59,7 @@ public class HydraHeadContainer {
     public EntityTFHydraNeck neckc;
     public EntityTFHydraNeck neckd;
     public EntityTFHydraNeck necke;
+    private final EntityTFHydraNeck[] neckParts;
 
     public Entity targetEntity;
 
@@ -78,6 +81,7 @@ public class HydraHeadContainer {
     public final int headNum;
 
     public int damageTaken;
+    private float fractionalDamage;
     public int respawnCounter;
 
     public final EntityTFHydra hydraObj;
@@ -88,6 +92,7 @@ public class HydraHeadContainer {
     public float[][] stateXRotations;
     public float[][] stateYRotations;
     public float[][] stateMouthOpen;
+    private double flameBreathTrackingSpeed = NORMAL_FLAME_TRACKING_SPEED;
 
     public HydraHeadContainer(EntityTFHydra hydra, int number, boolean startActive) {
         this.headNum = number;
@@ -103,6 +108,7 @@ public class HydraHeadContainer {
         neckc = new EntityTFHydraNeck(hydraObj, "neck" + headNum + "c", 2F, 2F);
         neckd = new EntityTFHydraNeck(hydraObj, "neck" + headNum + "d", 2F, 2F);
         necke = new EntityTFHydraNeck(hydraObj, "neck" + headNum + "e", 2F, 2F);
+        this.neckParts = new EntityTFHydraNeck[] { necka, neckb, neckc, neckd, necke };
 
         // state variables, what state is next in the chain
         nextStates = new int[NUM_STATES];
@@ -320,55 +326,42 @@ public class HydraHeadContainer {
     }
 
     public EntityTFHydraNeck[] getNeckArray() {
-        return new EntityTFHydraNeck[] { necka, neckb, neckc, neckd, necke };
+        return this.neckParts.clone();
     }
 
     /**
      * Called once per tick as part of the hydra entity update loop.
      */
     public void onUpdate() {
-
-        // neck updates
-        necka.onUpdate();
-        neckb.onUpdate();
-        neckc.onUpdate();
-        neckd.onUpdate();
-        necke.onUpdate();
-
-        // check if the head is here
-        if (headEntity == null) {
-            headEntity = findNearbyHead("head" + headNum);
+        // neck parts are managed by the hydra, not by the worlds entity tick loop
+        for (EntityTFHydraNeck neck : this.neckParts) {
+            neck.onUpdate();
         }
 
-        // adjust for difficulty
-        setDifficultyVariables();
+        if (this.headEntity == null || this.headEntity.isDead) {
+            this.headEntity = findNearbyHead("head" + this.headNum);
+        }
+        if (this.headEntity == null) {
+            return;
+        }
 
-        if (headEntity != null) {
-            // make sure this is set up
-            headEntity.width = headEntity.height = this.isActive() ? 4.0F : 1.0F;
+        this.headEntity.width = this.headEntity.height = this.isActive() ? 4.0F : 1.0F;
+        if (!this.hydraObj.worldObj.isRemote) {
+            setDifficultyVariables();
+            advanceRespawnCounter();
+            advanceHeadState();
+            setHeadPosition();
+            setHeadFacing();
+            executeAttacks();
+        } else {
+            clientAnimateHeadDeath();
+        }
 
-            // only actually do these things on the server
-            if (!hydraObj.worldObj.isRemote) {
-                advanceRespawnCounter();
-
-                advanceHeadState();
-
-                setHeadPosition();
-
-                setHeadFacing();
-
-                executeAttacks();
-            } else {
-                clientAnimateHeadDeath();
-            }
-
-            setNeckPosition();
-
+        setNeckPosition();
+        if (this.hydraObj.worldObj.isRemote) {
             addMouthParticles();
-
-            playSounds();
-
         }
+        playSounds();
     }
 
     /**
@@ -379,6 +372,7 @@ public class HydraHeadContainer {
             if (--this.respawnCounter <= 0) {
                 this.setNextState(STATE_BORN);
                 this.damageTaken = 0;
+                this.fractionalDamage = 0.0F;
                 this.endCurrentAction();
                 this.respawnCounter = -1;
             }
@@ -486,79 +480,68 @@ public class HydraHeadContainer {
      * Set the direction the head is facing. It mostly faces the targetEntity, but that depends on the state
      */
     protected void setHeadFacing() {
-        if (this.currentState == HydraHeadContainer.STATE_BITE_READY) {
-            // face target within certain constraints
-            this.faceEntity(targetEntity, 5F, hydraObj.getVerticalFaceSpeed());
-
-            // head 0 and 1 max yaw
-            float biteMaxYaw = -60;
-            float biteMinYaw = -90;
-
-            if (headNum == 2) {
-                // head 2 max/min yaw
-                biteMaxYaw = 60;
-                biteMinYaw = 90;
+        if (this.headEntity == null) {
+            return;
+        }
+        if (this.currentState == STATE_BITE_READY) {
+            if (this.targetEntity != null && this.targetEntity.isEntityAlive()) {
+                this.faceEntity(this.targetEntity, 5.0F, this.hydraObj.getVerticalFaceSpeed());
             }
-
-            float yawOffOffset = MathHelper.wrapAngleTo180_float(headEntity.rotationYaw - hydraObj.renderYawOffset);
-
-            // System.out.println("biting head yaw = " + yawOffOffset);
-
-            if (yawOffOffset > biteMaxYaw) {
-                headEntity.rotationYaw = hydraObj.renderYawOffset + biteMaxYaw;
+            // the side heads bite along opposite sides of the body
+            float yawOffset = MathHelper
+                    .wrapAngleTo180_float(this.headEntity.rotationYaw - this.hydraObj.renderYawOffset);
+            if (this.headNum == 2) {
+                yawOffset = MathHelper.clamp_float(yawOffset, 60.0F, 90.0F);
+            } else {
+                yawOffset = MathHelper.clamp_float(yawOffset, -90.0F, -60.0F);
             }
-            if (yawOffOffset < biteMinYaw) {
-                headEntity.rotationYaw = hydraObj.renderYawOffset + biteMinYaw;
-            }
-
-            // make the target vector be a point off in the distance in the direction we're already facing
+            this.headEntity.rotationYaw = this.hydraObj.renderYawOffset + yawOffset;
             Vec3 look = this.headEntity.getLookVec();
-            double distance = 16.0D;
-            this.targetX = headEntity.posX + look.xCoord * distance;
-            this.targetY = headEntity.posY + 1.5 + look.yCoord * distance;
-            this.targetZ = headEntity.posZ + look.zCoord * distance;
-        } else if (this.currentState == HydraHeadContainer.STATE_BITE_BITING
-                || this.currentState == HydraHeadContainer.STATE_BITE_ENDING) {
-                    this.faceEntity(targetEntity, 5F, hydraObj.getVerticalFaceSpeed());
-                    headEntity.rotationPitch += Math.PI / 4;
-                } else
-            if (this.currentState == HydraHeadContainer.STATE_ROAR_RAWR) {
-                // keep facing target vector, don't move
-                this.faceVec(this.targetX, this.targetY, this.targetZ, 10F, hydraObj.getVerticalFaceSpeed());
-            } else if (this.currentState == HydraHeadContainer.STATE_FLAME_BREATHING
-                    || (this.currentState == HydraHeadContainer.STATE_FLAME_BEGINNING)) {
-                        // move flame breath slowly towards the player
-                        moveTargetCoordsTowardsTargetEntity(FLAME_BREATH_TRACKING_SPEED);
-                        // face the target coordinates
-                        this.faceVec(this.targetX, this.targetY, this.targetZ, 5F, hydraObj.getVerticalFaceSpeed());
-                    } else {
-                        if (this.isActive()) {
-                            if (this.targetEntity != null) {
-                                // watch the target entity
-                                this.faceEntity(targetEntity, 5F, hydraObj.getVerticalFaceSpeed());
-                            } else {
-                                // while idle, look where the body is looking?
-                                faceIdle(1.5F, hydraObj.getVerticalFaceSpeed());
-                            }
-                        }
-                    }
+            this.targetX = this.headEntity.posX + look.xCoord * 16.0D;
+            this.targetY = this.headEntity.posY + 1.5D + look.yCoord * 16.0D;
+            this.targetZ = this.headEntity.posZ + look.zCoord * 16.0D;
+        } else if (this.currentState == STATE_BITE_BITING || this.currentState == STATE_BITE_ENDING) {
+            if (this.targetEntity != null && this.targetEntity.isEntityAlive()) {
+                this.faceEntity(this.targetEntity, 5.0F, this.hydraObj.getVerticalFaceSpeed());
+            } else {
+                this.faceVec(this.targetX, this.targetY, this.targetZ, 5.0F, this.hydraObj.getVerticalFaceSpeed());
+            }
+            this.headEntity.rotationPitch = MathHelper
+                    .clamp_float(this.headEntity.rotationPitch + (float) (Math.PI / 4.0D), -90.0F, 90.0F);
+        } else if (this.currentState == STATE_ROAR_RAWR) {
+            this.faceVec(this.targetX, this.targetY, this.targetZ, 10.0F, this.hydraObj.getVerticalFaceSpeed());
+        } else if (this.currentState == STATE_FLAME_BEGINNING || this.currentState == STATE_FLAME_BREATHING) {
+            moveTargetCoordsTowardsTargetEntity(this.flameBreathTrackingSpeed);
+            this.faceVec(this.targetX, this.targetY, this.targetZ, 5.0F, this.hydraObj.getVerticalFaceSpeed());
+        } else if (this.isActive()) {
+            if (this.targetEntity != null && this.targetEntity.isEntityAlive()) {
+                this.faceEntity(this.targetEntity, 5.0F, this.hydraObj.getVerticalFaceSpeed());
+            } else {
+                faceIdle(1.5F, this.hydraObj.getVerticalFaceSpeed());
+            }
+        }
     }
 
     /**
      * Slowly track our target coords towards the target entity
      */
     protected void moveTargetCoordsTowardsTargetEntity(double distance) {
-        if (this.targetEntity != null) {
-            Vec3 vect = Vec3.createVectorHelper(
-                    this.targetEntity.posX - this.targetX,
-                    this.targetEntity.posY - this.targetY,
-                    this.targetEntity.posZ - this.targetZ);
-
-            vect = vect.normalize();
-
-            this.targetX += vect.xCoord * distance;
-            this.targetY += vect.yCoord * distance;
-            this.targetZ += vect.zCoord * distance;
+        if (this.targetEntity == null || !this.targetEntity.isEntityAlive() || distance <= 0.0D) {
+            return;
+        }
+        double dx = this.targetEntity.posX - this.targetX;
+        double dy = this.targetEntity.posY - this.targetY;
+        double dz = this.targetEntity.posZ - this.targetZ;
+        double distanceSq = dx * dx + dy * dy + dz * dz;
+        if (distanceSq <= distance * distance) {
+            this.targetX = this.targetEntity.posX;
+            this.targetY = this.targetEntity.posY;
+            this.targetZ = this.targetEntity.posZ;
+        } else {
+            double factor = distance / Math.sqrt(distanceSq);
+            this.targetX += dx * factor;
+            this.targetY += dy * factor;
+            this.targetZ += dz * factor;
         }
     }
 
@@ -643,36 +626,40 @@ public class HydraHeadContainer {
      * Generate any sounds we need to go along with head animations
      */
     protected void playSounds() {
-        if (headEntity.getState() == STATE_FLAME_BREATHING && headEntity.ticksExisted % 5 == 0) {
-            // fire breathing!
-            headEntity.worldObj.playSoundEffect(
-                    headEntity.posX + 0.5,
-                    headEntity.posY + 0.5,
-                    headEntity.posZ + 0.5,
-                    "mob.ghast.fireball",
-                    0.5F + headEntity.getRNG().nextFloat(),
-                    headEntity.getRNG().nextFloat() * 0.7F + 0.3F);
+        if (this.hydraObj.worldObj.isRemote || this.headEntity == null) {
+            return;
         }
-        if (headEntity.getState() == STATE_ROAR_RAWR) {
-            headEntity.worldObj.playSoundEffect(
-                    headEntity.posX + 0.5,
-                    headEntity.posY + 0.5,
-                    headEntity.posZ + 0.5,
+        int state = this.currentState;
+        if (state == STATE_FLAME_BREATHING && this.headEntity.ticksExisted % 5 == 0) {
+            this.headEntity.worldObj.playSoundEffect(
+                    this.headEntity.posX + 0.5D,
+                    this.headEntity.posY + 0.5D,
+                    this.headEntity.posZ + 0.5D,
+                    "mob.ghast.fireball",
+                    0.5F + this.headEntity.getRNG().nextFloat(),
+                    this.headEntity.getRNG().nextFloat() * 0.7F + 0.3F);
+        }
+        // one roar per roar animation, not one roar every server tick
+        if (state == STATE_ROAR_RAWR && !this.didRoar) {
+            this.headEntity.worldObj.playSoundEffect(
+                    this.headEntity.posX + 0.5D,
+                    this.headEntity.posY + 0.5D,
+                    this.headEntity.posZ + 0.5D,
                     TwilightForestMod.ID + ":mob.hydra.roar",
                     1.25F,
-                    headEntity.getRNG().nextFloat() * 0.3F + 0.7F);
+                    this.headEntity.getRNG().nextFloat() * 0.3F + 0.7F);
+            this.didRoar = true;
+        } else if (state != STATE_ROAR_RAWR) {
+            this.didRoar = false;
         }
-        if (headEntity.getState() == STATE_BITE_READY && this.ticksProgress == 60) {
-            headEntity.worldObj.playSoundEffect(
-                    headEntity.posX + 0.5,
-                    headEntity.posY + 0.5,
-                    headEntity.posZ + 0.5,
+        if (state == STATE_BITE_READY && this.ticksProgress == 60) {
+            this.headEntity.worldObj.playSoundEffect(
+                    this.headEntity.posX + 0.5D,
+                    this.headEntity.posY + 0.5D,
+                    this.headEntity.posZ + 0.5D,
                     TwilightForestMod.ID + ":mob.hydra.warn",
                     2.0F,
-                    headEntity.getRNG().nextFloat() * 0.3F + 0.7F);
-        }
-        if (headEntity.getState() == STATE_IDLE) {
-            this.didRoar = false;
+                    this.headEntity.getRNG().nextFloat() * 0.3F + 0.7F);
         }
     }
 
@@ -735,9 +722,8 @@ public class HydraHeadContainer {
         // head1 is above
         // head2 is to the right
         // head3 is to the left
-        setupStateDurations();
-        setupStateRotations(); // temporary, for debugging
-
+        // state tables are immutable after construction, dont rebuild them
+        // for every head on every tick
         float neckLength = getCurrentNeckLength();
         float xRotation = getCurrentHeadXRotation();
         float yRotation = getCurrentHeadYRotation();
@@ -839,14 +825,11 @@ public class HydraHeadContainer {
     }
 
     protected void setDifficultyVariables() {
-        if (this.hydraObj.worldObj.difficultySetting != EnumDifficulty.HARD) {
-            HydraHeadContainer.FLAME_BREATH_TRACKING_SPEED = 0.04D;
-
-        } else {
-            // hard mode!
-            HydraHeadContainer.FLAME_BREATH_TRACKING_SPEED = 0.1D; // higher is harder
-        }
-
+        // Per-head value prevents one world or difficulty from modifying
+        // another Hydra's tracking speed through a shared static field.
+        this.flameBreathTrackingSpeed = this.hydraObj.worldObj.difficultySetting == EnumDifficulty.HARD
+                ? HARD_FLAME_TRACKING_SPEED
+                : NORMAL_FLAME_TRACKING_SPEED;
     }
 
     /**
@@ -858,18 +841,27 @@ public class HydraHeadContainer {
         Vec3 srcVec = Vec3.createVectorHelper(headEntity.posX, headEntity.posY + 1.0, headEntity.posZ);
         Vec3 lookVec = headEntity.getLook(1.0F);
         Vec3 destVec = srcVec.addVector(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range);
+        MovingObjectPosition blockHit = headEntity.worldObj.rayTraceBlocks(srcVec, destVec);
+        if (blockHit != null && blockHit.hitVec != null) {
+            destVec = blockHit.hitVec;
+        }
+        double reach = srcVec.distanceTo(destVec);
         float var9 = 3.0F;
         List<Entity> possibleList = headEntity.worldObj.getEntitiesWithinAABBExcludingEntity(
                 headEntity,
-                headEntity.boundingBox.addCoord(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range)
+                headEntity.boundingBox.addCoord(lookVec.xCoord * reach, lookVec.yCoord * reach, lookVec.zCoord * reach)
                         .expand(var9, var9, var9));
         double hitDist = 0;
 
         for (Entity possibleEntity : possibleList) {
-            if (possibleEntity.canBeCollidedWith() && possibleEntity != headEntity
+            if (!possibleEntity.isDead && possibleEntity.canBeCollidedWith()
+                    && possibleEntity != hydraObj
+                    && possibleEntity != headEntity
                     && possibleEntity != necka
                     && possibleEntity != neckb
-                    && possibleEntity != neckc) {
+                    && possibleEntity != neckc
+                    && possibleEntity != neckd
+                    && possibleEntity != necke) {
                 float borderSize = possibleEntity.getCollisionBorderSize();
                 AxisAlignedBB collisionBB = possibleEntity.boundingBox.expand(borderSize, borderSize, borderSize);
                 MovingObjectPosition interceptPos = collisionBB.calculateIntercept(srcVec, destVec);
@@ -900,7 +892,7 @@ public class HydraHeadContainer {
     }
 
     /**
-     * 
+     *
      */
     public void endCurrentAction() {
         this.ticksProgress = this.ticksNeeded;
@@ -923,7 +915,7 @@ public class HydraHeadContainer {
 
         for (EntityTFHydraHead nearbyHead : nearbyHeads) {
 
-            if (nearbyHead.getPartName().equals(string)) {
+            if (!nearbyHead.isDead && string.equals(nearbyHead.getPartName())) {
                 nearbyHead.hydraObj = hydraObj;
 
                 // System.out.println("Reconnected hydra with head named " + string + " in world " +
@@ -980,7 +972,7 @@ public class HydraHeadContainer {
 
     /**
      * Sets the four neck positions ranging from the start position to the head position.
-     * 
+     *
      * @param hi         head index
      * @param startX
      * @param startY
@@ -989,79 +981,41 @@ public class HydraHeadContainer {
      * @param startPitch
      */
     protected void setNeckPositon(double startX, double startY, double startZ, float startYaw, float startPitch) {
+        if (this.headEntity == null) {
+            return;
+        }
+        double endX = this.headEntity.posX;
+        double endY = this.headEntity.posY;
+        double endZ = this.headEntity.posZ;
+        float endYaw = this.headEntity.rotationYaw;
+        float endPitch = this.headEntity.rotationPitch;
 
-        double endX = headEntity.posX;
-        double endY = headEntity.posY;
-        double endZ = headEntity.posZ;
-        float endYaw = headEntity.rotationYaw;
-        float endPitch = headEntity.rotationPitch;
+        endYaw = startYaw - MathHelper.wrapAngleTo180_float(startYaw - endYaw);
+        endPitch = startPitch - MathHelper.wrapAngleTo180_float(startPitch - endPitch);
 
-        for (; startYaw - endYaw < -180F; endYaw -= 360F) {}
-        for (; startYaw - endYaw >= 180F; endYaw += 360F) {}
-        for (; startPitch - endPitch < -180F; endPitch -= 360F) {}
-        for (; startPitch - endPitch >= 180F; endPitch += 360F) {}
-
-        // translate the end position back 1 unit
-        if (endPitch > 0) {
-            // if we are looking down, don't raise the first neck position, it looks weird
-            Vec3 vector = Vec3.createVectorHelper(0, 0, -1.0);
-            vector.rotateAroundY((-endYaw * 3.141593F) / 180F);
-            endX += vector.xCoord;
-            endY += vector.yCoord;
-            endZ += vector.zCoord;
+        if (endPitch > 0.0F) {
+            Vec3 backward = Vec3.createVectorHelper(0.0D, 0.0D, -1.0D);
+            backward.rotateAroundY((float) Math.toRadians(-endYaw));
+            endX += backward.xCoord;
+            endY += backward.yCoord;
+            endZ += backward.zCoord;
         } else {
-            // but if we are looking up, lower it or it goes through the crest
-            Vec3 vector = headEntity.getLookVec();
-            float dist = 1.0f;
-
-            endX -= vector.xCoord * dist;
-            endY -= vector.yCoord * dist;
-            endZ -= vector.zCoord * dist;
-
+            Vec3 look = this.headEntity.getLookVec();
+            endX -= look.xCoord;
+            endY -= look.yCoord;
+            endZ -= look.zCoord;
         }
 
-        float factor = 0F;
-
-        factor = 0.00F;
-        necka.setPosition(
-                endX + (startX - endX) * factor,
-                endY + (startY - endY) * factor,
-                endZ + (startZ - endZ) * factor);
-        necka.rotationYaw = endYaw + (startYaw - endYaw) * factor;
-        necka.rotationPitch = endPitch + (startPitch - endPitch) * factor;
-
-        factor = 0.25F;
-        neckb.setPosition(
-                endX + (startX - endX) * factor,
-                endY + (startY - endY) * factor,
-                endZ + (startZ - endZ) * factor);
-        neckb.rotationYaw = endYaw + (startYaw - endYaw) * factor;
-        neckb.rotationPitch = endPitch + (startPitch - endPitch) * factor;
-
-        factor = 0.50F;
-        neckc.setPosition(
-                endX + (startX - endX) * factor,
-                endY + (startY - endY) * factor,
-                endZ + (startZ - endZ) * factor);
-        neckc.rotationYaw = endYaw + (startYaw - endYaw) * factor;
-        neckc.rotationPitch = endPitch + (startPitch - endPitch) * factor;
-
-        factor = 0.75F;
-        neckd.setPosition(
-                endX + (startX - endX) * factor,
-                endY + (startY - endY) * factor,
-                endZ + (startZ - endZ) * factor);
-        neckd.rotationYaw = endYaw + (startYaw - endYaw) * factor;
-        neckd.rotationPitch = endPitch + (startPitch - endPitch) * factor;
-
-        factor = 1.0F;
-        necke.setPosition(
-                endX + (startX - endX) * factor,
-                endY + (startY - endY) * factor,
-                endZ + (startZ - endZ) * factor);
-        necke.rotationYaw = endYaw + (startYaw - endYaw) * factor;
-        necke.rotationPitch = endPitch + (startPitch - endPitch) * factor;
-
+        for (int i = 0; i < NECK_SEGMENT_COUNT; ++i) {
+            float fraction = i / (float) (NECK_SEGMENT_COUNT - 1);
+            EntityTFHydraNeck neck = this.neckParts[i];
+            neck.setPosition(
+                    endX + (startX - endX) * fraction,
+                    endY + (startY - endY) * fraction,
+                    endZ + (startZ - endZ) * fraction);
+            neck.rotationYaw = endYaw + (startYaw - endYaw) * fraction;
+            neck.rotationPitch = endPitch + (startPitch - endPitch) * fraction;
+        }
     }
 
     /**
@@ -1086,16 +1040,12 @@ public class HydraHeadContainer {
      * Face this head towards an entity
      */
     public void faceEntity(Entity entity, float yawConstraint, float pitchConstraint) {
-        double yTarget;
-        if (entity instanceof EntityLivingBase entityliving) {
-            yTarget = entityliving.posY + entityliving.getEyeHeight();
-        } else {
-            yTarget = (entity.boundingBox.minY + entity.boundingBox.maxY) / 2D;
+        if (entity == null || this.headEntity == null || entity.isDead) {
+            return;
         }
-
-        faceVec(entity.posX, yTarget, entity.posZ, yawConstraint, pitchConstraint);
-
-        // let's just set the target vector here
+        double eyeY = entity instanceof EntityLivingBase living ? living.posY + living.getEyeHeight()
+                : (entity.boundingBox.minY + entity.boundingBox.maxY) * 0.5D;
+        faceVec(entity.posX, eyeY, entity.posZ, yawConstraint, pitchConstraint);
         this.targetX = entity.posX;
         this.targetY = entity.posY;
         this.targetZ = entity.posZ;
@@ -1105,19 +1055,17 @@ public class HydraHeadContainer {
      * Face this head towards a specific Vector
      */
     public void faceVec(double xCoord, double yCoord, double zCoord, float yawConstraint, float pitchConstraint) {
-        double xOffset = xCoord - headEntity.posX;
-        double zOffset = zCoord - headEntity.posZ;
-        double yOffset = (headEntity.posY + 1.0) - yCoord;
-
-        double distance = MathHelper.sqrt_double(xOffset * xOffset + zOffset * zOffset);
-        float xyAngle = (float) ((Math.atan2(zOffset, xOffset) * 180D) / Math.PI) - 90F;
-        float zdAngle = (float) (-((Math.atan2(yOffset, distance) * 180D) / Math.PI));
-        headEntity.rotationPitch = -updateRotation(headEntity.rotationPitch, zdAngle, pitchConstraint);
-        headEntity.rotationYaw = updateRotation(headEntity.rotationYaw, xyAngle, yawConstraint);
-
-        // System.out.println("Updating head " + head + " with rotationPitch " + head.rotationPitch);
-        // System.out.println("Updating head " + head + " with rotationYaw " + head.rotationYaw);
-
+        if (this.headEntity == null) {
+            return;
+        }
+        double dx = xCoord - this.headEntity.posX;
+        double dz = zCoord - this.headEntity.posZ;
+        double dy = yCoord - (this.headEntity.posY + 1.0D);
+        double horizontalDistance = MathHelper.sqrt_double(dx * dx + dz * dz);
+        float desiredYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
+        float desiredPitch = (float) -Math.toDegrees(Math.atan2(dy, horizontalDistance));
+        this.headEntity.rotationPitch = updateRotation(this.headEntity.rotationPitch, desiredPitch, pitchConstraint);
+        this.headEntity.rotationYaw = updateRotation(this.headEntity.rotationYaw, desiredYaw, yawConstraint);
     }
 
     /**
@@ -1160,13 +1108,16 @@ public class HydraHeadContainer {
      * At certain times, some of the heads are "dead" and hidden
      */
     public boolean shouldRenderHead() {
-        return this.headEntity.getState() != STATE_DEAD && this.headEntity.deathTime < 20;
+        return this.headEntity != null && this.headEntity.getState() != STATE_DEAD && this.headEntity.deathTime < 20;
     }
 
     /**
      * Same with the neck parts
      */
     public boolean shouldRenderNeck(int neckNum) {
+        if (this.headEntity == null || neckNum < 0 || neckNum >= NECK_SEGMENT_COUNT) {
+            return false;
+        }
         int time = 30 + 10 * neckNum;
         return this.headEntity.getState() != STATE_DEAD && this.headEntity.deathTime < time;
     }
@@ -1175,14 +1126,23 @@ public class HydraHeadContainer {
      * Is this head active, that is, not dying or dead?
      */
     public boolean isActive() {
-        return this.currentState != STATE_DYING && this.currentState != STATE_DEAD;
+        int state = this.hydraObj.worldObj.isRemote && this.headEntity != null ? this.headEntity.getState()
+                : this.currentState;
+        return state != STATE_DYING && state != STATE_DEAD;
     }
 
     /**
      * Add to our damage taken counter
      */
     public void addDamage(float damageAmount) {
-        this.damageTaken += damageAmount;
+        if (damageAmount <= 0.0F || !Float.isFinite(damageAmount)) {
+            return;
+        }
+        // preserve the public integer counter while accumulating fractional hits
+        this.fractionalDamage += damageAmount;
+        int wholeDamage = (int) this.fractionalDamage;
+        this.damageTaken += wholeDamage;
+        this.fractionalDamage -= wholeDamage;
     }
 
     /**

@@ -59,13 +59,15 @@ public class EntityTFHydraPart extends EntityLiving {
      */
     @Override
     public void onUpdate() {
-        if (this.hydraObj != null && this.hydraObj.deathTime > 190) {
+        if (this.hydraObj != null && (this.hydraObj.isDead || this.hydraObj.deathTime > 190)) {
             setDead();
+            return;
         }
 
         // just die if we've been alive 60 seconds and there's still no body
         if (this.hydraObj == null && this.ticksExisted > 1200) {
             setDead();
+            return;
         }
 
         super.onEntityUpdate();

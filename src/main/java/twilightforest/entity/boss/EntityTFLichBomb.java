@@ -31,7 +31,9 @@ public class EntityTFLichBomb extends EntityThrowable {
     public void onUpdate() {
         super.onUpdate();
 
-        makeTrail();
+        if (this.worldObj.isRemote && !this.isDead) {
+            makeTrail();
+        }
     }
 
     public void makeTrail() {
@@ -79,6 +81,9 @@ public class EntityTFLichBomb extends EntityThrowable {
     public boolean attackEntityFrom(DamageSource damagesource, float i) {
         // System.out.println("Lich bolt being attacked!");
 
+        if (this.worldObj.isRemote || this.isDead) {
+            return false;
+        }
         setBeenAttacked();
         if (damagesource.getEntity() != null) {
             // explode
@@ -91,6 +96,9 @@ public class EntityTFLichBomb extends EntityThrowable {
     }
 
     protected void explode() {
+        if (this.worldObj.isRemote || this.isDead) {
+            return;
+        }
         float explosionPower = 2F;
         this.worldObj.newExplosion(this, this.posX, this.posY, this.posZ, explosionPower, false, false);
 
@@ -107,6 +115,9 @@ public class EntityTFLichBomb extends EntityThrowable {
 
     @Override
     protected void onImpact(MovingObjectPosition par1MovingObjectPosition) {
+        if (this.isDead) {
+            return;
+        }
         boolean passThrough = false;
 
         // pass through other lich bolts
@@ -122,7 +133,7 @@ public class EntityTFLichBomb extends EntityThrowable {
         }
 
         // if we're not set to pass, damage what we hit
-        if (!passThrough) {
+        if (!passThrough && !this.worldObj.isRemote) {
             explode();
         }
 

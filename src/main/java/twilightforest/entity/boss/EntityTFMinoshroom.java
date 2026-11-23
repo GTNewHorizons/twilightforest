@@ -69,7 +69,9 @@ public class EntityTFMinoshroom extends EntityTFMinotaur {
     @Override
     public void onLivingUpdate() {
         despawnIfInvalid();
-        super.onLivingUpdate();
+        if (!this.isDead) {
+            super.onLivingUpdate();
+        }
     }
 
     protected void despawnIfInvalid() {

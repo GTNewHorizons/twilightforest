@@ -6,7 +6,7 @@ import twilightforest.entity.passive.EntityTFTinyBird;
 
 public class EntityAITFBirdFly extends EntityAIBase {
 
-    private EntityTFTinyBird entity;
+    private final EntityTFTinyBird entity;
 
     public EntityAITFBirdFly(EntityTFTinyBird par1EntityCreature) {
         this.entity = par1EntityCreature;
@@ -18,7 +18,7 @@ public class EntityAITFBirdFly extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        return !entity.isBirdLanded();
+        return entity.isEntityAlive() && !entity.isBirdLanded();
     }
 
     /**

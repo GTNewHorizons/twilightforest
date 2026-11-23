@@ -22,6 +22,7 @@ public class EntityTFNagaSegment extends Entity {
     String texture;
 
     private int deathCounter;
+    private int attackCooldown;
 
     public EntityTFNagaSegment(World par1World) {
         super(par1World);
@@ -68,13 +69,15 @@ public class EntityTFNagaSegment extends Entity {
     @Override
     public void onUpdate() {
         super.onUpdate();
+        if (this.attackCooldown > 0) {
+            --this.attackCooldown;
+        }
 
         // remove if invalid
         if (this.naga == null || this.naga.isDead) {
             this.setDead();
+            return;
         }
-
-        this.ticksExisted++;
 
         lastTickPosX = posX;
         lastTickPosY = posY;
@@ -99,7 +102,9 @@ public class EntityTFNagaSegment extends Entity {
 
         this.moveEntity(motionX, motionY, motionZ);
 
-        collideWithOthers();
+        if (!this.worldObj.isRemote) {
+            collideWithOthers();
+        }
 
         // if (this.segment == 6)
         // {
@@ -141,7 +146,7 @@ public class EntityTFNagaSegment extends Entity {
                 // worldObj.newExplosion(null, posX, posY, posZ, 3.0F, true);
 
                 setDead();
-                worldObj.removeEntity(this);
+                // setDead already removes the segment from normal world ticking
             }
         }
 
@@ -163,8 +168,10 @@ public class EntityTFNagaSegment extends Entity {
         entity.applyEntityCollision(this);
 
         // attack anything that's not us
-        if ((entity instanceof EntityLivingBase) && !(entity instanceof EntityTFNaga)
+        if (this.attackCooldown <= 0 && entity instanceof EntityLivingBase
+                && !(entity instanceof EntityTFNaga)
                 && !(entity instanceof EntityTFNagaSegment)) {
+            this.attackCooldown = 10;
             naga.attackTime = 10;
             int attackStrength = 2;
 

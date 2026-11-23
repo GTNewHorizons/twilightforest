@@ -15,24 +15,25 @@ import twilightforest.entity.IBreathAttacker;
 
 public class EntityAITFBreathAttack extends EntityAIBase {
 
-    private EntityLiving entityHost;
+    private final EntityLiving entityHost;
     private EntityLivingBase attackTarget;
 
     protected double breathX;
     protected double breathY;
     protected double breathZ;
 
-    private int maxDuration;
-    private float attackChance;
-    private float breathRange;
+    private final int maxDuration;
+    private final float attackChance;
+    private final float breathRange;
 
     private int durationLeft;
+    private int recoveryTicks;
 
     public EntityAITFBreathAttack(EntityLiving par1EntityLiving, float speed, float range, int time, float chance) {
         this.entityHost = par1EntityLiving;
-        this.breathRange = range;
-        this.maxDuration = time;
-        this.attackChance = chance;
+        this.breathRange = Math.max(0.1F, range);
+        this.maxDuration = Math.max(1, time);
+        this.attackChance = Math.max(0.0F, Math.min(1.0F, chance));
         this.setMutexBits(7);
     }
 
@@ -41,18 +42,22 @@ public class EntityAITFBreathAttack extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        this.attackTarget = this.entityHost.getAttackTarget();
-
-        if (this.attackTarget == null || this.entityHost.getDistanceToEntity(attackTarget) > this.breathRange
-                || !this.entityHost.canEntityBeSeen(attackTarget)) {
+        if (recoveryTicks > 0) {
+            --recoveryTicks;
             return false;
-        } else {
-            breathX = attackTarget.posX;
-            breathY = attackTarget.posY + attackTarget.getEyeHeight();
-            breathZ = attackTarget.posZ;
-
-            return this.entityHost.getRNG().nextFloat() < this.attackChance;
         }
+        if (!(entityHost instanceof IBreathAttacker)) {
+            return false;
+        }
+        EntityLivingBase target = entityHost.getAttackTarget();
+        if (target == null || !target.isEntityAlive()
+                || entityHost.getDistanceSqToEntity(target) > breathRange * breathRange
+                || !entityHost.canEntityBeSeen(target)
+                || entityHost.getRNG().nextFloat() >= attackChance) {
+            return false;
+        }
+        attackTarget = target;
+        return true;
     }
 
     /**
@@ -60,12 +65,8 @@ public class EntityAITFBreathAttack extends EntityAIBase {
      */
     @Override
     public void startExecuting() {
-        this.durationLeft = this.maxDuration;
-
-        // set breather flag
-        if (this.entityHost instanceof IBreathAttacker) {
-            ((IBreathAttacker) entityHost).setBreathing(true);
-        }
+        durationLeft = maxDuration;
+        ((IBreathAttacker) entityHost).setBreathing(true);
     }
 
     /**
@@ -73,10 +74,12 @@ public class EntityAITFBreathAttack extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        return this.durationLeft > 0 && !this.entityHost.isDead
-                && !this.attackTarget.isDead
-                && this.entityHost.getDistanceToEntity(attackTarget) <= this.breathRange
-                && this.entityHost.canEntityBeSeen(attackTarget);
+        return durationLeft > 0 && !entityHost.isDead
+                && attackTarget != null
+                && attackTarget.isEntityAlive()
+                && entityHost.getAttackTarget() == attackTarget
+                && entityHost.getDistanceSqToEntity(attackTarget) <= breathRange * breathRange
+                && entityHost.canEntityBeSeen(attackTarget);
     }
 
     /**
@@ -84,72 +87,73 @@ public class EntityAITFBreathAttack extends EntityAIBase {
      */
     @Override
     public void updateTask() {
-        this.durationLeft--;
-
-        // why do we need both of these?
-        this.entityHost.getLookHelper().setLookPosition(breathX, breathY, breathZ, 100.0F, 100.0F);
+        --durationLeft;
+        // track a moving target instead of continuously aiming at its old location
+        breathX = attackTarget.posX;
+        breathY = attackTarget.posY + attackTarget.getEyeHeight() * 0.5D;
+        breathZ = attackTarget.posZ;
+        entityHost.getLookHelper().setLookPosition(breathX, breathY, breathZ, 100.0F, 100.0F);
         faceVec(breathX, breathY, breathZ, 100.0F, 100.0F);
-
-        if ((this.maxDuration - this.durationLeft) > 5) {
-            // anyhoo, deal damage
-            Entity target = getHeadLookTarget();
-
-            if (target != null) {
-                ((IBreathAttacker) entityHost).doBreathAttack(target);
+        if (maxDuration - durationLeft > 5 && !entityHost.worldObj.isRemote) {
+            Entity victim = getHeadLookTarget();
+            if (victim != null) {
+                ((IBreathAttacker) entityHost).doBreathAttack(victim);
             }
         }
-
     }
 
     @Override
     public void resetTask() {
-        this.durationLeft = 0;
-
-        // set breather flag
-        if (this.entityHost instanceof IBreathAttacker) {
+        durationLeft = 0;
+        recoveryTicks = 10;
+        if (entityHost instanceof IBreathAttacker) {
             ((IBreathAttacker) entityHost).setBreathing(false);
         }
+        attackTarget = null;
     }
 
     /**
      * What, if anything, is the head currently looking at?
      */
     private Entity getHeadLookTarget() {
-        Entity pointedEntity = null;
-        double range = 30.0D;
-        Vec3 srcVec = Vec3.createVectorHelper(this.entityHost.posX, this.entityHost.posY + 0.25, this.entityHost.posZ);
-        Vec3 lookVec = this.entityHost.getLook(1.0F);
-        Vec3 destVec = srcVec.addVector(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range);
-        float var9 = 3.0F;
-        List<Entity> possibleList = this.entityHost.worldObj.getEntitiesWithinAABBExcludingEntity(
-                this.entityHost,
-                this.entityHost.boundingBox
-                        .addCoord(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range)
-                        .expand(var9, var9, var9));
-        double hitDist = 0;
-
-        for (Entity possibleEntity : possibleList) {
-            if (possibleEntity.canBeCollidedWith() && possibleEntity != this.entityHost) {
-                float borderSize = possibleEntity.getCollisionBorderSize();
-                AxisAlignedBB collisionBB = possibleEntity.boundingBox.expand(borderSize, borderSize, borderSize);
-                MovingObjectPosition interceptPos = collisionBB.calculateIntercept(srcVec, destVec);
-
-                if (collisionBB.isVecInside(srcVec)) {
-                    if (0.0D < hitDist || hitDist == 0.0D) {
-                        pointedEntity = possibleEntity;
-                        hitDist = 0.0D;
-                    }
-                } else if (interceptPos != null) {
-                    double possibleDist = srcVec.distanceTo(interceptPos.hitVec);
-
-                    if (possibleDist < hitDist || hitDist == 0.0D) {
-                        pointedEntity = possibleEntity;
-                        hitDist = possibleDist;
-                    }
+        // an entity in the actual breath range must be in front of the host unobstructed
+        Vec3 origin = Vec3
+                .createVectorHelper(entityHost.posX, entityHost.posY + entityHost.getEyeHeight(), entityHost.posZ);
+        Vec3 direction = entityHost.getLook(1.0F);
+        Vec3 end = origin.addVector(
+                direction.xCoord * breathRange,
+                direction.yCoord * breathRange,
+                direction.zCoord * breathRange);
+        MovingObjectPosition wall = entityHost.worldObj.rayTraceBlocks(origin, end);
+        double maximum = wall == null ? breathRange : origin.distanceTo(wall.hitVec);
+        Entity nearest = null;
+        double nearestDistance = maximum;
+        List<Entity> candidates = entityHost.worldObj.getEntitiesWithinAABBExcludingEntity(
+                entityHost,
+                entityHost.boundingBox.addCoord(
+                        direction.xCoord * breathRange,
+                        direction.yCoord * breathRange,
+                        direction.zCoord * breathRange).expand(1.0D, 1.0D, 1.0D));
+        for (Entity candidate : candidates) {
+            if (!(candidate instanceof EntityLivingBase) || !candidate.isEntityAlive()
+                    || !candidate.canBeCollidedWith()) {
+                continue;
+            }
+            float border = candidate.getCollisionBorderSize();
+            AxisAlignedBB hitBox = candidate.boundingBox.expand(border, border, border);
+            MovingObjectPosition impact = hitBox.calculateIntercept(origin, end);
+            if (hitBox.isVecInside(origin)) {
+                return candidate;
+            }
+            if (impact != null) {
+                double distance = origin.distanceTo(impact.hitVec);
+                if (distance <= nearestDistance) {
+                    nearest = candidate;
+                    nearestDistance = distance;
                 }
             }
         }
-        return pointedEntity;
+        return nearest;
     }
 
     /**
@@ -163,7 +167,7 @@ public class EntityAITFBreathAttack extends EntityAIBase {
         double distance = MathHelper.sqrt_double(xOffset * xOffset + zOffset * zOffset);
         float xyAngle = (float) ((Math.atan2(zOffset, xOffset) * 180D) / Math.PI) - 90F;
         float zdAngle = (float) (-((Math.atan2(yOffset, distance) * 180D) / Math.PI));
-        entityHost.rotationPitch = -updateRotation(entityHost.rotationPitch, zdAngle, pitchConstraint);
+        entityHost.rotationPitch = updateRotation(entityHost.rotationPitch, -zdAngle, pitchConstraint);
         entityHost.rotationYaw = updateRotation(entityHost.rotationYaw, xyAngle, yawConstraint);
 
     }

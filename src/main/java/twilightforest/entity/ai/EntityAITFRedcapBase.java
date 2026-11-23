@@ -16,60 +16,62 @@ public abstract class EntityAITFRedcapBase extends EntityAIBase {
 
     protected EntityTFRedcap entityObj;
 
-    /**
-     * Fairly straightforward. Returns true in a 120 degree arc in front of the target's view.
-     * 
-     * @return
-     */
+    // returns whether the redcap is within the 120-degree forward cone of its target
     public boolean isTargetLookingAtMe(EntityLivingBase attackTarget) {
-        // find angle of approach
-        double dx = entityObj.posX - attackTarget.posX;
-        double dz = entityObj.posZ - attackTarget.posZ;
-        float angle = (float) ((Math.atan2(dz, dx) * 180D) / Math.PI) - 90F;
+        if (attackTarget == null || !attackTarget.isEntityAlive()) {
+            return false;
+        }
 
-        float difference = MathHelper.abs((attackTarget.rotationYaw - angle) % 360);
+        double dx = this.entityObj.posX - attackTarget.posX;
+        double dz = this.entityObj.posZ - attackTarget.posZ;
+        double distanceSq = dx * dx + dz * dz;
+        if (distanceSq < 1.0E-6D) {
+            return true;
+        }
 
-        // System.out.println("Difference in angle of approach is " + difference);
-
-        return difference < 60 || difference > 300;
+        double yaw = Math.toRadians(attackTarget.rotationYaw);
+        double facingDot = -Math.sin(yaw) * dx + Math.cos(yaw) * dz;
+        return facingDot > Math.sqrt(distanceSq) * 0.5D;
     }
 
-    /**
-     * Check within the specified range to see if any of the blocks nearby are TNT
-     * 
-     * @param range
-     * @return
-     */
+    // finds the closest unlit TNT at a redcap reachable height without loading chunks
     public ChunkCoordinates findBlockTNTNearby(int range) {
-        int entityPosX = MathHelper.floor_double(this.entityObj.posX);
-        int entityPosY = MathHelper.floor_double(this.entityObj.posY);
-        int entityPosZ = MathHelper.floor_double(this.entityObj.posZ);
+        if (range < 0) {
+            return null;
+        }
 
-        for (int x = -range; x <= range; x++) {
-            for (int y = -range; y <= range; y++) {
+        int baseX = MathHelper.floor_double(this.entityObj.posX);
+        int baseY = MathHelper.floor_double(this.entityObj.posY);
+        int baseZ = MathHelper.floor_double(this.entityObj.posZ);
+        int verticalRange = Math.min(range, 2);
+        double bestDistance = Double.POSITIVE_INFINITY;
+        ChunkCoordinates closest = null;
+
+        // a ground mob probably cant reach tnt 8 blocks above or below it
+        for (int y = -verticalRange; y <= verticalRange; y++) {
+            for (int x = -range; x <= range; x++) {
                 for (int z = -range; z <= range; z++) {
-                    if (entityObj.worldObj.getBlock(entityPosX + x, entityPosY + y, entityPosZ + z) == Blocks.tnt) {
-                        return new ChunkCoordinates(entityPosX + x, entityPosY + y, entityPosZ + z);
+                    int blockX = baseX + x;
+                    int blockY = baseY + y;
+                    int blockZ = baseZ + z;
+                    double distance = this.entityObj.getDistanceSq(blockX + 0.5D, blockY, blockZ + 0.5D);
+                    if (distance >= bestDistance || !this.entityObj.worldObj.blockExists(blockX, blockY, blockZ)) {
+                        continue;
+                    }
+                    if (this.entityObj.worldObj.getBlock(blockX, blockY, blockZ) == Blocks.tnt) {
+                        bestDistance = distance;
+                        closest = new ChunkCoordinates(blockX, blockY, blockZ);
                     }
                 }
             }
         }
-
-        return null;
+        return closest;
     }
 
-    /**
-     * Check within the specified range to see if any of the blocks nearby are TNT
-     * 
-     * @param range
-     * @return
-     */
+    // returns whether any already lit TNT is close enough to make planting unsafe
     public boolean isLitTNTNearby(int range) {
-        AxisAlignedBB expandedBox = entityObj.boundingBox.expand(range, range, range);
-
-        List<EntityTNTPrimed> nearbyTNT = entityObj.worldObj.getEntitiesWithinAABB(EntityTNTPrimed.class, expandedBox);
-
-        return nearbyTNT.size() > 0;
+        AxisAlignedBB box = this.entityObj.boundingBox.expand(range, range, range);
+        List<EntityTNTPrimed> primed = this.entityObj.worldObj.getEntitiesWithinAABB(EntityTNTPrimed.class, box);
+        return !primed.isEmpty();
     }
-
 }

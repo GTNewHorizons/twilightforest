@@ -69,6 +69,10 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
 
         this.setHealth(getMaxHealth());
         this.segmentHealth = getMaxHealth() / 10;
+        this.body = new EntityTFNagaSegment[MAX_SEGMENTS];
+        for (int i = 0; i < body.length; i++) {
+            this.body[i] = new EntityTFNagaSegment(this, i);
+        }
         setSegmentsPerHealth();
 
         this.experienceValue = 217;
@@ -76,13 +80,6 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
         this.ignoreFrustumCheck = true;
 
         circleCount = 15;
-
-        // make segments
-        this.body = new EntityTFNagaSegment[MAX_SEGMENTS];
-        for (int i = 0; i < body.length; i++) {
-            this.body[i] = new EntityTFNagaSegment(this, i);
-            world.spawnEntityInWorld(body[i]);
-        }
 
         this.goNormal();
     }
@@ -132,7 +129,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(getMaxHealthPerDifficulty()); // max
-                                                                                                              // health
+        // health
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(2.0D); // movement speed
         this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(6.0D); // attack damage
     }
@@ -217,7 +214,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
     public void onUpdate() {
         despawnIfInvalid();
 
-        if (deathTime > 0) {
+        if (this.worldObj.isRemote && deathTime > 0) {
             for (int k = 0; k < 5; k++) {
                 double d = rand.nextGaussian() * 0.02D;
                 double d1 = rand.nextGaussian() * 0.02D;
@@ -263,6 +260,9 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
 
         setSegmentsPerHealth();
 
+        if (this.isDead) {
+            return;
+        }
         super.onUpdate();
 
         // if (!this.worldObj.isRemote)
@@ -276,16 +276,20 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
         // move bodies
         moveSegments();
 
-        for (EntityTFNagaSegment entityTFNagaSegment : body) {
-            if (!entityTFNagaSegment.addedToChunk && !worldObj.isRemote) {
-                worldObj.spawnEntityInWorld(entityTFNagaSegment);
+        if (!this.worldObj.isRemote && !this.isDead) {
+            // only active segments belong in the world, inactive segments remain render only
+            for (int i = 0; i < this.currentSegments; i++) {
+                EntityTFNagaSegment segment = this.body[i];
+                if (segment != null && !segment.isDead && !segment.addedToChunk) {
+                    this.worldObj.spawnEntityInWorld(segment);
+                }
             }
         }
     }
 
     /**
      * Semi-copied from EntityCreature, but this adds the capability to just path around and not target the player
-     * 
+     *
      */
     @Override
     protected void updateAITasks() {
@@ -296,6 +300,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
          * // Resist fire if (fire >= 20) { fire -= 10; }
          */
 
+        this.moveStrafing = 0.0F;
         // NAGA SMASH!
         if (isCollidedHorizontally) {
             if (hasTarget() || (hasHome() && this.posY < this.getHomePosition().posY - 2)) breakNearbyBlocks();
@@ -303,7 +308,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
         }
 
         // break targeting if our target goes outside the walls
-        if (targetEntity != null && !this.isEntityWithinHomeArea(targetEntity)) {
+        if (targetEntity != null && (!targetEntity.isEntityAlive() || !this.isEntityWithinHomeArea(targetEntity))) {
             this.targetEntity = null;
         }
 
@@ -388,11 +393,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
         }
         if (intimidateTimer > 0 && hasTarget()) {
             faceEntity(targetEntity, 30F, 30F);
-            moveForward = 0.1f;
-        }
-        if (intimidateTimer > 0 && hasTarget()) {
-            faceEntity(targetEntity, 30F, 30F);
-            moveForward = 0.1f;
+            moveForward = 0.1F;
         }
         if (rand.nextFloat() < 0.8F && (inWater || inLava)) {
             isJumping = true;
@@ -415,6 +416,9 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
      * Breaks blocks near the naga
      */
     protected void breakNearbyBlocks() {
+        if (this.worldObj.isRemote || !this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            return;
+        }
         int minx = MathHelper.floor_double(boundingBox.minX - 0.5D);
         int miny = MathHelper.floor_double(boundingBox.minY + 1.01D);
         int minz = MathHelper.floor_double(boundingBox.minZ - 0.5D);
@@ -513,6 +517,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
             if (crumblePlayerTimer == 0) {
                 doCharge();
             }
+            return;
         }
 
         // looks like we're charging!
@@ -537,7 +542,7 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
         }
 
         // circle if we're supposed to
-        if (circleCount > 0) {
+        if (chargeCount == 0 && circleCount > 0) {
 
             circleCount--;
 
@@ -580,6 +585,9 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
      * Crumbles blocks below our current targetEntity.
      */
     protected void crumbleBelowTarget(int range) {
+        if (this.worldObj.isRemote || !this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            return;
+        }
         int floor = (int) boundingBox.minY; // the block level the naga is standing on.
         int targetY = (int) targetEntity.boundingBox.minY; // the block level the target is standing on.
 
@@ -617,10 +625,13 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
 
     /**
      * Breaks a block, no questions asked.
-     * 
+     *
      * TODO: there should be some limits on what kinds of blocks we can break.
      */
     protected void breakBlock(int dx, int dy, int dz) {
+        if (this.worldObj.isRemote || !this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            return;
+        }
         Block whatsThere = worldObj.getBlock(dx, dy, dz);
         int whatsMeta = worldObj.getBlockMetadata(dx, dy, dz);
         float whatsHardness = whatsThere.getBlockHardness(worldObj, dx, dy, dz);
@@ -751,17 +762,8 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
     @Override
     public boolean attackEntityFrom(DamageSource damagesource, float i) {
         // reject damage from outside of our home radius
-        if (damagesource.getEntity() != null) {
-            if (!this.isEntityWithinHomeArea(damagesource.getEntity())) {
-                return false;
-            }
-
-        }
-
-        if (damagesource.getEntity() != null) {
-            if (!this.isEntityWithinHomeArea(damagesource.getEntity())) {
-                return false;
-            }
+        if (damagesource.getEntity() != null && !this.isEntityWithinHomeArea(damagesource.getEntity())) {
+            return false;
         }
 
         // normal damage processing
@@ -809,42 +811,32 @@ public class EntityTFNaga extends EntityMob implements IMob, IBossDisplayData, I
      */
     protected void wanderRandomly() {
         goNormal();
+        int tx = 0, ty = 0, tz = 0;
+        boolean found = false;
+        float bestWeight = -Float.MAX_VALUE;
+        for (int candidate = 0; candidate < 10; candidate++) {
+            int dx = MathHelper.floor_double(posX + rand.nextInt(21) - rand.nextInt(21));
+            int dy = MathHelper.floor_double(posY + rand.nextInt(7) - 3);
+            int dz = MathHelper.floor_double(posZ + rand.nextInt(21) - rand.nextInt(21));
 
-        boolean flag = false;
-        int tx = -1;
-        int ty = -1;
-        int tz = -1;
-        float worstweight = -99999F;
-        for (int l = 0; l < 10; l++) {
-            int dx;
-            int dy;
-            int dz;
-            do {
-                dx = MathHelper.floor_double((posX + (rand.nextBoolean() ? 1 : -1) * rand.nextInt(21))/* - 6D */);
-                dy = MathHelper.floor_double((posY + rand.nextInt(7)) - 3D);
-                dz = MathHelper.floor_double((posZ + (rand.nextBoolean() ? 1 : -1) * rand.nextInt(21))/* - 6D */);
-            } while (!this.worldObj.isAirBlock(dx, dy, dz));
-
-            // if we are thinking about out of bounds, head back home instead
             if (!this.isWithinHomeDistance(dx, dy, dz)) {
-                // System.err.println("Naga wants to go out of bounds");
-
                 dx = this.getHomePosition().posX + rand.nextInt(21) - rand.nextInt(21);
-                dy = this.getHomePosition().posY + rand.nextInt(7) - rand.nextInt(7);
+                dy = this.getHomePosition().posY + rand.nextInt(7) - 3;
                 dz = this.getHomePosition().posZ + rand.nextInt(21) - rand.nextInt(21);
             }
-
+            if (!this.worldObj.blockExists(dx, dy, dz) || !this.worldObj.isAirBlock(dx, dy, dz)) {
+                continue;
+            }
             float weight = getBlockPathWeight(dx, dy, dz);
-            if (weight > worstweight) {
-                worstweight = weight;
+            if (weight > bestWeight) {
+                bestWeight = weight;
                 tx = dx;
                 ty = dy;
                 tz = dz;
-                flag = true;
+                found = true;
             }
         }
-
-        if (flag) {
+        if (found) {
             pathToEntity = worldObj.getEntityPathToXYZ(this, tx, ty, tz, 80F, true, true, true, true);
         }
     }

@@ -19,31 +19,32 @@ public class EntityAITFMagicAttack extends EntityAIBase {
     public static final int TOME = 2;
     public static final int NATURE = 1;
 
-    World worldObj;
+    private final World worldObj;
 
     /** The entity the AI instance has been applied to */
-    EntityLiving entityHost;
+    private final EntityLiving entityHost;
     EntityLivingBase attackTarget;
 
     /**
      * A decrementing tick that spawns a ranged attack once this value reaches 0. It is then set back to the
      * maxRangedAttackTime.
      */
-    int rangedAttackTime = 0;
-    float moveSpeed;
+    private int rangedAttackTime = 0;
+    private int pathCooldown;
+    private final float moveSpeed;
     int ticksLookingAtTarget = 0;
 
     /**
      * The ID of this ranged attack AI. This chooses which entity is to be used as a ranged attack.
      */
-    int rangedAttackID;
+    private final int rangedAttackID;
 
     /**
      * The maximum time the AI has to wait before peforming another ranged attack.
      */
-    int maxRangedAttackTime;
+    private final int maxRangedAttackTime;
 
-    float attackChance;
+    private final float attackChance;
 
     public EntityAITFMagicAttack(EntityLiving par1EntityLiving, float speed, int id, int time) {
         this(par1EntityLiving, speed, id, time, 1.0F);
@@ -54,8 +55,8 @@ public class EntityAITFMagicAttack extends EntityAIBase {
         this.worldObj = par1EntityLiving.worldObj;
         this.moveSpeed = speed;
         this.rangedAttackID = id;
-        this.maxRangedAttackTime = time;
-        this.attackChance = chance;
+        this.maxRangedAttackTime = Math.max(1, time);
+        this.attackChance = Math.max(0.0F, Math.min(1.0F, chance));
         this.setMutexBits(3);
     }
 
@@ -64,14 +65,12 @@ public class EntityAITFMagicAttack extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        EntityLivingBase var1 = this.entityHost.getAttackTarget();
-
-        if (var1 == null || this.entityHost.getRNG().nextFloat() > attackChance) {
+        EntityLivingBase target = entityHost.getAttackTarget();
+        if (target == null || !target.isEntityAlive() || entityHost.getRNG().nextFloat() >= attackChance) {
             return false;
-        } else {
-            this.attackTarget = var1;
-            return true;
         }
+        attackTarget = target;
+        return true;
     }
 
     /**
@@ -79,7 +78,9 @@ public class EntityAITFMagicAttack extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        return this.shouldExecute() || !this.entityHost.getNavigator().noPath();
+        return attackTarget != null && attackTarget.isEntityAlive()
+                && entityHost.getAttackTarget() == attackTarget
+                && !entityHost.isDead;
     }
 
     /**
@@ -87,7 +88,10 @@ public class EntityAITFMagicAttack extends EntityAIBase {
      */
     @Override
     public void resetTask() {
-        this.attackTarget = null;
+        attackTarget = null;
+        ticksLookingAtTarget = 0;
+        pathCooldown = 0;
+        entityHost.getNavigator().clearPathEntity();
     }
 
     /**
@@ -95,31 +99,24 @@ public class EntityAITFMagicAttack extends EntityAIBase {
      */
     @Override
     public void updateTask() {
-        double maxRange = 100.0D;
-        double targetDistance = this.entityHost
-                .getDistanceSq(this.attackTarget.posX, this.attackTarget.boundingBox.minY, this.attackTarget.posZ);
-        boolean canSee = this.entityHost.getEntitySenses().canSee(this.attackTarget);
-
-        if (canSee) {
-            ++this.ticksLookingAtTarget;
-        } else {
-            this.ticksLookingAtTarget = 0;
+        if (attackTarget == null || !attackTarget.isEntityAlive()) {
+            return;
         }
-
-        if (targetDistance <= maxRange && this.ticksLookingAtTarget >= 20) {
-            this.entityHost.getNavigator().clearPathEntity();
-        } else {
-            this.entityHost.getNavigator().tryMoveToEntityLiving(this.attackTarget, this.moveSpeed);
+        final double rangeSq = 100.0D;
+        double distance = entityHost.getDistanceSq(attackTarget.posX, attackTarget.boundingBox.minY, attackTarget.posZ);
+        boolean visible = entityHost.getEntitySenses().canSee(attackTarget);
+        ticksLookingAtTarget = visible ? ticksLookingAtTarget + 1 : 0;
+        if (distance <= rangeSq && ticksLookingAtTarget >= 20) {
+            entityHost.getNavigator().clearPathEntity();
+        } else if (--pathCooldown <= 0) {
+            pathCooldown = 10;
+            entityHost.getNavigator().tryMoveToEntityLiving(attackTarget, moveSpeed);
         }
-
-        this.entityHost.getLookHelper().setLookPositionWithEntity(this.attackTarget, 30.0F, 30.0F);
-        this.rangedAttackTime = Math.max(this.rangedAttackTime - 1, 0);
-
-        if (this.rangedAttackTime <= 0) {
-            if (targetDistance <= maxRange && canSee) {
-                this.doRangedAttack();
-                this.rangedAttackTime = this.maxRangedAttackTime;
-            }
+        entityHost.getLookHelper().setLookPositionWithEntity(attackTarget, 30.0F, 30.0F);
+        rangedAttackTime = Math.max(0, rangedAttackTime - 1);
+        if (!worldObj.isRemote && rangedAttackTime == 0 && visible && distance <= rangeSq) {
+            doRangedAttack();
+            rangedAttackTime = maxRangedAttackTime;
         }
     }
 
@@ -127,6 +124,9 @@ public class EntityAITFMagicAttack extends EntityAIBase {
      * Performs a ranged attack according to the AI's rangedAttackID.
      */
     protected void doRangedAttack() {
+        if (attackTarget == null || !attackTarget.isEntityAlive() || worldObj.isRemote) {
+            return;
+        }
         EntityThrowable projectile = null;
 
         if (this.rangedAttackID == NATURE) {
@@ -162,9 +162,7 @@ public class EntityAITFMagicAttack extends EntityAIBase {
         // launch the projectile
         if (projectile != null) {
             double tx = this.attackTarget.posX - this.entityHost.posX;
-            double ty = this.attackTarget.posY + this.attackTarget.getEyeHeight()
-                    - 1.100000023841858D
-                    - projectile.posY;
+            double ty = this.attackTarget.posY + this.attackTarget.getEyeHeight() * 0.5D - projectile.posY;
             double tz = this.attackTarget.posZ - this.entityHost.posZ;
             float heightOffset = MathHelper.sqrt_double(tx * tx + tz * tz) * 0.2F;
             projectile.setThrowableHeading(tx, ty + heightOffset, tz, 0.6F, 6.0F); // 0.6 speed, 6.0 inaccuracy

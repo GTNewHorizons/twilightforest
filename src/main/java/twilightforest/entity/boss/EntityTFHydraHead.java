@@ -60,12 +60,16 @@ public class EntityTFHydraHead extends EntityTFHydraPart {
         int openByte = Math.round(openness * 255);
 
         openByte &= 0xFF;
-        dataWatcher.updateObject(18, (byte) openByte);
+        if ((this.dataWatcher.getWatchableObjectByte(18) & 0xFF) != openByte) {
+            dataWatcher.updateObject(18, (byte) openByte);
+        }
     }
 
     public void setState(int state) {
         state &= 0xFF;
-        dataWatcher.updateObject(19, (byte) state);
+        if ((this.dataWatcher.getWatchableObjectByte(19) & 0xFF) != state) {
+            dataWatcher.updateObject(19, (byte) state);
+        }
     }
 
 }

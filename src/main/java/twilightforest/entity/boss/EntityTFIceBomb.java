@@ -1,6 +1,6 @@
 package twilightforest.entity.boss;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.MathHelper;
@@ -22,10 +23,17 @@ import twilightforest.entity.TFDamageSources;
 public class EntityTFIceBomb extends EntityThrowable {
 
     private int zoneTimer = 80;
+    private static final int HIT_FLAG = 17;
     private boolean hasHit;
 
     public EntityTFIceBomb(World world) {
         super(world);
+    }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataWatcher.addObject(HIT_FLAG, (byte) 0);
     }
 
     public EntityTFIceBomb(World world, EntityLivingBase thrower) {
@@ -37,26 +45,31 @@ public class EntityTFIceBomb extends EntityThrowable {
      */
     @Override
     protected void onImpact(MovingObjectPosition mop) {
+        if (this.worldObj.isRemote || this.hasHit || this.isDead) {
+            return;
+        }
         if (this.getThrower() != null && this.getThrower() instanceof EntityTFYetiAlpha) {
             double dist = this.getDistanceSqToEntity(this.getThrower());
 
             if (dist <= 100) {
                 this.setDead();
+                return;
             }
         }
 
         this.motionY = 0;
         this.hasHit = true;
-
-        if (!worldObj.isRemote) {
-            this.doTerrainEffects();
-        }
+        this.dataWatcher.updateObject(HIT_FLAG, (byte) 1);
+        this.doTerrainEffects();
     }
 
     /**
      * Called when this EntityThrowable hits a block or entity.
      */
     private void doTerrainEffects() {
+        if (!this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            return;
+        }
         int range = 3;
         int ix = MathHelper.floor_double(this.lastTickPosX);
         int iy = MathHelper.floor_double(this.lastTickPosY);
@@ -96,6 +109,10 @@ public class EntityTFIceBomb extends EntityThrowable {
     @Override
     public void onUpdate() {
         super.onUpdate();
+        if (this.isDead) {
+            return;
+        }
+        this.hasHit = this.dataWatcher.getWatchableObjectByte(HIT_FLAG) != 0;
 
         // this.func_145771_j(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ);
         // // push out of block
@@ -108,16 +125,17 @@ public class EntityTFIceBomb extends EntityThrowable {
                 this.motionZ *= 0.1D;
             }
 
-            this.zoneTimer--;
-
+            if (!this.worldObj.isRemote) {
+                this.zoneTimer--;
+            }
             makeIceZone();
 
-            // eventually explode
-            if (this.zoneTimer <= 0) {
+            // eventually expire
+            if (!this.worldObj.isRemote && this.zoneTimer <= 0) {
                 detonate();
             }
 
-        } else {
+        } else if (this.worldObj.isRemote) {
             makeTrail();
         }
     }
@@ -152,8 +170,8 @@ public class EntityTFIceBomb extends EntityThrowable {
     }
 
     private void hitNearbyEntities() {
-        ArrayList<Entity> nearby = new ArrayList<>(
-                this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(3, 2, 3)));
+        List<Entity> nearby = this.worldObj
+                .getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(3, 2, 3));
 
         for (Entity entity : nearby) {
             if (entity instanceof EntityLivingBase && entity != this.getThrower()) {
@@ -165,8 +183,14 @@ public class EntityTFIceBomb extends EntityThrowable {
                     int iy = MathHelper.floor_double(entity.lastTickPosY);
                     int iz = MathHelper.floor_double(entity.lastTickPosZ);
 
-                    worldObj.setBlock(ix, iy, iz, Blocks.ice);
-                    worldObj.setBlock(ix, iy + 1, iz, Blocks.ice);
+                    if (this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+                        if (this.worldObj.isAirBlock(ix, iy, iz)) {
+                            worldObj.setBlock(ix, iy, iz, Blocks.ice);
+                        }
+                        if (this.worldObj.isAirBlock(ix, iy + 1, iz)) {
+                            worldObj.setBlock(ix, iy + 1, iz, Blocks.ice);
+                        }
+                    }
 
                 } else {
                     entity.attackEntityFrom(TFDamageSources.iceBomb, 1);
@@ -176,6 +200,21 @@ public class EntityTFIceBomb extends EntityThrowable {
                 }
             }
         }
+    }
+
+    @Override
+    protected void readEntityFromNBT(NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
+        this.zoneTimer = nbt.hasKey("ZoneTimer") ? Math.max(0, nbt.getInteger("ZoneTimer")) : 80;
+        this.hasHit = nbt.getBoolean("HasHit");
+        this.dataWatcher.updateObject(HIT_FLAG, (byte) (this.hasHit ? 1 : 0));
+    }
+
+    @Override
+    protected void writeEntityToNBT(NBTTagCompound nbt) {
+        super.writeEntityToNBT(nbt);
+        nbt.setInteger("ZoneTimer", this.zoneTimer);
+        nbt.setBoolean("HasHit", this.hasHit);
     }
 
     private void detonate() {

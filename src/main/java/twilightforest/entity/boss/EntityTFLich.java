@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -20,7 +19,6 @@ import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -119,7 +117,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(MAX_HEALTH); // max health
         this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(6.0D); // attack damage
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.800000011920929D); // movement
-                                                                                                         // speed
+        // speed
     }
 
     @Override
@@ -264,7 +262,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
 
     /**
      * What phase of the fight are we on?
-     * 
+     *
      * 1 - reflecting bolts, shield up 2 - summoning minions 3 - melee
      */
     public int getPhase() {
@@ -290,35 +288,37 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         double dy = posY + (height * 0.94);
         double dz = posZ + (MathHelper.sin(angle) * 0.65);
 
-        // add particles!
+        // add particles only on the rendering side.
+        if (this.worldObj.isRemote) {
 
-        // how many particles do we want to add?!
-        int factor = (80 - attackTime) / 10;
-        int particles = factor > 0 ? rand.nextInt(factor) : 1;
+            // how many particles do we want to add?!
+            int factor = (80 - attackTime) / 10;
+            int particles = factor > 0 ? rand.nextInt(factor) : 1;
 
-        for (int j1 = 0; j1 < particles; j1++) {
-            float sparkle = 1.0F - (attackTime + 1.0F) / 60.0F;
-            sparkle *= sparkle;
+            for (int j1 = 0; j1 < particles; j1++) {
+                float sparkle = 1.0F - (attackTime + 1.0F) / 60.0F;
+                sparkle *= sparkle;
 
-            float red = 0.37F * sparkle;
-            float grn = 0.99F * sparkle;
-            float blu = 0.89F * sparkle;
+                float red = 0.37F * sparkle;
+                float grn = 0.99F * sparkle;
+                float blu = 0.89F * sparkle;
 
-            // change color for fireball
-            if (this.getNextAttackType() != 0) {
-                red = 0.99F * sparkle;
-                grn = 0.47F * sparkle;
-                blu = 0.00F * sparkle;
+                // change color for fireball
+                if (this.getNextAttackType() != 0) {
+                    red = 0.99F * sparkle;
+                    grn = 0.47F * sparkle;
+                    blu = 0.00F * sparkle;
+                }
+
+                worldObj.spawnParticle(
+                        "mobSpell",
+                        dx + (rand.nextGaussian() * 0.025),
+                        dy + (rand.nextGaussian() * 0.025),
+                        dz + (rand.nextGaussian() * 0.025),
+                        red,
+                        grn,
+                        blu);
             }
-
-            worldObj.spawnParticle(
-                    "mobSpell",
-                    dx + (rand.nextGaussian() * 0.025),
-                    dy + (rand.nextGaussian() * 0.025),
-                    dz + (rand.nextGaussian() * 0.025),
-                    red,
-                    grn,
-                    blu);
         }
 
         if (isShadowClone()) {
@@ -336,15 +336,15 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
 
     /**
      * Called when we get attacked.
-     * 
+     *
      * Never switch targets to any lich.
-     * 
+     *
      * TODO maybe we could compare masters to make teams or something.
      */
     @Override
     public boolean attackEntityFrom(DamageSource damageSource, float damage) {
         // if we're in a wall, teleport for gosh sakes
-        if (damageSource.getDamageType() == "inWall" && entityToAttack != null) {
+        if ("inWall".equals(damageSource.getDamageType()) && entityToAttack != null) {
             teleportToSightOfEntity(entityToAttack);
         }
 
@@ -432,7 +432,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
      */
     @Override
     protected void attackEntity(Entity targetedEntity, float f) {
-        if (!isShadowClone() && attackTime % 15 == 0) {
+        if (!this.worldObj.isRemote && !isShadowClone() && attackTime % 15 == 0) {
             popNearbyMob();
         }
 
@@ -524,7 +524,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
 
     /**
      * Fires a lich bolt at the target
-     * 
+     *
      * @param targetedEntity
      */
     protected void launchBoltAt(Entity targetedEntity) {
@@ -553,7 +553,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
 
     /**
      * Fires a lich bomb at the target
-     * 
+     *
      * @param targetedEntity
      */
     protected void launchBombAt(Entity targetedEntity) {
@@ -636,7 +636,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
 
     /**
      * Look and see if there are enough clones in the surrounding area. If there are not, spawn one.
-     * 
+     *
      * @param targetedEntity
      */
     protected void checkAndSpawnClones(Entity targetedEntity) {
@@ -673,6 +673,9 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         // find a good spot
         Vec3 cloneSpot = findVecInLOSOf(targetedEntity);
 
+        if (cloneSpot == null || this.worldObj.isRemote) {
+            return;
+        }
         // put a clone there
         EntityTFLich newClone = new EntityTFLich(worldObj, this);
         newClone.setPosition(cloneSpot.xCoord, cloneSpot.yCoord, cloneSpot.zCoord);
@@ -695,8 +698,8 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
                         .expand(32.0D, 16.0D, 32.0D));
 
         for (EntityTFLich nearbyLich : nearbyLiches) {
-            if (nearbyLich.isShadowClone()) {
-                nearbyLich.isDead = true;
+            if (nearbyLich.isShadowClone() && nearbyLich.masterLich == this) {
+                nearbyLich.setDead();
             }
         }
     }
@@ -708,7 +711,6 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
             // if not, spawn one!
             if (minions < EntityTFLich.MAX_ACTIVE_MINIONS) {
                 spawnMinionAt((EntityLivingBase) targetedEntity);
-                this.setMinionsToSummon(this.getMinionsToSummon() - 1);
             }
         }
         // if there's no minions left to summon, we should move into phase 3 naturally
@@ -736,12 +738,17 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         // find a good spot
         Vec3 minionSpot = findVecInLOSOf(targetedEntity);
 
-        // put a clone there
+        if (minionSpot == null || this.worldObj.isRemote) {
+            return;
+        }
+        // put a minion there
         EntityTFLichMinion minion = new EntityTFLichMinion(worldObj, this);
         minion.setPosition(minionSpot.xCoord, minionSpot.yCoord, minionSpot.zCoord);
         // minion.initCreature();
-        worldObj.spawnEntityInWorld(minion);
-
+        if (!worldObj.spawnEntityInWorld(minion)) {
+            return;
+        }
+        this.setMinionsToSummon(this.getMinionsToSummon() - 1);
         minion.setAttackTarget(targetedEntity);
 
         minion.spawnExplosionParticle();
@@ -769,6 +776,9 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
      * A method on the clones that despawns this clone if we are too far from the master
      */
     protected void checkForMaster() {
+        if (this.worldObj.isRemote) {
+            return;
+        }
         if (masterLich == null) {
             findNewMaster();
         }
@@ -817,7 +827,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         double srcY = posY;
         double srcZ = posZ;
 
-        if (dest != null) {
+        if (dest != null && !this.worldObj.isRemote) {
             teleportToNoChecks(dest.xCoord, dest.yCoord, dest.zCoord);
             faceEntity(entity, 100F, 100F);
             this.renderYawOffset = this.rotationYaw;
@@ -833,81 +843,50 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
 
     /**
      * Returns coords that would be good to teleport to.
-     * 
+     *
      * Returns null if we can't find anything
      */
     protected Vec3 findVecInLOSOf(Entity targetEntity) {
-        // for some reason we occasionally get null here
-        if (targetEntity == null) {
+        if (targetEntity == null || !targetEntity.isEntityAlive()) {
             return null;
         }
 
-        double tx = 0, ty = 0, tz = 0;
-        int tries = 100;
-        for (int i = 0; i < tries; i++) {
-            tx = targetEntity.posX + rand.nextGaussian() * 16D;
-            ty = targetEntity.posY + rand.nextGaussian() * 8D;
-            tz = targetEntity.posZ + rand.nextGaussian() * 16D;
-
-            // put the y on something solid
-            boolean groundFlag = false;
-            // we need to get the integer coordinates for this calculation
+        // every candidate must pass all checks, dont return the rejected location
+        for (int attempt = 0; attempt < 100; attempt++) {
+            double tx = targetEntity.posX + rand.nextGaussian() * 16.0D;
+            double ty = targetEntity.posY + rand.nextGaussian() * 8.0D;
+            double tz = targetEntity.posZ + rand.nextGaussian() * 16.0D;
             int bx = MathHelper.floor_double(tx);
             int by = MathHelper.floor_double(ty);
             int bz = MathHelper.floor_double(tz);
-            while (!groundFlag && ty > 0) {
-                Block whatsThere = worldObj.getBlock(bx, by - 1, bz);
-                if (whatsThere == Blocks.air || !whatsThere.getMaterial().isSolid()) {
-                    ty--;
-                    by--;
-                } else {
-                    groundFlag = true;
-                }
-            }
 
-            // did we not find anything at all to stand on?
-            if (by == 0) {
-                // System.out.println("teleport find failed to find a block to stand on");
+            if (by <= 1 || !worldObj.blockExists(bx, by, bz)) {
                 continue;
             }
-
-            //
-            if (!canEntitySee(targetEntity, tx, ty, tz)) {
-                // System.out.println("teleport find failed because of lack of LOS");
-                // System.out.println("ty = " + ty);
+            // a bounded vertical search avoids scanning below the world or loading chunks
+            while (by > 1 && !worldObj.getBlock(bx, by - 1, bz).getMaterial().isSolid()) {
+                --by;
+            }
+            if (by <= 1) {
                 continue;
             }
+            ty = by;
 
-            // check that we're not colliding and not in liquid
             float halfWidth = this.width / 2.0F;
-            AxisAlignedBB destBox = AxisAlignedBB.getBoundingBox(
+            AxisAlignedBB destination = AxisAlignedBB.getBoundingBox(
                     tx - halfWidth,
                     ty - yOffset + ySize,
                     tz - halfWidth,
                     tx + halfWidth,
                     ty - yOffset + ySize + height,
                     tz + halfWidth);
-            if (worldObj.getCollidingBoundingBoxes(this, destBox).size() > 0) {
-                // System.out.println("teleport find failed because of collision");
+            if (!worldObj.getCollidingBoundingBoxes(this, destination).isEmpty() || worldObj.isAnyLiquid(destination)
+                    || !canEntitySee(targetEntity, tx, ty, tz)) {
                 continue;
             }
-
-            if (worldObj.isAnyLiquid(destBox)) {
-                // System.out.println("teleport find failed because of liquid at destination");
-                continue;
-            }
-
-            // if we made it this far, we win!
-            break;
+            return Vec3.createVectorHelper(tx, ty, tz);
         }
-
-        if (tries == 99) {
-            return null;
-        }
-
-        // System.out.println("I think we found a good destination at " + tx + ", " + ty + ", " + tz);
-        // System.out.println("canEntitySee = " + canEntitySee(targetEntity, tx, ty, tz));
-        return Vec3.createVectorHelper(tx, ty, tz);
+        return null;
     }
 
     /**
