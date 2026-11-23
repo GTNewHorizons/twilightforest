@@ -479,8 +479,10 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
 
         int width = data[0] & 0xFF;
         int cells = width * width;
-        // preserve legacy dimensions but reject negative and overflow widths and truncated data
-        if (width == 0 || width > Byte.MAX_VALUE || data.length < 1 + (cells + 7) / 8) return;
+        // courtyard cells are laid out on an odd square grid
+        if (width < 3 || width > DEFAULT_TABLE_WIDTH || (width & 1) == 0 || data.length < 1 + (cells + 7) / 8) {
+            return;
+        }
 
         tableWidth = width;
         courtyard = new CellType[width][width];
@@ -489,6 +491,9 @@ public class ComponentTFNagaCourtyardMain extends StructureTFComponent {
                 int bit = x * width + z;
                 if (((data[1 + bit / 8] & 0xFF) & (1 << (bit % 8))) != 0) {
                     courtyard[x][z] = CellType.EMPTY;
+                } else {
+                    // the legacy CY format records empty walkable cells only
+                    courtyard[x][z] = CellType.OUTSIDE;
                 }
             }
         }

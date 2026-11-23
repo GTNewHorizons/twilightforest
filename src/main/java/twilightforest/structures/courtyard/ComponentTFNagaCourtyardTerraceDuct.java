@@ -26,24 +26,26 @@ public class ComponentTFNagaCourtyardTerraceDuct extends ComponentTFNagaCourtyar
     }
 
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void buildComponent(StructureComponent structurecomponent, List list, Random random) {
         super.buildComponent(structurecomponent, list, random);
+        List<StructureComponent> components = list;
 
         if (coordBaseMode == 0 || coordBaseMode == 3) {
-            addDuctPart(list, random, boundingBox.minX + 13, boundingBox.minZ + 6, 0);
+            addDuctPart(components, random, boundingBox.minX + 13, boundingBox.minZ + 6, 0);
         }
         if (coordBaseMode == 3 || coordBaseMode == 2) {
-            addDuctPart(list, random, boundingBox.minX + 6, boundingBox.minZ - 1, 3);
+            addDuctPart(components, random, boundingBox.minX + 6, boundingBox.minZ - 1, 3);
         }
         if (coordBaseMode == 2 || coordBaseMode == 1) {
-            addDuctPart(list, random, boundingBox.minX, boundingBox.minZ + 6, 2);
+            addDuctPart(components, random, boundingBox.minX, boundingBox.minZ + 6, 2);
         }
         if (coordBaseMode == 1 || coordBaseMode == 0) {
-            addDuctPart(list, random, boundingBox.minX + 7, boundingBox.minZ + 13, 1);
+            addDuctPart(components, random, boundingBox.minX + 7, boundingBox.minZ + 13, 1);
         }
     }
 
-    private void addDuctPart(List list, Random random, int x, int z, int rotation) {
+    private void addDuctPart(List<StructureComponent> list, Random random, int x, int z, int rotation) {
         ComponentTFNagaCourtyardTerraceDuctPart ductPart = new ComponentTFNagaCourtyardTerraceDuctPart(
                 1,
                 x,

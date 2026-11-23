@@ -11,7 +11,6 @@ public class ComponentTFDarkTowerRoofRings extends ComponentTFDarkTowerRoof {
 
     public ComponentTFDarkTowerRoofRings() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFDarkTowerRoofRings(int i, ComponentTFTowerWing wing) {

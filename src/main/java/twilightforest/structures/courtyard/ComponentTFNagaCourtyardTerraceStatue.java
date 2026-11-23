@@ -26,16 +26,18 @@ public class ComponentTFNagaCourtyardTerraceStatue extends ComponentTFNagaCourty
     }
 
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void buildComponent(StructureComponent structurecomponent, List list, Random random) {
         super.buildComponent(structurecomponent, list, random);
+        List<StructureComponent> components = list;
 
-        addBorder(list, random, boundingBox.minX, boundingBox.minZ + 5, 0);
-        addBorder(list, random, boundingBox.minX + 7, boundingBox.minZ + 1, 1);
-        addBorder(list, random, boundingBox.minX + 11, boundingBox.minZ + 5, 2);
-        addBorder(list, random, boundingBox.minX + 4, boundingBox.minZ + 9, 3);
+        addBorder(components, random, boundingBox.minX, boundingBox.minZ + 5, 0);
+        addBorder(components, random, boundingBox.minX + 7, boundingBox.minZ + 1, 1);
+        addBorder(components, random, boundingBox.minX + 11, boundingBox.minZ + 5, 2);
+        addBorder(components, random, boundingBox.minX + 4, boundingBox.minZ + 9, 3);
     }
 
-    private void addBorder(List list, Random random, int x, int z, int rotation) {
+    private void addBorder(List<StructureComponent> list, Random random, int x, int z, int rotation) {
         ComponentTFNagaCourtyardTerraceStatueBorder border = new ComponentTFNagaCourtyardTerraceStatueBorder(
                 1,
                 x,

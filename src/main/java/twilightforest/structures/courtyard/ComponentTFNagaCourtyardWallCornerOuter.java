@@ -18,7 +18,6 @@ public class ComponentTFNagaCourtyardWallCornerOuter extends ComponentTFNagaCour
 
     public ComponentTFNagaCourtyardWallCornerOuter(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
-        this.coordBaseMode = rotation;
         this.boundingBox = new StructureBoundingBox(x, y, z, x + 4, y + 8, z + 4);
     }
 

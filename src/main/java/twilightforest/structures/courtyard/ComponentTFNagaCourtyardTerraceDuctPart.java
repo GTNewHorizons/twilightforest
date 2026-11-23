@@ -19,6 +19,12 @@ public class ComponentTFNagaCourtyardTerraceDuctPart extends ComponentTFNagaCour
     public ComponentTFNagaCourtyardTerraceDuctPart(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
         this.boundingBox = new StructureBoundingBox(x, y, z, x + 3, y + 2, z + 4);
+        normalizeRotatedFootprint();
+    }
+
+    @Override
+    protected void normalizeRotatedFootprint() {
+        fitRotatedFootprint(4, 5);
     }
 
     @Override

@@ -22,14 +22,22 @@ public class ComponentTFNagaCourtyardDecorator extends StructureTFComponent {
     public ComponentTFNagaCourtyardDecorator(int i, int x, int y, int z, int width, int height, int length) {
         super(i);
         this.coordBaseMode = 0;
-        this.boundingBox = new StructureBoundingBox(x, y - 2, z, x + width, y + height, z + length);
+        this.boundingBox = new StructureBoundingBox(x, y - 2, z, x + width - 1, y + height - 1, z + length - 1);
     }
 
     @Override
     public boolean addComponentParts(World world, Random random, StructureBoundingBox structureBoundingBox) {
-        for (int x = 0; x < boundingBox.getXSize(); x++) {
-            for (int y = 0; y < boundingBox.getYSize(); y++) {
-                for (int z = 0; z < boundingBox.getZSize(); z++) {
+        // visit only positions in this chunk, the original scans the entire courtyard each time
+        int minX = Math.max(0, structureBoundingBox.minX - boundingBox.minX);
+        int minY = Math.max(0, structureBoundingBox.minY - boundingBox.minY);
+        int minZ = Math.max(0, structureBoundingBox.minZ - boundingBox.minZ);
+        int maxX = Math.min(boundingBox.getXSize() - 1, structureBoundingBox.maxX - boundingBox.minX);
+        int maxY = Math.min(boundingBox.getYSize() - 1, structureBoundingBox.maxY - boundingBox.minY);
+        int maxZ = Math.min(boundingBox.getZSize() - 1, structureBoundingBox.maxZ - boundingBox.minZ);
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     Block block = this.getBlockAtCurrentPosition(world, x, y, z, structureBoundingBox);
                     if (block != Blocks.air) {
                         int metadata = this.getMetadataAtCurrentPosition(world, x, y, z, structureBoundingBox);

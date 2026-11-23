@@ -19,6 +19,12 @@ public class ComponentTFNagaCourtyardTerraceStatueBorder extends ComponentTFNaga
     public ComponentTFNagaCourtyardTerraceStatueBorder(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
         this.boundingBox = new StructureBoundingBox(x, y - 1, z - 1, x + 5, y + 5, z + 7);
+        normalizeRotatedFootprint();
+    }
+
+    @Override
+    protected void normalizeRotatedFootprint() {
+        fitRotatedFootprint(6, 9);
     }
 
     @Override

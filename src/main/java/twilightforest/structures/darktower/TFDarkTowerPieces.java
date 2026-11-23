@@ -2,7 +2,9 @@ package twilightforest.structures.darktower;
 
 import net.minecraft.world.gen.structure.MapGenStructureIO;
 
-public class TFDarkTowerPieces {
+public final class TFDarkTowerPieces {
+
+    private TFDarkTowerPieces() {}
 
     public static void registerPieces() {
         MapGenStructureIO.func_143031_a(ComponentTFDarkTowerBalcony.class, "TFDTBal");

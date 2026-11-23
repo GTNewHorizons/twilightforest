@@ -18,6 +18,12 @@ public class ComponentTFNagaCourtyardWallPadder extends ComponentTFNagaCourtyard
     public ComponentTFNagaCourtyardWallPadder(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
         this.boundingBox = new StructureBoundingBox(x, y, z, x, y + 8, z + 2);
+        normalizeRotatedFootprint();
+    }
+
+    @Override
+    protected void normalizeRotatedFootprint() {
+        fitRotatedFootprint(1, 3);
     }
 
     @Override

@@ -31,8 +31,10 @@ public class ComponentTFNagaCourtyardWallCornerInner extends ComponentTFNagaCour
      * Initiates construction of the Structure Component picked, at the current Location of StructGen
      */
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void buildComponent(StructureComponent structurecomponent, List list, Random random) {
         super.buildComponent(structurecomponent, list, random);
+        List<StructureComponent> components = list;
 
         int rotation = coordBaseMode >= 0 && coordBaseMode < WALL_OFFSETS.length ? coordBaseMode : 1;
         int[][] offsets = WALL_OFFSETS[rotation];
@@ -45,8 +47,8 @@ public class ComponentTFNagaCourtyardWallCornerInner extends ComponentTFNagaCour
                     boundingBox.minY,
                     boundingBox.minZ + offsets[i][1],
                     WALL_ROTATIONS[i]);
-            list.add(cornerWall);
-            cornerWall.buildComponent(this, list, random);
+            components.add(cornerWall);
+            cornerWall.buildComponent(this, components, random);
         }
     }
 
@@ -101,7 +103,8 @@ public class ComponentTFNagaCourtyardWallCornerInner extends ComponentTFNagaCour
     private void buildPadders(World world, StructureBoundingBox box) {
         // Padders
         // Brick base
-        fillWithBlocks(world, box, 0, 0, 8, 2, 0, 6, Blocks.stonebrick, Blocks.air, false);
+        // the original Z bounds were reversed, so this part of the brick footing never generated
+        fillWithBlocks(world, box, 0, 0, 6, 2, 0, 8, Blocks.stonebrick, Blocks.air, false);
 
         // Middle brick layer
         fillWithBlocks(world, box, 1, 1, 6, 2, 7, 6, Blocks.stonebrick, Blocks.air, false);

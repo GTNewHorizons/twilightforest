@@ -2,15 +2,22 @@ package twilightforest.structures.courtyard;
 
 import java.util.Random;
 
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import twilightforest.block.BlockTFNagastone2.Yaw;
+import twilightforest.block.TFBlocks;
 import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponent {
+
+    private static final String GROUND_HEIGHT_CHECKED_NBT_KEY = "CYGroundChecked";
+
+    private boolean groundHeightChecked;
 
     protected int horizontalColumnsOrient4;
     protected int horizontalColumnsOrient8;
@@ -40,7 +47,7 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
 
     public ComponentTFNagaCourtyardRotatedAbstract(int i, int x, int y, int z, int rotation) {
         super(i);
-        this.coordBaseMode = rotation;
+        this.coordBaseMode = Math.floorMod(rotation, 4);
         initRotation();
     }
 
@@ -130,10 +137,78 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
         return false;
     }
 
+    // a component is populated once per intersecting chunk, dont shift its origin on every call
+    // preserve the rotation anchor while sizing the world bounding box to the local footprint
+    protected final void fitRotatedFootprint(int localWidth, int localDepth) {
+        if (coordBaseMode == 1) {
+            boundingBox.minX = boundingBox.maxX - localDepth + 1;
+            boundingBox.maxZ = boundingBox.minZ + localWidth - 1;
+        } else if (coordBaseMode == 3) {
+            boundingBox.maxX = boundingBox.minX + localDepth - 1;
+            boundingBox.minZ = boundingBox.maxZ - localWidth + 1;
+        }
+    }
+
+    protected void normalizeRotatedFootprint() {}
+
+    protected final void adjustGroundHeightOnce(World world, StructureBoundingBox chunkBox, int width, int depth,
+            int sampleZ) {
+        if (groundHeightChecked) {
+            return;
+        }
+
+        int groundAir = 0;
+        int undergroundAir = 0;
+        for (int x = 0; x < width; x++) {
+            for (int z = 0; z < depth; z++) {
+                int localZ = z + sampleZ;
+                if (getBlockAtCurrentPosition(world, x, -1, localZ, chunkBox) == Blocks.air) {
+                    groundAir++;
+                }
+                if (getBlockAtCurrentPosition(world, x, -2, localZ, chunkBox) == Blocks.air) {
+                    undergroundAir++;
+                }
+            }
+        }
+
+        if (groundAir > undergroundAir) {
+            boundingBox.minY--;
+        }
+        groundHeightChecked = true;
+    }
+
+    protected final void replaceGroundAround(World world, StructureBoundingBox chunkBox, int width, int depth) {
+        for (int x = 0; x < width; x++) {
+            for (int z = 0; z < depth; z++) {
+                Block west = getBlockAtCurrentPosition(world, x - 1, 0, z, chunkBox);
+                Block east = getBlockAtCurrentPosition(world, x + 1, 0, z, chunkBox);
+                Block north = getBlockAtCurrentPosition(world, x, 0, z - 1, chunkBox);
+                Block south = getBlockAtCurrentPosition(world, x, 0, z + 1, chunkBox);
+                if (isGroundBlock(west) || isGroundBlock(east) || isGroundBlock(north) || isGroundBlock(south)) {
+                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneEtched, 0, x, 0, z, chunkBox);
+                }
+            }
+        }
+    }
+
+    private static boolean isGroundBlock(Block block) {
+        return block == Blocks.grass || block == Blocks.dirt || block == Blocks.stonebrick;
+    }
+
+    @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setBoolean(GROUND_HEIGHT_CHECKED_NBT_KEY, groundHeightChecked);
+    }
+
     // load from nbt
     @Override
     protected void func_143011_b(NBTTagCompound nbt) {
         super.func_143011_b(nbt);
+        // legacy pieces may already have had their bounding boxes lowered before being saved
+        groundHeightChecked = !nbt.hasKey(GROUND_HEIGHT_CHECKED_NBT_KEY)
+                || nbt.getBoolean(GROUND_HEIGHT_CHECKED_NBT_KEY);
         initRotation();
+        normalizeRotatedFootprint();
     }
 }
