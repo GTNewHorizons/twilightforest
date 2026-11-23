@@ -10,6 +10,7 @@ import twilightforest.TFFeature;
 /**
  * Lightweight dependency injection to allow overriding Twilight Forest structure implementations.
  */
+@FunctionalInterface
 public interface TFMajorFeatureProvider {
 
     StructureComponent getComponent(World world, Random rand, TFFeature feature, int x, int y, int z);
