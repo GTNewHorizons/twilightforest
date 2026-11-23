@@ -27,18 +27,18 @@ public class ItemTFMazebreakerPick extends ItemPickaxe {
      */
     @Override
     public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> par3List) {
-        ItemStack istack = new ItemStack(par1, 1, 0);
-        istack.addEnchantment(Enchantment.efficiency, 4);
-        istack.addEnchantment(Enchantment.unbreaking, 3);
-        istack.addEnchantment(Enchantment.fortune, 2);
-        par3List.add(istack);
+        ItemStack stack = new ItemStack(par1, 1, 0);
+        stack.addEnchantment(Enchantment.efficiency, 4);
+        stack.addEnchantment(Enchantment.unbreaking, 3);
+        stack.addEnchantment(Enchantment.fortune, 2);
+        par3List.add(stack);
     }
 
     @Override
     public float func_150893_a(ItemStack par1ItemStack, Block par2Block) {
-        float strVsBlock = super.func_150893_a(par1ItemStack, par2Block);
+        float baseSpeed = super.func_150893_a(par1ItemStack, par2Block);
         // 16x strength vs mazestone
-        return par2Block == TFBlocks.mazestone ? strVsBlock * 16F : strVsBlock;
+        return par2Block == TFBlocks.mazestone ? baseSpeed * 16F : baseSpeed;
     }
 
     /**

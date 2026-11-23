@@ -15,7 +15,13 @@ public class ItemBlockTFCompressed extends ItemBlock {
 
     public ItemBlockTFCompressed(Block block) {
         super(block);
-        hasSubtypes = true;
+        setHasSubtypes(true);
+        setMaxDamage(0);
+    }
+
+    @Override
+    public int getMetadata(int metadata) {
+        return metadata;
     }
 
     /**

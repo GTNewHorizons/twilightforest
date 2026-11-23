@@ -17,7 +17,7 @@ import twilightforest.TwilightForestMod;
 
 public class ItemTFMeta extends Item {
 
-    public String[] textureNames = { "adherentFragment", "harbingerFragment" };// make something called emissary?
+    public String[] textureNames = { "adherentFragment", "harbingerFragment" }; // make something called emissary?
     public IIcon[] icons;
 
     public ItemTFMeta() {
@@ -58,7 +58,8 @@ public class ItemTFMeta extends Item {
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIconFromDamage(int meta) {
-        return icons[meta];
+        // corrupt or legacy metadata musnt crash inventory and NEI rendering
+        return icons != null && meta >= 0 && meta < icons.length ? icons[meta] : itemIcon;
     }
 
     @Override
@@ -66,13 +67,17 @@ public class ItemTFMeta extends Item {
     public void registerIcons(IIconRegister iconRegister) {
         this.icons = new IIcon[textureNames.length];
 
-        for (int i = 0; i < this.icons.length; ++i)
+        for (int i = 0; i < this.icons.length; i++) {
             this.icons[i] = iconRegister.registerIcon(TwilightForestMod.ID + ":" + textureNames[i]);
+        }
+        this.itemIcon = this.icons.length > 0 ? this.icons[0] : null;
     }
 
     @Override
     public void getSubItems(Item id, CreativeTabs tab, List<ItemStack> list) {
-        for (int i = 0; i < textureNames.length; i++) list.add(new ItemStack(id, 1, i));
+        for (int i = 0; i < textureNames.length; i++) {
+            list.add(new ItemStack(id, 1, i));
+        }
     }
 
 }

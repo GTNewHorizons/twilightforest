@@ -20,6 +20,7 @@ public abstract class ItemTFBowBase extends ItemBow {
 
     private IIcon[] iconArray;
 
+    @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister par1IconRegister) {
         this.itemIcon = par1IconRegister.registerIcon(this.getIconString() + "_standby");
@@ -33,9 +34,11 @@ public abstract class ItemTFBowBase extends ItemBow {
     /**
      * used to cycle through icons based on their used duration, i.e. for the bow
      */
+    @Override
     @SideOnly(Side.CLIENT)
-    public IIcon getItemIconForUseDuration(int par1) {
-        return this.iconArray[par1];
+    public IIcon getItemIconForUseDuration(int index) {
+        return this.iconArray == null || index < 0 || index >= this.iconArray.length ? this.itemIcon
+                : this.iconArray[index];
     }
 
     /**
@@ -72,6 +75,7 @@ public abstract class ItemTFBowBase extends ItemBow {
     /**
      * called when the player releases the use item button. Args: itemstack, world, entityplayer, itemInUseCount
      */
+    @Override
     public void onPlayerStoppedUsing(ItemStack itemstack, World world, EntityPlayer entityPlayer, int itemInUseCount) {
         int charge = this.getMaxItemUseDuration(itemstack) - itemInUseCount;
 
@@ -98,6 +102,9 @@ public abstract class ItemTFBowBase extends ItemBow {
             }
 
             EntityArrow entityarrow = getArrow(world, entityPlayer, velocity * 2.0F);
+            if (entityarrow == null) {
+                return;
+            }
 
             if (velocity == 1.0F) {
                 entityarrow.setIsCritical(true);

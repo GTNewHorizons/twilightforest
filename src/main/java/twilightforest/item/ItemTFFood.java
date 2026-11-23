@@ -50,7 +50,7 @@ public class ItemTFFood extends ItemFood {
      */
     public IIcon getIconFromDamage(int par1) {
         if (this.looksLike != null) {
-            return looksLike.getIconFromDamage(0);
+            return this.looksLike.getIconFromDamage(0);
         } else {
             return super.getIconFromDamage(par1);
         }
@@ -70,25 +70,37 @@ public class ItemTFFood extends ItemFood {
     }
 
     @Override
-    public boolean onItemUse(ItemStack itemStackIn, EntityPlayer player, World worldIn, int x, int y, int z, int side,
-            float p_77648_8_, float p_77648_9_, float p_77648_10_) {
-        if (player.isSneaking() && itemStackIn.getItem() == TFItems.experiment115) {
-            if (worldIn.getBlock(x, y, z) == TFBlocks.experiment115) {
-                int l = worldIn.getBlockMetadata(x, y, z) + 1;
-                if (l <= 8) {
-                    worldIn.setBlockMetadataWithNotify(x, y, z, l, 2);
-                    worldIn.notifyBlocksOfNeighborChange(x, y, z, worldIn.getBlock(x, y, z));
-                    itemStackIn.stackSize--;
-                }
-            } else {
-                if (worldIn.isAirBlock(x, y + 1, z) && side == 1) {
-                    worldIn.setBlock(x, y + 1, z, TFBlocks.experiment115, 1, 2);
-                    worldIn.notifyBlocksOfNeighborChange(x, y, z, worldIn.getBlock(x, y, z));
-                    itemStackIn.stackSize--;
-                }
-            }
+    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side,
+            float hitX, float hitY, float hitZ) {
+        if (!player.isSneaking() || stack.getItem() != TFItems.experiment115) {
+            return super.onItemUse(stack, player, world, x, y, z, side, hitX, hitY, hitZ);
+        }
+        if (stack.stackSize <= 0) {
+            return false;
+        }
+
+        boolean stacking = world.getBlock(x, y, z) == TFBlocks.experiment115;
+        int placeY = stacking ? y : y + 1;
+        if ((!stacking && (side != 1 || !world.isAirBlock(x, placeY, z)))
+                || (stacking && world.getBlockMetadata(x, y, z) >= 8)
+                || !world.canMineBlock(player, x, placeY, z)
+                || !player.canPlayerEdit(x, placeY, z, side, stack)) {
+            return false;
+        }
+        if (world.isRemote) {
             return true;
-        } else return super.onItemUse(itemStackIn, player, worldIn, x, y, z, side, p_77648_8_, p_77648_9_, p_77648_10_);
+        }
+
+        boolean placed = stacking ? world.setBlockMetadataWithNotify(x, y, z, world.getBlockMetadata(x, y, z) + 1, 2)
+                : world.setBlock(x, placeY, z, TFBlocks.experiment115, 1, 2);
+        if (!placed) {
+            return false;
+        }
+        world.notifyBlocksOfNeighborChange(x, placeY, z, world.getBlock(x, placeY, z));
+        if (!player.capabilities.isCreativeMode) {
+            --stack.stackSize;
+        }
+        return true;
     }
 
     public boolean isSoup() {
@@ -97,20 +109,16 @@ public class ItemTFFood extends ItemFood {
 
     public void setSoup(boolean isSoup) {
         this.isSoup = isSoup;
-        this.setMaxStackSize(1);
+        this.setMaxStackSize(isSoup ? 1 : 64);
     }
 
     /**
      * Give a bowl back if we are soup
      */
-    public ItemStack onEaten(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer) {
-        super.onEaten(par1ItemStack, par2World, par3EntityPlayer);
-
-        if (isSoup) {
-            return new ItemStack(Items.bowl);
-        } else {
-            return par1ItemStack;
-        }
+    @Override
+    public ItemStack onEaten(ItemStack stack, World world, EntityPlayer player) {
+        ItemStack eaten = super.onEaten(stack, world, player);
+        return this.isSoup ? new ItemStack(Items.bowl) : eaten;
     }
 
 }

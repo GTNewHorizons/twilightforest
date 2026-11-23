@@ -4,9 +4,9 @@ import net.minecraft.util.IIcon;
 
 public class GiantItemIcon implements IIcon {
 
-    private IIcon baseIcon;
-    private float myX;
-    private float myY;
+    private final IIcon baseIcon;
+    private final float myX;
+    private final float myY;
 
     public GiantItemIcon(IIcon blockIcon, float x, float y) {
         this.baseIcon = blockIcon;

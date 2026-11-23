@@ -125,6 +125,7 @@ public class ItemTFPeacockFan extends ItemTF {
 
         fanEntitiesInAABB(world, player, fanBox);
 
+        // One durability point per fan use is intentional even if no flowers are harvested.
         return 1;
     }
 
@@ -143,6 +144,8 @@ public class ItemTFPeacockFan extends ItemTF {
                 entity.motionX = moveVec.xCoord * force;
                 entity.motionY = moveVec.yCoord * force;
                 entity.motionZ = moveVec.zCoord * force;
+                // server movement changes must be synchronised to observing clients
+                entity.velocityChanged = true;
             }
         }
 
@@ -167,10 +170,10 @@ public class ItemTFPeacockFan extends ItemTF {
 
     /**
      * Do fan effects on blocks in the bounding box
-     * 
+     *
      * @param player
      */
-    private int fanBlocksInAABB(World world, EntityPlayer player, AxisAlignedBB par1AxisAlignedBB) {
+    private void fanBlocksInAABB(World world, EntityPlayer player, AxisAlignedBB par1AxisAlignedBB) {
 
         int minX = MathHelper.floor_double(par1AxisAlignedBB.minX);
         int minY = MathHelper.floor_double(par1AxisAlignedBB.minY);
@@ -179,38 +182,44 @@ public class ItemTFPeacockFan extends ItemTF {
         int maxY = MathHelper.floor_double(par1AxisAlignedBB.maxY);
         int maxZ = MathHelper.floor_double(par1AxisAlignedBB.maxZ);
 
-        int fan = 0;
-
         for (int dx = minX; dx <= maxX; ++dx) {
             for (int dy = minY; dy <= maxY; ++dy) {
                 for (int dz = minZ; dz <= maxZ; ++dz) {
-                    fan += fanBlock(world, player, dx, dy, dz);
+                    fanBlock(world, player, dx, dy, dz);
                 }
             }
         }
 
-        return fan;
     }
 
-    private int fanBlock(World world, EntityPlayer player, int dx, int dy, int dz) {
-        int cost = 0;
-
+    private void fanBlock(World world, EntityPlayer player, int dx, int dy, int dz) {
         Block currentID = world.getBlock(dx, dy, dz);
 
         if (currentID != Blocks.air) {
             int currentMeta = world.getBlockMetadata(dx, dy, dz);
 
             if (currentID instanceof BlockFlower) {
-                if (currentID.canHarvestBlock(player, currentMeta) && itemRand.nextInt(3) == 0) {
-                    currentID.harvestBlock(world, player, dx, dy, dz, currentMeta);
-                    world.setBlock(dx, dy, dz, Blocks.air, 0, 3);
-                    world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                if (currentID.canHarvestBlock(player, currentMeta) && world.canMineBlock(player, dx, dy, dz)
+                        && player.canPlayerEdit(dx, dy, dz, 1, player.getCurrentEquippedItem())
+                        && itemRand.nextInt(3) == 0) {
+                    net.minecraftforge.event.world.BlockEvent.BreakEvent event = new net.minecraftforge.event.world.BlockEvent.BreakEvent(
+                            dx,
+                            dy,
+                            dz,
+                            world,
+                            currentID,
+                            currentMeta,
+                            player);
+                    if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)
+                            && world.setBlock(dx, dy, dz, Blocks.air, 0, 3)) {
+                        currentID.harvestBlock(world, player, dx, dy, dz, currentMeta);
+                        world.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(currentID) + (currentMeta << 12));
+                    }
                 }
             }
 
         }
 
-        return cost;
     }
 
     /**

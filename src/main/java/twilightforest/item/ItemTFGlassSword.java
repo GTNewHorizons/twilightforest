@@ -51,6 +51,7 @@ public class ItemTFGlassSword extends ItemSword {
      * @param entity The entity being attacked
      * @return True to cancel the rest of the interaction.
      */
+    @Override
     public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
         if (player.worldObj.isRemote) {
             // snow animation!

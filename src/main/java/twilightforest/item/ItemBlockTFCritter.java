@@ -24,6 +24,7 @@ public class ItemBlockTFCritter extends ItemBlock {
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer player, List<String> list, boolean par4) {
+        super.addInformation(itemStack, player, list, par4);
         list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("item.outdated.tooltip"));
     }
 }

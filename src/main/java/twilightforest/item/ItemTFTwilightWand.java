@@ -38,7 +38,7 @@ public class ItemTFTwilightWand extends ItemTF {
 
     /**
      * Called each tick while using an item.
-     * 
+     *
      * @param stack  The Item being used
      * @param player The Player using the item
      * @param count  The amount of time in tick the item has been used for continuously

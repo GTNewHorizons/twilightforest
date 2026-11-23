@@ -15,8 +15,7 @@ public class ItemBlockTFNagastone extends ItemBlock {
 
     public ItemBlockTFNagastone(Block block) {
         super(block);
-        if (this.field_150939_a instanceof BlockTFNagastone) setHasSubtypes(true);
-        else setHasSubtypes(false);
+        setHasSubtypes(this.field_150939_a instanceof BlockTFNagastone);
         setMaxDamage(0);
     }
 
@@ -27,10 +26,10 @@ public class ItemBlockTFNagastone extends ItemBlock {
 
     @Override
     public String getUnlocalizedName(ItemStack itemstack) {
-        if (this.field_150939_a instanceof BlockTFNagastone2)
-            return "tile.TFNagastone." + (((BlockTFNagastone2) this.field_150939_a).isHead ? 0 : 4);
-        else return (new StringBuilder()).append(super.getUnlocalizedName()).append(".")
-                .append(itemstack.getItemDamage()).toString();
+        if (this.field_150939_a instanceof BlockTFNagastone2 stone) {
+            return "tile.TFNagastone." + (stone.isHead ? 0 : 4);
+        }
+        return super.getUnlocalizedName() + "." + itemstack.getItemDamage();
     }
 
     @Override
@@ -45,6 +44,7 @@ public class ItemBlockTFNagastone extends ItemBlock {
      * @param player The player who is placing the block. Can be null if the block is not being placed by a player.
      * @param side   The side the player (or machine) right-clicked on.
      */
+    @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side,
             float hitX, float hitY, float hitZ, int metadata) {
         Block blockToPlace = field_150939_a;

@@ -43,11 +43,11 @@ public class ItemTFZombieWand extends ItemTF {
                     // make a zombie there
                     EntityTFLoyalZombie zombie = new EntityTFLoyalZombie(worldObj);
                     zombie.setPositionAndRotation(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord, 1.0F, 1.0F); /// NPE
-                                                                                                                        /// here
-                                                                                                                        /// needs
-                                                                                                                        /// to
-                                                                                                                        /// be
-                                                                                                                        /// fixed
+                    /// here
+                    /// needs
+                    /// to
+                    /// be
+                    /// fixed
                     zombie.setTamed(true);
                     try {
                         zombie.func_152115_b(player.getUniqueID().toString());
@@ -72,9 +72,9 @@ public class ItemTFZombieWand extends ItemTF {
 
     /**
      * What block is the player pointing the wand at?
-     * 
+     *
      * This very similar to player.rayTrace, but that method is not available on the server.
-     * 
+     *
      * @return
      */
     private MovingObjectPosition getPlayerPointVec(World worldObj, EntityPlayer player, float range) {
