@@ -19,7 +19,7 @@ public class StructureTFHollowTreeStart extends StructureStart {
 
         int x = (chunkX << 4) + CHUNK_CENTER_OFFSET;
         int z = (chunkZ << 4) + CHUNK_CENTER_OFFSET;
-        int y = TFWorld.SEALEVEL + 1;// world.getTopSolidOrLiquidBlock(x, z);
+        int y = TFWorld.SEALEVEL + 1;
 
         StructureTFComponent trunk = new ComponentTFHollowTreeTrunk(world, rand, 0, x, y, z);
         components.add(trunk);

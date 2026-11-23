@@ -103,25 +103,7 @@ public class ComponentTFHillMaze extends StructureTFComponent {
      * @return true if the specified dx and dz are within 3 of a room specified in rcoords
      */
     protected boolean isNearRoom(int dx, int dz, int[] rcoords) {
-        // if proposed coordinates are covering the origin, return true to stop the room from causing the
-        // maze to fail
-        if (dx == 1 && dz == 1) {
-            return true;
-        }
-
-        for (int i = 0; i < rcoords.length; i += 2) {
-            int rx = rcoords[i];
-            int rz = rcoords[i + 1];
-
-            if (rx == 0 && rz == 0) {
-                continue;
-            }
-
-            if (Math.abs(dx - rx) < ROOM_SPACING && Math.abs(dz - rz) < ROOM_SPACING) {
-                return true;
-            }
-        }
-        return false;
+        return isNearMazeRoom(dx, dz, rcoords, ROOM_SPACING);
     }
 
     void decorate3x3Rooms(World world, int[] rcoords, StructureBoundingBox sbb) {

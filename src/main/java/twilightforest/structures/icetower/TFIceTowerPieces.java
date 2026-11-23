@@ -2,9 +2,12 @@ package twilightforest.structures.icetower;
 
 import net.minecraft.world.gen.structure.MapGenStructureIO;
 
-public class TFIceTowerPieces {
+public final class TFIceTowerPieces {
+
+    private TFIceTowerPieces() {}
 
     public static void registerPieces() {
+        // these IDs are saved in world nbt
         MapGenStructureIO.func_143031_a(ComponentTFIceTowerMain.class, "TFITMai");
         MapGenStructureIO.func_143031_a(ComponentTFIceTowerWing.class, "TFITWin");
         MapGenStructureIO.func_143031_a(ComponentTFIceTowerRoof.class, "TFITRoof");

@@ -14,13 +14,18 @@ import twilightforest.structures.lichtower.ComponentTFTowerWing;
 
 public class ComponentTFFinalCastleLargeTower extends ComponentTFTowerWing {
 
+    private static final int TOWER_SIZE = 13;
+    private static final int TOWER_HEIGHT = 61;
+    private static final int MIN_GLYPH_BRANCHES = 6;
+    private static final int EXTRA_GLYPH_BRANCHES = 4;
+
     public ComponentTFFinalCastleLargeTower() {}
 
     public ComponentTFFinalCastleLargeTower(Random rand, int i, int x, int y, int z, int rotation) {
         super(i);
         this.setCoordBaseMode(rotation);
-        this.size = 13;
-        this.height = 61;
+        this.size = TOWER_SIZE;
+        this.height = TOWER_HEIGHT;
         this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(x, y, z, -6, 0, -6, 12, 60, 12, 0);
     }
 
@@ -40,10 +45,10 @@ public class ComponentTFFinalCastleLargeTower extends ComponentTFTowerWing {
         Random decoRNG = new Random(
                 world.getSeed() + (this.boundingBox.minX * 321534781) ^ (this.boundingBox.minZ * 756839));
 
-        fillWithRandomizedBlocks(world, sbb, 0, 0, 0, 12, 59, 12, false, rand, deco.randomBlocks);
+        fillWithRandomizedBlocks(world, sbb, 0, 0, 0, size - 1, height - 2, size - 1, false, rand, deco.randomBlocks);
 
         // add branching runes
-        int numBranches = 6 + decoRNG.nextInt(4);
+        int numBranches = MIN_GLYPH_BRANCHES + decoRNG.nextInt(EXTRA_GLYPH_BRANCHES);
         for (int i = 0; i < numBranches; i++) {
             makeGlyphBranches(world, decoRNG, this.getGlyphMeta(), sbb);
         }

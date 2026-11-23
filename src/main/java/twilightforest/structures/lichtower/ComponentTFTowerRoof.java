@@ -17,7 +17,6 @@ public abstract class ComponentTFTowerRoof extends StructureTFComponent {
 
     public ComponentTFTowerRoof() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoof(int i, ComponentTFTowerWing wing) {

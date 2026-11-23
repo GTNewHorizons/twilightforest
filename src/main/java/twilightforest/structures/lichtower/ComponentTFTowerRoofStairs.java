@@ -31,6 +31,7 @@ public class ComponentTFTowerRoofStairs extends ComponentTFTowerRoof {
         for (int y = 0; y <= height; y++) {
             int min = y;
             int max = size - y - 1;
+            if (min > max) break;
 
             for (int x = min; x <= max; x++) {
                 for (int z = min; z <= max; z++) {

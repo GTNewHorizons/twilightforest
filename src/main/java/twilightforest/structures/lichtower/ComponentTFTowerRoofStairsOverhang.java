@@ -24,7 +24,8 @@ public class ComponentTFTowerRoofStairsOverhang extends ComponentTFTowerRoofStai
                 wingBox.maxY,
                 wingBox.minZ - 1,
                 wingBox.maxX + 1,
-                wingBox.maxY + height - 1,
+                // the final stair/slab layer reaches this height
+                wingBox.maxY + height,
                 wingBox.maxZ + 1);
     }
 }

@@ -41,22 +41,13 @@ public class ComponentTFHydraLair extends ComponentTFHollowHill {
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
         // fill in features
         // ore or glowing stalactites! (smaller, less plentiful)
-        for (int i = 0; i < STALACTITE_COUNT; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateOreStalactite(world, dest[0], STALACTITE_Y, dest[1], sbb);
-        }
+        generateRandomOreStalactites(world, rand, STALACTITE_COUNT, STALACTITE_Y, sbb);
 
         // stone stalactites!
-        for (int i = 0; i < STALACTITE_COUNT; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateBlockStalactite(world, Blocks.stone, 1.0F, true, dest[0], STALACTITE_Y, dest[1], sbb);
-        }
+        generateRandomBlockStalactites(world, rand, STALACTITE_COUNT, Blocks.stone, 1.0F, true, STALACTITE_Y, sbb);
 
         // stone stalagmites!
-        for (int i = 0; i < STALAGMITE_COUNT; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateBlockStalactite(world, Blocks.stone, 0.9F, false, dest[0], STALACTITE_Y, dest[1], sbb);
-        }
+        generateRandomBlockStalactites(world, rand, STALAGMITE_COUNT, Blocks.stone, 0.9F, false, STALACTITE_Y, sbb);
 
         // boss spawner seems important
         placeBlockAtCurrentPosition(

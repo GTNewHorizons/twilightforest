@@ -128,30 +128,21 @@ public class TFMaze {
      * adjacent.
      */
     public int getWall(int sx, int sz, int dx, int dz) {
-        if (dx == sx + 1 && dz == sz) {
-            return getRaw(sx * 2 + 2, sz * 2 + 1);
-        } else if (dx == sx - 1 && dz == sz) {
-            return getRaw(sx * 2, sz * 2 + 1);
-        } else if (dx == sx && dz == sz + 1) {
-            return getRaw(sx * 2 + 1, sz * 2 + 2);
-        } else if (dx == sx && dz == sz - 1) {
-            return getRaw(sx * 2 + 1, sz * 2);
-        } else {
+        if (!areAdjacent(sx, sz, dx, dz)) {
             FMLLog.fine("[TwilightForest] Wall check out of bounds; s = " + sx + ", " + sz + "; d = " + dx + ", " + dz);
             return OUT_OF_BOUNDS;
         }
+        return getRaw(sx + dx + 1, sz + dz + 1);
     }
 
     public void putWall(int sx, int sz, int dx, int dz, int value) {
-        if (dx == sx + 1 && dz == sz) {
-            putRaw(sx * 2 + 2, sz * 2 + 1, value);
-        } else if (dx == sx - 1 && dz == sz) {
-            putRaw(sx * 2, sz * 2 + 1, value);
-        } else if (dx == sx && dz == sz + 1) {
-            putRaw(sx * 2 + 1, sz * 2 + 2, value);
-        } else if (dx == sx && dz == sz - 1) {
-            putRaw(sx * 2 + 1, sz * 2, value);
+        if (areAdjacent(sx, sz, dx, dz)) {
+            putRaw(sx + dx + 1, sz + dz + 1, value);
         }
+    }
+
+    private static boolean areAdjacent(int sx, int sz, int dx, int dz) {
+        return (sz == dz && (dx == sx + 1 || dx == sx - 1)) || (sx == dx && (dz == sz + 1 || dz == sz - 1));
     }
 
     /**
@@ -201,7 +192,9 @@ public class TFMaze {
                     int mdx = dx + (x / 2 * (evenBias + oddBias));
                     int mdz = dz + (z / 2 * (evenBias + oddBias));
 
-                    if (isEven(x) && isEven(z)) {
+                    boolean evenX = isEven(x);
+                    boolean evenZ = isEven(z);
+                    if (evenX && evenZ) {
                         if (type == 4 && shouldTree(x, z)) {
                             // occasionally make a tree
                             (new TFGenCanopyTree()).generate(world, rand, mdx, dy, mdz);
@@ -210,7 +203,7 @@ public class TFMaze {
                             placeWorldWallColumn(world, mdx, dy, mdz);
                         }
                     }
-                    if (isEven(x) && !isEven(z)) {
+                    if (evenX && !evenZ) {
                         // make a | vertical | wall!
                         for (int even = 0; even < evenBias; even++) {
                             for (int odd = 1; odd <= oddBias; odd++) {
@@ -218,7 +211,7 @@ public class TFMaze {
                             }
                         }
                     }
-                    if (!isEven(x) && isEven(z)) {
+                    if (!evenX && evenZ) {
                         // make a - horizontal - wall!
                         for (int even = 0; even < evenBias; even++) {
                             for (int odd = 1; odd <= oddBias; odd++) {
@@ -264,21 +257,22 @@ public class TFMaze {
                     int mdx = dx + (x / 2 * (evenBias + oddBias));
                     int mdz = dz + (z / 2 * (evenBias + oddBias));
 
-                    if (isEven(x) && isEven(z)) {
+                    boolean evenX = isEven(x);
+                    boolean evenZ = isEven(z);
+                    if (evenX && evenZ) {
                         // carve a one-block wide pillar
                         carveWorldColumn(world, mdx, dy, mdz);
-                    } else if (isEven(x) && !isEven(z)) {
+                    } else if (evenX && !evenZ) {
                         // carve a | vertical | wall
                         for (int i = 1; i <= oddBias; i++) {
                             carveWorldColumn(world, mdx, dy, mdz + i);
                         }
-                    } else if (!isEven(x) && isEven(z)) {
+                    } else if (!evenX && evenZ) {
                         // carve a - horizontal - wall!
                         for (int i = 1; i <= oddBias; i++) {
                             carveWorldColumn(world, mdx + i, dy, mdz);
                         }
-                    } else if (!isEven(x) && !isEven(z)) // this should always be true at this point
-                    {
+                    } else {
                         // carve an open space
                         for (int mx = 1; mx <= oddBias; mx++) {
                             for (int mz = 1; mz <= oddBias; mz++) {
@@ -300,79 +294,55 @@ public class TFMaze {
         for (int x = 0; x < rawWidth; x++) {
             for (int z = 0; z < rawDepth; z++) {
                 // only draw walls. if the data is 0 the there's a wall
-                if (getRaw(x, z) == 0) {
-                    int mdx = dx + (x / 2 * (evenBias + oddBias));
-                    int mdz = dz + (z / 2 * (evenBias + oddBias));
+                int cell = getRaw(x, z);
+                if (cell != 0 && cell != DOOR) continue;
 
-                    if (evenBias > 1) {
-                        mdx--;
-                        mdz--;
-                    }
+                int mdx = dx + (x / 2 * (evenBias + oddBias));
+                int mdz = dz + (z / 2 * (evenBias + oddBias));
+                if (evenBias > 1) {
+                    mdx--;
+                    mdz--;
+                }
 
-                    if (isEven(x) && isEven(z)) {
-                        if (type == 4 && shouldTree(x, z)) {
-                            // occasionally make a tree
-                            // (new TFGenCanopyTree()).generate(world, rand, mdx, dy, mdz);
-                            putCanopyTree(world, mdx, dy, mdz, component, sbb);
-                        } else {
-                            // make a block!
-                            for (int even = 0; even < evenBias; even++) {
-                                for (int even2 = 0; even2 < evenBias; even2++) {
-                                    for (int y = 0; y < head; y++) {
-                                        putHeadBlock(world, mdx + even, dy + tall + y, mdz + even2, component, sbb);
+                boolean evenX = isEven(x);
+                boolean evenZ = isEven(z);
+                if (cell == 0 && evenX && evenZ) {
+                    if (type == 4 && shouldTree(x, z)) {
+                        // occasionally make a tree
+                        // (new TFGenCanopyTree()).generate(world, rand, mdx, dy, mdz);
+                        putCanopyTree(world, mdx, dy, mdz, component, sbb);
+                    } else {
+                        // make a block!
+                        for (int even = 0; even < evenBias; even++) {
+                            for (int even2 = 0; even2 < evenBias; even2++) {
+                                for (int y = 0; y < head; y++) {
+                                    putHeadBlock(world, mdx + even, dy + tall + y, mdz + even2, component, sbb);
+                                }
+                                for (int y = 0; y < tall; y++) {
+                                    if (shouldPillar(x, z)) {
+                                        putPillarBlock(world, mdx + even, dy + y, mdz + even2, component, sbb);
+                                    } else {
+                                        putWallBlock(world, mdx + even, dy + y, mdz + even2, component, sbb);
                                     }
-                                    for (int y = 0; y < tall; y++) {
-                                        if (shouldPillar(x, z)) {
-                                            putPillarBlock(world, mdx + even, dy + y, mdz + even2, component, sbb);
-                                        } else {
-                                            putWallBlock(world, mdx + even, dy + y, mdz + even2, component, sbb);
-                                        }
-                                    }
-                                    for (int y = 1; y <= roots; y++) {
-                                        putRootBlock(world, mdx + even, dy - y, mdz + even2, component, sbb);
-                                    }
+                                }
+                                for (int y = 1; y <= roots; y++) {
+                                    putRootBlock(world, mdx + even, dy - y, mdz + even2, component, sbb);
                                 }
                             }
                         }
                     }
-                    if (isEven(x) && !isEven(z)) {
-                        // make a | vertical | wall!
-                        for (int even = 0; even < evenBias; even++) {
-                            for (int odd = 1; odd <= oddBias; odd++) {
-                                makeWallThing(world, dy, component, sbb, mdx, mdz, even, odd);
-                            }
-                        }
-                    }
-                    if (!isEven(x) && isEven(z)) {
-                        // make a - horizontal - wall!
-                        for (int even = 0; even < evenBias; even++) {
-                            for (int odd = 1; odd <= oddBias; odd++) {
-                                makeWallThing(world, dy, component, sbb, mdx, mdz, odd, even);
-                            }
-                        }
-                    }
-                } else if (getRaw(x, z) == DOOR) {
-                    int mdx = dx + (x / 2 * (evenBias + oddBias));
-                    int mdz = dz + (z / 2 * (evenBias + oddBias));
-
-                    if (evenBias > 1) {
-                        mdx--;
-                        mdz--;
-                    }
-
-                    if (isEven(x) && !isEven(z)) {
-                        // make a | vertical | door!
-                        for (int even = 0; even < evenBias; even++) {
-                            for (int odd = 1; odd <= oddBias; odd++) {
-                                makeDoorThing(world, dy, component, sbb, mdx, mdz, even, odd);
-                            }
-                        }
-                    }
-                    if (!isEven(x) && isEven(z)) {
-                        // make a - horizontal - door!
-                        for (int even = 0; even < evenBias; even++) {
-                            for (int odd = 1; odd <= oddBias; odd++) {
-                                makeDoorThing(world, dy, component, sbb, mdx, mdz, odd, even);
+                } else if (evenX != evenZ) {
+                    // keep the existing even then odd order for both wall and door segments
+                    for (int even = 0; even < evenBias; even++) {
+                        for (int odd = 1; odd <= oddBias; odd++) {
+                            int offsetX = evenX ? even : odd;
+                            int offsetZ = evenX ? odd : even;
+                            if (cell == DOOR) {
+                                // make a | vertical | door! / - horizontal - door!
+                                makeDoorThing(world, dy, component, sbb, mdx, mdz, offsetX, offsetZ);
+                            } else {
+                                // make a | vertical | wall! / - horizontal - wall!
+                                makeWallThing(world, dy, component, sbb, mdx, mdz, offsetX, offsetZ);
                             }
                         }
                     }
@@ -519,7 +489,7 @@ public class TFMaze {
      * I'm not sure why I made a function of this simple thing. Maybe I need like... a macro?
      */
     public final boolean isEven(int n) {
-        return n % 2 == 0;
+        return (n & 1) == 0;
     }
 
     /**
@@ -672,6 +642,7 @@ public class TFMaze {
         }
 
         // mark the exit areas as unmazed
+        // keep the existing cell/raw coord conversion, changing it alters generated mazes
         putCell(rx, rz + 1, 0);
         putCell(rx, rz - 1, 0);
         putCell(rx + 1, rz, 0);
@@ -727,19 +698,11 @@ public class TFMaze {
         putCell(sx, sz, 1);
 
         // count the unvisted neighbors
-        int unvisited = 0;
-        if (cellEquals(sx + 1, sz, 0)) {
-            unvisited++;
-        }
-        if (cellEquals(sx - 1, sz, 0)) {
-            unvisited++;
-        }
-        if (cellEquals(sx, sz + 1, 0)) {
-            unvisited++;
-        }
-        if (cellEquals(sx, sz - 1, 0)) {
-            unvisited++;
-        }
+        boolean east = cellEquals(sx + 1, sz, 0);
+        boolean west = cellEquals(sx - 1, sz, 0);
+        boolean south = cellEquals(sx, sz + 1, 0);
+        boolean north = cellEquals(sx, sz - 1, 0);
+        int unvisited = (east ? 1 : 0) + (west ? 1 : 0) + (south ? 1 : 0) + (north ? 1 : 0);
 
         // if there are no unvisited neighbors, return
         if (unvisited == 0) {
@@ -751,28 +714,28 @@ public class TFMaze {
         int dx, dz;
         dx = dz = 0;
 
-        if (cellEquals(sx + 1, sz, 0)) {
+        if (east) {
             if (rn == 0) {
                 dx = sx + 1;
                 dz = sz;
             }
             rn--;
         }
-        if (cellEquals(sx - 1, sz, 0)) {
+        if (west) {
             if (rn == 0) {
                 dx = sx - 1;
                 dz = sz;
             }
             rn--;
         }
-        if (cellEquals(sx, sz + 1, 0)) {
+        if (south) {
             if (rn == 0) {
                 dx = sx;
                 dz = sz + 1;
             }
             rn--;
         }
-        if (cellEquals(sx, sz - 1, 0)) {
+        if (north) {
             if (rn == 0) {
                 dx = sx;
                 dz = sz - 1;

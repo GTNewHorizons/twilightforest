@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -13,6 +14,7 @@ import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFFinalCastleFoundation13 extends StructureTFComponent {
 
+    private static final String NBT_GROUND_LEVEL = "castleFoundationGroundLevel";
     protected int groundLevel = -1;
 
     public ComponentTFFinalCastleFoundation13() {}
@@ -31,8 +33,20 @@ public class ComponentTFFinalCastleFoundation13 extends StructureTFComponent {
     }
 
     @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setInteger(NBT_GROUND_LEVEL, groundLevel);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        groundLevel = nbt.hasKey(NBT_GROUND_LEVEL) ? nbt.getInteger(NBT_GROUND_LEVEL) : -1;
+    }
+
+    @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
     }
@@ -76,19 +90,15 @@ public class ComponentTFFinalCastleFoundation13 extends StructureTFComponent {
      * Find what y level the local deadrock is. Just check the center of the chunk we're given
      */
     protected int getDeadrockLevel(World world, StructureBoundingBox sbb) {
-        int groundLevel = 256;
-
-        // is 150 a good place to start? :)
+        int cx = sbb.getCenterX();
+        int cz = sbb.getCenterZ();
         for (int y = 150; y > 0; y--) {
-            int cx = sbb.getCenterX();
-            int cz = sbb.getCenterZ();
 
             Block block = world.getBlock(cx, y, cz);
             if (block == TFBlocks.deadrock) {
-                groundLevel = y;
-                break;
+                return y;
             }
         }
-        return groundLevel;
+        return -1;
     }
 }

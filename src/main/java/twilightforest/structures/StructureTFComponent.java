@@ -530,6 +530,21 @@ public abstract class StructureTFComponent extends StructureComponent {
         this.fillBlocksRotated(world, sbb, minX, minY, minZ, maxX, maxY, maxZ, Blocks.air, 0, rotation);
     }
 
+    // shared by the hedge and underground mazes, preserve the origin exclusion and
+    // ignore unfilled (0,0) room slots during placement
+    protected static boolean isNearMazeRoom(int x, int z, int[] rooms, int spacing) {
+        // if proposed coordinates are covering the origin, return true to stop the room from causing the
+        // maze to fail
+        if (x == 1 && z == 1) return true;
+        for (int i = 0; i < rooms.length; i += 2) {
+            int roomX = rooms[i];
+            int roomZ = rooms[i + 1];
+            if (roomX == 0 && roomZ == 0) continue;
+            if (Math.abs(x - roomX) < spacing && Math.abs(z - roomZ) < spacing) return true;
+        }
+        return false;
+    }
+
     public static StructureComponent.BlockSelector getStrongholdStones() {
         return strongholdStones;
     }

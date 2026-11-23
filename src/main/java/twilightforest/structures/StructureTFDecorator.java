@@ -70,19 +70,14 @@ public class StructureTFDecorator {
     }
 
     public static StructureTFDecorator getDecoFor(String decoString) {
-        switch (decoString) {
-            case DECO_DARK_TOWER:
-                return new StructureDecoratorDarkTower();
-            case DECO_ICE_TOWER:
-                return new StructureDecoratorIceTower();
-            case DECO_MUSHROOM_TOWER:
-                return new StructureDecoratorMushroomTower();
-            case DECO_STRONGHOLD:
-                return new StructureTFDecoratorStronghold();
-            case DECO_CASTLE:
-                return new StructureTFDecoratorCastle();
-            default:
-                return new StructureTFDecorator();
-        }
+        if (decoString == null) return new StructureTFDecorator();
+        return switch (decoString) {
+            case DECO_DARK_TOWER -> new StructureDecoratorDarkTower();
+            case DECO_ICE_TOWER -> new StructureDecoratorIceTower();
+            case DECO_MUSHROOM_TOWER -> new StructureDecoratorMushroomTower();
+            case DECO_STRONGHOLD -> new StructureTFDecoratorStronghold();
+            case DECO_CASTLE -> new StructureTFDecoratorCastle();
+            default -> new StructureTFDecorator();
+        };
     }
 }

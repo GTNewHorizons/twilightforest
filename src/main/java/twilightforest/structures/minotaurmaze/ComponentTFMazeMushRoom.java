@@ -11,7 +11,6 @@ public class ComponentTFMazeMushRoom extends ComponentTFMazeRoom {
 
     public ComponentTFMazeMushRoom() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeMushRoom(int i, Random rand, int x, int y, int z) {
@@ -27,7 +26,7 @@ public class ComponentTFMazeMushRoom extends ComponentTFMazeRoom {
         for (int x = 1; x < 14; x++) {
             for (int z = 1; z < 14; z++) {
                 // calculate distance from middle
-                int dist = (int) Math.round(7 / Math.sqrt((7.5 - x) * (7.5 - x) + (7.5 - z) * (7.5 - z)));
+                int dist = mushroomDensity(x, z);
 
                 // make part of the floor mycelium
                 if (rand.nextInt(dist + 1) > 0) {
@@ -77,6 +76,25 @@ public class ComponentTFMazeMushRoom extends ComponentTFMazeRoom {
         // mushroom ceiling spots?
 
         return true;
+    }
+
+    private static final int[][] MUSHROOM_DENSITY = createMushroomDensity();
+
+    // reuse the exact same distribution for mushroom, boss and collapsed rooms
+    static int mushroomDensity(int x, int z) {
+        return MUSHROOM_DENSITY[x - 1][z - 1];
+    }
+
+    private static int[][] createMushroomDensity() {
+        int[][] density = new int[13][13];
+        for (int x = 1; x <= 13; x++) {
+            for (int z = 1; z <= 13; z++) {
+                double dx = 7.5D - x;
+                double dz = 7.5D - z;
+                density[x - 1][z - 1] = Math.max(1, (int) Math.round(7.0D / Math.sqrt(dx * dx + dz * dz)));
+            }
+        }
+        return density;
     }
 
     /**

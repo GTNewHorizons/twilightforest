@@ -9,10 +9,7 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 public class ComponentTFStrongholdUpperCorridor extends StructureTFStrongholdComponent {
 
-    public ComponentTFStrongholdUpperCorridor() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdUpperCorridor() {}
 
     public ComponentTFStrongholdUpperCorridor(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -44,22 +41,23 @@ public class ComponentTFStrongholdUpperCorridor extends StructureTFStrongholdCom
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
         if (this.isLiquidInStructureBoundingBox(world, sbb)) {
             return false;
-        } else {
-            placeUpperStrongholdWalls(world, sbb, 0, 0, 0, 4, 4, 8, rand, deco.randomBlocks);
-
-            // entrance doorway
-            placeSmallDoorwayAt(world, rand, 2, 2, 1, 0, sbb);
-
-            // end
-            placeSmallDoorwayAt(world, rand, 2, 2, 1, 8, sbb);
-
-            return true;
         }
+
+        placeUpperStrongholdWalls(world, sbb, 0, 0, 0, 4, 4, 8, rand, deco.randomBlocks);
+
+        // entrance doorway
+        placeSmallDoorwayAt(world, rand, 2, 2, 1, 0, sbb);
+
+        // end
+        placeSmallDoorwayAt(world, rand, 2, 2, 1, 8, sbb);
+
+        return true;
     }
 
     /**
      * Does this component fall under block protection when progression is turned on, normally true
      */
+    @Override
     public boolean isComponentProtected() {
         return false;
     }

@@ -18,6 +18,6 @@ public class StructureTFAuroraBricks extends StructureComponent.BlockSelector {
         }
 
         field_151562_a = TFBlocks.auroraBlock;
-        selectedBlockMetaData = Math.abs(x + z) % 16;
+        selectedBlockMetaData = Math.abs(x + z) & 15;
     }
 }

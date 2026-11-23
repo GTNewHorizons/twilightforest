@@ -16,6 +16,9 @@ public class ComponentTFMushroomTowerBridge extends ComponentTFMushroomTowerWing
     int dSize;
     int dHeight;
 
+    // set during buildComponent so the source tower cant keep a bridge with no destination
+    private boolean destinationCreated;
+
     public ComponentTFMushroomTowerBridge() {
         super();
         // TODO Auto-generated constructor stub
@@ -54,25 +57,15 @@ public class ComponentTFMushroomTowerBridge extends ComponentTFMushroomTowerWing
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 
-        int[] dest = new int[] { dSize - 1, 1, 1 };
+        boolean madeWing = makeTowerWing(list, rand, this.getComponentType(), dSize - 1, 1, 1, dSize, dHeight, 0);
 
-        boolean madeWing = makeTowerWing(
-                list,
-                rand,
-                this.getComponentType(),
-                dest[0],
-                dest[1],
-                dest[2],
-                dSize,
-                dHeight,
-                0);
-
+        destinationCreated = madeWing;
         if (!madeWing) {
-            int[] dx = offsetTowerCoords(dest[0], dest[1], dest[2], dSize, 0);
+            int[] dx = offsetTowerCoords(dSize - 1, 1, 1, dSize, 0);
 
             FMLLog.fine(
                     "[TwilightForest] Making tower wing failed when bridge was already made.  Size = " + dSize
@@ -81,6 +74,10 @@ public class ComponentTFMushroomTowerBridge extends ComponentTFMushroomTowerWing
                             + " z = "
                             + dx[2]);
         }
+    }
+
+    public boolean hasDestination() {
+        return destinationCreated;
     }
 
     public StructureBoundingBox getWingBB() {
@@ -111,7 +108,8 @@ public class ComponentTFMushroomTowerBridge extends ComponentTFMushroomTowerWing
         }
 
         // clear bridge walkway
-        this.fillWithAir(world, sbb, 0, 1, 1, 2, 2, 1);
+        // clear the whole bridge, the old 4 block opening left long spans obstructed
+        this.fillWithAir(world, sbb, 0, 1, 1, dSize - 1, 2, 1);
 
         return true;
     }

@@ -3,6 +3,7 @@ package twilightforest.structures.finalcastle;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -11,11 +12,16 @@ import net.minecraft.world.gen.structure.StructureComponent;
 import twilightforest.biomes.TFBiomeBase;
 import twilightforest.block.TFBlocks;
 import twilightforest.structures.StructureTFComponent;
+import twilightforest.structures.StructureTFDecoratorCastle;
 import twilightforest.structures.lichtower.ComponentTFTowerWing;
 
 public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
 
-    public int level; // this is not serialized, since it's only used during build, which should be all one step
+    private static final String NBT_DUNGEON_LEVEL = "castleDungeonLevel";
+    public int level;
+
+    // a full biome scan is needed only once per piece, not every chunk pass
+    private Boolean outsidePlateau;
 
     public ComponentTFFinalCastleDungeonRoom31() {}
 
@@ -31,8 +37,32 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
     }
 
     @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setInteger(NBT_DUNGEON_LEVEL, level);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        level = nbt.getInteger(NBT_DUNGEON_LEVEL);
+        outsidePlateau = null;
+        // the dungeons custom magic block and force field palette is not
+        // encoded by the decorator class name in the original save format
+        restoreDungeonDecoration();
+    }
+
+    protected void restoreDungeonDecoration() {
+        deco = new StructureTFDecoratorCastle();
+        deco.blockID = TFBlocks.castleMagic;
+        deco.blockMeta = 2;
+        deco.fenceID = TFBlocks.forceField;
+        deco.fenceMeta = 1;
+    }
+
+    @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 
@@ -74,7 +104,8 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
         }
     }
 
-    protected boolean addDungeonRoom(StructureComponent parent, List list, Random rand, int rotation, int level) {
+    protected boolean addDungeonRoom(StructureComponent parent, List<StructureComponent> list, Random rand,
+            int rotation, int level) {
         rotation = (this.coordBaseMode + rotation) % 4;
 
         ChunkCoordinates rc = this.getNewRoomCoords(rand, rotation);
@@ -88,15 +119,9 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
                 rotation,
                 level);
 
-        StructureBoundingBox largerBB = new StructureBoundingBox(dRoom.getBoundingBox());
-
-        int expand = 0;
-        largerBB.minX -= expand;
-        largerBB.minZ -= expand;
-        largerBB.maxX += expand;
-        largerBB.maxZ += expand;
-
-        StructureComponent intersect = StructureTFComponent.findIntersectingExcluding(list, largerBB, this);
+        // use the existing bounding box
+        StructureComponent intersect = StructureTFComponent
+                .findIntersectingExcluding(list, dRoom.getBoundingBox(), this);
         if (intersect == null) {
             list.add(dRoom);
             dRoom.buildComponent(parent, list, rand);
@@ -106,7 +131,8 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
         }
     }
 
-    protected boolean addDungeonExit(StructureComponent parent, List list, Random rand, int rotation) {
+    protected boolean addDungeonExit(StructureComponent parent, List<StructureComponent> list, Random rand,
+            int rotation) {
 
         // TODO: check if we are sufficiently near the castle center
 
@@ -160,7 +186,7 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        if (this.isBoundingBoxOutOfPlateau(world, sbb)) {
+        if (isBoundingBoxOutOfPlateau(world)) {
             return false;
         }
 
@@ -218,7 +244,10 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
         return true;
     }
 
-    private boolean isBoundingBoxOutOfPlateau(World world, StructureBoundingBox sbb) {
+    private boolean isBoundingBoxOutOfPlateau(World world) {
+        if (outsidePlateau != null) {
+            return outsidePlateau;
+        }
         int minX = this.boundingBox.minX - 1;
         int minZ = this.boundingBox.minZ - 1;
         int maxX = this.boundingBox.maxX + 1;
@@ -226,12 +255,14 @@ public class ComponentTFFinalCastleDungeonRoom31 extends ComponentTFTowerWing {
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
-                if (world.getBiomeGenForCoords(x, z) != TFBiomeBase.highlandsCenter
-                        && world.getBiomeGenForCoords(x, z) != TFBiomeBase.thornlands) {
+                var biome = world.getBiomeGenForCoords(x, z);
+                if (biome != TFBiomeBase.highlandsCenter && biome != TFBiomeBase.thornlands) {
+                    outsidePlateau = true;
                     return true;
                 }
             }
         }
+        outsidePlateau = false;
         return false;
     }
 

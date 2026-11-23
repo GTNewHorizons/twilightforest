@@ -88,7 +88,7 @@ public class ComponentTFHollowHill extends StructureTFComponent {
         // int sn = area / 16; // number of stalactites (there will actually be around twice this number)
         int sn = STALACTITE_COUNTS[hillSize]; // number of stalactites mga = {0, 3, 9, 18}
         int mg = SPAWNER_COUNTS[hillSize]; // number of monster generators mga = {0, 3, 9, 18} (reduced due to "natural"
-                                           // spawning)
+        // spawning)
         int tc = TREASURE_COUNTS[hillSize]; // number of treasure chests tca = {0, 2, 6, 12}
 
         // fill in features
@@ -108,20 +108,11 @@ public class ComponentTFHollowHill extends StructureTFComponent {
         }
 
         // ore or glowing stalactites! (smaller, less plentiful)
-        for (int i = 0; i < sn; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateOreStalactite(world, dest[0], 1, dest[1], sbb);
-        }
+        generateRandomOreStalactites(world, rand, sn, 1, sbb);
         // stone stalactites!
-        for (int i = 0; i < sn; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateBlockStalactite(world, Blocks.stone, 1.0F, true, dest[0], 1, dest[1], sbb);
-        }
+        generateRandomBlockStalactites(world, rand, sn, Blocks.stone, 1.0F, true, 1, sbb);
         // stone stalagmites!
-        for (int i = 0; i < sn; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateBlockStalactite(world, Blocks.stone, 0.9F, false, dest[0], 1, dest[1], sbb);
-        }
+        generateRandomBlockStalactites(world, rand, sn, Blocks.stone, 0.9F, false, 1, sbb);
 
         // level 3 hills get 2 mid-air wraith spawners
         // if (hillSize == 3) {
@@ -131,6 +122,22 @@ public class ComponentTFHollowHill extends StructureTFComponent {
         // placeWraithSpawner(dest[0], hy + 10, dest[1]);
         // }
         return true;
+    }
+
+    // dont combine ore and block passes, their random calls remain ordered
+    protected void generateRandomOreStalactites(World world, Random rand, int count, int y, StructureBoundingBox sbb) {
+        for (int i = 0; i < count; i++) {
+            int[] dest = getCoordsInHill2D(rand);
+            generateOreStalactite(world, dest[0], y, dest[1], sbb);
+        }
+    }
+
+    protected void generateRandomBlockStalactites(World world, Random rand, int count, Block block, float length,
+            boolean upwards, int y, StructureBoundingBox sbb) {
+        for (int i = 0; i < count; i++) {
+            int[] dest = getCoordsInHill2D(rand);
+            generateBlockStalactite(world, block, length, upwards, dest[0], y, dest[1], sbb);
+        }
     }
 
     /**
@@ -218,9 +225,7 @@ public class ComponentTFHollowHill extends StructureTFComponent {
     boolean isInHill(int cx, int cz) {
         int dx = radius - cx;
         int dz = radius - cz;
-        int dist = (int) Math.sqrt(dx * dx + dz * dz);
-
-        return dist < radius;
+        return dx * dx + dz * dz < radius * radius;
     }
 
     /**

@@ -29,13 +29,14 @@ public class ComponentTFTowerRoofPointy extends ComponentTFTowerRoof {
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
         final int slabMeta = 2;
+        int slopeChange = slopeChangeForSize(size);
 
         for (int y = 0; y <= height; y++) {
-            int slopeChange = slopeChangeForSize(size);
             int inset = y < slopeChange ? y : (y + slopeChange) / 2;
 
             int min = inset;
             int max = size - inset - 1;
+            if (min > max) break;
             int mid = min + (max - min) / 2;
 
             for (int x = min; x <= max; x++) {

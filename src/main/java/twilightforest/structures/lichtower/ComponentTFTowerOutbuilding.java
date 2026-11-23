@@ -12,12 +12,10 @@ public class ComponentTFTowerOutbuilding extends ComponentTFTowerWing {
 
     public ComponentTFTowerOutbuilding() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     protected ComponentTFTowerOutbuilding(int i, int x, int y, int z, int pSize, int pHeight, int direction) {
         super(i, x, y, z, pSize, pHeight, direction);
-        // TODO Auto-generated constructor stub
     }
 
     /**

@@ -20,7 +20,8 @@ public class ComponentTFTowerRoofFence extends ComponentTFTowerRoof {
 
         // same size
         size = wing.size; // assuming only square towers and roofs right now
-        height = 0;
+        // the railing sits one block above the tower, so the bounding box includes it
+        height = 1;
 
         // just hang out at the very top of the tower
         makeCapBB(wing);
@@ -29,7 +30,7 @@ public class ComponentTFTowerRoofFence extends ComponentTFTowerRoof {
     // a fence around the roof
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        int y = height + 1;
+        int y = height;
         int last = size - 1;
 
         for (int x = 0; x < size; x++) {

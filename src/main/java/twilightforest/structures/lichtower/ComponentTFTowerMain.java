@@ -443,6 +443,9 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         for (int i = 0; i < 5; i++) {
             // get some random coordinates on the wall in the chunk
             ChunkCoordinates wCoords = getRandomWallSpot(rand, floorLevel, direction, sbb);
+            if (wCoords == null) {
+                continue;
+            }
 
             // offset to see where the fence should be
             ChunkCoordinates tCoords = new ChunkCoordinates(wCoords);
@@ -461,7 +464,10 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
                     tCoords.posX + 1.0,
                     tCoords.posY + 2.0,
                     tCoords.posZ + 1.0);
-            if (world.getBlock(tCoords.posX, tCoords.posY, tCoords.posZ) == Blocks.air
+            // never place lighting into a neighbouring chunk during structure gen
+            if (sbb.isVecInside(tCoords.posX, tCoords.posY, tCoords.posZ)
+                    && sbb.isVecInside(tCoords.posX, tCoords.posY + 1, tCoords.posZ)
+                    && world.getBlock(tCoords.posX, tCoords.posY, tCoords.posZ) == Blocks.air
                     && world.getBlock(tCoords.posX, tCoords.posY + 1, tCoords.posZ) == Blocks.air
                     && world.getEntitiesWithinAABBExcludingEntity(null, torchBox).size() == 0) {
                 // if not, place a torch

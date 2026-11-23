@@ -98,26 +98,7 @@ public class ComponentTFHedgeMaze extends StructureTFComponent {
      * @return true if the specified dx and dz are within 3 of a room specified in rcoords
      */
     protected boolean isNearRoom(int dx, int dz, int[] rcoords) {
-        // if proposed coordinates are covering the origin, return true to stop the room from causing the
-        // maze to fail
-        if (dx == 1 && dz == 1) {
-            return true;
-        }
-
-        for (int i = 0; i < rcoords.length; i += 2) {
-            int rx = rcoords[i];
-            int rz = rcoords[i + 1];
-
-            if (rx == 0 && rz == 0) {
-                continue;
-            }
-
-            if (Math.abs(dx - rx) < ROOM_SPACING && Math.abs(dz - rz) < ROOM_SPACING) {
-                return true;
-            }
-        }
-
-        return false;
+        return isNearMazeRoom(dx, dz, rcoords, ROOM_SPACING);
     }
 
     /**
@@ -173,8 +154,8 @@ public class ComponentTFHedgeMaze extends StructureTFComponent {
      * Place a spawner within diameter / 2 squares of the specified x and z coordinates
      */
     private void roomSpawner(World world, Random rand, int x, int z, int diameter, StructureBoundingBox sbb) {
-        int rx = x + rand.nextInt(diameter) - diameter / 2;
-        int rz = z + rand.nextInt(diameter) - diameter / 2;
+        int rx = randomRoomCoordinate(rand, x, diameter);
+        int rz = randomRoomCoordinate(rand, z, diameter);
 
         String mobID = switch (rand.nextInt(3)) {
             case 1 -> TFCreatures.getSpawnerNameFor("Swarm Spider");
@@ -189,8 +170,8 @@ public class ComponentTFHedgeMaze extends StructureTFComponent {
      * Place a treasure chest within diameter / 2 squares of the specified x and z coordinates
      */
     private void roomTreasure(World world, Random rand, int x, int z, int diameter, StructureBoundingBox sbb) {
-        int rx = x + rand.nextInt(diameter) - diameter / 2;
-        int rz = z + rand.nextInt(diameter) - diameter / 2;
+        int rx = randomRoomCoordinate(rand, x, diameter);
+        int rz = randomRoomCoordinate(rand, z, diameter);
 
         placeTreasureAtCurrentPosition(world, rand, rx, FLOOR_LEVEL, rz, TFTreasure.hedgemaze, sbb);
     }
@@ -199,9 +180,13 @@ public class ComponentTFHedgeMaze extends StructureTFComponent {
      * Place a lit pumpkin lantern within diameter / 2 squares of the specified x and z coordinates
      */
     private void roomJackO(World world, Random rand, int x, int z, int diameter, StructureBoundingBox sbb) {
-        int rx = x + rand.nextInt(diameter) - diameter / 2;
-        int rz = z + rand.nextInt(diameter) - diameter / 2;
+        int rx = randomRoomCoordinate(rand, x, diameter);
+        int rz = randomRoomCoordinate(rand, z, diameter);
 
         placeBlockAtCurrentPosition(world, Blocks.lit_pumpkin, rand.nextInt(4), rx, FLOOR_LEVEL, rz, sbb);
+    }
+
+    private static int randomRoomCoordinate(Random rand, int center, int diameter) {
+        return center + rand.nextInt(diameter) - diameter / 2;
     }
 }

@@ -4,15 +4,16 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 
 import twilightforest.block.TFBlocks;
-import twilightforest.structures.StructureTFDecoratorCastle;
 
 public class ComponentTFFinalCastleDungeonEntrance extends ComponentTFFinalCastleDungeonRoom31 {
 
+    private static final String NBT_HAS_EXIT = "castleDungeonHasExit";
     public boolean hasExit = false;
 
     public ComponentTFFinalCastleDungeonEntrance() {}
@@ -22,13 +23,20 @@ public class ComponentTFFinalCastleDungeonEntrance extends ComponentTFFinalCastl
     }
 
     @Override
-    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        this.deco = new StructureTFDecoratorCastle();
-        this.deco.blockID = TFBlocks.castleMagic;
-        this.deco.blockMeta = 2;
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setBoolean(NBT_HAS_EXIT, hasExit);
+    }
 
-        this.deco.fenceID = TFBlocks.forceField;
-        this.deco.fenceMeta = 1;
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        hasExit = nbt.getBoolean(NBT_HAS_EXIT);
+    }
+
+    @Override
+    public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
+        restoreDungeonDecoration();
 
         // this is going to be the parent for all rooms on this level
         super.buildComponent(this, list, rand);

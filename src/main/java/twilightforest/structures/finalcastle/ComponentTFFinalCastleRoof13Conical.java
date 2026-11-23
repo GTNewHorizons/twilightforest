@@ -13,6 +13,8 @@ import twilightforest.structures.StructureTFComponent;
 // Pointy cone roof with variable height
 public class ComponentTFFinalCastleRoof13Conical extends StructureTFComponent {
 
+    private static final int BOTTOM_OVERHANG = 2;
+
     public int slope;
 
     public ComponentTFFinalCastleRoof13Conical() {}
@@ -22,12 +24,13 @@ public class ComponentTFFinalCastleRoof13Conical extends StructureTFComponent {
 
         this.slope = 2 + rand.nextInt(3) + rand.nextInt(3);
 
-        int height = slope * 4;
+        // include the full spire, the point reaches local Y (7 * slope) + 2
+        int height = (slope * 7) + 2;
 
         this.setCoordBaseMode(sideTower.getCoordBaseMode());
         this.boundingBox = new StructureBoundingBox(
                 sideTower.getBoundingBox().minX - 2,
-                sideTower.getBoundingBox().maxY - 1,
+                sideTower.getBoundingBox().maxY - 1 - BOTTOM_OVERHANG,
                 sideTower.getBoundingBox().minZ - 2,
                 sideTower.getBoundingBox().maxX + 2,
                 sideTower.getBoundingBox().maxY + height - 1,
@@ -55,29 +58,64 @@ public class ComponentTFFinalCastleRoof13Conical extends StructureTFComponent {
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
     }
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        for (int rotation = 0; rotation < 4; rotation++) {
-            this.fillBlocksRotated(world, sbb, 0, -1, 0, 3, 2, 3, deco.blockID, deco.blockMeta, rotation);
-            this.placeBlockRotated(world, deco.blockID, deco.blockMeta, 1, -2, 2, rotation, sbb);
-            this.placeBlockRotated(world, deco.blockID, deco.blockMeta, 1, -2, 1, rotation, sbb);
-            this.placeBlockRotated(world, deco.blockID, deco.blockMeta, 2, -2, 1, rotation, sbb);
+        int yOffset = this.boundingBox.getYSize() == (slope * 7) + 5 ? BOTTOM_OVERHANG : 0;
+        int base = 2 - slope + yOffset;
 
-            this.fillBlocksRotated(world, sbb, 4, 0, 1, 12, 1, 1, deco.blockID, deco.blockMeta, rotation);
+        for (int rotation = 0; rotation < 4; rotation++) {
+            this.fillBlocksRotated(
+                    world,
+                    sbb,
+                    0,
+                    yOffset - 1,
+                    0,
+                    3,
+                    yOffset + 2,
+                    3,
+                    deco.blockID,
+                    deco.blockMeta,
+                    rotation);
+            this.placeBlockRotated(world, deco.blockID, deco.blockMeta, 1, yOffset - 2, 2, rotation, sbb);
+            this.placeBlockRotated(world, deco.blockID, deco.blockMeta, 1, yOffset - 2, 1, rotation, sbb);
+            this.placeBlockRotated(world, deco.blockID, deco.blockMeta, 2, yOffset - 2, 1, rotation, sbb);
+
+            this.fillBlocksRotated(
+                    world,
+                    sbb,
+                    4,
+                    yOffset,
+                    1,
+                    12,
+                    yOffset + 1,
+                    1,
+                    deco.blockID,
+                    deco.blockMeta,
+                    rotation);
 
             // more teeny crenellations
             for (int i = 3; i < 13; i += 2) {
-                this.fillBlocksRotated(world, sbb, i, -1, 1, i, 2, 1, deco.blockID, deco.blockMeta, rotation);
+                this.fillBlocksRotated(
+                        world,
+                        sbb,
+                        i,
+                        yOffset - 1,
+                        1,
+                        i,
+                        yOffset + 2,
+                        1,
+                        deco.blockID,
+                        deco.blockMeta,
+                        rotation);
             }
 
             // cone roof
             for (int i = 2; i < 9; i++) {
-                int base = 2 - slope;
                 if (i < 7) {
                     this.fillBlocksRotated(
                             world,
@@ -123,10 +161,10 @@ public class ComponentTFFinalCastleRoof13Conical extends StructureTFComponent {
                     world,
                     sbb,
                     8,
-                    (slope * 6) + 2,
+                    (slope * 6) + 2 + yOffset,
                     8,
                     8,
-                    (slope * 7) + 2,
+                    (slope * 7) + 2 + yOffset,
                     8,
                     deco.roofID,
                     deco.roofMeta,

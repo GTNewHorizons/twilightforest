@@ -12,7 +12,7 @@ import twilightforest.entity.EntityTFMiniGhast;
 
 public class TileEntityTFCReactorActive extends TileEntity {
 
-    // Keep shell placement order: neighbouring updates can observe intermediate blocks.
+    // keep shell placement order, neighbouring updates can observe intermediate blocks
     private static final int[][] REACTOR_SHELL = { { 1, 1, 1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
             { 1, 1, -1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
             { -1, 1, 1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },

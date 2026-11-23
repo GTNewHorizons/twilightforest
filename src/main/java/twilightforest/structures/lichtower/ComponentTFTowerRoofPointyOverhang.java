@@ -12,7 +12,8 @@ public class ComponentTFTowerRoofPointyOverhang extends ComponentTFTowerRoofPoin
         size = wing.size + 2; // assuming only square towers and roofs right now
         height = size;
 
-        // just hang out at the very top of the tower
+        // the highest corner slabs can extend one level above the final solid layer
         makeOverhangBB(wing);
+        boundingBox.maxY++;
     }
 }

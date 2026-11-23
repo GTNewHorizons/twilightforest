@@ -22,7 +22,6 @@ public class ComponentTFTowerBridge extends ComponentTFTowerWing {
 
     public ComponentTFTowerBridge() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     protected ComponentTFTowerBridge(int i, int x, int y, int z, int pSize, int pHeight, int direction) {

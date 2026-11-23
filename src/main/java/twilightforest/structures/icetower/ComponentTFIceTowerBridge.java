@@ -48,8 +48,8 @@ public class ComponentTFIceTowerBridge extends StructureTFComponent {
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
-            this.deco = ((StructureTFComponent) parent).deco;
+        if (parent instanceof StructureTFComponent towerParent) {
+            deco = towerParent.deco;
         }
     }
 

@@ -2,7 +2,9 @@ package twilightforest.structures.finalcastle;
 
 import net.minecraft.world.gen.structure.MapGenStructureIO;
 
-public class TFFinalCastlePieces {
+public final class TFFinalCastlePieces {
+
+    private TFFinalCastlePieces() {}
 
     public static void registerFinalCastlePieces() {
         MapGenStructureIO.func_143031_a(ComponentTFFinalCastleMain.class, "TFFCMain");
@@ -34,5 +36,4 @@ public class TFFinalCastlePieces {
         MapGenStructureIO.func_143031_a(ComponentTFFinalCastleDamagedTower.class, "TFFCDamT");
         MapGenStructureIO.func_143031_a(ComponentTFFinalCastleWreckedTower.class, "TFFCWrT");
     }
-
 }

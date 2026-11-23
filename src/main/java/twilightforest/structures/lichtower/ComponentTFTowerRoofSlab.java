@@ -10,7 +10,6 @@ public class ComponentTFTowerRoofSlab extends ComponentTFTowerRoof {
 
     public ComponentTFTowerRoofSlab() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoofSlab(int i, ComponentTFTowerWing wing) {
@@ -50,6 +49,7 @@ public class ComponentTFTowerRoofSlab extends ComponentTFTowerRoof {
         for (int y = 0; y <= maxY; y++) {
             int min = 2 * y;
             int max = size - min - 1;
+            if (min > max) break;
             for (int x = connected ? 0 : min; x <= max; x++) {
                 for (int z = min; z <= max; z++) {
                     boolean edge = x == max || z == min || z == max || (!connected && x == min);

@@ -16,7 +16,6 @@ public class ComponentTFTowerRoofSlabForwards extends ComponentTFTowerRoofSlab {
 
     public ComponentTFTowerRoofSlabForwards() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoofSlabForwards(int i, ComponentTFTowerWing wing) {
@@ -40,6 +39,7 @@ public class ComponentTFTowerRoofSlabForwards extends ComponentTFTowerRoofSlab {
         for (int y = 0; y <= height; y++) {
             int minZ = 2 * y;
             int maxZ = size - minZ - 1;
+            if (minZ > maxZ) break;
             for (int x = 0; x < maxZ; x++) {
                 for (int z = minZ; z <= maxZ; z++) {
                     Block slab = x == maxZ - 1 || z == minZ || z == maxZ ? Blocks.wooden_slab

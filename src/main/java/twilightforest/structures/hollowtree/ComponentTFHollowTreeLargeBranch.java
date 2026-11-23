@@ -66,7 +66,7 @@ public class ComponentTFHollowTreeLargeBranch extends ComponentTFHollowTreeMedBr
      * Add other structure components to this one if needed
      */
     @Override
-    public void buildComponent(StructureComponent structurecomponent, List list, Random rand) {
+    public void buildComponent(StructureComponent structurecomponent, List<StructureComponent> list, Random rand) {
         int index = getComponentType();
 
         // go about halfway out and make a few medium branches.

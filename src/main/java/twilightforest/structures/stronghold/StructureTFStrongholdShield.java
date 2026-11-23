@@ -12,7 +12,6 @@ public class StructureTFStrongholdShield extends StructureTFStrongholdComponent 
 
     public StructureTFStrongholdShield() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public StructureTFStrongholdShield(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
@@ -29,99 +28,25 @@ public class StructureTFStrongholdShield extends StructureTFStrongholdComponent 
     @Override
     public boolean addComponentParts(World world, Random random, StructureBoundingBox sbb) {
         Block shieldBlock = TFBlocks.shield;
+        // structureBoundingBox sizes count blocks, fill coordinates require inclusive endpoints
+        int maxX = boundingBox.getXSize() - 1;
+        int maxY = boundingBox.getYSize() - 1;
+        int maxZ = boundingBox.getZSize() - 1;
 
         // Facing.facings
 
         // +x
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                this.boundingBox.getXSize(),
-                0,
-                0,
-                this.boundingBox.getXSize(),
-                this.boundingBox.getYSize(),
-                this.boundingBox.getZSize(),
-                shieldBlock,
-                4,
-                shieldBlock,
-                4,
-                false);
+        this.fillWithMetadataBlocks(world, sbb, maxX, 0, 0, maxX, maxY, maxZ, shieldBlock, 4, shieldBlock, 4, false);
         // -x
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                0,
-                0,
-                0,
-                0,
-                this.boundingBox.getYSize(),
-                this.boundingBox.getZSize(),
-                shieldBlock,
-                5,
-                shieldBlock,
-                5,
-                false);
+        this.fillWithMetadataBlocks(world, sbb, 0, 0, 0, 0, maxY, maxZ, shieldBlock, 5, shieldBlock, 5, false);
         // +z
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                0,
-                0,
-                this.boundingBox.getZSize(),
-                this.boundingBox.getXSize(),
-                this.boundingBox.getYSize(),
-                this.boundingBox.getZSize(),
-                shieldBlock,
-                2,
-                shieldBlock,
-                2,
-                false);
+        this.fillWithMetadataBlocks(world, sbb, 0, 0, maxZ, maxX, maxY, maxZ, shieldBlock, 2, shieldBlock, 2, false);
         // -z
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                0,
-                0,
-                0,
-                this.boundingBox.getXSize(),
-                this.boundingBox.getYSize(),
-                0,
-                shieldBlock,
-                3,
-                shieldBlock,
-                3,
-                false);
-        // top
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                0,
-                0,
-                0,
-                this.boundingBox.getXSize(),
-                0,
-                this.boundingBox.getZSize(),
-                shieldBlock,
-                1,
-                shieldBlock,
-                1,
-                false);
-        // bottom
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                0,
-                this.boundingBox.getYSize(),
-                0,
-                this.boundingBox.getXSize(),
-                this.boundingBox.getYSize(),
-                this.boundingBox.getZSize(),
-                shieldBlock,
-                0,
-                shieldBlock,
-                0,
-                false);
+        this.fillWithMetadataBlocks(world, sbb, 0, 0, 0, maxX, maxY, 0, shieldBlock, 3, shieldBlock, 3, false);
+        // bottom (negative Y face)
+        this.fillWithMetadataBlocks(world, sbb, 0, 0, 0, maxX, 0, maxZ, shieldBlock, 1, shieldBlock, 1, false);
+        // top (positive Y face)
+        this.fillWithMetadataBlocks(world, sbb, 0, maxY, 0, maxX, maxY, maxZ, shieldBlock, 0, shieldBlock, 0, false);
 
         return true;
     }

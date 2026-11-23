@@ -74,9 +74,9 @@ public class ComponentTFHollowTreeRoot extends ComponentTFHollowTreeMedBranch {
 
             groundLevel = sampledLevel;
             src.posY = groundLevel + ROOT_START_HEIGHT;
-            this.boundingBox = createRootBoundingBox();
-
-            // System.out.println("Adjusting root bounding box to " + this.boundingBox.minY);
+            // keep the original extents and expand for the newly sampled ground height
+            // shrinking here could strand blocks in a chunk not yet generated
+            this.boundingBox.expandTo(createRootBoundingBox());
         }
 
         ChunkCoordinates rSrc = toLocalCoordinates(src);
@@ -124,7 +124,7 @@ public class ComponentTFHollowTreeRoot extends ComponentTFHollowTreeMedBranch {
                 continue;
             }
 
-            Block block = getBlockAtCurrentPosition(world, coords.posX, coords.posY, coords.posZ, sbb);
+            Block block = world.getBlock(worldX, worldY, worldZ);
 
             // three choices here
             if (block == null || !block.isNormalCube(world, worldX, worldY, worldZ)

@@ -176,7 +176,7 @@ public class ComponentTFHollowTreeMedBranch extends StructureTFComponent {
     }
 
     @Override
-    public void buildComponent(StructureComponent structurecomponent, List list, Random rand) {
+    public void buildComponent(StructureComponent structurecomponent, List<StructureComponent> list, Random rand) {
         // medium branch decorations are placed directly during addComponentParts
     }
 

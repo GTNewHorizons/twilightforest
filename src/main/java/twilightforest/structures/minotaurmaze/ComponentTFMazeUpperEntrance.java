@@ -13,18 +13,15 @@ import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFMazeUpperEntrance extends StructureTFComponent {
 
-    private int averageGroundLevel = -1;
-
     public ComponentTFMazeUpperEntrance() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeUpperEntrance(int i, Random rand, int x, int y, int z) {
         super(i);
         this.coordBaseMode = rand.nextInt(4);
 
-        this.boundingBox = new StructureBoundingBox(x, y, z, x + 15, y + 4, z + 15);
+        this.boundingBox = new StructureBoundingBox(x, y, z, x + 15, y + 5, z + 15);
     }
 
     /**
@@ -76,32 +73,6 @@ public class ComponentTFMazeUpperEntrance extends StructureTFComponent {
         // System.out.println("Drawing entrance at " + var8 + ", " + var9 + ", " + var10);
 
         return true;
-    }
-
-    /**
-     * Discover the y coordinate that will serve as the ground level of the supplied BoundingBox. (A median of all the
-     * levels in the BB's horizontal rectangle).
-     */
-    protected int getAverageGroundLevel(World par1World, StructureBoundingBox par2StructureBoundingBox) {
-        int var3 = 0;
-        int var4 = 0;
-
-        for (int var5 = this.boundingBox.minZ; var5 <= this.boundingBox.maxZ; ++var5) {
-            for (int var6 = this.boundingBox.minX; var6 <= this.boundingBox.maxX; ++var6) {
-                if (par2StructureBoundingBox.isVecInside(var6, 64, var5)) {
-                    var3 += Math.max(
-                            par1World.getTopSolidOrLiquidBlock(var6, var5),
-                            par1World.provider.getAverageGroundLevel());
-                    ++var4;
-                }
-            }
-        }
-
-        if (var4 == 0) {
-            return -1;
-        } else {
-            return var3 / var4;
-        }
     }
 
 }

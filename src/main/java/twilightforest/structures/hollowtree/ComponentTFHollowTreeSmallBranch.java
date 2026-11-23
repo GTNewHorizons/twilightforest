@@ -26,8 +26,26 @@ public class ComponentTFHollowTreeSmallBranch extends ComponentTFHollowTreeMedBr
             boolean leafy) {
         super(i, sx, sy, sz, length, angle, tilt, leafy);
 
+        resizeBoundingBox();
+    }
+
+    @Override
+    protected void func_143011_b(net.minecraft.nbt.NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        resizeBoundingBox();
+    }
+
+    private void resizeBoundingBox() {
+        // medium branch padding is meant for its side shoots, a small branch only
+        // needs its log line and the possible 2 block leaf cluster at the tip
+        boundingBox = new StructureBoundingBox(
+                Math.min(src.posX, dest.posX),
+                Math.min(src.posY, dest.posY),
+                Math.min(src.posZ, dest.posZ),
+                Math.max(src.posX, dest.posX),
+                Math.max(src.posY, dest.posY),
+                Math.max(src.posZ, dest.posZ));
         if (leafy) {
-            // include the entire leaf blob so adjacent chunks also generate its outer blocks
             boundingBox.expandTo(
                     new StructureBoundingBox(
                             dest.posX - MAX_LEAF_RADIUS,
@@ -40,7 +58,7 @@ public class ComponentTFHollowTreeSmallBranch extends ComponentTFHollowTreeMedBr
     }
 
     @Override
-    public void buildComponent(StructureComponent structurecomponent, List list, Random rand) {
+    public void buildComponent(StructureComponent structurecomponent, List<StructureComponent> list, Random rand) {
         // small branches have no child components, leaves are generated with the branch blocks
     }
 
@@ -49,14 +67,8 @@ public class ComponentTFHollowTreeSmallBranch extends ComponentTFHollowTreeMedBr
      */
     @Override
     public boolean addComponentParts(World world, Random random, StructureBoundingBox sbb) {
-        ChunkCoordinates rSrc = new ChunkCoordinates(
-                src.posX - boundingBox.minX,
-                src.posY - boundingBox.minY,
-                src.posZ - boundingBox.minZ);
-        ChunkCoordinates rDest = new ChunkCoordinates(
-                dest.posX - boundingBox.minX,
-                dest.posY - boundingBox.minY,
-                dest.posZ - boundingBox.minZ);
+        ChunkCoordinates rSrc = toLocalCoordinates(src);
+        ChunkCoordinates rDest = toLocalCoordinates(dest);
 
         drawBresehnam(
                 world,

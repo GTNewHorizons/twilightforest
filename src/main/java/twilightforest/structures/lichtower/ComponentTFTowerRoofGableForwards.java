@@ -10,7 +10,6 @@ public class ComponentTFTowerRoofGableForwards extends ComponentTFTowerRoof {
 
     public ComponentTFTowerRoofGableForwards() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoofGableForwards(int i, ComponentTFTowerWing wing) {
@@ -24,6 +23,16 @@ public class ComponentTFTowerRoofGableForwards extends ComponentTFTowerRoof {
 
         // just hang out at the very top of the tower
         this.makeAttachedOverhangBB(wing);
+        // the figurehead extends one block farther than the normal attached roof footprint
+        switch (getCoordBaseMode()) {
+            case 0 -> boundingBox.maxX++;
+            case 1 -> boundingBox.maxZ++;
+            case 2 -> boundingBox.minX--;
+            case 3 -> boundingBox.minZ--;
+        }
+        // small roofs have a figurehead that rises above the regular gable
+        int figureheadTop = size + 2 - slopeChangeForSize(size);
+        boundingBox.maxY = Math.max(boundingBox.maxY, boundingBox.minY + figureheadTop);
     }
 
     /**
@@ -36,6 +45,7 @@ public class ComponentTFTowerRoofGableForwards extends ComponentTFTowerRoof {
         for (int y = 0; y <= height; y++) {
             int min = y < slopeChange ? y : (y + slopeChange) / 2;
             int max = size - min - 1;
+            if (min > max) break;
             for (int x = 0; x <= size - 2; x++) {
                 for (int z = min; z <= max; z++) {
                     if (x < size - 2 || z == min || z == max) {
@@ -62,9 +72,9 @@ public class ComponentTFTowerRoofGableForwards extends ComponentTFTowerRoof {
     }
 
     public int slopeChangeForSize(int pSize) {
-        if (size > 10) {
+        if (pSize > 10) {
             return 3;
-        } else if (size > 6) {
+        } else if (pSize > 6) {
             return 2;
         } else {
             return 1;

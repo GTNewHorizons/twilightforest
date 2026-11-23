@@ -59,6 +59,7 @@ public class ComponentTFTowerBeard extends StructureTFComponent {
         for (int y = 0; y <= height; y++) {
             int min = y;
             int max = size - y - 1;
+            if (min > max) break;
             int layerY = height - y;
 
             fillWithRandomizedBlocks(

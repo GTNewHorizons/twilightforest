@@ -9,7 +9,6 @@ public class ComponentTFTowerRoofAttachedSlab extends ComponentTFTowerRoofSlab {
 
     public ComponentTFTowerRoofAttachedSlab() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoofAttachedSlab(int i, ComponentTFTowerWing wing) {

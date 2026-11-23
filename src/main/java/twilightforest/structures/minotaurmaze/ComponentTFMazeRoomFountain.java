@@ -12,7 +12,6 @@ public class ComponentTFMazeRoomFountain extends ComponentTFMazeRoom {
 
     public ComponentTFMazeRoomFountain() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeRoomFountain(int i, Random rand, int x, int y, int z) {

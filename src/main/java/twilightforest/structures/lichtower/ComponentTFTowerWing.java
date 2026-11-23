@@ -12,7 +12,10 @@ import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityFlowerPot;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
@@ -35,6 +38,8 @@ public class ComponentTFTowerWing extends StructureTFComponent {
     protected Class<? extends ComponentTFTowerRoof> roofType;
 
     private static final EnumArt[] PAINTING_ARTS = EnumArt.values();
+    private static final EnumArt[] PAINTING_ARTS_32 = paintingArtsAtLeast(32);
+    private static final EnumArt[] PAINTING_ARTS_48 = paintingArtsAtLeast(48);
     private static final int[] CHAIR_OFFSET_X = { 1, 0, -1, 0 };
     private static final int[] CHAIR_OFFSET_Z = { 0, 1, 0, -1 };
 
@@ -118,7 +123,9 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      * Read in openings from int array
      */
     private void readOpeningsFromArray(int[] intArray) {
-        for (int i = 0; i < intArray.length; i += 3) {
+        openings.clear();
+        // ignore a truncated trailing entry rather than crashing when loading damaged nbt
+        for (int i = 0; i + 2 < intArray.length; i += 3) {
             ChunkCoordinates door = new ChunkCoordinates(intArray[i], intArray[i + 1], intArray[i + 2]);
 
             this.openings.add(door);
@@ -447,7 +454,9 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      * Decorates a dead end tower. These towers have no stairs, and will be the focus of our interior design.
      */
     protected void decorateDeadEnd(World world, Random rand, StructureBoundingBox sbb) {
-        int floors = (this.height - 1) / 5;
+        if (height < 2) return;
+
+        int floors = Math.max(1, (this.height - 1) / 5);
 
         // divide the tower into floors
         int floorHeight = this.height / floors;
@@ -1422,11 +1431,20 @@ public class ComponentTFTowerWing extends StructureTFComponent {
             planterBlock.updateTick(world, wx, wy, wz, world.rand);
         }
 
-        // otherwise, place the block into a flowerpot
-        Block whatHappened = this.getBlockAtCurrentPosition(world, cx + 0, 2, cz + 0, sbb);
+        // if the plant didnt spawn, keep it in a real populated flower pot
+        Block whatHappened = getBlockAtCurrentPosition(world, cx, 2, cz, sbb);
         if (whatHappened == planterBlock || whatHappened == Blocks.air) {
-            int potMeta = 0;// BlockFlowerPot.getMetaForPlant(new ItemStack(planterBlock, 1, planterMeta));
-            placeBlockAtCurrentPosition(world, Blocks.flower_pot, potMeta, cx + 0, 2, cz + 0, sbb);
+            int worldX = getXWithOffset(cx, cz);
+            int worldY = getYWithOffset(2);
+            int worldZ = getZWithOffset(cx, cz);
+            if (sbb.isVecInside(worldX, worldY, worldZ)) {
+                placeBlockAtCurrentPosition(world, Blocks.flower_pot, 0, cx, 2, cz, sbb);
+                TileEntity tileEntity = world.getTileEntity(worldX, worldY, worldZ);
+                if (tileEntity instanceof TileEntityFlowerPot flowerPot) {
+                    flowerPot.func_145964_a(Item.getItemFromBlock(planterBlock), planterMeta);
+                    flowerPot.markDirty();
+                }
+            }
         }
     }
 
@@ -1985,10 +2003,16 @@ public class ComponentTFTowerWing extends StructureTFComponent {
         for (int i = 0; i < howMany; i++) {
             // get some random coordinates on the wall in the chunk
             ChunkCoordinates pCoords = getRandomWallSpot(rand, floorLevel, direction, sbb);
+            if (pCoords == null) {
+                continue;
+            }
 
             // initialize a painting object
             EntityPainting painting = new EntityPainting(world, pCoords.posX, pCoords.posY, pCoords.posZ, direction);
             painting.art = getPaintingOfSize(rand, minSize);
+            if (painting.art == null) {
+                continue;
+            }
             painting.setDirection(direction);
 
             // temporary function, make a real bounding box for the painting
@@ -2010,26 +2034,23 @@ public class ComponentTFTowerWing extends StructureTFComponent {
      * At least one of the painting's parameters must be the specified size or greater
      */
     protected EnumArt getPaintingOfSize(Random rand, int minSize) {
-        int count = 0;
-        for (EnumArt art : PAINTING_ARTS) {
-            if (art.sizeX >= minSize || art.sizeY >= minSize) {
-                count++;
-            }
-        }
-        if (count == 0) {
-            return null;
-        }
+        EnumArt[] choices = switch (minSize) {
+            case 0 -> PAINTING_ARTS;
+            case 32 -> PAINTING_ARTS_32;
+            case 48 -> PAINTING_ARTS_48;
+            default -> paintingArtsAtLeast(minSize);
+        };
+        return choices.length == 0 ? null : choices[rand.nextInt(choices.length)];
+    }
 
-        // select the same index in the same art order with a 1 rng draw
-        int chosen = rand.nextInt(count);
+    private static EnumArt[] paintingArtsAtLeast(int minSize) {
+        List<EnumArt> result = new ArrayList<>();
         for (EnumArt art : PAINTING_ARTS) {
             if (art.sizeX >= minSize || art.sizeY >= minSize) {
-                if (chosen-- == 0) {
-                    return art;
-                }
+                result.add(art);
             }
         }
-        return null;
+        return result.toArray(new EnumArt[0]);
     }
 
     /**
@@ -2102,6 +2123,18 @@ public class ComponentTFTowerWing extends StructureTFComponent {
             }
         }
 
+        // most structure chunks dont touch this wall, skip impossible searches
+        if (minX > maxX || minY > maxY
+                || minZ > maxZ
+                || maxX < sbb.minX
+                || minX > sbb.maxX
+                || maxY < sbb.minY
+                || minY > sbb.maxY
+                || maxZ < sbb.minZ
+                || minZ > sbb.maxZ) {
+            return null;
+        }
+
         // try 30 times to get a proper result
         for (int i = 0; i < 30; i++) {
             int cx = minX + (maxX > minX ? rand.nextInt(maxX - minX) : 0);
@@ -2126,13 +2159,13 @@ public class ComponentTFTowerWing extends StructureTFComponent {
     protected void makeGlyphBranches(World world, Random rand, int meta, StructureBoundingBox sbb) {
         // Workaround for height and size not getting set
         // TODO: Fix properly if cause can be found
-        if (this.height == 0 | this.size == 0) return;
+        if (height < 2 || size <= 6) return;
 
         // pick a random side of the tower
         int rotation = rand.nextInt(4);
 
         // start somewhere in the lower part
-        int startHeight = rand.nextInt((int) (this.height * 0.66F));
+        int startHeight = rand.nextInt(Math.max(1, (int) (height * 0.66F)));
 
         // near the middle
         int startZ = 3 + rand.nextInt(this.size - 6);
@@ -2193,6 +2226,9 @@ public class ComponentTFTowerWing extends StructureTFComponent {
     }
 
     private ChunkCoordinates randomRoomSpot(Random rand, int margin, int y) {
+        if (size <= margin * 2) {
+            throw new IllegalArgumentException("Tower room is too narrow for the requested margin");
+        }
         return new ChunkCoordinates(
                 margin + rand.nextInt(size - margin * 2),
                 y,

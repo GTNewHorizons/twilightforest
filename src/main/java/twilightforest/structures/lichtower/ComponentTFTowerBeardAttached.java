@@ -33,6 +33,7 @@ public class ComponentTFTowerBeardAttached extends ComponentTFTowerBeard {
         for (int y = 0; y <= height; y++) {
             int min = y + 1;
             int max = size - y;
+            if (min > max) break;
             int layerY = height - y;
 
             fillWithRandomizedBlocks(

@@ -84,7 +84,7 @@ public class ComponentTFHollowTreeLeafDungeon extends StructureTFComponent {
      * Add other structure components to this one if needed
      */
     @Override
-    public void buildComponent(StructureComponent structurecomponent, List list, Random rand) {
+    public void buildComponent(StructureComponent structurecomponent, List<StructureComponent> list, Random rand) {
         // the bounding box should be cubical, so we can rotate freely
         this.setCoordBaseMode(rand.nextInt(ROTATION_COUNT));
     }
@@ -140,37 +140,14 @@ public class ComponentTFHollowTreeLeafDungeon extends StructureTFComponent {
 
     private void drawBlockBlob(World world, StructureBoundingBox sbb, int sx, int sy, int sz, int blobRadius,
             Block blockID, int metadata, boolean isLeaves) {
-        // then trace out a quadrant
-        for (int dx = 0; dx <= blobRadius; dx++) {
-            for (int dy = 0; dy <= blobRadius; dy++) {
-                for (int dz = 0; dz <= blobRadius; dz++) {
-                    // determine how far we are from the center.
-                    int maximum = Math.max(dx, Math.max(dy, dz));
-                    int minimum = Math.min(dx, Math.min(dy, dz));
-                    int middle = dx + dy + dz - maximum - minimum;
-                    int dist = maximum + (middle * 2 + minimum) / 4;
-
-                    // if we're inside the blob, fill it
-                    if (dist <= blobRadius) {
-                        // do eight at a time for easiness!
-                        // skip mirrored positions on the center planes so each block is placed once
-                        for (int ySign = 1; ySign >= (dy == 0 ? 1 : -1); ySign -= 2) {
-                            for (int xSign = 1; xSign >= (dx == 0 ? 1 : -1); xSign -= 2) {
-                                for (int zSign = 1; zSign >= (dz == 0 ? 1 : -1); zSign -= 2) {
-                                    int x = sx + dx * xSign;
-                                    int y = sy + dy * ySign;
-                                    int z = sz + dz * zSign;
-
-                                    if (isLeaves) {
-                                        placeLeafBlock(world, blockID, metadata, x, y, z, sbb);
-                                    } else {
-                                        this.placeBlockAtCurrentPosition(world, blockID, metadata, x, y, z, sbb);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        for (int[] offset : HollowTreeBlobGeometry.getOffsets(blobRadius)) {
+            int x = sx + offset[0];
+            int y = sy + offset[1];
+            int z = sz + offset[2];
+            if (isLeaves) {
+                placeLeafBlock(world, blockID, metadata, x, y, z, sbb);
+            } else {
+                placeBlockAtCurrentPosition(world, blockID, metadata, x, y, z, sbb);
             }
         }
     }
