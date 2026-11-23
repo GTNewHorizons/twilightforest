@@ -10,7 +10,6 @@ public class EntityTFSlimeProjectile extends EntityThrowable {
 
     public EntityTFSlimeProjectile(World par1World) {
         super(par1World);
-        // TODO Auto-generated constructor stub
     }
 
     public EntityTFSlimeProjectile(World par1World, EntityLivingBase par2EntityLiving) {
@@ -21,7 +20,9 @@ public class EntityTFSlimeProjectile extends EntityThrowable {
     public void onUpdate() {
         super.onUpdate();
 
-        makeTrail();
+        if (worldObj.isRemote) {
+            makeTrail();
+        }
     }
 
     // How much this entity falls each tick
@@ -44,11 +45,12 @@ public class EntityTFSlimeProjectile extends EntityThrowable {
      * Reflect!
      */
     @Override
-    public boolean attackEntityFrom(DamageSource damagesource, float i) {
+    public boolean attackEntityFrom(DamageSource source, float damage) {
+        if (isDead) {
+            return false;
+        }
         setBeenAttacked();
-
         pop();
-
         return true;
     }
 
@@ -57,6 +59,9 @@ public class EntityTFSlimeProjectile extends EntityThrowable {
      */
     @Override
     protected void onImpact(MovingObjectPosition par1MovingObjectPosition) {
+        if (isDead) {
+            return;
+        }
         // only damage living things
         /*
          * if (par1MovingObjectPosition.entityHit != null && par1MovingObjectPosition.entityHit instanceof
@@ -69,21 +74,19 @@ public class EntityTFSlimeProjectile extends EntityThrowable {
 
     // Yeah, do that
     protected void pop() {
-        for (int i = 0; i < 8; ++i) {
-            this.worldObj.spawnParticle(
-                    "slime",
-                    this.posX,
-                    this.posY,
-                    this.posZ,
-                    rand.nextGaussian() * 0.05D,
-                    rand.nextDouble() * 0.2D,
-                    rand.nextGaussian() * 0.05D);
-        }
-
-        // noise
-        this.worldObj.playSoundAtEntity(this, "mob.slime.big", 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 0.8F));
-
-        if (!this.worldObj.isRemote) {
+        if (worldObj.isRemote) {
+            for (int i = 0; i < 8; ++i) {
+                this.worldObj.spawnParticle(
+                        "slime",
+                        this.posX,
+                        this.posY,
+                        this.posZ,
+                        rand.nextGaussian() * 0.05D,
+                        rand.nextDouble() * 0.2D,
+                        rand.nextGaussian() * 0.05D);
+            }
+        } else {
+            this.worldObj.playSoundAtEntity(this, "mob.slime.big", 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 0.8F));
             this.setDead();
         }
     }

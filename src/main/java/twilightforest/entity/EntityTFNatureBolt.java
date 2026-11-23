@@ -11,14 +11,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public class EntityTFNatureBolt extends EntityThrowable {
-
-    private EntityPlayer playerTarget;
 
     public EntityTFNatureBolt(World par1World, double par2, double par4, double par6) {
         super(par1World, par2, par4, par6);
@@ -36,7 +37,9 @@ public class EntityTFNatureBolt extends EntityThrowable {
     public void onUpdate() {
         super.onUpdate();
 
-        makeTrail();
+        if (worldObj.isRemote) {
+            makeTrail();
+        }
     }
 
     /**
@@ -63,74 +66,82 @@ public class EntityTFNatureBolt extends EntityThrowable {
      * What happens when we hit something?
      */
     @Override
-    protected void onImpact(MovingObjectPosition par1MovingObjectPosition) {
-        // only damage living things
-        if (par1MovingObjectPosition.entityHit != null
-                && par1MovingObjectPosition.entityHit instanceof EntityLivingBase) {
-            if (par1MovingObjectPosition.entityHit
-                    .attackEntityFrom(DamageSource.causeIndirectMagicDamage(this, this.getThrower()), 2)) {
-                // similar to EntityCaveSpider
-                byte poisonStrength = (byte) (worldObj.difficultySetting == EnumDifficulty.PEACEFUL ? 0
-                        : worldObj.difficultySetting == EnumDifficulty.NORMAL ? 3 : 7);
-                if (poisonStrength > 0) {
-                    ((EntityLivingBase) par1MovingObjectPosition.entityHit)
-                            .addPotionEffect(new PotionEffect(Potion.poison.id, poisonStrength * 20, 0));
-
-                    // System.out.println("Poisoning entityHit " + par1MovingObjectPosition.entityHit);
-                }
-
+    protected void onImpact(MovingObjectPosition hit) {
+        if (worldObj.isRemote) {
+            for (int i = 0; i < 8; i++) {
+                worldObj.spawnParticle(
+                        "blockcrack_" + Block.getIdFromBlock(Blocks.leaves) + "_0",
+                        posX,
+                        posY,
+                        posZ,
+                        rand.nextGaussian() * 0.05D,
+                        rand.nextDouble() * 0.2D,
+                        rand.nextGaussian() * 0.05D);
             }
+            return;
         }
 
-        for (int i = 0; i < 8; ++i) {
-            this.worldObj.spawnParticle(
-                    "blockcrack_" + Block.getIdFromBlock(Blocks.leaves) + "_0",
-                    this.posX,
-                    this.posY,
-                    this.posZ,
-                    rand.nextGaussian() * 0.05D,
-                    rand.nextDouble() * 0.2D,
-                    rand.nextGaussian() * 0.05D);
+        if (isDead || hit == null) {
+            return;
         }
+        setDead();
 
-        if (!this.worldObj.isRemote) {
-            this.setDead();
-
-            if (par1MovingObjectPosition != null) {
-                // if we hit a solid block, maybe do our nature burst effect.
-                int dx = MathHelper.floor_double(par1MovingObjectPosition.blockX);
-                int dy = MathHelper.floor_double(par1MovingObjectPosition.blockY);
-                int dz = MathHelper.floor_double(par1MovingObjectPosition.blockZ);
-
-                Material materialHit = worldObj.getBlock(dx, dy, dz).getMaterial();
-
-                if (materialHit == Material.grass && this.playerTarget != null) {
-                    Items.dye
-                            .onItemUse(new ItemStack(Items.dye, 1, 15), playerTarget, worldObj, dx, dy, dz, 0, 0, 0, 0);
-                } else if (materialHit.isSolid() && canReplaceBlock(worldObj, dx, dy, dz)) {
-                    worldObj.setBlock(dx, dy, dz, Blocks.leaves, 2, 3);
+        if (hit.entityHit instanceof EntityLivingBase living) {
+            if (living.attackEntityFrom(DamageSource.causeIndirectMagicDamage(this, getThrower()), 2.0F)) {
+                int duration = switch (worldObj.difficultySetting) {
+                    case PEACEFUL -> 0;
+                    case EASY -> 1;
+                    case NORMAL -> 3;
+                    case HARD -> 7;
+                };
+                if (duration > 0) {
+                    living.addPotionEffect(new PotionEffect(Potion.poison.id, duration * 20, 0));
                 }
             }
+            return;
         }
 
+        // never impersonate the attacked player to perform an environmental change
+        // a forge fake player lets protection systems apply their permissions
+        if (hit.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK
+                || !worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
+                || !(worldObj instanceof WorldServer server)) {
+            return;
+        }
+
+        int x = hit.blockX;
+        int y = hit.blockY;
+        int z = hit.blockZ;
+        Block block = worldObj.getBlock(x, y, z);
+        EntityPlayer actor = FakePlayerFactory.getMinecraft(server);
+        if (block.getMaterial() == Material.grass) {
+            ItemStack bonemeal = new ItemStack(Items.dye, 1, 15);
+            if (actor.canPlayerEdit(x, y, z, hit.sideHit, bonemeal) && worldObj.canMineBlock(actor, x, y, z)) {
+                Items.dye.onItemUse(bonemeal, actor, worldObj, x, y, z, hit.sideHit, 0, 0, 0);
+            }
+        } else if (block.getMaterial().isSolid() && canReplaceBlock(worldObj, x, y, z)) {
+            ItemStack leaves = new ItemStack(Blocks.leaves, 1, 2);
+            if (!actor.canPlayerEdit(x, y, z, hit.sideHit, leaves) || !worldObj.canMineBlock(actor, x, y, z)) {
+                return;
+            }
+            BlockSnapshot snapshot = BlockSnapshot.getBlockSnapshot(worldObj, x, y, z);
+            if (worldObj.setBlock(x, y, z, Blocks.leaves, 2, 3) && ForgeEventFactory
+                    .onPlayerBlockPlace(actor, snapshot, ForgeDirection.getOrientation(hit.sideHit)).isCanceled()) {
+                snapshot.restore(true, false);
+            }
+        }
     }
 
     /**
      * This is surprisingly difficult to determine
      */
     private boolean canReplaceBlock(World worldObj, int dx, int dy, int dz) {
-        Block blockID = worldObj.getBlock(dx, dy, dz);
-        // int meta = worldObj.getBlockMetadata(dx, dy, dz);
-        Block blockObj = blockID;
-        float hardness = blockObj == null ? -1 : blockObj.getBlockHardness(worldObj, dx, dy, dz);
+        Block block = worldObj.getBlock(dx, dy, dz);
+        float hardness = block.getBlockHardness(worldObj, dx, dy, dz);
 
         return hardness >= 0 && hardness < 50F;
     }
 
-    public void setTarget(EntityLivingBase attackTarget) {
-        if (attackTarget instanceof EntityPlayer) {
-            this.playerTarget = (EntityPlayer) attackTarget;
-        }
-    }
+    public void setTarget(EntityLivingBase attackTarget) {}
 
 }

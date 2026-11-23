@@ -79,7 +79,7 @@ public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawn
             } else if (!this.worldObj.isAirBlock(bx, by - 1, bz) && this.worldObj.isAirBlock(bx, by + 1, bz)) {
                 this.moveY = 1F;
             } else if (!this.worldObj.isAirBlock(bx, by, bz + 1) && this.worldObj.isAirBlock(bx, by, bz - 1)) { // then
-                                                                                                                // try Z
+                // try Z
                 this.moveZ = -1F;
             } else if (!this.worldObj.isAirBlock(bx, by, bz - 1) && this.worldObj.isAirBlock(bx, by, bz + 1)) {
                 this.moveZ = 1F;
@@ -99,7 +99,7 @@ public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawn
             } else if (!this.worldObj.isAirBlock(bx, by - 1, bz) && this.worldObj.isAirBlock(bx, by + 1, bz)) {
                 this.moveY = 1F;
             } else if (!this.worldObj.isAirBlock(bx + 1, by, bz) && this.worldObj.isAirBlock(bx - 1, by, bz)) { // then
-                                                                                                                // try X
+                // try X
                 this.moveX = -1F;
             } else if (!this.worldObj.isAirBlock(bx - 1, by, bz) && this.worldObj.isAirBlock(bx + 1, by, bz)) {
                 this.moveX = 1F;
@@ -162,110 +162,93 @@ public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawn
     /**
      * Called to update the entity's position/logic.
      */
+    @Override
     public void onUpdate() {
-        if (this.myBlock == null || this.myBlock.getMaterial() == Material.air) {
-            this.setDead();
-        } else {
-            this.prevPosX = this.posX;
-            this.prevPosY = this.posY;
-            this.prevPosZ = this.posZ;
-            ++this.slideTime;
-            // start moving after warmup
-            if (this.slideTime > WARMUP_TIME) {
-                this.motionX += this.moveX * 0.03999999910593033D;
-                this.motionY += this.moveY * 0.03999999910593033D;
-                this.motionZ += this.moveZ * 0.03999999910593033D;
-                this.moveEntity(this.motionX, this.motionY, this.motionZ);
+        if (myBlock == null || myBlock.getMaterial() == Material.air) {
+            setDead();
+            return;
+        }
+
+        prevPosX = posX;
+        prevPosY = posY;
+        prevPosZ = posZ;
+        ++slideTime;
+
+        if (slideTime > WARMUP_TIME) {
+            motionX += moveX * 0.04D;
+            motionY += moveY * 0.04D;
+            motionZ += moveZ * 0.04D;
+            moveEntity(motionX, motionY, motionZ);
+        }
+        motionX *= 0.98D;
+        motionY *= 0.98D;
+        motionZ *= 0.98D;
+
+        // client prediction must reverse too, otherwise the render drifts from the server
+        if (slideTime == WARMUP_TIME + 40) {
+            motionX = motionY = motionZ = 0.0D;
+            moveX = -moveX;
+            moveY = -moveY;
+            moveZ = -moveZ;
+        }
+
+        if (worldObj.isRemote) {
+            return;
+        }
+        if (slideTime % 5 == 0) {
+            worldObj.playSoundEffect(
+                    posX,
+                    posY,
+                    posZ,
+                    TwilightForestMod.ID + ":random.slider",
+                    1.0F,
+                    0.9F + rand.nextFloat() * 0.4F);
+        }
+
+        int x = MathHelper.floor_double(posX);
+        int y = MathHelper.floor_double(posY);
+        int z = MathHelper.floor_double(posZ);
+        if (slideTime == 1) {
+            // only consume the original block and never dupe it if the removal fails
+            if (worldObj.getBlock(x, y, z) != myBlock || worldObj.getBlockMetadata(x, y, z) != myMeta
+                    || !worldObj.setBlockToAir(x, y, z)) {
+                setDead();
+                return;
             }
-            this.motionX *= 0.9800000190734863D;
-            this.motionY *= 0.9800000190734863D;
-            this.motionZ *= 0.9800000190734863D;
+        }
 
-            // sound
-            if (this.slideTime % 5 == 0) {
-                this.worldObj.playSoundEffect(
-                        this.posX,
-                        this.posY,
-                        this.posZ,
-                        TwilightForestMod.ID + ":random.slider",
-                        1.0F,
-                        0.9F + (this.rand.nextFloat() * 0.4F));
+        // contact causes damage and knockback while the sliding block is active
+        damageKnockbackEntities(worldObj.getEntitiesWithinAABBExcludingEntity(this, boundingBox));
+
+        if (isCollided || isStopped()) {
+            setDead();
+            if (!worldObj.canPlaceEntityOnSide(myBlock, x, y, z, true, 1, null, null)
+                    || !worldObj.setBlock(x, y, z, myBlock, myMeta, 3)) {
+                dropSlidingBlock();
             }
+        } else if ((slideTime > 100 && (y < 1 || y > 256)) || slideTime > 600) {
+            dropSlidingBlock();
+            setDead();
+        }
+    }
 
-            if (!this.worldObj.isRemote) {
-                int bx = MathHelper.floor_double(this.posX);
-                int by = MathHelper.floor_double(this.posY);
-                int bz = MathHelper.floor_double(this.posZ);
-
-                if (this.slideTime == 1) {
-                    if (this.worldObj.getBlock(bx, by, bz) != this.myBlock) {
-                        this.setDead();
-                        return;
-                    }
-
-                    this.worldObj.setBlockToAir(bx, by, bz);
-                }
-
-                // if we have not hit anything after 2 seconds of movement, reverse direction
-                if (this.slideTime == WARMUP_TIME + 40) {
-                    this.motionX = 0;
-                    this.motionY = 0;
-                    this.motionZ = 0;
-
-                    this.moveX *= -1F;
-                    this.moveY *= -1F;
-                    this.moveZ *= -1F;
-                }
-
-                // System.out.println("Status! onGround = " + this.onGround + ", isCollided = " + this.isCollided +
-                // ", hv = " + this.isCollidedHorizontally + ", " + this.isCollidedVertically);
-
-                if (this.isCollided || this.isStopped()) {
-                    this.motionX *= 0.699999988079071D;
-                    this.motionZ *= 0.699999988079071D;
-                    this.motionY *= 0.699999988079071D;
-
-                    this.setDead();
-
-                    if (this.worldObj.canPlaceEntityOnSide(this.myBlock, bx, by, bz, true, 1, null, null)
-                            && this.worldObj.setBlock(bx, by, bz, this.myBlock, this.myMeta, 3)) {
-                        // successfully set block
-                    } else if (this.canDropItem) {
-                        this.entityDropItem(
-                                new ItemStack(this.myBlock, 1, this.myBlock.damageDropped(this.myMeta)),
-                                0.0F);
-                    }
-                } else if (this.slideTime > 100 && !this.worldObj.isRemote && (by < 1 || by > 256)
-                        || this.slideTime > 600) {
-                            if (this.canDropItem) {
-                                this.entityDropItem(
-                                        new ItemStack(this.myBlock, 1, this.myBlock.damageDropped(this.myMeta)),
-                                        0.0F);
-                            }
-
-                            this.setDead();
-                        }
-
-                // push things out and damage them
-                this.damageKnockbackEntities(
-                        this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox),
-                        this);
-            }
+    private void dropSlidingBlock() {
+        if (canDropItem) {
+            entityDropItem(new ItemStack(myBlock, 1, myBlock.damageDropped(myMeta)), 0.0F);
         }
     }
 
     /**
      * Pushes all entities inside the list out and damages them
      */
-    private void damageKnockbackEntities(List<Entity> par1List, Entity me) {
-        for (Entity entity : par1List) {
-            if (entity instanceof EntityLivingBase) {
-                entity.attackEntityFrom(DamageSource.generic, 5);
-
-                double kx = (this.posX - entity.posX) * 2.0;
-                double kz = (this.posZ - entity.posZ) * 2.0;
-
-                ((EntityLivingBase) entity).knockBack(this, 5, kx, kz);
+    private void damageKnockbackEntities(List<Entity> entities) {
+        for (Entity entity : entities) {
+            if (entity instanceof EntityLivingBase living) {
+                entity.attackEntityFrom(DamageSource.generic, 5.0F);
+                double dx = (posX - entity.posX) * 2.0D;
+                double dz = (posZ - entity.posZ) * 2.0D;
+                living.knockBack(this, 5.0F, dx, dz);
+                living.velocityChanged = true;
             }
         }
     }
@@ -298,6 +281,7 @@ public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawn
         this.moveX = nbtTagCompound.getFloat("MoveX");
         this.moveY = nbtTagCompound.getFloat("MoveY");
         this.moveZ = nbtTagCompound.getFloat("MoveZ");
+        this.canDropItem = !nbtTagCompound.hasKey("CanDropItem") || nbtTagCompound.getBoolean("CanDropItem");
 
     }
 
@@ -309,6 +293,7 @@ public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawn
         nbtTagCompound.setFloat("MoveX", this.moveX);
         nbtTagCompound.setFloat("MoveY", this.moveY);
         nbtTagCompound.setFloat("MoveZ", this.moveZ);
+        nbtTagCompound.setBoolean("CanDropItem", canDropItem);
     }
 
     public Block getBlock() {
@@ -329,6 +314,11 @@ public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawn
         int blockData = Block.getIdFromBlock(this.myBlock) + (this.myMeta << 16);
 
         buffer.writeInt(blockData);
+        // direction and age are essential for matching the motion and reversal
+        buffer.writeFloat(moveX);
+        buffer.writeFloat(moveY);
+        buffer.writeFloat(moveZ);
+        buffer.writeShort(slideTime);
 
         // System.out.println("Wrote additional spawn data as " + blockData);
     }
@@ -345,6 +335,10 @@ public class EntityTFSlideBlock extends Entity implements IEntityAdditionalSpawn
 
         this.myBlock = Block.getBlockById(blockData & 65535);
         this.myMeta = blockData >> 16;
+        moveX = additionalData.readFloat();
+        moveY = additionalData.readFloat();
+        moveZ = additionalData.readFloat();
+        slideTime = additionalData.readShort();
 
         // System.out.println("Read additional spawn data as " + blockData + " so my block is " +
         // this.myBlock);

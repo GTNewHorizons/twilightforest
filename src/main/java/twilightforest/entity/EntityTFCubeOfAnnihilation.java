@@ -1,5 +1,6 @@
 package twilightforest.entity;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -8,6 +9,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -21,10 +23,12 @@ import twilightforest.TFGenericPacketHandler;
 import twilightforest.TwilightForestMod;
 import twilightforest.block.TFBlocks;
 import twilightforest.item.ItemTFCubeOfAnnihilation;
+import twilightforest.item.TFItems;
 
 public class EntityTFCubeOfAnnihilation extends EntityThrowable {
 
     boolean hasHitObstacle = false;
+    private WeakReference<ItemStack> launchingStack;
 
     public EntityTFCubeOfAnnihilation(World par1World) {
         super(par1World);
@@ -45,6 +49,12 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
 
         this.setSize(1F, 1F);
         this.isImmuneToFire = true;
+        if (par2EntityLiving instanceof EntityPlayer player) {
+            ItemStack equipped = player.getCurrentEquippedItem();
+            if (equipped != null && equipped.getItem() == TFItems.cubeOfAnnihilation) {
+                this.launchingStack = new WeakReference<>(equipped);
+            }
+        }
     }
 
     /**
@@ -58,13 +68,16 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
     @Override
     protected void onImpact(MovingObjectPosition mop) {
         // only hit living things
-        if (mop.entityHit != null && mop.entityHit instanceof EntityLivingBase) {
-            if (mop.entityHit.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) this.getThrower()), 10)) {
+        if (!this.worldObj.isRemote && mop.entityHit instanceof EntityLivingBase
+                && mop.entityHit != this.getThrower()
+                && this.getThrower() != null) {
+            if (mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), 10.0F)) {
                 this.ticksExisted += 60;
             }
         }
 
-        if (!this.worldObj.isAirBlock(mop.blockX, mop.blockY, mop.blockZ)) {
+        if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK
+                && !this.worldObj.isAirBlock(mop.blockX, mop.blockY, mop.blockZ)) {
 
             // demolish some blocks
             if (!this.worldObj.isRemote) {
@@ -77,7 +90,7 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
 
     /**
      * Do our ball and chain effect on blocks we hit. Harvest/destroy/whatevs
-     * 
+     *
      * @param entity
      */
     private boolean affectBlocksInAABB(AxisAlignedBB par1AxisAlignedBB, EntityLivingBase entity) {
@@ -97,19 +110,17 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
                     int currentMeta = this.worldObj.getBlockMetadata(dx, dy, dz);
 
                     if (block != Blocks.air) {
-                        if (canAnnihilate(dx, dy, dz, block, currentMeta)) {
-                            this.worldObj.setBlockToAir(dx, dy, dz);
-
+                        if (canAnnihilate(dx, dy, dz, block, currentMeta)
+                                && canRemoveBlock(dx, dy, dz, block, currentMeta)
+                                && this.worldObj.setBlockToAir(dx, dy, dz)) {
                             this.worldObj.playSoundAtEntity(
                                     this,
                                     "random.fizz",
-                                    0.125f,
+                                    0.125F,
                                     this.rand.nextFloat() * 0.25F + 0.75F);
-
                             this.sendAnnihilateBlockPacket(worldObj, dx, dy, dz);
-
                         } else {
-                            // return if we hit an obstacle
+                            // blocked or protected blocks force the cube back to its owner
                             this.hasHitObstacle = true;
                         }
                         hitBlock = true;
@@ -119,6 +130,25 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
         }
 
         return hitBlock;
+    }
+
+    private boolean canRemoveBlock(int x, int y, int z, Block block, int metadata) {
+        if (!(this.getThrower() instanceof EntityPlayer player)) {
+            return false;
+        }
+        if (!this.worldObj.canMineBlock(player, x, y, z)
+                || !player.canPlayerEdit(x, y, z, 1, player.getCurrentEquippedItem())) {
+            return false;
+        }
+        net.minecraftforge.event.world.BlockEvent.BreakEvent event = new net.minecraftforge.event.world.BlockEvent.BreakEvent(
+                x,
+                y,
+                z,
+                this.worldObj,
+                block,
+                metadata,
+                player);
+        return !net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event);
     }
 
     private boolean canAnnihilate(int dx, int dy, int dz, Block block, int meta) {
@@ -153,6 +183,9 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
     @Override
     public void onUpdate() {
         super.onUpdate();
+        if (this.isDead) {
+            return;
+        }
 
         // all server side
         if (!this.worldObj.isRemote) {
@@ -168,12 +201,16 @@ public class EntityTFCubeOfAnnihilation extends EntityThrowable {
                         this,
                         this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
 
-                if (list.contains(this.getThrower()) && !this.worldObj.isRemote) {
+                if (list.contains(this.getThrower())) {
                     // System.out.println("we have returned");
-                    if (this.getThrower() instanceof EntityPlayer) {
-                        ItemTFCubeOfAnnihilation.setCubeAsReturned((EntityPlayer) this.getThrower());
+                    ItemStack original = this.launchingStack == null ? null : this.launchingStack.get();
+                    if (original != null && original.getItem() == TFItems.cubeOfAnnihilation) {
+                        ItemTFCubeOfAnnihilation.setCubeAsReturned(original);
+                    } else if (this.getThrower() instanceof EntityPlayer player) {
+                        ItemTFCubeOfAnnihilation.setCubeAsReturned(player);
                     }
                     this.setDead();
+                    return;
                 }
             }
 

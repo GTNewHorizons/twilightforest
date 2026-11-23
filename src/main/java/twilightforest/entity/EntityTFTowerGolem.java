@@ -81,8 +81,9 @@ public class EntityTFTowerGolem extends EntityMob {
         this.worldObj.setEntityState(this, (byte) 4);
         boolean attackSuccess = super.attackEntityAsMob(par1Entity);
 
-        if (attackSuccess) {
-            par1Entity.motionY += 0.4000000059604645D;
+        if (attackSuccess && !worldObj.isRemote) {
+            par1Entity.motionY += 0.4D;
+            par1Entity.velocityChanged = true;
         }
 
         this.playSound("mob.irongolem.throw", 1.0F, 1.0F);
@@ -118,8 +119,12 @@ public class EntityTFTowerGolem extends EntityMob {
     }
 
     protected void collideWithEntity(Entity par1Entity) {
-        if (par1Entity instanceof IMob && this.getRNG().nextInt(10) == 0) {
-            this.setAttackTarget((EntityLivingBase) par1Entity);
+        if (!worldObj.isRemote && par1Entity instanceof EntityLivingBase living
+                && living instanceof IMob
+                && living != this
+                && this.getAttackTarget() == null
+                && this.getRNG().nextInt(10) == 0) {
+            this.setAttackTarget(living);
         }
 
         super.collideWithEntity(par1Entity);
@@ -135,9 +140,11 @@ public class EntityTFTowerGolem extends EntityMob {
         if (this.attackTimer > 0) {
             --this.attackTimer;
         }
+        if (!worldObj.isRemote) {
+            return;
+        }
 
-        if (this.motionX * this.motionX + this.motionZ * this.motionZ > 2.500000277905201E-7D
-                && this.rand.nextInt(5) == 0) {
+        if (this.motionX * this.motionX + this.motionZ * this.motionZ > 2.5E-7D && this.rand.nextInt(5) == 0) {
             int var1 = MathHelper.floor_double(this.posX);
             int var2 = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double) this.yOffset);
             int var3 = MathHelper.floor_double(this.posZ);

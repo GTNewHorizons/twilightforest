@@ -15,6 +15,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
 import twilightforest.TFAchievementPage;
@@ -26,6 +27,8 @@ import twilightforest.item.TFItems;
 public class EntityTFYeti extends EntityMob {
 
     private static final int ANGER_FLAG = 16;
+    private static final double CALM_FOLLOW_RANGE = 4.0D;
+    private static final double ANGRY_FOLLOW_RANGE = 40.0D;
 
     public EntityTFYeti(World par1World) {
         super(par1World);
@@ -58,7 +61,7 @@ public class EntityTFYeti extends EntityMob {
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D); // max health
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.38D); // movement speed
         this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(0.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(4.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(CALM_FOLLOW_RANGE);
     }
 
     protected void entityInit() {
@@ -66,55 +69,18 @@ public class EntityTFYeti extends EntityMob {
         this.dataWatcher.addObject(ANGER_FLAG, (byte) 0);
     }
 
-    /**
-     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
-     * use this to react to sunlight and start to burn.
-     */
     @Override
     public void onLivingUpdate() {
-        if (this.riddenByEntity != null) {
-            this.setSize(1.4F, 2.4F);
-
-            // stop player sneaking so that they can't dismount!
+        super.onLivingUpdate();
+        if (!this.worldObj.isRemote && this.riddenByEntity != null) {
+            // captured riders cant sneak before the throw task finishes
             if (this.riddenByEntity.isSneaking()) {
-                // System.out.println("Pinch beetle sneaking detected!");
-
                 this.riddenByEntity.setSneaking(false);
             }
-        } else {
-            this.setSize(1.4F, 2.4F);
 
-        }
-
-        super.onLivingUpdate();
-
-        // look at things in our jaws
-        if (this.riddenByEntity != null) {
-            this.getLookHelper().setLookPositionWithEntity(riddenByEntity, 100F, 100F);
-            // this.faceEntity(riddenByEntity, 100F, 100F);
-
-            // push out of user in wall
+            this.getLookHelper().setLookPositionWithEntity(this.riddenByEntity, 100.0F, 100.0F);
             Vec3 riderPos = this.getRiderPosition();
-            this.func_145771_j(riderPos.xCoord, riderPos.yCoord, riderPos.zCoord); // push out of block
-
-        }
-    }
-
-    /**
-     * Called when a player interacts with a mob. e.g. gets milk from a cow, gets into the saddle on a pig.
-     */
-    @Override
-    public boolean interact(EntityPlayer par1EntityPlayer) {
-        if (super.interact(par1EntityPlayer)) {
-            return true;
-        }
-        // else if (!this.worldObj.isRemote && (this.riddenByEntity == null || this.riddenByEntity == par1EntityPlayer))
-        // {
-        // par1EntityPlayer.mountEntity(this);
-        // return true;
-        // }
-        else {
-            return false;
+            this.func_145771_j(riderPos.xCoord, riderPos.yCoord, riderPos.zCoord);
         }
     }
 
@@ -122,25 +88,33 @@ public class EntityTFYeti extends EntityMob {
      * Pick up things we attack!
      */
     @Override
-    public boolean attackEntityAsMob(Entity par1Entity) {
-        if (this.riddenByEntity == null && par1Entity.ridingEntity == null) {
-            this.playSound(TwilightForestMod.ID + ":mob.yeti.grab", 4F, 0.75F + rand.nextFloat() * 0.25F);
-            par1Entity.mountEntity(this);
+    public boolean attackEntityAsMob(Entity target) {
+        if (this.worldObj.isRemote) {
+            return false;
         }
 
-        return super.attackEntityAsMob(par1Entity);
+        boolean attacked = super.attackEntityAsMob(target);
+        if (this.riddenByEntity == null && target != this
+                && target.ridingEntity == null
+                && target instanceof net.minecraft.entity.EntityLivingBase
+                && target.isEntityAlive()
+                && !target.isEntityInvulnerable()
+                && !(target instanceof EntityPlayer && ((EntityPlayer) target).capabilities.disableDamage)) {
+            // the Yetis base melee damage is zero, grabbing is its actual attack
+            this.playSound(TwilightForestMod.ID + ":mob.yeti.grab", 4.0F, 0.75F + this.rand.nextFloat() * 0.25F);
+            target.mountEntity(this);
+            return true;
+        }
+        return attacked;
     }
 
-    /**
-     * Called when the entity is attacked.
-     */
-    public boolean attackEntityFrom(DamageSource par1DamageSource, float par2) {
-        if (par1DamageSource.getEntity() != null) {
-            // become angry
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float damage) {
+        boolean damaged = super.attackEntityFrom(source, damage);
+        if (damaged && !this.worldObj.isRemote && source.getEntity() != null) {
             this.setAngry(true);
         }
-
-        return super.attackEntityFrom(par1DamageSource, par2);
+        return damaged;
     }
 
     /**
@@ -153,15 +127,15 @@ public class EntityTFYeti extends EntityMob {
     /**
      * Sets whether this yeti is angry or not.
      */
-    public void setAngry(boolean anger) {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(ANGER_FLAG);
-
-        if (anger) {
-            this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(40.0D);
-            this.dataWatcher.updateObject(ANGER_FLAG, (byte) (b0 | 2));
-        } else {
-            this.dataWatcher.updateObject(ANGER_FLAG, (byte) (b0 & -3));
+    public void setAngry(boolean angry) {
+        byte previous = this.dataWatcher.getWatchableObjectByte(ANGER_FLAG);
+        byte updated = (byte) (angry ? previous | 2 : previous & ~2);
+        if (updated != previous) {
+            this.dataWatcher.updateObject(ANGER_FLAG, updated);
         }
+        // clearing anger must also restore the peaceful detection radius
+        this.getEntityAttribute(SharedMonsterAttributes.followRange)
+                .setBaseValue(angry ? ANGRY_FOLLOW_RANGE : CALM_FOLLOW_RANGE);
     }
 
     /**
@@ -234,27 +208,26 @@ public class EntityTFYeti extends EntityMob {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
+        if (!this.worldObj.isRemote && par1DamageSource.getEntity() instanceof EntityPlayer
                 && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 
-    /**
-     * We're allowed to spawn in bright light only in snow
-     */
     @Override
     public boolean getCanSpawnHere() {
-        // are we in the snow
-        if (worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ))
-                == TFBiomeBase.tfSnow) {
-            // don't check light level
-            return worldObj.checkNoEntityCollision(boundingBox)
-                    && worldObj.getCollidingBoundingBoxes(this, boundingBox).size() == 0;
-        } else {
-            // normal EntityMob spawn check, checks light level
-            return super.getCanSpawnHere();
+        if (this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+            return false;
         }
+        // snow biomes bypass the light check, not collision and liquid checks
+        int x = MathHelper.floor_double(this.posX);
+        int z = MathHelper.floor_double(this.posZ);
+        if (this.worldObj.getBiomeGenForCoords(x, z) == TFBiomeBase.tfSnow) {
+            return this.worldObj.checkNoEntityCollision(this.boundingBox)
+                    && this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox).isEmpty()
+                    && !this.worldObj.isAnyLiquid(this.boundingBox);
+        }
+        return super.getCanSpawnHere();
     }
 
     /**
@@ -272,6 +245,7 @@ public class EntityTFYeti extends EntityMob {
         }
     }
 
+    @Override
     protected Item getDropItem() {
         return TFItems.arcticFur;
     }

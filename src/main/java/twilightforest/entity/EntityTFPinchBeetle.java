@@ -2,6 +2,7 @@ package twilightforest.entity;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
@@ -114,17 +115,18 @@ public class EntityTFPinchBeetle extends EntityMob {
     @Override
     public void onLivingUpdate() {
         if (this.riddenByEntity != null) {
-            this.setSize(1.9F, 2.0F);
+            if (this.width != 1.9F || this.height != 2.0F) {
+                this.setSize(1.9F, 2.0F);
+            }
 
-            // stop player sneaking so that they can't dismount!
-            if (this.riddenByEntity.isSneaking()) {
+            // stop a captured rider from immediately dismounting by sneaking
+            if (!worldObj.isRemote && this.riddenByEntity.isSneaking()) {
                 // System.out.println("Pinch beetle sneaking detected!");
 
                 this.riddenByEntity.setSneaking(false);
             }
-        } else {
+        } else if (this.width != 1.2F || this.height != 1.1F) {
             this.setSize(1.2F, 1.1F);
-
         }
 
         super.onLivingUpdate();
@@ -135,8 +137,10 @@ public class EntityTFPinchBeetle extends EntityMob {
             // this.faceEntity(riddenByEntity, 100F, 100F);
 
             // push out of user in wall
-            Vec3 riderPos = this.getRiderPosition();
-            this.func_145771_j(riderPos.xCoord, riderPos.yCoord, riderPos.zCoord); // push out of block
+            if (!worldObj.isRemote) {
+                Vec3 riderPos = this.getRiderPosition();
+                this.func_145771_j(riderPos.xCoord, riderPos.yCoord, riderPos.zCoord); // push out of block
+            }
 
         }
     }
@@ -147,7 +151,7 @@ public class EntityTFPinchBeetle extends EntityMob {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
+        if (!worldObj.isRemote && par1DamageSource.getEntity() instanceof EntityPlayer
                 && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
         }
@@ -171,11 +175,14 @@ public class EntityTFPinchBeetle extends EntityMob {
      */
     @Override
     public boolean attackEntityAsMob(Entity par1Entity) {
-        if (this.riddenByEntity == null && par1Entity.ridingEntity == null) {
+        boolean hit = super.attackEntityAsMob(par1Entity);
+        if (hit && !worldObj.isRemote
+                && this.riddenByEntity == null
+                && par1Entity instanceof EntityLivingBase
+                && par1Entity.ridingEntity == null) {
             par1Entity.mountEntity(this);
         }
-
-        return super.attackEntityAsMob(par1Entity);
+        return hit;
     }
 
     /**
@@ -183,17 +190,7 @@ public class EntityTFPinchBeetle extends EntityMob {
      */
     @Override
     public boolean interact(EntityPlayer par1EntityPlayer) {
-        if (super.interact(par1EntityPlayer)) {
-            return true;
-        }
-        // else if (!this.worldObj.isRemote && (this.riddenByEntity == null || this.riddenByEntity == par1EntityPlayer))
-        // {
-        // par1EntityPlayer.mountEntity(this);
-        // return true;
-        // }
-        else {
-            return false;
-        }
+        return super.interact(par1EntityPlayer);
     }
 
     @Override

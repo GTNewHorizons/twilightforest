@@ -39,6 +39,7 @@ public class EntityTFGiantMiner extends EntityMob {
         Arrays.fill(this.equipmentDropChances, 0F);
     }
 
+    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(80.0D);
@@ -55,6 +56,7 @@ public class EntityTFGiantMiner extends EntityMob {
         return true;
     }
 
+    @Override
     protected Item getDropItem() {
         return TFItems.giantPick;
     }
@@ -63,6 +65,7 @@ public class EntityTFGiantMiner extends EntityMob {
      * Drop 0-2 items of this living's type. @param par1 - Whether this entity has recently been hit by a player. @param
      * par2 - Level of Looting used to kill this mob.
      */
+    @Override
     protected void dropFewItems(boolean par1, int par2) {
         Item item = this.getDropItem();
         // just drop 1 item every time

@@ -9,6 +9,7 @@ import net.minecraft.world.World;
 public class EntityTFIceSnowball extends EntityThrowable {
 
     private static final int DAMAGE = 8;
+    private boolean popped;
 
     public EntityTFIceSnowball(World world) {
         super(world);
@@ -21,8 +22,9 @@ public class EntityTFIceSnowball extends EntityThrowable {
     @Override
     public void onUpdate() {
         super.onUpdate();
-
-        makeTrail();
+        if (!this.isDead && !this.popped && this.worldObj.isRemote) {
+            makeTrail();
+        }
     }
 
     // How much this entity falls each tick
@@ -31,7 +33,7 @@ public class EntityTFIceSnowball extends EntityThrowable {
         return 0.006F;
     }
 
-    // Make slimy trail
+    // Keep the existing snowball-puff trail client-side.
     public void makeTrail() {
         for (int i = 0; i < 2; i++) {
             double dx = posX + 0.5 * (rand.nextDouble() - rand.nextDouble());
@@ -43,11 +45,12 @@ public class EntityTFIceSnowball extends EntityThrowable {
 
     // Reflect!
     @Override
-    public boolean attackEntityFrom(DamageSource damageSource, float i) {
-        setBeenAttacked();
-
-        pop();
-
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (this.isDead || this.popped) {
+            return false;
+        }
+        this.setBeenAttacked();
+        this.pop();
         return true;
     }
 
@@ -55,35 +58,38 @@ public class EntityTFIceSnowball extends EntityThrowable {
      * What happens when we hit something?
      */
     @Override
-    protected void onImpact(MovingObjectPosition par1MovingObjectPosition) {
-        // only damage living things
-        /*
-         * if (par1MovingObjectPosition.entityHit != null && par1MovingObjectPosition.entityHit instanceof
-         * EntityLivingBase) { if
-         * (par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()),
-         * DAMAGE)) { // damage armor? // TODO: } }
-         */
-        pop();
+    protected void onImpact(MovingObjectPosition impact) {
+        if (this.isDead || this.popped) {
+            return;
+        }
+        if (!this.worldObj.isRemote && impact.entityHit instanceof EntityLivingBase target
+                && impact.entityHit != this.getThrower()) {
+            target.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), DAMAGE);
+        }
+        this.pop();
     }
 
     /**
      * Yeah, do that
      */
     protected void pop() {
-        for (int i = 0; i < 8; ++i) {
-            this.worldObj.spawnParticle(
-                    "snowballpoof",
-                    this.posX,
-                    this.posY,
-                    this.posZ,
-                    rand.nextGaussian() * 0.05D,
-                    rand.nextDouble() * 0.2D,
-                    rand.nextGaussian() * 0.05D);
+        if (this.isDead || this.popped) {
+            return;
         }
+        this.popped = true;
 
-        // noise
-        // this.worldObj.playSoundAtEntity(this, "mob.slime.big", 1.0F, 1.0F / (rand.nextFloat() * 0.4F +
-        // 0.8F));
+        if (this.worldObj.isRemote) {
+            for (int i = 0; i < 8; ++i) {
+                this.worldObj.spawnParticle(
+                        "snowballpoof",
+                        this.posX,
+                        this.posY,
+                        this.posZ,
+                        rand.nextGaussian() * 0.05D,
+                        rand.nextDouble() * 0.2D,
+                        rand.nextGaussian() * 0.05D);
+            }
+        }
 
         if (!this.worldObj.isRemote) {
             this.setDead();

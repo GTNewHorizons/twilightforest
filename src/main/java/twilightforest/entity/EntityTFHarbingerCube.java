@@ -62,11 +62,10 @@ public class EntityTFHarbingerCube extends EntityMob {
     @Override
     protected void dropFewItems(boolean hitByPlayer, int looting) {
         if (hitByPlayer) {
-            ItemStack item = new ItemStack(TFItems.metaItem, 1 + looting, 1);
             int dropCount = this.rand.nextInt(3);
 
             for (int i = 0; i < dropCount; ++i) {
-                this.entityDropItem(item, 1f);
+                this.entityDropItem(new ItemStack(TFItems.metaItem, 1 + looting, 1), 1.0F);
             }
         }
     }

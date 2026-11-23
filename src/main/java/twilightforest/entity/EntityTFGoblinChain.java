@@ -34,8 +34,6 @@ public class EntityTFGoblinChain extends Entity {
     public void onUpdate() {
         super.onUpdate();
 
-        this.ticksExisted++;
-
         lastTickPosX = posX;
         lastTickPosY = posY;
         lastTickPosZ = posZ;
@@ -53,6 +51,7 @@ public class EntityTFGoblinChain extends Entity {
     /**
      * Returns true if other Entities should be prevented from moving through this Entity.
      */
+    @Override
     public boolean canBeCollidedWith() {
         return false;
     }
@@ -60,10 +59,12 @@ public class EntityTFGoblinChain extends Entity {
     /**
      * Returns true if this entity should push and be pushed by other entities when colliding.
      */
+    @Override
     public boolean canBePushed() {
         return false;
     }
 
+    @Override
     public boolean isEntityEqual(Entity entity) {
         return this == entity || this.goblin == entity;
     }

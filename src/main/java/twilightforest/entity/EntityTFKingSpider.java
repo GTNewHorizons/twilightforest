@@ -10,6 +10,7 @@ import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
@@ -91,17 +92,28 @@ public class EntityTFKingSpider extends EntitySpider {
     /**
      * Init creature with mount
      */
-    public IEntityLivingData onSpawnWithEgg(IEntityLivingData par1EntityLivingData) {
-        Object par1EntityLivingData1 = super.onSpawnWithEgg(par1EntityLivingData);
+    @Override
+    public IEntityLivingData onSpawnWithEgg(IEntityLivingData spawnData) {
+        IEntityLivingData result = super.onSpawnWithEgg(spawnData);
+        if (this.worldObj.isRemote) {
+            return result;
+        }
 
-        // always a spider jockey
-        EntityTFSkeletonDruid druid = new EntityTFSkeletonDruid(this.worldObj);
-        druid.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-        druid.onSpawnWithEgg(null);
-        this.worldObj.spawnEntityInWorld(druid);
-        druid.mountEntity(this);
-
-        return (IEntityLivingData) par1EntityLivingData1;
+        // vanilla spiders can spawn a jockey, replace it
+        if (this.riddenByEntity instanceof EntitySkeleton) {
+            Entity vanillaRider = this.riddenByEntity;
+            vanillaRider.mountEntity(null);
+            vanillaRider.setDead();
+        }
+        if (this.riddenByEntity == null) {
+            EntityTFSkeletonDruid druid = new EntityTFSkeletonDruid(this.worldObj);
+            druid.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
+            druid.onSpawnWithEgg(null);
+            if (this.worldObj.spawnEntityInWorld(druid)) {
+                druid.mountEntity(this);
+            }
+        }
+        return result;
     }
 
     /**

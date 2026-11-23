@@ -120,7 +120,7 @@ public class EntityTFTowerGhast extends EntityGhast {
             this.entityAge += 2;
         }
 
-        if (this.rand.nextBoolean()) {
+        if (worldObj.isRemote && this.rand.nextBoolean()) {
             this.worldObj.spawnParticle(
                     "reddust",
                     this.posX + (this.rand.nextDouble() - 0.5D) * (double) this.width,
@@ -138,8 +138,9 @@ public class EntityTFTowerGhast extends EntityGhast {
      * Altered Ghast AI
      */
     protected void updateEntityActionState() {
-        if (!this.worldObj.isRemote && this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
-            this.setDead();
+        if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+            setDead();
+            return;
         }
 
         this.despawnEntity();
@@ -151,79 +152,81 @@ public class EntityTFTowerGhast extends EntityGhast {
         if (this.inTrapCounter > 0) {
             this.inTrapCounter--;
             this.targetedEntity = null;
-            return; // do nothing if in trap;
+            this.isAggressive = false;
+            this.aggroCounter = 0;
+            this.attackCounter = 0;
+            if (dataWatcher.getWatchableObjectByte(AGGRO_STATUS) != 0) {
+                dataWatcher.updateObject(AGGRO_STATUS, (byte) 0);
+            }
+            return; // do nothing if in trap
         }
 
         this.prevAttackCounter = this.attackCounter;
 
         // target
-        if (this.targetedEntity != null && this.targetedEntity.isDead) {
+        if (this.targetedEntity != null && (!this.targetedEntity.isEntityAlive()
+                || this.targetedEntity instanceof EntityPlayer player && player.capabilities.disableDamage)) {
             this.targetedEntity = null;
+            this.isAggressive = false;
+            this.aggroCounter = 0;
         }
 
         if (this.targetedEntity == null) {
-            this.targetedEntity = findPlayerInRange();
+            // target scans are considerably more expensive than movement updates
+            if (ticksExisted % 10 == 0) {
+                this.targetedEntity = findPlayerInRange();
+            }
         } else if (!this.isAggressive && this.targetedEntity instanceof EntityPlayer) {
             checkToIncreaseAggro((EntityPlayer) this.targetedEntity);
         }
 
-        // check if we are at our waypoint target
-        double offsetX = this.waypointX - this.posX;
-        double offsetY = this.waypointY - this.posY;
-        double offsetZ = this.waypointZ - this.posZ;
-        double distanceDesired = offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ;
-
-        if ((distanceDesired < 1.0D || distanceDesired > 3600.0D) && this.wanderFactor > 0) {
-            this.waypointX = this.posX + (double) ((this.rand.nextFloat() * 2.0F - 1.0F) * wanderFactor);
-            this.waypointY = this.posY + (double) ((this.rand.nextFloat() * 2.0F - 1.0F) * wanderFactor);
-            this.waypointZ = this.posZ + (double) ((this.rand.nextFloat() * 2.0F - 1.0F) * wanderFactor);
+        // choose a waypoint before measuring its offset,
+        // offsets after replacing a waypoint and could fly in the wrong direction
+        double dx = waypointX - posX;
+        double dy = waypointY - posY;
+        double dz = waypointZ - posZ;
+        double distanceSq = dx * dx + dy * dy + dz * dz;
+        if ((distanceSq < 1.0D || distanceSq > 3600.0D) && wanderFactor > 0) {
+            waypointX = posX + (rand.nextFloat() * 2.0F - 1.0F) * wanderFactor;
+            waypointY = posY + (rand.nextFloat() * 2.0F - 1.0F) * wanderFactor;
+            waypointZ = posZ + (rand.nextFloat() * 2.0F - 1.0F) * wanderFactor;
         }
 
-        // move?
-        if (this.targetedEntity == null && this.wanderFactor > 0) {
-            if (this.courseChangeCooldown-- <= 0) {
-                this.courseChangeCooldown += this.rand.nextInt(20) + 20;
-                distanceDesired = MathHelper.sqrt_double(distanceDesired);
+        if (targetedEntity == null && wanderFactor > 0) {
+            if (courseChangeCooldown-- <= 0) {
+                courseChangeCooldown += rand.nextInt(20) + 20;
 
-                if (!this.isWithinHomeDistance(
+                if (!isWithinHomeDistance(
                         MathHelper.floor_double(waypointX),
                         MathHelper.floor_double(waypointY),
                         MathHelper.floor_double(waypointZ))) {
-                    // change waypoint to be more towards home
-                    ChunkCoordinates cc = TFFeature.getNearestCenterXYZ(
-                            MathHelper.floor_double(this.posX),
-                            MathHelper.floor_double(this.posZ),
-                            worldObj);
-
-                    Vec3 homeVector = Vec3
-                            .createVectorHelper(cc.posX - this.posX, cc.posY + 128 - this.posY, cc.posZ - this.posZ);
-                    homeVector = homeVector.normalize();
-
-                    this.waypointX = this.posX + homeVector.xCoord * 16.0F
-                            + (double) ((this.rand.nextFloat() * 2.0F - 1.0F) * 16.0F);
-                    this.waypointY = this.posY + homeVector.yCoord * 16.0F
-                            + (double) ((this.rand.nextFloat() * 2.0F - 1.0F) * 16.0F);
-                    this.waypointZ = this.posZ + homeVector.zCoord * 16.0F
-                            + (double) ((this.rand.nextFloat() * 2.0F - 1.0F) * 16.0F);
-
-                    // System.out.println("Setting tower ghast on a course towards home: " + this.waypointX + ", " +
-                    // this.waypointY + ", " + this.waypointZ);
+                    // guide wandering ghasts towards the tower rather than searching for its centre again
+                    ChunkCoordinates home = getHomePosition();
+                    Vec3 homeVector = Vec3.createVectorHelper(home.posX - posX, home.posY - posY, home.posZ - posZ)
+                            .normalize();
+                    waypointX = posX + homeVector.xCoord * 16.0D + (rand.nextFloat() * 2.0F - 1.0F) * 16.0F;
+                    waypointY = posY + homeVector.yCoord * 16.0D + (rand.nextFloat() * 2.0F - 1.0F) * 16.0F;
+                    waypointZ = posZ + homeVector.zCoord * 16.0D + (rand.nextFloat() * 2.0F - 1.0F) * 16.0F;
                 }
 
-                if (this.isCourseTraversable(this.waypointX, this.waypointY, this.waypointZ, distanceDesired)) {
-                    this.motionX += offsetX / distanceDesired * 0.1D;
-                    this.motionY += offsetY / distanceDesired * 0.1D;
-                    this.motionZ += offsetZ / distanceDesired * 0.1D;
+                dx = waypointX - posX;
+                dy = waypointY - posY;
+                dz = waypointZ - posZ;
+                double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                if (distance > 1.0E-6D && isCourseTraversable(waypointX, waypointY, waypointZ, distance)) {
+                    motionX += dx / distance * 0.1D;
+                    motionY += dy / distance * 0.1D;
+                    motionZ += dz / distance * 0.1D;
                 } else {
-                    this.waypointX = this.posX;
-                    this.waypointY = this.posY;
-                    this.waypointZ = this.posZ;
+                    waypointX = posX;
+                    waypointY = posY;
+                    waypointZ = posZ;
                 }
             }
         } else {
-            this.motionX *= 0.75;
-            this.motionY *= 0.75;
-            this.motionZ *= 0.75;
+            motionX *= 0.75D;
+            motionY *= 0.75D;
+            motionZ *= 0.75D;
         }
 
         // check if our target is still within range
@@ -313,24 +316,33 @@ public class EntityTFTowerGhast extends EntityGhast {
     /**
      * Find a player in our aggro range. If we feel the need to become aggressive towards that player, or it is within
      * our stare range, return
-     * 
+     *
      * @return
      */
     protected EntityLivingBase findPlayerInRange() {
-        EntityPlayer closest = this.worldObj.getClosestVulnerablePlayerToEntity(this, aggroRange);
+        EntityPlayer best = null;
+        double bestDistanceSq = aggroRange * aggroRange;
 
-        if (closest != null) {
-            float range = this.getDistanceToEntity(closest);
-            if (range < this.stareRange || this.shouldAttackPlayer(closest)) {
-                return closest;
+        // dont let a nearby hidden player prevent from noticing a visible one
+        @SuppressWarnings("unchecked")
+        java.util.List<EntityPlayer> players = worldObj
+                .getEntitiesWithinAABB(EntityPlayer.class, boundingBox.expand(aggroRange, aggroRange, aggroRange));
+        for (EntityPlayer player : players) {
+            if (!player.isEntityAlive() || player.capabilities.disableDamage || !canEntityBeSeen(player)) {
+                continue;
+            }
+            double distanceSq = getDistanceSqToEntity(player);
+            if (distanceSq < bestDistanceSq && (distanceSq < stareRange * stareRange || shouldAttackPlayer(player))) {
+                best = player;
+                bestDistanceSq = distanceSq;
             }
         }
-        return null;
+        return best;
     }
 
     /**
      * Check if we should become aggressive towards the player.
-     * 
+     *
      * @param par1EntityPlayer
      */
     protected void checkToIncreaseAggro(EntityPlayer par1EntityPlayer) {
@@ -363,20 +375,20 @@ public class EntityTFTowerGhast extends EntityGhast {
     /**
      * True if the ghast has an unobstructed line of travel to the waypoint.
      */
-    protected boolean isCourseTraversable(double par1, double par3, double par5, double par7) {
-        double var9 = (this.waypointX - this.posX) / par7;
-        double var11 = (this.waypointY - this.posY) / par7;
-        double var13 = (this.waypointZ - this.posZ) / par7;
-        AxisAlignedBB var15 = this.boundingBox.copy();
-
-        for (int var16 = 1; (double) var16 < par7; ++var16) {
-            var15.offset(var9, var11, var13);
-
-            if (!this.worldObj.getCollidingBoundingBoxes(this, var15).isEmpty()) {
+    protected boolean isCourseTraversable(double targetX, double targetY, double targetZ, double distance) {
+        if (distance <= 0.0D) {
+            return false;
+        }
+        double stepX = (targetX - posX) / distance;
+        double stepY = (targetY - posY) / distance;
+        double stepZ = (targetZ - posZ) / distance;
+        AxisAlignedBB testBox = boundingBox.copy();
+        for (int step = 1; step < distance; step++) {
+            testBox.offset(stepX, stepY, stepZ);
+            if (!worldObj.getCollidingBoundingBoxes(this, testBox).isEmpty()) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -469,6 +481,13 @@ public class EntityTFTowerGhast extends EntityGhast {
 
     public void setInTrap() {
         this.inTrapCounter = 10;
+        this.isAggressive = false;
+        this.aggroCounter = 0;
+        this.attackCounter = 0;
+        this.targetedEntity = null;
+        if (!worldObj.isRemote) {
+            dataWatcher.updateObject(AGGRO_STATUS, (byte) 0);
+        }
     }
 
     public void setHomeArea(int par1, int par2, int par3, int par4) {
