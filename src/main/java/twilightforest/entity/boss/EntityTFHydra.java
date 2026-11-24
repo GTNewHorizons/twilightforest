@@ -121,21 +121,12 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
 
     @Override
     public void onLivingUpdate() {
-        if (hc[0].headEntity == null || hc[1].headEntity == null || hc[2].headEntity == null) {
-            // don't spawn if we're connected in multiplayer
-            if (shouldSpawnHeads() && !worldObj.isRemote) {
-                for (int i = 0; i < numHeads; i++) {
-                    hc[i].headEntity = new EntityTFHydraHead(this, "head" + i, 3F, 3F);
-                    hc[i].headEntity.setPosition(this.posX, this.posY, this.posZ);
-                    worldObj.spawnEntityInWorld(hc[i].headEntity);
-                }
-
-                setSpawnHeads(false);
-
-                // System.out.println("Server is spawning heads");
-            } else {
-                // I think the head containers should attempt connection during the update call below
+        if (!worldObj.isRemote && shouldSpawnHeads()) {
+            boolean allSpawned = true;
+            for (HydraHeadContainer head : hc) {
+                allSpawned &= head.spawnHead();
             }
+            setSpawnHeads(!allSpawned);
         }
 
         body.onUpdate();
@@ -364,8 +355,12 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
+        nbttagcompound.setInteger("TFHomeRadius", (int) maximumHomeDistance);
         nbttagcompound.setBoolean("SpawnHeads", shouldSpawnHeads());
         nbttagcompound.setByte("NumHeads", (byte) countActiveHeads());
+        NBTTagList states = new NBTTagList();
+        for (HydraHeadContainer head : hc) states.appendTag(head.writeState());
+        nbttagcompound.setTag("HydraHeadStates", states);
     }
 
     /**
@@ -379,13 +374,22 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
             int hx = (int) nbttaglist.func_150309_d(0);
             int hy = (int) nbttaglist.func_150309_d(1);
             int hz = (int) nbttaglist.func_150309_d(2);
-            this.setHomeArea(hx, hy, hz, 20);
+            this.setHomeArea(
+                    hx,
+                    hy,
+                    hz,
+                    nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
         }
         if (!nbttagcompound.getBoolean("HasHome")) {
             this.detachHome();
         }
         setSpawnHeads(nbttagcompound.getBoolean("SpawnHeads"));
-        activateNumberOfHeads(nbttagcompound.getByte("NumHeads"));
+        NBTTagList states = nbttagcompound.getTagList("HydraHeadStates", 10);
+        if (states.tagCount() == numHeads) {
+            for (int i = 0; i < numHeads; i++) hc[i].readState(states.getCompoundTagAt(i));
+        } else if (nbttagcompound.hasKey("NumHeads", 99)) {
+            activateNumberOfHeads(nbttagcompound.getByte("NumHeads"));
+        }
     }
 
     @Override

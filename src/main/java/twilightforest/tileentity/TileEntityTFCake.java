@@ -20,6 +20,7 @@ public class TileEntityTFCake extends TileEntity {
         if (isSprinkled != sprinkled) {
             isSprinkled = sprinkled;
             markDirty();
+            if (worldObj != null && !worldObj.isRemote) worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
         }
     }
 
@@ -39,6 +40,7 @@ public class TileEntityTFCake extends TileEntity {
         NBTTagCompound tagCompound = packet.func_148857_g();
 
         this.readFromNBT(tagCompound);
+        if (worldObj != null) worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
     }
 
     /**

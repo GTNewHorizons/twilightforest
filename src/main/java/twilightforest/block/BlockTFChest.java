@@ -66,7 +66,7 @@ public class BlockTFChest extends BlockChest {
 
     /**
      * Called when a tile entity on a side of this block changes is created or is destroyed.
-     * 
+     *
      * @param world The world
      * @param x     The x position of this block instance
      * @param y     The y position of this block instance
@@ -77,9 +77,7 @@ public class BlockTFChest extends BlockChest {
      */
     public void onNeighborChange(IBlockAccess world, int x, int y, int z, int tileX, int tileY, int tileZ) {
         super.onNeighborChange(world, x, y, z, tileX, tileY, tileZ);
-        TileEntityChest tileentitychest = (TileEntityChest) world.getTileEntity(x, y, z);
-
-        if (tileentitychest != null) {
+        if (world.getTileEntity(x, y, z) instanceof TileEntityChest tileentitychest) {
             tileentitychest.updateContainingBlockInfo();
         }
     }

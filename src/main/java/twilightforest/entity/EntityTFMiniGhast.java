@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 public class EntityTFMiniGhast extends EntityTFTowerGhast {
 
     public boolean isMinion = false;
+    private boolean trapChargeConsumed;
 
     public EntityTFMiniGhast(World par1World) {
         super(par1World);
@@ -107,7 +108,15 @@ public class EntityTFMiniGhast extends EntityTFTowerGhast {
         this.configureMinion(true);
     }
 
+    @Override
+    protected void checkForTowerHome() {
+        if (!isMinion) {
+            super.checkForTowerHome();
+        }
+    }
+
     private void configureMinion(boolean heal) {
+        detachHome();
         this.wanderFactor = 0.005F;
         this.isMinion = true;
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(6.0D);
@@ -126,15 +135,23 @@ public class EntityTFMiniGhast extends EntityTFTowerGhast {
         }
     }
 
+    public boolean consumeTrapCharge() {
+        if (worldObj.isRemote || deathTime <= 0 || trapChargeConsumed) return false;
+        trapChargeConsumed = true;
+        return true;
+    }
+
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         nbttagcompound.setBoolean("isMinion", this.isMinion);
+        nbttagcompound.setBoolean("TrapChargeConsumed", trapChargeConsumed);
         super.writeEntityToNBT(nbttagcompound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
         super.readEntityFromNBT(nbttagcompound);
+        trapChargeConsumed = nbttagcompound.getBoolean("TrapChargeConsumed");
         if (nbttagcompound.getBoolean("isMinion")) {
             this.configureMinion(false);
         }

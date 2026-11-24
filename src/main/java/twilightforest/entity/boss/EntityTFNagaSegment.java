@@ -23,6 +23,7 @@ public class EntityTFNagaSegment extends Entity {
 
     private int deathCounter;
     private int attackCooldown;
+    private boolean hasFollowPosition;
 
     public EntityTFNagaSegment(World par1World) {
         super(par1World);
@@ -53,7 +54,7 @@ public class EntityTFNagaSegment extends Entity {
         }
 
         // do not transfer damage from segments that are disconnected and about to explode
-        if (naga != null) {
+        if (isAttached()) {
             // hurtTime = maxHurtTime = 10;
             // System.out.println("transferring damage, world is " + this.worldObj);
 
@@ -68,70 +69,49 @@ public class EntityTFNagaSegment extends Entity {
      */
     @Override
     public void onUpdate() {
-        super.onUpdate();
-        if (this.attackCooldown > 0) {
-            --this.attackCooldown;
-        }
-
-        // remove if invalid
         if (this.naga == null || this.naga.isDead) {
             this.setDead();
             return;
         }
 
+        if (this.attackCooldown > 0) {
+            --this.attackCooldown;
+        }
+
+        // the head positions attached segments, dont apply their movement a second time
+        if (isAttached()) {
+            if (!this.worldObj.isRemote) {
+                collideWithOthers();
+            }
+            return;
+        }
+
+        if (!isDetaching()) {
+            setDead();
+            return;
+        }
+
+        super.onUpdate();
         lastTickPosX = posX;
         lastTickPosY = posY;
         lastTickPosZ = posZ;
 
-        // System.out.println("Updating " + this + " with angles " + rotationYaw + ", " + rotationPitch);
-
-        for (; rotationYaw - prevRotationYaw < -180F; prevRotationYaw -= 360F) {}
-        for (; rotationYaw - prevRotationYaw >= 180F; prevRotationYaw += 360F) {}
-        for (; rotationPitch - prevRotationPitch < -180F; prevRotationPitch -= 360F) {}
-        for (; rotationPitch - prevRotationPitch >= 180F; prevRotationPitch += 360F) {}
-
-        // this.pushOutOfBlocks(posX, posY, posZ);
-
+        // detached segments fall independently and no longer damage/push anything
         if (!this.onGround) {
             this.motionY -= 0.08D;
         } else {
-            this.motionX *= 0.800000011920929D;
-            // this.motionY *= 0.800000011920929D;
-            this.motionZ *= 0.800000011920929D;
+            this.motionX *= 0.8D;
+            this.motionZ *= 0.8D;
         }
-
         this.moveEntity(motionX, motionY, motionZ);
 
-        if (!this.worldObj.isRemote) {
-            collideWithOthers();
-        }
-
-        // if (this.segment == 6)
-        // {
-        // System.out.println("Updating segment 6");
-        //
-        //// int dx = MathHelper.floor_double(this.posX);
-        //// int dy = MathHelper.floor_double(this.posY);
-        //// int dz = MathHelper.floor_double(this.posZ);
-        ////
-        //// if (worldObj.isAirBlock(dx, dy, dz))
-        //// {
-        //// worldObj.setBlock(dx, dy, dz, Blocks.torch);
-        //// }
-        //
-        // }
-
-        if (deathCounter > 0) {
-            deathCounter--;
-
-            if (deathCounter == 0) {
-
+        if (--deathCounter == 0) {
+            if (worldObj.isRemote) {
                 for (int k = 0; k < 20; k++) {
                     double d = rand.nextGaussian() * 0.02D;
                     double d1 = rand.nextGaussian() * 0.02D;
                     double d2 = rand.nextGaussian() * 0.02D;
                     String explosionType = rand.nextBoolean() ? "largeexplode" : "explode";
-
                     worldObj.spawnParticle(
                             explosionType,
                             (posX + rand.nextFloat() * width * 2.0F) - width,
@@ -141,15 +121,38 @@ public class EntityTFNagaSegment extends Entity {
                             d1,
                             d2);
                 }
-
-                // really explode?
-                // worldObj.newExplosion(null, posX, posY, posZ, 3.0F, true);
-
-                setDead();
-                // setDead already removes the segment from normal world ticking
             }
+            setDead();
         }
+    }
 
+    boolean isDetaching() {
+        return deathCounter > 0;
+    }
+
+    boolean hasFollowPosition() {
+        return hasFollowPosition;
+    }
+
+    private boolean isAttached() {
+        return !isDead && deathCounter == 0
+                && naga != null
+                && !naga.isDead
+                && segment >= 0
+                && segment < naga.currentSegments
+                && naga.body[segment] == this;
+    }
+
+    void follow(double x, double y, double z, float yaw, float pitch) {
+        lastTickPosX = prevPosX = hasFollowPosition ? posX : x;
+        lastTickPosY = prevPosY = hasFollowPosition ? posY : y;
+        lastTickPosZ = prevPosZ = hasFollowPosition ? posZ : z;
+        prevRotationYaw = hasFollowPosition ? rotationYaw : MathHelper.wrapAngleTo180_float(yaw);
+        prevRotationPitch = hasFollowPosition ? rotationPitch : pitch;
+        setPosition(x, y, z);
+        setRotation(yaw, pitch);
+        motionX = motionY = motionZ = 0;
+        hasFollowPosition = true;
     }
 
     protected void collideWithOthers() {
@@ -197,7 +200,7 @@ public class EntityTFNagaSegment extends Entity {
      * Returns true if other Entities should be prevented from moving through this Entity.
      */
     public boolean canBeCollidedWith() {
-        return true;
+        return isAttached();
     }
 
     /**
@@ -245,7 +248,11 @@ public class EntityTFNagaSegment extends Entity {
      * Starts the self destruction process
      */
     public void selfDestruct() {
-        this.deathCounter = 30;
+        if (!this.hasFollowPosition || (!worldObj.isRemote && !this.addedToChunk)) {
+            setDead();
+        } else if (!isDead && !isDetaching()) {
+            this.deathCounter = 30;
+        }
     }
 
 }

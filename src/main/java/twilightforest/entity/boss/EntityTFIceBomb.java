@@ -203,7 +203,7 @@ public class EntityTFIceBomb extends EntityThrowable {
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound nbt) {
+    public void readEntityFromNBT(NBTTagCompound nbt) {
         super.readEntityFromNBT(nbt);
         this.zoneTimer = nbt.hasKey("ZoneTimer") ? Math.max(0, nbt.getInteger("ZoneTimer")) : 80;
         this.hasHit = nbt.getBoolean("HasHit");
@@ -211,7 +211,7 @@ public class EntityTFIceBomb extends EntityThrowable {
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound nbt) {
+    public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
         nbt.setInteger("ZoneTimer", this.zoneTimer);
         nbt.setBoolean("HasHit", this.hasHit);

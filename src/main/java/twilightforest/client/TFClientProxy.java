@@ -10,6 +10,7 @@ import net.minecraft.client.model.ModelSlime;
 import net.minecraft.client.model.ModelWolf;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.particle.EntitySmokeFX;
+import net.minecraft.client.renderer.entity.RenderFireball;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.init.Items;
@@ -306,6 +307,7 @@ public class TFClientProxy extends TFCommonProxy {
         RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.EntityTFRovingCube.class, new RenderTFRovingCube());
 
         // projectiles
+        RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.boss.EntityTFUrGhastFireball.class, new RenderFireball(2.0F));
         RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.EntityTFNatureBolt.class, new RenderSnowball(Items.wheat_seeds));
         RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.boss.EntityTFLichBolt.class, new RenderSnowball(Items.ender_pearl));
         RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.EntityTFTwilightWandBolt.class, new RenderSnowball(Items.ender_pearl));

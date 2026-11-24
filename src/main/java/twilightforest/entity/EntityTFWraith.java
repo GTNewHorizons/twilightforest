@@ -181,7 +181,6 @@ public class EntityTFWraith extends EntityFlying implements IMob {
         }
     }
 
-    @Override
     protected void attackEntity(Entity entity, float distance) {
         if (this.attackTime <= 0 && distance < 2.0F
                 && entity.boundingBox.maxY > this.boundingBox.minY

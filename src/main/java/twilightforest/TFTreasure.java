@@ -4,6 +4,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -22,8 +23,6 @@ public class TFTreasure {
     private static final int MAX_SLOT_ATTEMPTS = 100;
 
     int type;
-
-    Random treasureRNG;
 
     public TFTreasureTable useless;
     // one quarter of common treasures are one of these useless items.
@@ -72,8 +71,6 @@ public class TFTreasure {
         rare = new TFTreasureTable();
         ultrarare = new TFTreasureTable();
 
-        treasureRNG = new Random();
-
         // TODO: separate these into plain ol' different classes
         fill(i);
     }
@@ -91,10 +88,17 @@ public class TFTreasure {
     public boolean generate(World world, Random rand, int cx, int cy, int cz, Block chestBlock) {
         boolean flag = true;
 
-        treasureRNG.setSeed(world.getSeed() * cx + cy ^ cz);
+        Random treasureRNG = new Random(world.getSeed() * cx + cy ^ cz);
 
         // make a chest
-        world.setBlock(cx, cy, cz, chestBlock, 0, 2);
+        if (cy < 0 || cy >= world.getHeight()) return false;
+        if (world.getBlock(cx, cy, cz) == chestBlock) {
+            // dont refill a previously generated chest on reloads
+            return world.getTileEntity(cx, cy, cz) instanceof TileEntityChest;
+        }
+        if (world.getTileEntity(cx, cy, cz) != null || !world.setBlock(cx, cy, cz, chestBlock, 0, 2)
+                || !(world.getTileEntity(cx, cy, cz) instanceof TileEntityChest))
+            return false;
 
         // add 4 common items
         for (int i = 0; i < COMMON_ROLLS; i++) {
@@ -111,6 +115,43 @@ public class TFTreasure {
             flag &= addItemToChest(world, treasureRNG, cx, cy, cz, getRareItem(treasureRNG));
         }
         return flag;
+    }
+
+    // boss rewards musnt replace an existing chest, te or solid player block
+    public boolean generateBossReward(World world, int x, int y, int z) {
+        if (world.isRemote) return false;
+        for (int radius = 0; radius <= 4; radius++) {
+            for (int dy = 0; dy <= 3; dy++) {
+                for (int dx = -radius; dx <= radius; dx++) {
+                    for (int dz = -radius; dz <= radius; dz++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dz)) != radius) continue;
+                        int px = x + dx, py = y + dy, pz = z + dz;
+                        if (py <= 0 || py >= world.getHeight()
+                                || !world.blockExists(px, py, pz)
+                                || !world.isAirBlock(px, py, pz)
+                                || !World.doesBlockHaveSolidTopSurface(world, px, py - 1, pz))
+                            continue;
+                        if (generate(world, null, px, py, pz)) return true;
+                        // Never roll the same reward a second time if a chest was partially filled.
+                        if (world.getTileEntity(px, py, pz) instanceof TileEntityChest) return false;
+                    }
+                }
+            }
+        }
+        // if no safe chest location exists, drop the same loot tiers instead of overwriting a block
+        Random random = new Random(world.getSeed() * x + y ^ z);
+        int py = Math.max(1, Math.min(world.getHeight() - 1, y));
+        for (int i = 0; i < COMMON_ROLLS; i++) dropBossItem(world, x, py, z, getCommonItem(random));
+        for (int i = 0; i < UNCOMMON_ROLLS; i++) dropBossItem(world, x, py, z, getUncommonItem(random));
+        for (int i = 0; i < RARE_ROLLS; i++) dropBossItem(world, x, py, z, getRareItem(random));
+        return false;
+    }
+
+    private static void dropBossItem(World world, int x, int y, int z, ItemStack stack) {
+        if (stack == null) return;
+        EntityItem item = new EntityItem(world, x + 0.5D, y + 1.0D, z + 0.5D, stack);
+        item.delayBeforeCanPickup = 10;
+        world.spawnEntityInWorld(item);
     }
 
     /**
@@ -141,7 +182,8 @@ public class TFTreasure {
      */
     protected boolean addItemToChest(World world, Random rand, int cx, int cy, int cz, ItemStack itemStack) {
 
-        if (itemStack == null || !(world.getTileEntity(cx, cy, cz) instanceof TileEntityChest chest)) {
+        if (itemStack == null) return true; // Empty loot tiers are intentional.
+        if (!(world.getTileEntity(cx, cy, cz) instanceof TileEntityChest chest)) {
             return false;
         }
 
@@ -168,7 +210,10 @@ public class TFTreasure {
             }
         }
 
-        // didn't find one
+        // retain the original random sequence for normal chests but never miss a slot
+        for (int slot = 0; slot < chest.getSizeInventory(); slot++) {
+            if (chest.getStackInSlot(slot) == null) return slot;
+        }
         return -1;
     }
 

@@ -293,6 +293,7 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
+        nbttagcompound.setInteger("TFHomeRadius", (int) func_110174_bM());
     }
 
     @Override
@@ -316,7 +317,11 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
             int hx = (int) nbttaglist.func_150309_d(0);
             int hy = (int) nbttaglist.func_150309_d(1);
             int hz = (int) nbttaglist.func_150309_d(2);
-            this.setHomeArea(hx, hy, hz, 20);
+            this.setHomeArea(
+                    hx,
+                    hy,
+                    hz,
+                    nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
         }
         if (!nbttagcompound.getBoolean("HasHome")) {
             this.detachHome();

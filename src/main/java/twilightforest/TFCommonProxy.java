@@ -11,6 +11,7 @@ import twilightforest.client.GuiTFCinderFurnace;
 import twilightforest.client.GuiTFGoblinCrafting;
 import twilightforest.inventory.ContainerTFCinderFurnace;
 import twilightforest.inventory.ContainerTFUncrafting;
+import twilightforest.tileentity.TileEntityTFCinderFurnace;
 
 public class TFCommonProxy implements IGuiHandler {
 
@@ -112,7 +113,9 @@ public class TFCommonProxy implements IGuiHandler {
         if (id == TwilightForestMod.GUI_ID_UNCRAFTING) {
             return new ContainerTFUncrafting(player.inventory, world, x, y, z);
         } else if (id == TwilightForestMod.GUI_ID_FURNACE) {
-            return new ContainerTFCinderFurnace(player.inventory, world, x, y, z);
+            return world.getTileEntity(x, y, z) instanceof TileEntityTFCinderFurnace
+                    ? new ContainerTFCinderFurnace(player.inventory, world, x, y, z)
+                    : null;
         } else {
             return null;
         }
@@ -123,7 +126,9 @@ public class TFCommonProxy implements IGuiHandler {
         if (id == TwilightForestMod.GUI_ID_UNCRAFTING) {
             return new GuiTFGoblinCrafting(player.inventory, world, x, y, z);
         } else if (id == TwilightForestMod.GUI_ID_FURNACE) {
-            return new GuiTFCinderFurnace(player.inventory, world, x, y, z);
+            return world.getTileEntity(x, y, z) instanceof TileEntityTFCinderFurnace
+                    ? new GuiTFCinderFurnace(player.inventory, world, x, y, z)
+                    : null;
         } else {
             return null;
         }

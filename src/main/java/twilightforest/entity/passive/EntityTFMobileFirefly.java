@@ -1,5 +1,6 @@
 package twilightforest.entity.passive;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.util.ChunkCoordinates;

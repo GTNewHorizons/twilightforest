@@ -17,7 +17,7 @@ import twilightforest.TFFeature;
 
 public class EntityTFTowerGhast extends EntityGhast {
 
-    private static final int AGGRO_STATUS = 16;
+    protected static final int AGGRO_STATUS = 16;
     protected EntityLivingBase targetedEntity;
     protected boolean isAggressive;
     protected int aggroCooldown;
@@ -138,7 +138,10 @@ public class EntityTFTowerGhast extends EntityGhast {
      * Altered Ghast AI
      */
     protected void updateEntityActionState() {
-        if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+        if (worldObj.isRemote) {
+            return;
+        }
+        if (worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
             setDead();
             return;
         }
@@ -214,9 +217,11 @@ public class EntityTFTowerGhast extends EntityGhast {
                 dz = waypointZ - posZ;
                 double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
                 if (distance > 1.0E-6D && isCourseTraversable(waypointX, waypointY, waypointZ, distance)) {
-                    motionX += dx / distance * 0.1D;
-                    motionY += dy / distance * 0.1D;
-                    motionZ += dz / distance * 0.1D;
+                    // tiny minion waypoints should produce tiny acceleration, full
+                    double acceleration = 0.1D / Math.max(1.0D, distance);
+                    motionX += dx * acceleration;
+                    motionY += dy * acceleration;
+                    motionZ += dz * acceleration;
                 } else {
                     waypointX = posX;
                     waypointY = posY;
@@ -230,7 +235,7 @@ public class EntityTFTowerGhast extends EntityGhast {
         }
 
         // check if our target is still within range
-        double targetRange = (this.aggroCounter > 0 || this.isAggressive) ? aggroRange : stareRange;
+        double targetRange = getCurrentTargetRange();
 
         if (this.targetedEntity != null && this.targetedEntity.getDistanceSqToEntity(this) < targetRange * targetRange
                 && this.canEntityBeSeen(this.targetedEntity)) {
@@ -254,6 +259,7 @@ public class EntityTFTowerGhast extends EntityGhast {
             // ignore player, move normally
             this.isAggressive = false;
             this.targetedEntity = null;
+            this.aggroCounter = 0;
             this.renderYawOffset = this.rotationYaw = -((float) Math.atan2(this.motionX, this.motionZ)) * 180.0F
                     / (float) Math.PI;
 
@@ -302,9 +308,10 @@ public class EntityTFTowerGhast extends EntityGhast {
         // var17.field_92012_e = this.explosionPower;
         double shotSpawnDistance = 0.5D;
         Vec3 lookVec = this.getLook(1.0F);
-        entityFireball.posX = this.posX + lookVec.xCoord * shotSpawnDistance;
-        entityFireball.posY = this.posY + (double) (this.height / 2.0F) + lookVec.yCoord * shotSpawnDistance;
-        entityFireball.posZ = this.posZ + lookVec.zCoord * shotSpawnDistance;
+        entityFireball.setPosition(
+                this.posX + lookVec.xCoord * shotSpawnDistance,
+                this.posY + this.height / 2.0F + lookVec.yCoord * shotSpawnDistance,
+                this.posZ + lookVec.zCoord * shotSpawnDistance);
         this.worldObj.spawnEntityInWorld(entityFireball);
 
         // when we attack, there is a 1-in-6 chance we decide to stop attacking
@@ -319,6 +326,15 @@ public class EntityTFTowerGhast extends EntityGhast {
      *
      * @return
      */
+    protected double getCurrentTargetRange() {
+        // a new exposed player must survive the first tick to build aggro
+        if (isAggressive || aggroCounter > 0
+                || targetedEntity instanceof EntityPlayer player && shouldAttackPlayer(player)) {
+            return aggroRange;
+        }
+        return stareRange;
+    }
+
     protected EntityLivingBase findPlayerInRange() {
         EntityPlayer best = null;
         double bestDistanceSq = aggroRange * aggroRange;
@@ -398,7 +414,7 @@ public class EntityTFTowerGhast extends EntityGhast {
     public boolean attackEntityFrom(DamageSource par1DamageSource, float par2) {
         boolean wasAttacked = super.attackEntityFrom(par1DamageSource, par2);
 
-        if (wasAttacked && par1DamageSource.getEntity() instanceof EntityLivingBase) {
+        if (!worldObj.isRemote && wasAttacked && par1DamageSource.getEntity() instanceof EntityLivingBase) {
             this.targetedEntity = (EntityLivingBase) par1DamageSource.getEntity();
 
             this.isAggressive = true;

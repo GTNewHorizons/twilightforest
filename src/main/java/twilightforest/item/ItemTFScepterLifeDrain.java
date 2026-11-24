@@ -94,7 +94,7 @@ public class ItemTFScepterLifeDrain extends ItemTF {
                 player,
                 player.boundingBox.addCoord(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range)
                         .expand(var9, var9, var9));
-        double hitDist = 0;
+        double hitDist = srcVec.distanceTo(destVec);
 
         for (Entity possibleEntity : possibleList) {
 
@@ -104,14 +104,14 @@ public class ItemTFScepterLifeDrain extends ItemTF {
                 MovingObjectPosition interceptPos = collisionBB.calculateIntercept(srcVec, destVec);
 
                 if (collisionBB.isVecInside(srcVec)) {
-                    if (0.0D < hitDist || hitDist == 0.0D) {
+                    if (pointedEntity == null || hitDist > 0.0D) {
                         pointedEntity = possibleEntity;
                         hitDist = 0.0D;
                     }
                 } else if (interceptPos != null) {
                     double possibleDist = srcVec.distanceTo(interceptPos.hitVec);
 
-                    if (possibleDist < hitDist || hitDist == 0.0D) {
+                    if (possibleDist < hitDist || pointedEntity == null && possibleDist == hitDist) {
                         pointedEntity = possibleEntity;
                         hitDist = possibleDist;
                     }

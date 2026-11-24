@@ -600,6 +600,7 @@ public class EntityTFYetiAlpha extends EntityMob implements IRangedAttackMob {
             nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         }
         nbttagcompound.setBoolean("HasHome", this.hasHome());
+        nbttagcompound.setInteger("TFHomeRadius", (int) func_110174_bM());
         nbttagcompound.setBoolean("CanRampage", this.canRampage);
         nbttagcompound.setBoolean("Rampaging", this.isRampaging());
         nbttagcompound.setBoolean("Tired", this.isTired());
@@ -615,7 +616,7 @@ public class EntityTFYetiAlpha extends EntityMob implements IRangedAttackMob {
                         (int) home.func_150309_d(0),
                         (int) home.func_150309_d(1),
                         (int) home.func_150309_d(2),
-                        30);
+                        nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
             }
         }
         if (!nbttagcompound.getBoolean("HasHome")) {

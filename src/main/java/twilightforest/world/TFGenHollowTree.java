@@ -632,8 +632,7 @@ public class TFGenHollowTree extends TFGenerator {
 
         // spawner
         world.setBlock(x + 0, y + 1, z + 0, Blocks.mob_spawner, 0, 2);
-        TileEntityMobSpawner ms = (TileEntityMobSpawner) world.getTileEntity(x + 0, y + 1, z + 0);
-        if (ms != null) {
+        if (world.getTileEntity(x, y + 1, z) instanceof TileEntityMobSpawner ms) {
             ms.func_145881_a().setEntityName(TFCreatures.getSpawnerNameFor("Swarm Spider"));
         }
 

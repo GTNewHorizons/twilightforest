@@ -174,14 +174,14 @@ public class EntityTFHydraMortar extends EntityThrowable {
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound nbt) {
+    public void readEntityFromNBT(NBTTagCompound nbt) {
         super.readEntityFromNBT(nbt);
         this.fuse = nbt.hasKey("Fuse") ? Math.max(1, nbt.getInteger("Fuse")) : 80;
         this.megaBlast = nbt.getBoolean("MegaBlast");
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound nbt) {
+    public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
         nbt.setInteger("Fuse", this.fuse);
         nbt.setBoolean("MegaBlast", this.megaBlast);

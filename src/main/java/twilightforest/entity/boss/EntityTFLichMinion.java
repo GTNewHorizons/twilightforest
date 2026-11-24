@@ -1,12 +1,14 @@
 package twilightforest.entity.boss;
 
 import java.util.List;
+import java.util.UUID;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
@@ -20,6 +22,8 @@ import twilightforest.TwilightForestMod;
 public class EntityTFLichMinion extends EntityZombie {
 
     EntityTFLich master;
+    private UUID masterId;
+    private int masterSearchTicks;
 
     public EntityTFLichMinion(World par1World) {
         super(par1World);
@@ -34,6 +38,7 @@ public class EntityTFLichMinion extends EntityZombie {
     public EntityTFLichMinion(World par1World, EntityTFLich entityTFLich) {
         super(par1World);
         this.master = entityTFLich;
+        this.masterId = entityTFLich.getUniqueID();
     }
 
     /**
@@ -69,13 +74,42 @@ public class EntityTFLichMinion extends EntityZombie {
     public void onLivingUpdate() {
         if (!this.worldObj.isRemote) {
             if (master == null) {
-                findNewMaster();
-            }
-            if (master == null || master.isDead) {
-                this.setHealth(0);
+                if (masterSearchTicks++ % 10 == 0) findNewMaster();
+                if (master == null && masterSearchTicks >= 100) setHealth(0);
+            } else if (!master.isEntityAlive()) {
+                setHealth(0);
             }
         }
         super.onLivingUpdate();
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound tag) {
+        super.writeEntityToNBT(tag);
+        writeMasterId(tag);
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound tag) {
+        super.readEntityFromNBT(tag);
+        readMasterId(tag);
+    }
+
+    boolean isOwnedBy(EntityTFLich lich) {
+        return master == lich || masterId != null && masterId.equals(lich.getUniqueID());
+    }
+
+    private void writeMasterId(NBTTagCompound tag) {
+        if (masterId != null) {
+            tag.setLong("LichMasterMost", masterId.getMostSignificantBits());
+            tag.setLong("LichMasterLeast", masterId.getLeastSignificantBits());
+        }
+    }
+
+    private void readMasterId(NBTTagCompound tag) {
+        if (tag.hasKey("LichMasterMost", 99) && tag.hasKey("LichMasterLeast", 99)) {
+            masterId = new UUID(tag.getLong("LichMasterMost"), tag.getLong("LichMasterLeast"));
+        }
     }
 
     private void findNewMaster() {
@@ -85,8 +119,11 @@ public class EntityTFLichMinion extends EntityZombie {
                         .expand(32.0D, 16.0D, 32.0D));
 
         for (EntityTFLich nearbyLich : nearbyLiches) {
-            if (!nearbyLich.isShadowClone() && nearbyLich.wantsNewMinion(this)) {
+            if (nearbyLich.isEntityAlive() && !nearbyLich.isShadowClone()
+                    && (masterId != null ? masterId.equals(nearbyLich.getUniqueID())
+                            : nearbyLich.wantsNewMinion(this))) {
                 this.master = nearbyLich;
+                this.masterId = nearbyLich.getUniqueID();
 
                 // animate our new linkage!
                 master.makeBlackMagicTrail(

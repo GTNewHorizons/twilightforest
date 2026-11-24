@@ -198,6 +198,7 @@ public class TwilightForestMod {
     public static int idVehicleSpawnChainBlock = 18;
     public static int idVehicleSpawnCubeOfAnnihilation = 19;
     public static int idVehicleSpawnSlideBlock = 20;
+    public static final int idVehicleSpawnUrGhastFireball = 21;
 
     public static int idBiomeLake;
     public static int idBiomeTwilightForest;
@@ -778,6 +779,14 @@ public class TwilightForestMod {
     }
 
     private void registerProjectiles() {
+        EntityRegistry.registerModEntity(
+                twilightforest.entity.boss.EntityTFUrGhastFireball.class,
+                "tfurghastfireball",
+                idVehicleSpawnUrGhastFireball,
+                this,
+                150,
+                1,
+                true);
         EntityRegistry.registerModEntity(
                 twilightforest.entity.boss.EntityTFHydraHead.class,
                 "HydraHead",

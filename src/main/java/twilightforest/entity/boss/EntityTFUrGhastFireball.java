@@ -6,12 +6,33 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
-public class EntityTFUrGhastFireball extends EntityLargeFireball {
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
+import io.netty.buffer.ByteBuf;
+
+public class EntityTFUrGhastFireball extends EntityLargeFireball implements IEntityAdditionalSpawnData {
 
     private static final int DIRECT_HIT_DAMAGE = 16;
 
+    public EntityTFUrGhastFireball(World world) {
+        super(world);
+    }
+
     public EntityTFUrGhastFireball(World world, EntityTFUrGhast urGhast, double x, double y, double z) {
         super(world, urGhast, x, y, z);
+    }
+
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        buffer.writeDouble(accelerationX);
+        buffer.writeDouble(accelerationY);
+        buffer.writeDouble(accelerationZ);
+    }
+
+    @Override
+    public void readSpawnData(ByteBuf buffer) {
+        accelerationX = buffer.readDouble();
+        accelerationY = buffer.readDouble();
+        accelerationZ = buffer.readDouble();
     }
 
     /**

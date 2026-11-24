@@ -166,7 +166,8 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
                         home.posX,
                         home.posY,
                         home.posZ) instanceof TileEntityTFKnightPhantomsSpawner spawner) {
-                    spawner.knightsCount = getNearbyKnights().size();
+                    spawner.knightsCount = Math.max(1, getNearbyKnights().size());
+                    spawner.markDirty();
                 }
             }
         }
@@ -207,8 +208,8 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         }
 
         // only the last Knight defeats the whole stronghold and generates the reward
-        if (!this.worldObj.isRemote && getNearbyKnights().size() <= 1) {
-            if (worldObj.provider instanceof WorldProviderTwilightForest) {
+        if (!this.worldObj.isRemote && getNearbyKnights().stream().noneMatch(knight -> knight != this)) {
+            if (hasHome() && worldObj.provider instanceof WorldProviderTwilightForest) {
                 ChunkProviderTwilightForest chunkProvider = ((WorldProviderTwilightForest) worldObj.provider)
                         .getChunkProvider();
                 int dx = getHomePosition().posX;
@@ -226,11 +227,10 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
 
     // Make a treasure for when we're dead
     private void makeATreasure() {
-        if (this.getHomePosition().posX != 0) {
+        if (this.hasHome()) {
             // if we have a proper home position, generate the treasure there
-            TFTreasure.stronghold_boss.generate(
+            TFTreasure.stronghold_boss.generateBossReward(
                     worldObj,
-                    null,
                     getHomePosition().posX,
                     getHomePosition().posY - 1,
                     getHomePosition().posZ);
@@ -240,7 +240,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
             int py = MathHelper.floor_double(this.lastTickPosY);
             int pz = MathHelper.floor_double(this.lastTickPosZ);
 
-            TFTreasure.stronghold_boss.generate(worldObj, null, px, py, pz);
+            TFTreasure.stronghold_boss.generateBossReward(worldObj, px, py, pz);
         }
     }
 
@@ -550,7 +550,9 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
                         .getBoundingBox(this.posX, this.posY, this.posZ, this.posX + 1, this.posY + 1, this.posZ + 1)
                         .expand(32.0D, 8.0D, 32.0D));
         // Preserve this knight while onDeath runs, but ignore other dead/dying knights.
-        nearbyKnights.removeIf(knight -> knight != this && !knight.isEntityAlive());
+        nearbyKnights.removeIf(
+                knight -> knight != this && (!knight.isEntityAlive() || hasHome() != knight.hasHome()
+                        || hasHome() && !getHomePosition().equals(knight.getHomePosition())));
         return nearbyKnights;
     }
 
@@ -842,6 +844,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
+        nbttagcompound.setInteger("TFHomeRadius", (int) getMaximumHomeDistance());
         nbttagcompound.setInteger("MyNumber", this.getNumber());
         nbttagcompound.setInteger("Formation", this.getFormationAsNumber());
         nbttagcompound.setInteger("TicksProgress", this.getTicksProgress());
@@ -856,7 +859,11 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
             int hx = (int) nbttaglist.func_150309_d(0);
             int hy = (int) nbttaglist.func_150309_d(1);
             int hz = (int) nbttaglist.func_150309_d(2);
-            this.setHomeArea(hx, hy, hz, 20);
+            this.setHomeArea(
+                    hx,
+                    hy,
+                    hz,
+                    nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
         }
         if (!nbttagcompound.getBoolean("HasHome")) {
             this.detachHome();

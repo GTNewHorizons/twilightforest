@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -45,6 +49,9 @@ public class TileEntityTFGhastTrapActive extends TileEntity {
     public void updateEntity() {
 
         ++counter;
+        if (!worldObj.isRemote) {
+            markDirty();
+        }
 
         if (worldObj.isRemote) {
             // smoke when done
@@ -115,6 +122,12 @@ public class TileEntityTFGhastTrapActive extends TileEntity {
             List<EntityGhast> nearbyGhasts = worldObj.getEntitiesWithinAABB(EntityGhast.class, aabb);
 
             for (EntityGhast ghast : nearbyGhasts) {
+                if (!ghast.isEntityAlive()) {
+                    continue;
+                }
+                if (ghast instanceof EntityTFTowerGhast towerGhast) {
+                    towerGhast.setInTrap();
+                }
                 boolean isBoss = ghast instanceof EntityTFUrGhast;
                 if (isBoss) {
                     // stop boss tantrum
@@ -130,9 +143,6 @@ public class TileEntityTFGhastTrapActive extends TileEntity {
                     ghast.attackEntityFrom(DamageSource.generic, isBoss ? 3 : 10);
                 }
 
-                if (ghast instanceof EntityTFTowerGhast towerGhast) {
-                    towerGhast.setInTrap();
-                }
             }
 
             if (counter >= 120) {
@@ -147,5 +157,29 @@ public class TileEntityTFGhastTrapActive extends TileEntity {
                 // worldObj.scheduleBlockUpdate(this.xCoord, this.yCoord, this.zCoord, TFBlocks.towerDevice, 4);
             }
         }
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound tag) {
+        super.writeToNBT(tag);
+        tag.setInteger("TrapTicks", counter);
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        counter = Math.max(0, Math.min(120, tag.getInteger("TrapTicks")));
+    }
+
+    @Override
+    public Packet getDescriptionPacket() {
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setInteger("TrapTicks", counter);
+        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 3, tag);
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager manager, S35PacketUpdateTileEntity packet) {
+        counter = Math.max(0, Math.min(120, packet.func_148857_g().getInteger("TrapTicks")));
     }
 }

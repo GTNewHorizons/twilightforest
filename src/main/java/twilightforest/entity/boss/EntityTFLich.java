@@ -2,6 +2,7 @@ package twilightforest.entity.boss;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
@@ -55,6 +56,8 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
     private static final int DATA_ATTACKTYPE = 20;
 
     EntityTFLich masterLich;
+    private UUID masterId;
+    private int masterSearchTicks;
 
     private static final ItemStack[] heldItems = { new ItemStack(TFItems.scepterTwilight, 1),
             new ItemStack(TFItems.scepterZombie, 1), new ItemStack(Items.golden_sword, 1) };
@@ -96,6 +99,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
 
         setShadowClone(true);
         this.masterLich = otherLich;
+        this.masterId = otherLich.getUniqueID();
     }
 
     @Override
@@ -432,6 +436,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
      */
     @Override
     protected void attackEntity(Entity targetedEntity, float f) {
+        if (isShadowClone() && (masterLich == null || !masterLich.isEntityAlive())) return;
         if (!this.worldObj.isRemote && !isShadowClone() && attackTime % 15 == 0) {
             popNearbyMob();
         }
@@ -655,7 +660,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         int count = 0;
 
         for (EntityTFLich nearbyLich : nearbyLiches) {
-            if (nearbyLich.isShadowClone() && nearbyLich.masterLich == this) {
+            if (nearbyLich.isShadowClone() && nearbyLich.isEntityAlive() && nearbyLich.isOwnedBy(this)) {
                 count++;
             }
         }
@@ -679,7 +684,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         // put a clone there
         EntityTFLich newClone = new EntityTFLich(worldObj, this);
         newClone.setPosition(cloneSpot.xCoord, cloneSpot.yCoord, cloneSpot.zCoord);
-        worldObj.spawnEntityInWorld(newClone);
+        if (!worldObj.spawnEntityInWorld(newClone)) return;
 
         newClone.entityToAttack = targetedEntity;
         newClone.attackTime = 60 + rand.nextInt(3) - rand.nextInt(3);
@@ -698,7 +703,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
                         .expand(32.0D, 16.0D, 32.0D));
 
         for (EntityTFLich nearbyLich : nearbyLiches) {
-            if (nearbyLich.isShadowClone() && nearbyLich.masterLich == this) {
+            if (nearbyLich.isShadowClone() && nearbyLich.isEntityAlive() && nearbyLich.isOwnedBy(this)) {
                 nearbyLich.setDead();
             }
         }
@@ -725,7 +730,7 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         int count = 0;
 
         for (EntityTFLichMinion nearbyMinon : nearbyMinons) {
-            if (nearbyMinon.master == this) {
+            if (nearbyMinon.isEntityAlive() && nearbyMinon.isOwnedBy(this)) {
                 count++;
             }
         }
@@ -780,23 +785,33 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
             return;
         }
         if (masterLich == null) {
-            findNewMaster();
-        }
-        if (!worldObj.isRemote) {
-            if (masterLich == null || masterLich.isDead) {
-                this.isDead = true;
-            } else {
-                // double distance = (this.posX - masterLich.posX) * (this.posX - masterLich.posX) + (this.posY -
-                // masterLich.posY) * (this.posY - masterLich.posY) + (this.posZ - masterLich.posZ) * (this.posZ -
-                // masterLich.posZ);
-                // System.out.println("Clone says that distance from master is " + distance);
-            }
+            if (masterSearchTicks++ % 10 == 0) findNewMaster();
+            if (masterLich == null && masterSearchTicks >= 100) setDead();
+        } else if (!masterLich.isEntityAlive() || masterLich.getPhase() != 1) {
+            setDead();
         }
     }
 
     /**
      * Find a new master for this clone
      */
+    boolean isOwnedBy(EntityTFLich lich) {
+        return masterLich == lich || masterId != null && masterId.equals(lich.getUniqueID());
+    }
+
+    private void writeMasterId(NBTTagCompound tag) {
+        if (masterId != null) {
+            tag.setLong("LichMasterMost", masterId.getMostSignificantBits());
+            tag.setLong("LichMasterLeast", masterId.getLeastSignificantBits());
+        }
+    }
+
+    private void readMasterId(NBTTagCompound tag) {
+        if (tag.hasKey("LichMasterMost", 99) && tag.hasKey("LichMasterLeast", 99)) {
+            masterId = new UUID(tag.getLong("LichMasterMost"), tag.getLong("LichMasterLeast"));
+        }
+    }
+
     private void findNewMaster() {
         List<EntityTFLich> nearbyLiches = worldObj.getEntitiesWithinAABB(
                 EntityTFLich.class,
@@ -804,8 +819,11 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
                         .expand(32.0D, 16.0D, 32.0D));
 
         for (EntityTFLich nearbyLich : nearbyLiches) {
-            if (!nearbyLich.isShadowClone() && nearbyLich.wantsNewClone(this)) {
+            if (nearbyLich.isEntityAlive() && !nearbyLich.isShadowClone()
+                    && (masterId != null ? masterId.equals(nearbyLich.getUniqueID())
+                            : nearbyLich.wantsNewClone(this))) {
                 this.masterLich = nearbyLich;
+                this.masterId = nearbyLich.getUniqueID();
 
                 // animate our new linkage!
                 makeTeleportTrail(posX, posY, posZ, nearbyLich.posX, nearbyLich.posY, nearbyLich.posZ);
@@ -1058,7 +1076,9 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
+        nbttagcompound.setInteger("TFHomeRadius", (int) func_110174_bM());
         nbttagcompound.setBoolean("ShadowClone", isShadowClone());
+        writeMasterId(nbttagcompound);
         nbttagcompound.setByte("ShieldStrength", getShieldStrength());
         nbttagcompound.setByte("MinionsToSummon", getMinionsToSummon());
     }
@@ -1071,12 +1091,17 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
             int hx = (int) nbttaglist.func_150309_d(0);
             int hy = (int) nbttaglist.func_150309_d(1);
             int hz = (int) nbttaglist.func_150309_d(2);
-            this.setHomeArea(hx, hy, hz, 20);
+            this.setHomeArea(
+                    hx,
+                    hy,
+                    hz,
+                    nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
         }
         if (!nbttagcompound.getBoolean("HasHome")) {
             this.detachHome();
         }
         setShadowClone(nbttagcompound.getBoolean("ShadowClone"));
+        readMasterId(nbttagcompound);
         setShieldStrength(nbttagcompound.getByte("ShieldStrength"));
         setMinionsToSummon(nbttagcompound.getByte("MinionsToSummon"));
     }

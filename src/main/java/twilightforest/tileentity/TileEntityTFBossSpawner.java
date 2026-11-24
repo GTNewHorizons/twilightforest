@@ -25,8 +25,15 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
 
     // keep the Y restriction separate from the distance check used by each boss
     protected final boolean isPlayerInRange(double range, int maximumBelowSpawner) {
-        EntityPlayer player = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, range);
-        return player != null && player.posY > (double) yCoord - maximumBelowSpawner;
+        double rangeSq = range * range;
+        for (Object entry : worldObj.playerEntities) {
+            if (entry instanceof EntityPlayer player && player.isEntityAlive()
+                    && player.posY > (double) yCoord - maximumBelowSpawner
+                    && player.getDistanceSq(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D) < rangeSq) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -58,8 +65,7 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
             } else {
                 // System.out.println("Thinking about boss!");
 
-                if (worldObj.difficultySetting != EnumDifficulty.PEACEFUL) {
-                    spawnMyBoss();
+                if (worldObj.difficultySetting != EnumDifficulty.PEACEFUL && spawnMyBoss()) {
 
                     // destroy block
                     worldObj.setBlock(xCoord, yCoord, zCoord, Blocks.air, 0, 2);
@@ -74,12 +80,12 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
     /**
      * Spawn the boss
      */
-    protected void spawnMyBoss() {
+    protected boolean spawnMyBoss() {
         // spawn creature
         EntityLiving myCreature = makeMyCreature();
 
         if (myCreature == null) {
-            return;
+            return false;
         }
 
         double rx = xCoord + 0.5D;
@@ -91,7 +97,7 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
         initializeCreature(myCreature);
 
         // spawn it
-        worldObj.spawnEntityInWorld(myCreature);
+        return worldObj.spawnEntityInWorld(myCreature);
     }
 
     /**

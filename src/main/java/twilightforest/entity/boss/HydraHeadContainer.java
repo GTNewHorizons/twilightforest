@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -79,6 +80,7 @@ public class HydraHeadContainer {
     public int ticksProgress;
 
     public final int headNum;
+    private int missingHeadTicks;
 
     public int damageTaken;
     private float fractionalDamage;
@@ -342,9 +344,18 @@ public class HydraHeadContainer {
             this.headEntity = findNearbyHead("head" + this.headNum);
         }
         if (this.headEntity == null) {
-            return;
+            if (!hydraObj.worldObj.isRemote && ++missingHeadTicks >= 100 && hydraObj.isEntityAlive()) {
+                int x = MathHelper.floor_double(hydraObj.posX);
+                int y = MathHelper.floor_double(hydraObj.posY);
+                int z = MathHelper.floor_double(hydraObj.posZ);
+                if (hydraObj.worldObj.checkChunksExist(x - 16, y - 16, z - 16, x + 16, y + 16, z + 16)) {
+                    spawnHead();
+                    missingHeadTicks = 0;
+                }
+            }
+            if (headEntity == null) return;
         }
-
+        missingHeadTicks = 0;
         this.headEntity.width = this.headEntity.height = this.isActive() ? 4.0F : 1.0F;
         if (!this.hydraObj.worldObj.isRemote) {
             setDifficultyVariables();
@@ -362,6 +373,55 @@ public class HydraHeadContainer {
             addMouthParticles();
         }
         playSounds();
+    }
+
+    boolean spawnHead() {
+        if (headEntity != null && !headEntity.isDead) return true;
+        EntityTFHydraHead existing = findNearbyHead("head" + headNum);
+        if (existing != null) {
+            headEntity = existing;
+            return true;
+        }
+        EntityTFHydraHead head = new EntityTFHydraHead(hydraObj, "head" + headNum, 3F, 3F);
+        head.setPosition(hydraObj.posX, hydraObj.posY, hydraObj.posZ);
+        head.setState(currentState);
+        if (!hydraObj.worldObj.spawnEntityInWorld(head)) return false;
+        headEntity = head;
+        return true;
+    }
+
+    NBTTagCompound writeState() {
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setInteger("Previous", prevState);
+        tag.setInteger("Current", currentState);
+        tag.setInteger("Next", nextState);
+        tag.setInteger("Duration", ticksNeeded);
+        tag.setInteger("Progress", ticksProgress);
+        tag.setInteger("Damage", damageTaken);
+        tag.setFloat("FractionalDamage", fractionalDamage);
+        tag.setInteger("Respawn", respawnCounter);
+        tag.setBoolean("Roared", didRoar);
+        tag.setBoolean("Secondary", isSecondaryAttacking);
+        tag.setDouble("TargetX", targetX);
+        tag.setDouble("TargetY", targetY);
+        tag.setDouble("TargetZ", targetZ);
+        return tag;
+    }
+
+    void readState(NBTTagCompound tag) {
+        currentState = MathHelper.clamp_int(tag.getInteger("Current"), 0, NUM_STATES - 1);
+        prevState = MathHelper.clamp_int(tag.getInteger("Previous"), 0, NUM_STATES - 1);
+        nextState = MathHelper.clamp_int(tag.getInteger("Next"), NEXT_AUTOMATIC, NUM_STATES - 1);
+        ticksNeeded = Math.max(1, tag.getInteger("Duration"));
+        ticksProgress = MathHelper.clamp_int(tag.getInteger("Progress"), 0, ticksNeeded);
+        damageTaken = Math.max(0, tag.getInteger("Damage"));
+        fractionalDamage = MathHelper.clamp_float(tag.getFloat("FractionalDamage"), 0F, 1F);
+        respawnCounter = Math.max(-1, tag.getInteger("Respawn"));
+        didRoar = tag.getBoolean("Roared");
+        isSecondaryAttacking = tag.getBoolean("Secondary");
+        targetX = tag.getDouble("TargetX");
+        targetY = tag.getDouble("TargetY");
+        targetZ = tag.getDouble("TargetZ");
     }
 
     /**
@@ -913,21 +973,20 @@ public class HydraHeadContainer {
                         hydraObj.posY + 1,
                         hydraObj.posZ + 1).expand(16.0D, 16.0D, 16.0D));
 
+        EntityTFHydraHead legacy = null;
         for (EntityTFHydraHead nearbyHead : nearbyHeads) {
-
-            if (!nearbyHead.isDead && string.equals(nearbyHead.getPartName())) {
-                nearbyHead.hydraObj = hydraObj;
-
-                // System.out.println("Reconnected hydra with head named " + string + " in world " +
-                // hydraObj.worldObj);
-
+            if (nearbyHead.isDead || !string.equals(nearbyHead.getPartName())) continue;
+            if (nearbyHead.belongsTo(hydraObj)) {
+                nearbyHead.bindToHydra(hydraObj);
                 return nearbyHead;
             }
-
+            if (nearbyHead.hasNoOwner() && (legacy == null
+                    || nearbyHead.getDistanceSqToEntity(hydraObj) < legacy.getDistanceSqToEntity(hydraObj))) {
+                legacy = nearbyHead;
+            }
         }
-
-        // System.out.println("Did not find head named " + string);
-        return null;
+        if (legacy != null) legacy.bindToHydra(hydraObj);
+        return legacy;
     }
 
     /**

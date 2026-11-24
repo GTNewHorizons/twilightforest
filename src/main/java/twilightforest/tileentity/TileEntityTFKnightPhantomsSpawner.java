@@ -1,6 +1,10 @@
 package twilightforest.tileentity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.nbt.NBTTagCompound;
 
 import twilightforest.entity.TFCreatures;
 import twilightforest.entity.boss.EntityTFKnightPhantom;
@@ -21,18 +25,36 @@ public class TileEntityTFKnightPhantomsSpawner extends TileEntityTFBossSpawner {
         return isPlayerInRange(9D, 2);
     }
 
+    @Override
+    public void writeToNBT(NBTTagCompound tag) {
+        super.writeToNBT(tag);
+        tag.setInteger("KnightsCount", knightsCount);
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        if (tag.hasKey("KnightsCount", 99)) {
+            knightsCount = Math.max(1, Math.min(6, tag.getInteger("KnightsCount")));
+        }
+    }
+
     /**
      * Spawn the boss
      */
     @Override
-    protected void spawnMyBoss() {
+    protected boolean spawnMyBoss() {
+        List<EntityLiving> spawned = new ArrayList<>();
         for (int i = 0; i < knightsCount; i++) {
 
             // spawn creature
             EntityLiving myCreature = makeMyCreature();
 
             if (!(myCreature instanceof EntityTFKnightPhantom knight)) {
-                continue;
+                for (EntityLiving creature : spawned) {
+                    creature.setDead();
+                }
+                return false;
             }
 
             float angle = ANGLE_BETWEEN_KNIGHTS * i;
@@ -50,8 +72,16 @@ public class TileEntityTFKnightPhantomsSpawner extends TileEntityTFBossSpawner {
             knight.setNumber(i);
 
             // spawn it
-            worldObj.spawnEntityInWorld(myCreature);
+            if (!worldObj.spawnEntityInWorld(myCreature)) {
+                // keep the spawner if the group couldnt be created, duplicating
+                for (EntityLiving creature : spawned) {
+                    creature.setDead();
+                }
+                return false;
+            }
+            spawned.add(myCreature);
         }
+        return !spawned.isEmpty();
     }
 
     /**
