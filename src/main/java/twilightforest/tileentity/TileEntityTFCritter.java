@@ -1,48 +1,8 @@
 package twilightforest.tileentity;
 
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
 public abstract class TileEntityTFCritter extends TileEntity {
-
-    public TileEntityTFCritter() {
-        super();
-    }
-
-    /**
-     * Reads a tile entity from NBT.
-     */
-    @Override
-    public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
-        super.readFromNBT(par1NBTTagCompound);
-    }
-
-    /**
-     * Writes a tile entity to NBT.
-     */
-    @Override
-    public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
-        super.writeToNBT(par1NBTTagCompound);
-    }
-
-    /**
-     * Determines if this TileEntity requires update calls.
-     * 
-     * @return True if you want updateEntity() to be called, false if not
-     */
-    @Override
-    public boolean canUpdate() {
-        return true;
-    }
-
-    /**
-     * Allows the entity to update its state. Overridden in most subclasses, e.g. the mob spawner uses this to count
-     * ticks and creates a new spawn inside its implementation.
-     */
-    @Override
-    public void updateEntity() {
-
-    }
 
     // /**
     // * Fix imported tileentities from version 1.9

@@ -7,6 +7,9 @@ import twilightforest.TwilightForestMod;
 
 public class TileEntityTFCicada extends TileEntityTFCritter {
 
+    private static final int ROTATION_DELAY = 200;
+    private static final int SING_DURATION = 100;
+
     public int yawDelay;
     public int currentYaw;
     public int desiredYaw;
@@ -33,7 +36,7 @@ public class TileEntityTFCicada extends TileEntityTFCritter {
         } else {
             if (currentYaw == 0 && desiredYaw == 0) {
                 // make it rotate!
-                yawDelay = 200 + worldObj.rand.nextInt(200);
+                yawDelay = ROTATION_DELAY + worldObj.rand.nextInt(ROTATION_DELAY);
                 desiredYaw = worldObj.rand.nextInt(15) - worldObj.rand.nextInt(15);
             }
 
@@ -54,17 +57,17 @@ public class TileEntityTFCicada extends TileEntityTFCritter {
             if (singing && singDuration == 0) {
                 playSong();
             }
-            if (singing && singDuration >= 100) {
+            if (singing && singDuration >= SING_DURATION) {
                 singing = false;
                 singDuration = 0;
             }
-            if (singing && singDuration < 100) {
+            if (singing && singDuration < SING_DURATION) {
                 singDuration++;
                 doSingAnimation();
             }
             if (!singing && singDuration <= 0) {
                 singing = true;
-                singDelay = 100 + worldObj.rand.nextInt(100);
+                singDelay = SING_DURATION + worldObj.rand.nextInt(SING_DURATION);
             }
         }
     }

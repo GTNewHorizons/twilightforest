@@ -409,9 +409,10 @@ public class BlockTFTrophyPedestal extends Block implements IInfusionStabiliser 
      */
     @Override
     public int getComparatorInputOverride(World worldIn, int x, int y, int z, int side) {
-        if (worldIn.getBlock(x, y + 1, z) == TFBlocks.trophy) {
+        if (worldIn.getBlock(x, y + 1, z) == TFBlocks.trophy
+                && worldIn.getTileEntity(x, y + 1, z) instanceof TileEntitySkull skull) {
             // Gives power proportionally to boss' order (might change later)
-            switch (((TileEntitySkull) worldIn.getTileEntity(x, y + 1, z)).func_145904_a()) {
+            switch (skull.func_145904_a()) {
                 case 8:
                     return 1; // Questing Ram
                 case 1:
