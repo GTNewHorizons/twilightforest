@@ -9,8 +9,8 @@ import net.minecraft.item.ItemStack;
 
 public class TFTreasureItem {
 
-    ItemStack itemStack;
-    int rarity;
+    private final ItemStack itemStack;
+    private final int rarity;
 
     int randomEnchantmentLevel = 0;
 
@@ -39,12 +39,16 @@ public class TFTreasureItem {
 
     /**
      * Get a new ItemStack ready for use!
-     * 
+     *
      * @param rand
      * @return
      */
     public ItemStack getItemStack(Random rand) {
         ItemStack result = this.itemStack.copy();
+        if (result.stackSize <= 0) {
+            // A malformed loot entry should not crash chest generation.
+            return result;
+        }
         result.stackSize = rand.nextInt(result.stackSize) + 1;
 
         // randomly enchant this item if needed
@@ -57,7 +61,7 @@ public class TFTreasureItem {
 
     /**
      * Returns this items rarity value
-     * 
+     *
      * @param total
      * @return
      */
