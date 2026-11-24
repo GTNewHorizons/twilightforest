@@ -26,6 +26,8 @@ public class TFGenLargeWinter extends TFTreeGenerator {
         rootMeta = BlockTFRoots.ROOT_META;
     }
 
+    private static final int LEAVES_ABOVE_TRUNK = 3;
+
     @Override
     public boolean generate(World world, Random random, int x, int y, int z) {
         // determine a height
@@ -40,8 +42,9 @@ public class TFGenLargeWinter extends TFTreeGenerator {
 
         // check if we're on dirt or grass
         Material materialUnder = world.getBlock(x, y - 1, z).getMaterial();
-        if ((materialUnder != Material.grass && materialUnder != Material.ground)
-                || y >= world.getHeight() - treeHeight) {
+        // the highest leaf layer is 3 blocks above the top of the trunk
+        if (y < 1 || (materialUnder != Material.grass && materialUnder != Material.ground)
+                || (long) y + treeHeight + LEAVES_ABOVE_TRUNK >= world.getHeight()) {
             return false;
         }
 
@@ -62,11 +65,9 @@ public class TFGenLargeWinter extends TFTreeGenerator {
 
     private void makeLeaves(World world, int x, int y, int z, int treeHeight) {
         int offGround = 3;
-        int leafType = 1;
-
         for (int dy = 0; dy < treeHeight; dy++) {
 
-            int radius = leafRadius(treeHeight, dy, leafType);
+            int radius = leafRadius(treeHeight, dy);
 
             this.makeLeafCircle2(world, x, y + offGround + treeHeight - dy, z, radius, leafBlock, leafMeta, false);
             this.makePineBranches(world, x, y + offGround + treeHeight - dy, z, radius);
@@ -97,12 +98,8 @@ public class TFGenLargeWinter extends TFTreeGenerator {
         }
     }
 
-    private int leafRadius(int treeHeight, int dy, int functionType) {
-        return switch (functionType) {
-            default -> (dy - 1) % 4;
-            case 1 -> (int) (4F * (float) dy / (float) treeHeight + (0.75F * dy % 3));
-            case 99 -> (treeHeight - (dy / 2) - 1) % 4; // bad
-        };
+    private static int leafRadius(int treeHeight, int dy) {
+        return (int) (4F * (float) dy / (float) treeHeight + (0.75F * dy % 3));
     }
 
     private void buildTrunk(World world, int x, int y, int z, int treeHeight) {

@@ -11,9 +11,14 @@ import twilightforest.entity.TFCreatures;
 
 public class TFGenWitchHut extends TFGenerator {
 
+    private static final int HUT_WIDTH = 7;
+    private static final int HUT_HEIGHT = 8;
+    private static final int HUT_DEPTH = 7;
+
     /**
      * Make a cute witch's hut
      */
+    @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
         return generateTinyHut(world, rand, x, y, z);
     }
@@ -22,7 +27,9 @@ public class TFGenWitchHut extends TFGenerator {
      * Make the smallest size hut
      */
     public boolean generateTinyHut(World world, Random rand, int x, int y, int z) {
-        if (!isAreaSuitable(world, rand, x, y, z, 5, 7, 6)) {
+        // the roof reaches x + 6, z + 6 and y + 7, beyond the old clearance box
+        if (y < 1 || y + HUT_HEIGHT > world.getHeight()
+                || !isAreaSuitable(world, rand, x, y, z, HUT_WIDTH, HUT_HEIGHT, HUT_DEPTH)) {
             return false;
         }
 
@@ -174,10 +181,12 @@ public class TFGenWitchHut extends TFGenerator {
 
         // skeleton spawner!
         world.setBlock(x + 3, y + 1, z + 3, Blocks.mob_spawner, 0, 2);
-        TileEntityMobSpawner ms = (TileEntityMobSpawner) world.getTileEntity(x + 3, y + 1, z + 3);
-        MobSpawnerBaseLogic spawnerLogic = ms.func_145881_a();
-        if (spawnerLogic != null) {
-            spawnerLogic.setEntityName(TFCreatures.getSpawnerNameFor("Skeleton Druid"));
+        // tile entities may be unavailable when a block placement fails
+        if (world.getTileEntity(x + 3, y + 1, z + 3) instanceof TileEntityMobSpawner spawner) {
+            MobSpawnerBaseLogic spawnerLogic = spawner.func_145881_a();
+            if (spawnerLogic != null) {
+                spawnerLogic.setEntityName(TFCreatures.getSpawnerNameFor("Skeleton Druid"));
+            }
         }
         return true;
     }

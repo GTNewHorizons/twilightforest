@@ -7,7 +7,7 @@ import net.minecraft.world.World;
 
 /**
  * Several ruin types that look like the quest grove
- * 
+ *
  * @author Ben
  *
  */
@@ -16,18 +16,15 @@ public class TFGenGroveRuins extends TFGenerator {
     @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
 
-        if (rand.nextBoolean()) {
-            return generateLargeArch(world, rand, x, y, z);
-        } else {
-            return generateSmallArch(world, rand, x, y, z);
-        }
+        return rand.nextBoolean() ? generateLargeArch(world, rand, x, y, z) : generateSmallArch(world, rand, x, y, z);
     }
 
     /**
      * Generate a ruin with the larger arch
      */
     private boolean generateLargeArch(World world, Random rand, int x, int y, int z) {
-        if (!isAreaSuitable(world, rand, x, y, z, 2, 7, 6)) {
+        // the top row is y + 7, the cleared region includes it
+        if (y < 2 || (long) y + 8 > world.getHeight() || !isAreaSuitable(world, rand, x, y, z, 2, 8, 6)) {
             return false;
         }
 
@@ -72,7 +69,8 @@ public class TFGenGroveRuins extends TFGenerator {
      * Generate a ruin with the smaller arch
      */
     private boolean generateSmallArch(World world, Random rand, int x, int y, int z) {
-        if (!isAreaSuitable(world, rand, x, y, z, 7, 5, 9)) {
+        // the arch reaches y + 5, include that row in the clearance test
+        if (y < 1 || (long) y + 6 > world.getHeight() || !isAreaSuitable(world, rand, x, y, z, 7, 6, 9)) {
             return false;
         }
 

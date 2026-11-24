@@ -6,17 +6,19 @@ import net.minecraft.block.material.Material;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
-import cpw.mods.fml.common.FMLLog;
 import twilightforest.block.BlockTFRoots;
 import twilightforest.block.TFBlocks;
 
 /**
  * Makes large trees with flat leaf ovals that provide a canopy for the forest
- * 
+ *
  * @author Ben
  *
  */
 public class TFGenDarkCanopyTree extends TFTreeGenerator {
+
+    private static final int MAX_BRANCH_SPREAD = 4;
+    private static final int BRANCH_COUNT = 4;
 
     public TFGenDarkCanopyTree() {
         this(false);
@@ -66,20 +68,24 @@ public class TFGenDarkCanopyTree extends TFTreeGenerator {
         // determine a height
         int treeHeight = 6 + random.nextInt(5);
 
+        // allow room for the upper leaf crown and the tilted side branches
+        if ((long) y + treeHeight + 6 >= world.getHeight()) {
+            return false;
+        }
+
         // okay build a tree! trunk here
         drawBresehnam(world, x, y, z, x, y + treeHeight, z, treeBlock, treeMeta);
         leafAround(world, x, y + treeHeight, z);
 
         // make 4 branches
-        int numBranches = 4;
         double offset = random.nextFloat();
-        for (int b = 0; b < numBranches; b++) {
+        for (int b = 0; b < BRANCH_COUNT; b++) {
             buildBranch(
                     world,
                     x,
                     y,
                     z,
-                    treeHeight - 3 - numBranches + (b / 2),
+                    treeHeight - 3 - BRANCH_COUNT + (b / 2),
                     10 + random.nextInt(4),
                     0.23 * b + offset,
                     0.23,
@@ -105,7 +111,7 @@ public class TFGenDarkCanopyTree extends TFTreeGenerator {
 
     /**
      * Build a branch with a flat blob of leaves at the end.
-     * 
+     *
      * @param height
      * @param length
      * @param angle
@@ -117,30 +123,16 @@ public class TFGenDarkCanopyTree extends TFTreeGenerator {
         ChunkCoordinates dest = translateCoords(src.posX, src.posY, src.posZ, length, angle, tilt);
 
         // constrain branch spread
-        if ((dest.posX - x) < -4) {
-            dest.posX = x - 4;
-        }
-        if ((dest.posX - x) > 4) {
-            dest.posX = x + 4;
-        }
-        if ((dest.posZ - z) < -4) {
-            dest.posZ = z - 4;
-        }
-        if ((dest.posZ - z) > 4) {
-            dest.posZ = z + 4;
-        }
+        dest.posX = clampBranchCoordinate(dest.posX, x);
+        dest.posZ = clampBranchCoordinate(dest.posZ, z);
 
         drawBresehnam(world, src.posX, src.posY, src.posZ, dest.posX, dest.posY, dest.posZ, treeBlock, branchMeta);
 
-        if (Math.abs(x - dest.posX) + 2 > 7 || Math.abs(z - dest.posZ) + 2 > 7) {
-            FMLLog.fine(
-                    "[TwilightForest]  getting branch too far.  x = " + (x - dest.posX + 2)
-                            + ", z = "
-                            + (z - dest.posZ + 2));
-        }
-
         leafAround(world, dest.posX, dest.posY, dest.posZ);
+    }
 
+    private static int clampBranchCoordinate(int coordinate, int origin) {
+        return Math.max(origin - MAX_BRANCH_SPREAD, Math.min(origin + MAX_BRANCH_SPREAD, coordinate));
     }
 
     /**
