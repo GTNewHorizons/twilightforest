@@ -22,6 +22,9 @@ public class EntityTFThrownAxe extends EntityThrowable {
 
     @Override
     protected void onImpact(MovingObjectPosition par1MovingObjectPosition) {
+        if (this.isDead) {
+            return;
+        }
         boolean passThru = false;
 
         if (par1MovingObjectPosition.entityHit != null) {
@@ -30,14 +33,16 @@ public class EntityTFThrownAxe extends EntityThrowable {
             }
 
             // if we're not set to pass, damage what we hit
-            if (!passThru) {
+            if (!passThru && !this.worldObj.isRemote) {
                 par1MovingObjectPosition.entityHit
                         .attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), PROJECTILE_DAMAGE);
             }
         }
 
-        for (int i = 0; i < 8; ++i) {
-            this.worldObj.spawnParticle("largesmoke", this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D);
+        if (!passThru && this.worldObj.isRemote) {
+            for (int i = 0; i < 8; ++i) {
+                this.worldObj.spawnParticle("largesmoke", this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D);
+            }
         }
 
         if (!passThru && !this.worldObj.isRemote) {
