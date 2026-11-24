@@ -14,17 +14,18 @@ public class StructureTFCastleBlocks extends StructureComponent.BlockSelector {
         if (!isWall) {
             this.field_151562_a = Blocks.air;
             this.selectedBlockMetaData = 0;
-        } else {
-            this.field_151562_a = TFBlocks.castleBlock;
-            float randFloat = rand.nextFloat();
+            return;
+        }
 
-            if (randFloat < 0.1F) {
-                this.selectedBlockMetaData = 1;
-            } else if (randFloat < 0.2F) {
-                this.selectedBlockMetaData = 2;
-            } else {
-                this.selectedBlockMetaData = 0;
-            }
+        this.field_151562_a = TFBlocks.castleBlock;
+        float roll = rand.nextFloat();
+
+        if (roll < 0.1F) {
+            this.selectedBlockMetaData = 1;
+        } else if (roll < 0.2F) {
+            this.selectedBlockMetaData = 2;
+        } else {
+            this.selectedBlockMetaData = 0;
         }
     }
 }

@@ -1,6 +1,5 @@
 package twilightforest.structures;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -53,24 +52,6 @@ public abstract class StructureTFComponent extends StructureComponent {
     public static StructureBoundingBox getComponentToAddBoundingBox(int x, int y, int z, int minX, int minY, int minZ,
             int maxX, int maxY, int maxZ, int dir) {
         switch (dir) {
-            default:
-                return new StructureBoundingBox(
-                        x + minX,
-                        y + minY,
-                        z + minZ,
-                        x + maxX + minX,
-                        y + maxY + minY,
-                        z + maxZ + minZ);
-
-            case 0: // '\0'
-                return new StructureBoundingBox(
-                        x + minX,
-                        y + minY,
-                        z + minZ,
-                        x + maxX + minX,
-                        y + maxY + minY,
-                        z + maxZ + minZ);
-
             case 1: // '\001'
                 return new StructureBoundingBox(
                         x - maxZ + minZ,
@@ -79,7 +60,6 @@ public abstract class StructureTFComponent extends StructureComponent {
                         x + minZ,
                         y + maxY + minY,
                         z + maxX + minX);
-
             case 2: // '\002'
                 return new StructureBoundingBox(
                         x - maxX - minX,
@@ -88,7 +68,6 @@ public abstract class StructureTFComponent extends StructureComponent {
                         x - minX,
                         y + maxY + minY,
                         z - minZ);
-
             case 3: // '\003'
                 return new StructureBoundingBox(
                         x + minZ,
@@ -97,15 +76,7 @@ public abstract class StructureTFComponent extends StructureComponent {
                         x + maxZ + minZ,
                         y + maxY + minY,
                         z + minX);
-        }
-    }
-
-    /**
-     * Fixed a bug with direction 1 and -z values, but I'm not sure if it'll break other things
-     */
-    public static StructureBoundingBox getComponentToAddBoundingBox2(int x, int y, int z, int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ, int dir) {
-        switch (dir) {
+            case 0: // '\0'
             default:
                 return new StructureBoundingBox(
                         x + minX,
@@ -114,16 +85,12 @@ public abstract class StructureTFComponent extends StructureComponent {
                         x + maxX + minX,
                         y + maxY + minY,
                         z + maxZ + minZ);
+        }
+    }
 
-            case 0: // '\0'
-                return new StructureBoundingBox(
-                        x + minX,
-                        y + minY,
-                        z + minZ,
-                        x + maxX + minX,
-                        y + maxY + minY,
-                        z + maxZ + minZ);
-
+    public static StructureBoundingBox getComponentToAddBoundingBox2(int x, int y, int z, int minX, int minY, int minZ,
+            int maxX, int maxY, int maxZ, int dir) {
+        switch (dir) {
             case 1: // '\001'
                 return new StructureBoundingBox(
                         x - maxZ - minZ,
@@ -132,16 +99,6 @@ public abstract class StructureTFComponent extends StructureComponent {
                         x - minZ,
                         y + maxY + minY,
                         z + maxX + minX);
-
-            case 2: // '\002'
-                return new StructureBoundingBox(
-                        x - maxX - minX,
-                        y + minY,
-                        z - maxZ - minZ,
-                        x - minX,
-                        y + maxY + minY,
-                        z - minZ);
-
             case 3: // '\003'
                 return new StructureBoundingBox(
                         x + minZ,
@@ -150,58 +107,61 @@ public abstract class StructureTFComponent extends StructureComponent {
                         x + maxZ + minZ,
                         y + maxY + minY,
                         z - minX);
+            case 0: // '\0'
+            case 2: // '\002'
+            default:
+                return getComponentToAddBoundingBox(x, y, z, minX, minY, minZ, maxX, maxY, maxZ, dir);
         }
     }
 
     /**
      * Place a monster spawner at the specified coordinates
-     * 
+     *
      * @param monsterID
      */
     protected TileEntityMobSpawner placeSpawnerAtCurrentPosition(World world, Random rand, int x, int y, int z,
             String monsterID, StructureBoundingBox sbb) {
-        TileEntityMobSpawner tileEntitySpawner = null;
-
-        int dx = getXWithOffset(x, z);
-        int dy = getYWithOffset(y);
-        int dz = getZWithOffset(x, z);
-        if (sbb.isVecInside(dx, dy, dz) && world.getBlock(dx, dy, dz) != Blocks.mob_spawner) {
-            world.setBlock(dx, dy, dz, Blocks.mob_spawner, 0, 2);
-            tileEntitySpawner = (TileEntityMobSpawner) world.getTileEntity(dx, dy, dz);
-            if (tileEntitySpawner != null) {
-                tileEntitySpawner.func_145881_a().setEntityName(monsterID);
-            }
-        }
-
-        return tileEntitySpawner;
+        return placeSpawnerAtWorldPosition(
+                world,
+                getXWithOffset(x, z),
+                getYWithOffset(y),
+                getZWithOffset(x, z),
+                monsterID,
+                sbb);
     }
 
     /**
      * Place a monster spawner at the specified coordinates, as if rotated
-     * 
+     *
      * @param monsterID
      */
     protected TileEntityMobSpawner placeSpawnerRotated(World world, int x, int y, int z, int rotation, String monsterID,
             StructureBoundingBox sbb) {
-        TileEntityMobSpawner tileEntitySpawner = null;
+        return placeSpawnerAtWorldPosition(
+                world,
+                getXWithOffsetAsIfRotated(x, z, rotation),
+                getYWithOffset(y),
+                getZWithOffsetAsIfRotated(x, z, rotation),
+                monsterID,
+                sbb);
+    }
 
-        int dx = getXWithOffsetAsIfRotated(x, z, rotation);
-        int dy = getYWithOffset(y);
-        int dz = getZWithOffsetAsIfRotated(x, z, rotation);
-        if (sbb.isVecInside(dx, dy, dz) && world.getBlock(dx, dy, dz) != Blocks.mob_spawner) {
-            world.setBlock(dx, dy, dz, Blocks.mob_spawner, 0, 2);
-            tileEntitySpawner = (TileEntityMobSpawner) world.getTileEntity(dx, dy, dz);
-            if (tileEntitySpawner != null) {
-                tileEntitySpawner.func_145881_a().setEntityName(monsterID);
-            }
-        }
+    private TileEntityMobSpawner placeSpawnerAtWorldPosition(World world, int x, int y, int z, String monsterID,
+            StructureBoundingBox sbb) {
+        if (!sbb.isVecInside(x, y, z) || world.getBlock(x, y, z) == Blocks.mob_spawner) return null;
 
-        return tileEntitySpawner;
+        world.setBlock(x, y, z, Blocks.mob_spawner, 0, 2);
+        TileEntity tileEntity = world.getTileEntity(x, y, z);
+        if (!(tileEntity instanceof TileEntityMobSpawner)) return null;
+
+        TileEntityMobSpawner spawner = (TileEntityMobSpawner) tileEntity;
+        spawner.func_145881_a().setEntityName(monsterID);
+        return spawner;
     }
 
     /**
      * Place a treasure chest at the specified coordinates
-     * 
+     *
      * @param treasureType
      */
     protected void placeTreasureAtCurrentPosition(World world, Random rand, int x, int y, int z,
@@ -211,22 +171,25 @@ public abstract class StructureTFComponent extends StructureComponent {
 
     /**
      * Place a treasure chest at the specified coordinates
-     * 
+     *
      * @param treasureType
      */
     protected void placeTreasureAtCurrentPosition(World world, Random rand, int x, int y, int z,
             TFTreasure treasureType, boolean trapped, StructureBoundingBox sbb) {
-        int dx = getXWithOffset(x, z);
-        int dy = getYWithOffset(y);
-        int dz = getZWithOffset(x, z);
-        if (sbb.isVecInside(dx, dy, dz) && world.getBlock(dx, dy, dz) != Blocks.chest) {
-            treasureType.generate(world, rand, dx, dy, dz, trapped ? Blocks.trapped_chest : Blocks.chest);
-        }
+        placeTreasureAtWorldPosition(
+                world,
+                rand,
+                getXWithOffset(x, z),
+                getYWithOffset(y),
+                getZWithOffset(x, z),
+                treasureType,
+                trapped,
+                sbb);
     }
 
     /**
      * Place a treasure chest at the specified coordinates
-     * 
+     *
      * @param treasureType
      */
     protected void placeTreasureRotated(World world, int x, int y, int z, int rotation, TFTreasure treasureType,
@@ -236,32 +199,54 @@ public abstract class StructureTFComponent extends StructureComponent {
 
     /**
      * Place a treasure chest at the specified coordinates
-     * 
+     *
      * @param treasureType
      */
     protected void placeTreasureRotated(World world, int x, int y, int z, int rotation, TFTreasure treasureType,
             boolean trapped, StructureBoundingBox sbb) {
-        int dx = getXWithOffsetAsIfRotated(x, z, rotation);
-        int dy = getYWithOffset(y);
-        int dz = getZWithOffsetAsIfRotated(x, z, rotation);
-        if (sbb.isVecInside(dx, dy, dz) && world.getBlock(dx, dy, dz) != Blocks.chest) {
-            treasureType.generate(world, null, dx, dy, dz, trapped ? Blocks.trapped_chest : Blocks.chest);
+        placeTreasureRotated(world, null, x, y, z, rotation, treasureType, trapped, sbb);
+    }
+
+    // allows new call sites to supply deterministic loot rng for rotated treasure chests
+    protected void placeTreasureRotated(World world, Random random, int x, int y, int z, int rotation,
+            TFTreasure treasureType, boolean trapped, StructureBoundingBox sbb) {
+        placeTreasureAtWorldPosition(
+                world,
+                random,
+                getXWithOffsetAsIfRotated(x, z, rotation),
+                getYWithOffset(y),
+                getZWithOffsetAsIfRotated(x, z, rotation),
+                treasureType,
+                trapped,
+                sbb);
+    }
+
+    private void placeTreasureAtWorldPosition(World world, Random random, int x, int y, int z, TFTreasure treasureType,
+            boolean trapped, StructureBoundingBox sbb) {
+        if (!sbb.isVecInside(x, y, z)) return;
+
+        Block block = world.getBlock(x, y, z);
+        if (block != Blocks.chest && block != Blocks.trapped_chest) {
+            treasureType.generate(world, random, x, y, z, trapped ? Blocks.trapped_chest : Blocks.chest);
         }
     }
 
     protected void placeSignAtCurrentPosition(World world, int x, int y, int z, String string0, String string1,
             StructureBoundingBox sbb) {
-        int dx = getXWithOffset(x, z);
-        int dy = getYWithOffset(y);
-        int dz = getZWithOffset(x, z);
-        if (sbb.isVecInside(dx, dy, dz) && world.getBlock(dx, dy, dz) != Blocks.standing_sign) {
-            world.setBlock(dx, dy, dz, Blocks.standing_sign, (this.coordBaseMode * 2), 2);
+        int worldX = getXWithOffset(x, z);
+        int worldY = getYWithOffset(y);
+        int worldZ = getZWithOffset(x, z);
+        if (!sbb.isVecInside(worldX, worldY, worldZ)
+                || world.getBlock(worldX, worldY, worldZ) == Blocks.standing_sign) {
+            return;
+        }
 
-            TileEntitySign teSign = (TileEntitySign) world.getTileEntity(dx, dy, dz);
-            if (teSign != null) {
-                teSign.signText[1] = string0;
-                teSign.signText[2] = string1;
-            }
+        world.setBlock(worldX, worldY, worldZ, Blocks.standing_sign, coordBaseMode * 2, 2);
+        TileEntity tileEntity = world.getTileEntity(worldX, worldY, worldZ);
+        if (tileEntity instanceof TileEntitySign) {
+            TileEntitySign sign = (TileEntitySign) tileEntity;
+            sign.signText[1] = string0;
+            sign.signText[2] = string1;
         }
     }
 
@@ -286,59 +271,59 @@ public abstract class StructureTFComponent extends StructureComponent {
      * Provides coordinates to make a tower such that it will open into the parent tower at the provided coordinates.
      */
     protected int[] offsetTowerCoords(int x, int y, int z, int towerSize, int direction) {
+        int worldX = getXWithOffset(x, z);
+        int worldY = getYWithOffset(y) - 1;
+        int worldZ = getZWithOffset(x, z);
+        int halfSize = towerSize / 2;
 
-        int dx = getXWithOffset(x, z);
-        int dy = getYWithOffset(y);
-        int dz = getZWithOffset(x, z);
-
-        if (direction == 0) {
-            return new int[] { dx + 1, dy - 1, dz - towerSize / 2 };
-        } else if (direction == 1) {
-            return new int[] { dx + towerSize / 2, dy - 1, dz + 1 };
-        } else if (direction == 2) {
-            return new int[] { dx - 1, dy - 1, dz + towerSize / 2 };
-        } else if (direction == 3) {
-            return new int[] { dx - towerSize / 2, dy - 1, dz - 1 };
+        switch (direction) {
+            case 0:
+                return new int[] { worldX + 1, worldY, worldZ - halfSize };
+            case 1:
+                return new int[] { worldX + halfSize, worldY, worldZ + 1 };
+            case 2:
+                return new int[] { worldX - 1, worldY, worldZ + halfSize };
+            case 3:
+                return new int[] { worldX - halfSize, worldY, worldZ - 1 };
+            default:
+                // ugh?
+                return new int[] { x, y, z };
         }
-
-        // ugh?
-        return new int[] { x, y, z };
     }
 
     /**
      * Provides coordinates to make a tower such that it will open into the parent tower at the provided coordinates.
      */
     protected ChunkCoordinates offsetTowerCCoords(int x, int y, int z, int towerSize, int direction) {
+        int worldX = getXWithOffset(x, z);
+        int worldY = getYWithOffset(y) - 1;
+        int worldZ = getZWithOffset(x, z);
+        int halfSize = towerSize / 2;
 
-        int dx = getXWithOffset(x, z);
-        int dy = getYWithOffset(y);
-        int dz = getZWithOffset(x, z);
-
-        if (direction == 0) {
-            return new ChunkCoordinates(dx + 1, dy - 1, dz - towerSize / 2);
-        } else if (direction == 1) {
-            return new ChunkCoordinates(dx + towerSize / 2, dy - 1, dz + 1);
-        } else if (direction == 2) {
-            return new ChunkCoordinates(dx - 1, dy - 1, dz + towerSize / 2);
-        } else if (direction == 3) {
-            return new ChunkCoordinates(dx - towerSize / 2, dy - 1, dz - 1);
+        switch (direction) {
+            case 0:
+                return new ChunkCoordinates(worldX + 1, worldY, worldZ - halfSize);
+            case 1:
+                return new ChunkCoordinates(worldX + halfSize, worldY, worldZ + 1);
+            case 2:
+                return new ChunkCoordinates(worldX - 1, worldY, worldZ + halfSize);
+            case 3:
+                return new ChunkCoordinates(worldX - halfSize, worldY, worldZ - 1);
+            default:
+                // ugh?
+                return new ChunkCoordinates(x, y, z);
         }
-
-        // ugh?
-        return new ChunkCoordinates(x, y, z);
     }
 
-    public int[] getOffsetAsIfRotated(int src[], int rotation) {
-        int temp = this.getCoordBaseMode();
-        int[] dest = new int[3];
-        this.setCoordBaseMode(rotation);
-
-        dest[0] = getXWithOffset(src[0], src[2]);
-        dest[1] = getYWithOffset(src[1]);
-        dest[2] = getZWithOffset(src[0], src[2]);
-
-        this.setCoordBaseMode(temp);
-        return dest;
+    public int[] getOffsetAsIfRotated(int[] src, int rotation) {
+        // the vanilla offset methods dispatch virtually, so restore the mode even if override throws
+        int originalMode = getCoordBaseMode();
+        try {
+            setCoordBaseMode(rotation);
+            return new int[] { getXWithOffset(src[0], src[2]), getYWithOffset(src[1]), getZWithOffset(src[0], src[2]) };
+        } finally {
+            setCoordBaseMode(originalMode);
+        }
     }
 
     protected int getXWithOffset(int x, int z) {
@@ -351,8 +336,9 @@ public abstract class StructureTFComponent extends StructureComponent {
                 return boundingBox.maxX - x;
             case 3: // '\003'
                 return boundingBox.minX + z;
+            default:
+                return x;
         }
-        return x;
     }
 
     protected int getYWithOffset(int par1) {
@@ -369,17 +355,16 @@ public abstract class StructureTFComponent extends StructureComponent {
                 return boundingBox.maxZ - z;
             case 3: // '\003'
                 return boundingBox.maxZ - x;
+            default:
+                return z;
         }
-        return z;
     }
 
     /**
      * Pretend as though the structure is rotated beyond what it already is
      */
     protected int getXWithOffsetAsIfRotated(int x, int z, int rotation) {
-        if (coordBaseMode < 0) {
-            return x;
-        }
+        if (coordBaseMode < 0) return x;
 
         switch ((coordBaseMode + rotation) % 4) {
             case 0:
@@ -390,25 +375,25 @@ public abstract class StructureTFComponent extends StructureComponent {
                 return boundingBox.maxX - x;
             case 3:
                 return boundingBox.minX + z;
+            default:
+                return x;
         }
-        return x;
     }
 
     protected int getZWithOffsetAsIfRotated(int x, int z, int rotation) {
-        if (coordBaseMode < 0) {
-            return x;
-        } else {
-            switch ((coordBaseMode + rotation) % 4) {
-                case 0:
-                    return boundingBox.minZ + z;
-                case 1:
-                    return boundingBox.minZ + x;
-                case 2:
-                    return boundingBox.maxZ - z;
-                case 3:
-                    return boundingBox.maxZ - x;
-            }
-            return z;
+        if (coordBaseMode < 0) return z;
+
+        switch ((coordBaseMode + rotation) % 4) {
+            case 0:
+                return boundingBox.minZ + z;
+            case 1:
+                return boundingBox.minZ + x;
+            case 2:
+                return boundingBox.maxZ - z;
+            case 3:
+                return boundingBox.maxZ - x;
+            default:
+                return z;
         }
     }
 
@@ -427,10 +412,11 @@ public abstract class StructureTFComponent extends StructureComponent {
 
     protected int getMetadataAtCurrentPosition(World world, int x, int y, int z,
             StructureBoundingBox structureBoundingBox) {
-        int l = this.getXWithOffset(x, z);
-        int i1 = this.getYWithOffset(y);
-        int j1 = this.getZWithOffset(x, z);
-        return !structureBoundingBox.isVecInside(l, i1, j1) ? 0 : world.getBlockMetadata(l, i1, j1);
+        int worldX = getXWithOffset(x, z);
+        int worldY = getYWithOffset(y);
+        int worldZ = getZWithOffset(x, z);
+        return structureBoundingBox.isVecInside(worldX, worldY, worldZ) ? world.getBlockMetadata(worldX, worldY, worldZ)
+                : 0;
     }
 
     /**
@@ -438,13 +424,10 @@ public abstract class StructureTFComponent extends StructureComponent {
      */
     protected void setTileEntityAtCurrentPosition(World world, TileEntity te, int x, int y, int z,
             StructureBoundingBox sbb) {
-        int i1 = this.getXWithOffset(x, z);
-        int j1 = this.getYWithOffset(y);
-        int k1 = this.getZWithOffset(x, z);
-
-        if (sbb.isVecInside(i1, j1, k1)) {
-            world.setTileEntity(i1, j1, k1, te);
-        }
+        int worldX = getXWithOffset(x, z);
+        int worldY = getYWithOffset(y);
+        int worldZ = getZWithOffset(x, z);
+        if (sbb.isVecInside(worldX, worldY, worldZ)) world.setTileEntity(worldX, worldY, worldZ, te);
     }
 
     /**
@@ -458,18 +441,12 @@ public abstract class StructureTFComponent extends StructureComponent {
     protected void partiallyFillWithMetadataBlocks(World world, StructureBoundingBox structureBoundingBox, int minX,
             int minY, int minZ, int maxX, int maxY, int maxZ, Block placeBlock, int placeBlockMeta, Random random,
             float placeRate) {
-        for (int i2 = minY; i2 <= maxY; ++i2) {
-            for (int j2 = minX; j2 <= maxX; ++j2) {
-                for (int k2 = minZ; k2 <= maxZ; ++k2) {
+        // preserve the original y x z iteration order and rng calls for seeded structures
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     if (random.nextFloat() <= placeRate) {
-                        this.placeBlockAtCurrentPosition(
-                                world,
-                                placeBlock,
-                                placeBlockMeta,
-                                j2,
-                                i2,
-                                k2,
-                                structureBoundingBox);
+                        placeBlockAtCurrentPosition(world, placeBlock, placeBlockMeta, x, y, z, structureBoundingBox);
                     }
                 }
             }
@@ -481,12 +458,11 @@ public abstract class StructureTFComponent extends StructureComponent {
      */
     protected void placeBlockRotated(World world, Block blockID, int meta, int x, int y, int z, int rotation,
             StructureBoundingBox sbb) {
-        int dx = this.getXWithOffsetAsIfRotated(x, z, rotation);
-        int dy = this.getYWithOffset(y);
-        int dz = this.getZWithOffsetAsIfRotated(x, z, rotation);
-
-        if (sbb.isVecInside(dx, dy, dz)) {
-            world.setBlock(dx, dy, dz, blockID, meta, 2);
+        int worldX = getXWithOffsetAsIfRotated(x, z, rotation);
+        int worldY = getYWithOffset(y);
+        int worldZ = getZWithOffsetAsIfRotated(x, z, rotation);
+        if (sbb.isVecInside(worldX, worldY, worldZ)) {
+            world.setBlock(worldX, worldY, worldZ, blockID, meta, 2);
         }
     }
 
@@ -494,15 +470,10 @@ public abstract class StructureTFComponent extends StructureComponent {
      * Get a block ID as though the entire structure were rotated the specified amount beyond what it already is
      */
     protected Block getBlockIDRotated(World world, int x, int y, int z, int rotation, StructureBoundingBox sbb) {
-        int dx = this.getXWithOffsetAsIfRotated(x, z, rotation);
-        int dy = this.getYWithOffset(y);
-        int dz = this.getZWithOffsetAsIfRotated(x, z, rotation);
-
-        if (sbb.isVecInside(dx, dy, dz)) {
-            return world.getBlock(dx, dy, dz);
-        } else {
-            return Blocks.air;
-        }
+        int worldX = getXWithOffsetAsIfRotated(x, z, rotation);
+        int worldY = getYWithOffset(y);
+        int worldZ = getZWithOffsetAsIfRotated(x, z, rotation);
+        return sbb.isVecInside(worldX, worldY, worldZ) ? world.getBlock(worldX, worldY, worldZ) : Blocks.air;
     }
 
     /**
@@ -510,10 +481,10 @@ public abstract class StructureTFComponent extends StructureComponent {
      */
     protected void fillBlocksRotated(World world, StructureBoundingBox sbb, int minX, int minY, int minZ, int maxX,
             int maxY, int maxZ, Block blockID, int meta, int rotation) {
-        for (int dx = minY; dx <= maxY; ++dx) {
-            for (int dy = minX; dy <= maxX; ++dy) {
-                for (int dz = minZ; dz <= maxZ; ++dz) {
-                    this.placeBlockRotated(world, blockID, meta, dy, dx, dz, rotation, sbb);
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    placeBlockRotated(world, blockID, meta, x, y, z, rotation, sbb);
                 }
             }
         }
@@ -525,13 +496,13 @@ public abstract class StructureTFComponent extends StructureComponent {
     protected void randomlyFillBlocksRotated(World world, StructureBoundingBox sbb, Random rand, float chance, int minX,
             int minY, int minZ, int maxX, int maxY, int maxZ, Block blockID, int meta, Block blockID2, int meta2,
             int rotation) {
-        for (int dx = minY; dx <= maxY; ++dx) {
-            for (int dy = minX; dy <= maxX; ++dy) {
-                for (int dz = minZ; dz <= maxZ; ++dz) {
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     if (rand.nextFloat() < chance) {
-                        this.placeBlockRotated(world, blockID, meta, dy, dx, dz, rotation, sbb);
+                        placeBlockRotated(world, blockID, meta, x, y, z, rotation, sbb);
                     } else {
-                        this.placeBlockRotated(world, blockID2, meta2, dy, dx, dz, rotation, sbb);
+                        placeBlockRotated(world, blockID2, meta2, x, y, z, rotation, sbb);
                     }
                 }
             }
@@ -540,15 +511,14 @@ public abstract class StructureTFComponent extends StructureComponent {
 
     public void fillToGroundRotated(World world, Block stonebrick, int meta, int x, int y, int z, int rotation,
             StructureBoundingBox sbb) {
-        int dx = this.getXWithOffsetAsIfRotated(x, z, rotation);
-        int dy = this.getYWithOffset(y);
-        int dz = this.getZWithOffsetAsIfRotated(x, z, rotation);
+        int worldX = getXWithOffsetAsIfRotated(x, z, rotation);
+        int worldY = getYWithOffset(y);
+        int worldZ = getZWithOffsetAsIfRotated(x, z, rotation);
+        if (!sbb.isVecInside(worldX, worldY, worldZ)) return;
 
-        if (sbb.isVecInside(dx, dy, dz)) {
-            while ((world.isAirBlock(dx, dy, dz) || world.getBlock(dx, dy, dz).getMaterial().isLiquid()) && dy > 1) {
-                world.setBlock(dx, dy, dz, stonebrick, meta, 2);
-                --dy;
-            }
+        while (worldY > 1 && (world.isAirBlock(worldX, worldY, worldZ)
+                || world.getBlock(worldX, worldY, worldZ).getMaterial().isLiquid())) {
+            world.setBlock(worldX, worldY--, worldZ, stonebrick, meta, 2);
         }
     }
 
@@ -560,18 +530,33 @@ public abstract class StructureTFComponent extends StructureComponent {
         this.fillBlocksRotated(world, sbb, minX, minY, minZ, maxX, maxY, maxZ, Blocks.air, 0, rotation);
     }
 
+    // shared by the hedge and underground mazes, preserve the origin exclusion and
+    // ignore unfilled (0,0) room slots during placement
+    protected static boolean isNearMazeRoom(int x, int z, int[] rooms, int spacing) {
+        // if proposed coordinates are covering the origin, return true to stop the room from causing the
+        // maze to fail
+        if (x == 1 && z == 1) return true;
+        for (int i = 0; i < rooms.length; i += 2) {
+            int roomX = rooms[i];
+            int roomZ = rooms[i + 1];
+            if (roomX == 0 && roomZ == 0) continue;
+            if (Math.abs(x - roomX) < spacing && Math.abs(z - roomZ) < spacing) return true;
+        }
+        return false;
+    }
+
     public static StructureComponent.BlockSelector getStrongholdStones() {
         return strongholdStones;
     }
 
     /**
      * Gets the metadata necessary to make stairs facing the proper direction.
-     * 
+     *
      * @param dir
      * @return
      */
     protected int getStairMeta(int dir) {
-        switch ((this.getCoordBaseMode() + dir) % 4) {
+        switch ((getCoordBaseMode() + dir) % 4) {
             case 0:
                 return 0;
             case 1:
@@ -587,13 +572,13 @@ public abstract class StructureTFComponent extends StructureComponent {
 
     /**
      * Gets the metadata necessary to stick the ladder on the specified wall.
-     * 
+     *
      * @param ladderDir
      * @return
      */
     protected int getLadderMeta(int ladderDir) {
         // ladder data values are... dumb.
-        switch ((this.getCoordBaseMode() + ladderDir) % 4) {
+        switch ((getCoordBaseMode() + ladderDir) % 4) {
             case 0:
                 return 4;
             case 1:
@@ -618,7 +603,7 @@ public abstract class StructureTFComponent extends StructureComponent {
      * Nullify all the sky light in this component bounding box
      */
     public void nullifySkyLightForBoundingBox(World world) {
-        this.nullifySkyLight(
+        nullifySkyLight(
                 world,
                 boundingBox.minX - 1,
                 boundingBox.minY - 1,
@@ -633,14 +618,21 @@ public abstract class StructureTFComponent extends StructureComponent {
      */
     public void nullifySkyLightAtCurrentPosition(World world, int sx, int sy, int sz, int dx, int dy, int dz) {
         // resolve all variables to their actual in-world positions
+        int x1 = getXWithOffset(sx, sz);
+        int y1 = getYWithOffset(sy);
+        int z1 = getZWithOffset(sx, sz);
+        int x2 = getXWithOffset(dx, dz);
+        int y2 = getYWithOffset(dy);
+        int z2 = getZWithOffset(dx, dz);
+        // rotations can reverse the transformed corner order
         nullifySkyLight(
                 world,
-                getXWithOffset(sx, sz),
-                getYWithOffset(sy),
-                getZWithOffset(sx, sz),
-                getXWithOffset(dx, dz),
-                getYWithOffset(dy),
-                getZWithOffset(dx, dz));
+                Math.min(x1, x2),
+                Math.min(y1, y2),
+                Math.min(z1, z2),
+                Math.max(x1, x2),
+                Math.max(y1, y2),
+                Math.max(z1, z2));
     }
 
     /**
@@ -659,49 +651,35 @@ public abstract class StructureTFComponent extends StructureComponent {
     /**
      * Discover the y coordinate that will serve as the ground level of the supplied BoundingBox. (A median of all the
      * levels in the BB's horizontal rectangle).
-     * 
+     *
      * This is basically copied from ComponentVillage
      */
     protected int getAverageGroundLevel(World world, StructureBoundingBox sbb) {
         int totalHeight = 0;
         int heightCount = 0;
-
-        for (int bz = this.boundingBox.minZ; bz <= this.boundingBox.maxZ; ++bz) {
-            for (int by = this.boundingBox.minX; by <= this.boundingBox.maxX; ++by) {
-                if (sbb.isVecInside(by, 64, bz)) {
+        for (int z = boundingBox.minZ; z <= boundingBox.maxZ; z++) {
+            for (int x = boundingBox.minX; x <= boundingBox.maxX; x++) {
+                if (sbb.isVecInside(x, 64, z)) {
                     totalHeight += Math
-                            .max(world.getTopSolidOrLiquidBlock(by, bz), world.provider.getAverageGroundLevel());
-                    ++heightCount;
+                            .max(world.getTopSolidOrLiquidBlock(x, z), world.provider.getAverageGroundLevel());
+                    heightCount++;
                 }
             }
         }
-
-        if (heightCount == 0) {
-            return -1;
-        } else {
-            return totalHeight / heightCount;
-        }
+        return heightCount == 0 ? -1 : totalHeight / heightCount;
     }
 
     /**
      * Find what y level the dirt/grass/stone is. Just check the center of the chunk we're given
      */
     protected int getSampledDirtLevel(World world, StructureBoundingBox sbb) {
-        int dirtLevel = 256;
-
-        for (int y = 90; y > 0; y--) // is 90 like a good place to start? :)
-        {
-            int cx = sbb.getCenterX();
-            int cz = sbb.getCenterZ();
-
-            Material material = world.getBlock(cx, y, cz).getMaterial();
-            if (material == Material.ground || material == Material.rock || material == Material.grass) {
-                dirtLevel = y;
-                break;
-            }
+        int centerX = sbb.getCenterX();
+        int centerZ = sbb.getCenterZ();
+        for (int y = 90; y > 0; y--) { // is 90 like a good place to start? :)
+            Material material = world.getBlock(centerX, y, centerZ).getMaterial();
+            if (material == Material.ground || material == Material.rock || material == Material.grass) return y;
         }
-
-        return dirtLevel;
+        return 256;
     }
 
     /**
@@ -724,19 +702,13 @@ public abstract class StructureTFComponent extends StructureComponent {
      */
     public static StructureComponent findIntersectingExcluding(List list, StructureBoundingBox toCheck,
             StructureComponent exclude) {
-        Iterator iterator = list.iterator();
-        StructureComponent structurecomponent;
-
-        do {
-            if (!iterator.hasNext()) {
-                return null;
-            }
-
-            structurecomponent = (StructureComponent) iterator.next();
-        } while (structurecomponent == exclude || structurecomponent.getBoundingBox() == null
-                || !structurecomponent.getBoundingBox().intersectsWith(toCheck));
-
-        return structurecomponent;
+        for (Object candidate : list) {
+            StructureComponent component = (StructureComponent) candidate;
+            if (component != exclude && component.getBoundingBox() != null
+                    && component.getBoundingBox().intersectsWith(toCheck))
+                return component;
+        }
+        return null;
     }
 
 }
