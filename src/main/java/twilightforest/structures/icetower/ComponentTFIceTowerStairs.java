@@ -30,18 +30,18 @@ public class ComponentTFIceTowerStairs extends ComponentTFTowerWing {
 
         for (int x = 1; x < this.size; x++) {
 
-            this.placeStairs(world, sbb, x, 1 - x, 5, 2);
+            this.placeStairs(world, sbb, x, 1 - x, 5);
 
             for (int z = 0; z <= x; z++) {
 
                 if (z > 0 && z <= this.size / 2) {
-                    this.placeStairs(world, sbb, x, 1 - x, 5 - z, 2);
-                    this.placeStairs(world, sbb, x, 1 - x, 5 + z, 2);
+                    this.placeStairs(world, sbb, x, 1 - x, 5 - z);
+                    this.placeStairs(world, sbb, x, 1 - x, 5 + z);
                 }
 
                 if (x <= this.size / 2) {
-                    this.placeStairs(world, sbb, z, 1 - x, 5 - x, 1);
-                    this.placeStairs(world, sbb, z, 1 - x, 5 + x, 3);
+                    this.placeStairs(world, sbb, z, 1 - x, 5 - x);
+                    this.placeStairs(world, sbb, z, 1 - x, 5 + x);
                 }
 
             }
@@ -53,12 +53,17 @@ public class ComponentTFIceTowerStairs extends ComponentTFTowerWing {
         return true;
     }
 
-    private void placeStairs(World world, StructureBoundingBox sbb, int x, int y, int z, int stairMeta) {
-        if (this.getBlockAtCurrentPosition(world, x, y, z, sbb).isReplaceable(world, x, y, z)) {
-            this.placeBlockAtCurrentPosition(world, deco.blockID, deco.blockMeta, x, y, z, sbb);
-            // this.placeBlockAtCurrentPosition(world, deco.stairID, this.getStairMeta(stairMeta), x, y, z,
-            // sbb);
-            this.func_151554_b(world, deco.blockID, deco.blockMeta, x, y - 1, z, sbb);
+    private void placeStairs(World world, StructureBoundingBox sbb, int x, int y, int z) {
+        int worldX = getXWithOffset(x, z);
+        int worldY = getYWithOffset(y);
+        int worldZ = getZWithOffset(x, z);
+        if (!sbb.isVecInside(worldX, worldY, worldZ)
+                || !world.getBlock(worldX, worldY, worldZ).isReplaceable(world, worldX, worldY, worldZ)) {
+            return;
         }
+
+        // keep the existing solid-block steps, place a foundation only for successful steps
+        placeBlockAtCurrentPosition(world, deco.blockID, deco.blockMeta, x, y, z, sbb);
+        func_151554_b(world, deco.blockID, deco.blockMeta, x, y - 1, z, sbb);
     }
 }
