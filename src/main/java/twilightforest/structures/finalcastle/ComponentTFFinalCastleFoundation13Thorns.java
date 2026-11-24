@@ -18,10 +18,10 @@ public class ComponentTFFinalCastleFoundation13Thorns extends ComponentTFFinalCa
 
         this.boundingBox = new StructureBoundingBox(
                 sideTower.getBoundingBox().minX - 5,
-                sideTower.getBoundingBox().maxY - 1,
+                Math.min(60, sideTower.getBoundingBox().maxY - 1),
                 sideTower.getBoundingBox().minZ - 5,
                 sideTower.getBoundingBox().maxX + 5,
-                sideTower.getBoundingBox().maxY,
+                sideTower.getBoundingBox().maxY + 6,
                 sideTower.getBoundingBox().maxZ + 5);
     }
 
@@ -42,7 +42,8 @@ public class ComponentTFFinalCastleFoundation13Thorns extends ComponentTFFinalCa
         int x = 3 + decoRNG.nextInt(13);
         int z = 3 + decoRNG.nextInt(13);
 
-        int y = this.boundingBox.getYSize() + 5;
+        int startY = this.boundingBox.getYSize() <= 2 ? 7 : this.boundingBox.getYSize() - 1;
+        int y = startY;
 
         int twist = decoRNG.nextInt(4);
         int twistMod = 3 + decoRNG.nextInt(3);
@@ -74,13 +75,13 @@ public class ComponentTFFinalCastleFoundation13Thorns extends ComponentTFFinalCa
                 }
             }
 
-            if (Math.abs(y % twistMod) == 1) {
-                // make branch
-                this.makeThornBranch(world, x, y, z, rotation, sbb);
+            int oldLocalY = y - startY + 7;
+            if (Math.abs(oldLocalY % twistMod) == 1) {
+                makeThornBranch(world, x, y, oldLocalY, z, rotation, sbb);
             }
 
-            // twist randomly
-            if (y % twistMod == 0) {
+            // Keep the original twist frequency independent of the bounding box.
+            if (oldLocalY % twistMod == 0) {
                 twist++;
                 twist = twist % 4;
             }
@@ -88,8 +89,10 @@ public class ComponentTFFinalCastleFoundation13Thorns extends ComponentTFFinalCa
         }
     }
 
-    private void makeThornBranch(World world, int x, int y, int z, int rotation, StructureBoundingBox sbb) {
-        Random rand = new Random(world.getSeed() + (x * 321534781) ^ (y * 756839) + z);
+    private void makeThornBranch(World world, int x, int y, int oldLocalY, int z, int rotation,
+            StructureBoundingBox sbb) {
+        // preserve branch choices from the old Y origin
+        Random rand = new Random(world.getSeed() + (x * 321534781) ^ (oldLocalY * 756839) + z);
 
         // pick a direction
         int dir = rand.nextInt(4);

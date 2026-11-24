@@ -20,8 +20,7 @@ public class ComponentTFFinalCastleBellTower21 extends ComponentTFFinalCastleMaz
     public ComponentTFFinalCastleBellTower21(Random rand, int i, int x, int y, int z, int direction) {
         super(rand, i, x, y, z, FLOORS, 1, 1, direction);
         this.size = 21;
-        int floors = FLOORS;
-        this.height = floors * 8 + 1;
+        this.height = FLOORS * 8 + 1;
         this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox2(
                 x,
                 y,
@@ -39,7 +38,7 @@ public class ComponentTFFinalCastleBellTower21 extends ComponentTFFinalCastleMaz
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 
@@ -56,32 +55,23 @@ public class ComponentTFFinalCastleBellTower21 extends ComponentTFFinalCastleMaz
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        super.addComponentParts(world, rand, sbb);
+        if (!super.addComponentParts(world, rand, sbb)) {
+            return false;
+        }
 
-        // openings!
+        // decorative force field windows
         Block fieldBlock = TFBlocks.forceField;
         int fieldMeta = 4;
         for (int rotation = 0; rotation < 4; rotation++) {
             int y = 48;
             for (int x = 5; x < this.size - 4; x += 2) {
-                // for (int wy = 0; wy < 15; wy++) {
-                // fieldMeta = rand.nextInt(4) + 1;
-                // this.placeBlockRotated(world, fieldBlock, fieldMeta, x, y + wy, 0, rotation, sbb);
                 // }
-                // fieldMeta = rand.nextInt(5);
                 this.fillBlocksRotated(world, sbb, x, y, 0, x, y + 14, 0, fieldBlock, fieldMeta, rotation);
             }
             y = 24;
             for (int x = 1; x < this.size - 1; x += 8) {
-                // for (int wy = 0; wy < 15; wy++) {
-                // fieldMeta = rand.nextInt(4) + 1;
-                // this.placeBlockRotated(world, fieldBlock, fieldMeta, x, y + wy, 0, rotation, sbb);
-                // fieldMeta = rand.nextInt(4) + 1;
-                // this.placeBlockRotated(world, fieldBlock, fieldMeta, x + 2, y + wy, 0, rotation, sbb);
                 // }
-                // fieldMeta = rand.nextInt(5);
                 this.fillBlocksRotated(world, sbb, x, y, 0, x, y + 14, 0, fieldBlock, fieldMeta, rotation);
-                // fieldMeta = rand.nextInt(5);
                 this.fillBlocksRotated(world, sbb, x + 2, y, 0, x + 2, y + 14, 0, fieldBlock, fieldMeta, rotation);
             }
         }

@@ -1,7 +1,5 @@
 package twilightforest.structures.finalcastle;
 
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -20,9 +18,12 @@ import twilightforest.structures.StructureTFDecoratorCastle;
 
 public class ComponentTFFinalCastleMain extends StructureTFComponent {
 
+    private static final int MAX_TOWER_MAZE_ATTEMPTS = 64;
+
     public ComponentTFFinalCastleMain() {}
 
     public ComponentTFFinalCastleMain(World world, Random rand, int i, int x, int y, int z) {
+        super(i);
         this.setCoordBaseMode(0);
         this.spawnListIndex = 1; // main monsters
 
@@ -128,11 +129,11 @@ public class ComponentTFFinalCastleMain extends StructureTFComponent {
         ComponentTFFinalCastleDungeonSteps steps3 = steps2.buildMoreStepsTowards(parent, list, rand, 3);
 
         // start dungeon
-        ComponentTFFinalCastleDungeonEntrance dRoom = steps3.buildLevelUnder(parent, list, rand, 1);
+        steps3.buildLevelUnder(parent, list, rand, 1);
 
         // ComponentTFFinalCastleMural on front
         ChunkCoordinates mc = this.offsetTowerCCoords(48, 23, 25, 1, 0);
-        ComponentTFFinalCastleMural ComponentTFFinalCastleMural0 = new ComponentTFFinalCastleMural(
+        ComponentTFFinalCastleMural exteriorMural = new ComponentTFFinalCastleMural(
                 rand,
                 7,
                 mc.posX,
@@ -141,84 +142,80 @@ public class ComponentTFFinalCastleMain extends StructureTFComponent {
                 35,
                 30,
                 0);
-        list.add(ComponentTFFinalCastleMural0);
-        ComponentTFFinalCastleMural0.buildComponent(this, list, rand);
+        list.add(exteriorMural);
+        exteriorMural.buildComponent(this, list, rand);
 
-        // ComponentTFFinalCastleMural inside
         ChunkCoordinates mc1 = this.offsetTowerCCoords(48, 33, 24, -1, 0);
-        ComponentTFFinalCastleMural ComponentTFFinalCastleMural1 = new ComponentTFFinalCastleMural(
+        ComponentTFFinalCastleMural interiorMural = new ComponentTFFinalCastleMural(
                 rand,
                 7,
                 mc1.posX,
                 mc1.posY,
-                mc.posZ,
+                mc1.posZ,
                 19,
                 12,
                 2);
-        list.add(ComponentTFFinalCastleMural1);
-        ComponentTFFinalCastleMural1.buildComponent(this, list, rand);
+        list.add(interiorMural);
+        interiorMural.buildComponent(this, list, rand);
     }
 
     /**
      * Build a side tower, then tell it to start building towards the destination
      */
-    private void buildTowerMaze(List list, Random rand, int x, int y, int z, int howFar, int direction, int type,
-            ChunkCoordinates dest) {
-        // duplicate list
-        LinkedList before = new LinkedList(list);
+    private void buildTowerMaze(List<StructureComponent> list, Random rand, int x, int y, int z, int howFar,
+            int direction, int type, ChunkCoordinates dest) {
+        int originalSize = list.size();
 
-        // build
-        ChunkCoordinates tc = this.offsetTowerCCoords(x, y, z, howFar, direction);
-        ComponentTFFinalCastleMazeTower13 sTower = new ComponentTFFinalCastleMazeTower13(
-                rand,
-                3,
-                tc.posX,
-                tc.posY,
-                tc.posZ,
-                type,
-                direction);
-        // add bridge
-        ChunkCoordinates bc = this.offsetTowerCCoords(x, y, z, 1, direction);
-        ComponentTFFinalCastleBridge bridge = new ComponentTFFinalCastleBridge(
-                this.getComponentType() + 1,
-                bc.posX,
-                bc.posY,
-                bc.posZ,
-                howFar - 7,
-                direction);
-        list.add(bridge);
-        bridge.buildComponent(this, list, rand);
+        // a failed maze must not recurse indefinitely or discard earlier castle components
+        for (int attempt = 0; attempt < MAX_TOWER_MAZE_ATTEMPTS; attempt++) {
+            ChunkCoordinates tc = offsetTowerCCoords(x, y, z, howFar, direction);
+            ComponentTFFinalCastleMazeTower13 tower = new ComponentTFFinalCastleMazeTower13(
+                    rand,
+                    3,
+                    tc.posX,
+                    tc.posY,
+                    tc.posZ,
+                    type,
+                    direction);
 
-        // don't check if the bounding box is clear, there's either nothing there or we've made a terrible
-        // mistake
-        list.add(sTower);
-        sTower.buildTowards(this, list, rand, dest);
+            ChunkCoordinates bc = offsetTowerCCoords(x, y, z, 1, direction);
+            ComponentTFFinalCastleBridge bridge = new ComponentTFFinalCastleBridge(
+                    getComponentType() + 1,
+                    bc.posX,
+                    bc.posY,
+                    bc.posZ,
+                    howFar - 7,
+                    direction);
+            list.add(bridge);
+            bridge.buildComponent(this, list, rand);
 
-        // check if we've successfully built the end tower
-        if (this.isMazeComplete(list, type)) {
-            FMLLog.fine("[TwilightForest] Tower maze type " + type + " complete!");
-        } else {
-            // TODO: add limit on retrying, in case of infinite loop?
-            FMLLog.fine("[TwilightForest] Tower maze type " + type + " INCOMPLETE, retrying!");
-            list.clear();
-            list.addAll(before);
-            this.buildTowerMaze(list, rand, x, y, z, howFar, direction, type, dest);
-        }
-    }
+            // the initial tower touches the keep, so the overlap is intentional
+            list.add(tower);
+            tower.buildTowards(this, list, rand, dest);
 
-    private boolean isMazeComplete(List list, int type) {
-        Iterator iterator = list.iterator();
-        StructureComponent structurecomponent;
-
-        do {
-            if (!iterator.hasNext()) {
-                return false;
+            if (isMazeComplete(list, type)) {
+                FMLLog.fine("[TwilightForest] Tower maze type " + type + " complete!");
+                return;
             }
 
-            structurecomponent = (StructureComponent) iterator.next();
-        } while (!((structurecomponent instanceof ComponentTFFinalCastleEntranceTower && type == 0)
-                || (structurecomponent instanceof ComponentTFFinalCastleBellTower21 && type == 1)));
-        return true;
+            list.subList(originalSize, list.size()).clear();
+        }
+
+        FMLLog.warning(
+                "[TwilightForest] Unable to complete tower maze type " + type
+                        + " after "
+                        + MAX_TOWER_MAZE_ATTEMPTS
+                        + " attempts");
+    }
+
+    private boolean isMazeComplete(List<StructureComponent> list, int type) {
+        for (StructureComponent component : list) {
+            if ((type == 0 && component instanceof ComponentTFFinalCastleEntranceTower)
+                    || (type == 1 && component instanceof ComponentTFFinalCastleBellTower21)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -452,7 +449,7 @@ public class ComponentTFFinalCastleMain extends StructureTFComponent {
         makeSmallTowerStairs(world, sbb, 0);
         makeSmallTowerStairs(world, sbb, 1);
         makeSmallTowerStairs(world, sbb, 3);
-        makeComponentTFFinalCastleLargeTowerStairs(world, sbb, 2);
+        makeLargeTowerStairs(world, sbb, 2);
 
         // door, first floor
         this.fillWithMetadataBlocks(world, sbb, 48, 1, 23, 48, 4, 25, TFBlocks.castleDoor, 0, Blocks.air, 0, false);
@@ -471,7 +468,7 @@ public class ComponentTFFinalCastleMain extends StructureTFComponent {
         }
     }
 
-    private void makeComponentTFFinalCastleLargeTowerStairs(World world, StructureBoundingBox sbb, int rotation) {
+    private void makeLargeTowerStairs(World world, StructureBoundingBox sbb, int rotation) {
         for (int y = 1; y < 4; y++) {
             int z = 38 + y;
             this.fillBlocksRotated(world, sbb, 2, 1, z, 6, y, z, deco.blockID, deco.blockMeta, rotation);

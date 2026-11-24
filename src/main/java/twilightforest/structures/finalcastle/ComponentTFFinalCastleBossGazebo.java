@@ -3,6 +3,7 @@ package twilightforest.structures.finalcastle;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -31,12 +32,21 @@ public class ComponentTFFinalCastleBossGazebo extends StructureTFComponent {
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        this.deco = new StructureTFDecoratorCastle();
-        this.deco.blockID = TFBlocks.castleMagic;
-        this.deco.blockMeta = 1;
+        restoreGazeboDecoration();
+    }
 
-        this.deco.fenceID = TFBlocks.forceField;
-        this.deco.fenceMeta = 10;
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        restoreGazeboDecoration();
+    }
+
+    private void restoreGazeboDecoration() {
+        deco = new StructureTFDecoratorCastle();
+        deco.blockID = TFBlocks.castleMagic;
+        deco.blockMeta = 1;
+        deco.fenceID = TFBlocks.forceField;
+        deco.fenceMeta = 10;
     }
 
     @Override
