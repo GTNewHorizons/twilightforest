@@ -11,7 +11,6 @@ public class ComponentTFDarkTowerRoofAntenna extends ComponentTFDarkTowerRoof {
 
     public ComponentTFDarkTowerRoofAntenna() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFDarkTowerRoofAntenna(int i, ComponentTFTowerWing wing) {
