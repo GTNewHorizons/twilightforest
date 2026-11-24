@@ -13,10 +13,10 @@ import twilightforest.world.TFGenCanopyTree;
 
 /**
  * This is a maze of cells and walls.
- * 
+ *
  * The cells are at odd numbered x and y values, and the walls are at even numbered ones. This does make the storage
  * slightly inefficient, but oh wells.
- * 
+ *
  * @author Ben
  *
  */
@@ -92,11 +92,11 @@ public class TFMaze {
 
         doorRarity = 0F;
 
-        this.width = cellsWidth;
-        this.depth = cellsDepth;
+        width = cellsWidth;
+        depth = cellsDepth;
 
-        this.rawWidth = width * 2 + 1;
-        this.rawDepth = depth * 2 + 1;
+        rawWidth = width * 2 + 1;
+        rawDepth = depth * 2 + 1;
         storage = new int[rawWidth * rawDepth];
 
         rand = new Random();
@@ -128,30 +128,21 @@ public class TFMaze {
      * adjacent.
      */
     public int getWall(int sx, int sz, int dx, int dz) {
-        if (dx == sx + 1 && dz == sz) {
-            return getRaw(sx * 2 + 2, sz * 2 + 1);
-        } else if (dx == sx - 1 && dz == sz) {
-            return getRaw(sx * 2 + 0, sz * 2 + 1);
-        } else if (dx == sx && dz == sz + 1) {
-            return getRaw(sx * 2 + 1, sz * 2 + 2);
-        } else if (dx == sx && dz == sz - 1) {
-            return getRaw(sx * 2 + 1, sz * 2 + 0);
-        } else {
+        if (!areAdjacent(sx, sz, dx, dz)) {
             FMLLog.fine("[TwilightForest] Wall check out of bounds; s = " + sx + ", " + sz + "; d = " + dx + ", " + dz);
             return OUT_OF_BOUNDS;
         }
+        return getRaw(sx + dx + 1, sz + dz + 1);
     }
 
     public void putWall(int sx, int sz, int dx, int dz, int value) {
-        if (dx == sx + 1 && dz == sz) {
-            putRaw(sx * 2 + 2, sz * 2 + 1, value);
-        } else if (dx == sx - 1 && dz == sz) {
-            putRaw(sx * 2 + 0, sz * 2 + 1, value);
-        } else if (dx == sx && dz == sz + 1) {
-            putRaw(sx * 2 + 1, sz * 2 + 2, value);
-        } else if (dx == sx && dz == sz - 1) {
-            putRaw(sx * 2 + 1, sz * 2 + 0, value);
+        if (areAdjacent(sx, sz, dx, dz)) {
+            putRaw(sx + dx + 1, sz + dz + 1, value);
         }
+    }
+
+    private static boolean areAdjacent(int sx, int sz, int dx, int dz) {
+        return (sz == dz && (dx == sx + 1 || dx == sx - 1)) || (sx == dx && (dz == sz + 1 || dz == sz - 1));
     }
 
     /**
@@ -176,9 +167,8 @@ public class TFMaze {
     protected int getRaw(int rawx, int rawz) {
         if (rawx < 0 || rawx >= rawWidth || rawz < 0 || rawz >= rawDepth) {
             return OUT_OF_BOUNDS;
-        } else {
-            return storage[rawz * rawWidth + rawx];
         }
+        return storage[rawz * rawWidth + rawx];
     }
 
     /**
@@ -202,52 +192,30 @@ public class TFMaze {
                     int mdx = dx + (x / 2 * (evenBias + oddBias));
                     int mdz = dz + (z / 2 * (evenBias + oddBias));
 
-                    if (isEven(x) && isEven(z)) {
+                    boolean evenX = isEven(x);
+                    boolean evenZ = isEven(z);
+                    if (evenX && evenZ) {
                         if (type == 4 && shouldTree(x, z)) {
                             // occasionally make a tree
                             (new TFGenCanopyTree()).generate(world, rand, mdx, dy, mdz);
                         } else {
                             // make a block!
-                            for (int y = 0; y < head; y++) {
-                                putHeadBlock(world, mdx, dy + tall + y, mdz);
-                            }
-                            for (int y = 0; y < tall; y++) {
-                                putWallBlock(world, mdx, dy + y, mdz);
-                            }
-                            for (int y = 1; y <= roots; y++) {
-                                putRootBlock(world, mdx, dy - y, mdz);
-                            }
+                            placeWorldWallColumn(world, mdx, dy, mdz);
                         }
                     }
-                    if (isEven(x) && !isEven(z)) {
+                    if (evenX && !evenZ) {
                         // make a | vertical | wall!
                         for (int even = 0; even < evenBias; even++) {
                             for (int odd = 1; odd <= oddBias; odd++) {
-                                for (int y = 0; y < head; y++) {
-                                    putHeadBlock(world, mdx + even, dy + tall + y, mdz + odd);
-                                }
-                                for (int y = 0; y < tall; y++) {
-                                    putWallBlock(world, mdx + even, dy + y, mdz + odd);
-                                }
-                                for (int y = 1; y <= roots; y++) {
-                                    putRootBlock(world, mdx + even, dy - y, mdz + odd);
-                                }
+                                placeWorldWallColumn(world, mdx + even, dy, mdz + odd);
                             }
                         }
                     }
-                    if (!isEven(x) && isEven(z)) {
+                    if (!evenX && evenZ) {
                         // make a - horizontal - wall!
                         for (int even = 0; even < evenBias; even++) {
                             for (int odd = 1; odd <= oddBias; odd++) {
-                                for (int y = 0; y < head; y++) {
-                                    putHeadBlock(world, mdx + odd, dy + tall + y, mdz + even);
-                                }
-                                for (int y = 0; y < tall; y++) {
-                                    putWallBlock(world, mdx + odd, dy + y, mdz + even);
-                                }
-                                for (int y = 1; y <= roots; y++) {
-                                    putRootBlock(world, mdx + odd, dy - y, mdz + even);
-                                }
+                                placeWorldWallColumn(world, mdx + odd, dy, mdz + even);
                             }
                         }
                     }
@@ -255,6 +223,24 @@ public class TFMaze {
             }
         }
         placeTorches(world);
+    }
+
+    private void placeWorldWallColumn(World world, int x, int y, int z) {
+        for (int i = 0; i < head; i++) {
+            putHeadBlock(world, x, y + tall + i, z);
+        }
+        for (int i = 0; i < tall; i++) {
+            putWallBlock(world, x, y + i, z);
+        }
+        for (int i = 1; i <= roots; i++) {
+            putRootBlock(world, x, y - i, z);
+        }
+    }
+
+    private void carveWorldColumn(World world, int x, int y, int z) {
+        for (int i = 0; i < tall; i++) {
+            carveBlock(world, x, y + i, z);
+        }
     }
 
     /**
@@ -271,33 +257,26 @@ public class TFMaze {
                     int mdx = dx + (x / 2 * (evenBias + oddBias));
                     int mdz = dz + (z / 2 * (evenBias + oddBias));
 
-                    if (isEven(x) && isEven(z)) {
+                    boolean evenX = isEven(x);
+                    boolean evenZ = isEven(z);
+                    if (evenX && evenZ) {
                         // carve a one-block wide pillar
-                        for (int y = 0; y < tall; y++) {
-                            carveBlock(world, mdx, dy + y, mdz);
-                        }
-                    } else if (isEven(x) && !isEven(z)) {
+                        carveWorldColumn(world, mdx, dy, mdz);
+                    } else if (evenX && !evenZ) {
                         // carve a | vertical | wall
                         for (int i = 1; i <= oddBias; i++) {
-                            for (int y = 0; y < tall; y++) {
-                                carveBlock(world, mdx, dy + y, mdz + i);
-                            }
+                            carveWorldColumn(world, mdx, dy, mdz + i);
                         }
-                    } else if (!isEven(x) && isEven(z)) {
+                    } else if (!evenX && evenZ) {
                         // carve a - horizontal - wall!
                         for (int i = 1; i <= oddBias; i++) {
-                            for (int y = 0; y < tall; y++) {
-                                carveBlock(world, mdx + i, dy + y, mdz);
-                            }
+                            carveWorldColumn(world, mdx + i, dy, mdz);
                         }
-                    } else if (!isEven(x) && !isEven(z)) // this should always be true at this point
-                    {
+                    } else {
                         // carve an open space
                         for (int mx = 1; mx <= oddBias; mx++) {
                             for (int mz = 1; mz <= oddBias; mz++) {
-                                for (int y = 0; y < tall; y++) {
-                                    carveBlock(world, mdx + mx, dy + y, mdz + mz);
-                                }
+                                carveWorldColumn(world, mdx + mx, dy, mdz + mz);
                             }
                         }
                     }
@@ -315,95 +294,55 @@ public class TFMaze {
         for (int x = 0; x < rawWidth; x++) {
             for (int z = 0; z < rawDepth; z++) {
                 // only draw walls. if the data is 0 the there's a wall
-                if (getRaw(x, z) == 0) {
-                    int mdx = dx + (x / 2 * (evenBias + oddBias));
-                    int mdz = dz + (z / 2 * (evenBias + oddBias));
+                int cell = getRaw(x, z);
+                if (cell != 0 && cell != DOOR) continue;
 
-                    if (evenBias > 1) {
-                        mdx--;
-                        mdz--;
-                    }
+                int mdx = dx + (x / 2 * (evenBias + oddBias));
+                int mdz = dz + (z / 2 * (evenBias + oddBias));
+                if (evenBias > 1) {
+                    mdx--;
+                    mdz--;
+                }
 
-                    if (isEven(x) && isEven(z)) {
-                        if (type == 4 && shouldTree(x, z)) {
-                            // occasionally make a tree
-                            // (new TFGenCanopyTree()).generate(world, rand, mdx, dy, mdz);
-                            putCanopyTree(world, mdx, dy, mdz, component, sbb);
-                        } else {
-                            // make a block!
-                            for (int even = 0; even < evenBias; even++) {
-                                for (int even2 = 0; even2 < evenBias; even2++) {
-                                    for (int y = 0; y < head; y++) {
-                                        putHeadBlock(world, mdx + even, dy + tall + y, mdz + even2, component, sbb);
-                                    }
-                                    for (int y = 0; y < tall; y++) {
-                                        if (shouldPillar(x, z)) {
-                                            putPillarBlock(world, mdx + even, dy + y, mdz + even2, component, sbb);
-                                        } else {
-                                            putWallBlock(world, mdx + even, dy + y, mdz + even2, component, sbb);
-                                        }
-                                    }
-                                    for (int y = 1; y <= roots; y++) {
-                                        putRootBlock(world, mdx + even, dy - y, mdz + even2, component, sbb);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (isEven(x) && !isEven(z)) {
-                        // make a | vertical | wall!
+                boolean evenX = isEven(x);
+                boolean evenZ = isEven(z);
+                if (cell == 0 && evenX && evenZ) {
+                    if (type == 4 && shouldTree(x, z)) {
+                        // occasionally make a tree
+                        // (new TFGenCanopyTree()).generate(world, rand, mdx, dy, mdz);
+                        putCanopyTree(world, mdx, dy, mdz, component, sbb);
+                    } else {
+                        // make a block!
                         for (int even = 0; even < evenBias; even++) {
-                            for (int odd = 1; odd <= oddBias; odd++) {
-                                makeWallThing(world, dy, component, sbb, mdx, mdz, even, odd);
-                            }
-                        }
-                    }
-                    if (!isEven(x) && isEven(z)) {
-                        // make a - horizontal - wall!
-                        for (int even = 0; even < evenBias; even++) {
-                            for (int odd = 1; odd <= oddBias; odd++) {
-                                makeWallThing(world, dy, component, sbb, mdx, mdz, odd, even);
-                            }
-                        }
-                    }
-                } else if (getRaw(x, z) == DOOR) {
-                    int mdx = dx + (x / 2 * (evenBias + oddBias));
-                    int mdz = dz + (z / 2 * (evenBias + oddBias));
-
-                    if (evenBias > 1) {
-                        mdx--;
-                        mdz--;
-                    }
-
-                    if (isEven(x) && !isEven(z)) {
-                        // make a | vertical | door!
-                        for (int even = 0; even < evenBias; even++) {
-                            for (int odd = 1; odd <= oddBias; odd++) {
+                            for (int even2 = 0; even2 < evenBias; even2++) {
                                 for (int y = 0; y < head; y++) {
-                                    putHeadBlock(world, mdx + even, dy + tall + y, mdz + odd, component, sbb);
+                                    putHeadBlock(world, mdx + even, dy + tall + y, mdz + even2, component, sbb);
                                 }
                                 for (int y = 0; y < tall; y++) {
-                                    putDoorBlock(world, mdx + even, dy + y, mdz + odd, component, sbb);
+                                    if (shouldPillar(x, z)) {
+                                        putPillarBlock(world, mdx + even, dy + y, mdz + even2, component, sbb);
+                                    } else {
+                                        putWallBlock(world, mdx + even, dy + y, mdz + even2, component, sbb);
+                                    }
                                 }
                                 for (int y = 1; y <= roots; y++) {
-                                    putRootBlock(world, mdx + even, dy - y, mdz + odd, component, sbb);
+                                    putRootBlock(world, mdx + even, dy - y, mdz + even2, component, sbb);
                                 }
                             }
                         }
                     }
-                    if (!isEven(x) && isEven(z)) {
-                        // make a - horizontal - door!
-                        for (int even = 0; even < evenBias; even++) {
-                            for (int odd = 1; odd <= oddBias; odd++) {
-                                for (int y = 0; y < head; y++) {
-                                    putHeadBlock(world, mdx + odd, dy + tall + y, mdz + even, component, sbb);
-                                }
-                                for (int y = 0; y < tall; y++) {
-                                    putDoorBlock(world, mdx + odd, dy + y, mdz + even, component, sbb);
-                                }
-                                for (int y = 1; y <= roots; y++) {
-                                    putRootBlock(world, mdx + odd, dy - y, mdz + even, component, sbb);
-                                }
+                } else if (evenX != evenZ) {
+                    // keep the existing even then odd order for both wall and door segments
+                    for (int even = 0; even < evenBias; even++) {
+                        for (int odd = 1; odd <= oddBias; odd++) {
+                            int offsetX = evenX ? even : odd;
+                            int offsetZ = evenX ? odd : even;
+                            if (cell == DOOR) {
+                                // make a | vertical | door! / - horizontal - door!
+                                makeDoorThing(world, dy, component, sbb, mdx, mdz, offsetX, offsetZ);
+                            } else {
+                                // make a | vertical | wall! / - horizontal - wall!
+                                makeWallThing(world, dy, component, sbb, mdx, mdz, offsetX, offsetZ);
                             }
                         }
                     }
@@ -450,6 +389,19 @@ public class TFMaze {
         }
     }
 
+    private void makeDoorThing(World world, int dy, StructureTFComponent component, StructureBoundingBox sbb, int mdx,
+            int mdz, int even, int odd) {
+        for (int y = 0; y < head; y++) {
+            putHeadBlock(world, mdx + even, dy + tall + y, mdz + odd, component, sbb);
+        }
+        for (int y = 0; y < tall; y++) {
+            putDoorBlock(world, mdx + even, dy + y, mdz + odd, component, sbb);
+        }
+        for (int y = 1; y <= roots; y++) {
+            putRootBlock(world, mdx + even, dy - y, mdz + odd, component, sbb);
+        }
+    }
+
     /**
      * Puts a wall block in the structure, if pillar blocks are properly specified
      */
@@ -470,7 +422,7 @@ public class TFMaze {
      */
     protected void putWallBlock(World world, int x, int y, int z, StructureTFComponent component,
             StructureBoundingBox sbb) {
-        if (wallVarRarity > 0 && rand.nextFloat() < this.wallVarRarity) {
+        if (wallVarRarity > 0 && rand.nextFloat() < wallVarRarity) {
             component.placeBlockAtCurrentPosition(world, wallVar0ID, wallVar0Meta, x, y, z, sbb);
         } else {
             component.placeBlockAtCurrentPosition(world, wallBlockID, wallBlockMeta, x, y, z, sbb);
@@ -537,12 +489,12 @@ public class TFMaze {
      * I'm not sure why I made a function of this simple thing. Maybe I need like... a macro?
      */
     public final boolean isEven(int n) {
-        return n % 2 == 0;
+        return (n & 1) == 0;
     }
 
     /**
      * Called after copyToWorld. Place torches in the maze as appropriate
-     * 
+     *
      * @param world
      * @param dx
      * @param dy
@@ -574,22 +526,19 @@ public class TFMaze {
      */
     public boolean shouldTorch(int rx, int rz) {
         // if there is out of bounds in any direction, no
-        if (getRaw(rx + 1, rz) == OOB || getRaw(rx - 1, rz) == OOB
-                || getRaw(rx, rz + 1) == OOB
-                || getRaw(rx, rz - 1) == OOB) {
+        if (hasOutOfBoundsNeighbor(rx, rz)) {
             return false;
         }
 
         // if there are walls in two opposite directions, no
-        if ((getRaw(rx + 1, rz) == 0 && getRaw(rx - 1, rz) == 0)
-                || (getRaw(rx, rz + 1) == 0 && getRaw(rx, rz - 1) == 0)) {
+        if (hasOppositeWalls(rx, rz)) {
             return false;
         }
 
         // otherwise, I suppose yes
 
         // check rarity
-        return rand.nextFloat() <= this.torchRarity;
+        return rand.nextFloat() <= torchRarity;
     }
 
     /**
@@ -602,15 +551,12 @@ public class TFMaze {
         }
 
         // if there is out of bounds in any direction, no
-        if (getRaw(rx + 1, rz) == OOB || getRaw(rx - 1, rz) == OOB
-                || getRaw(rx, rz + 1) == OOB
-                || getRaw(rx, rz - 1) == OOB) {
+        if (hasOutOfBoundsNeighbor(rx, rz)) {
             return false;
         }
 
         // if there are walls in two opposite directions, no
-        if ((getRaw(rx + 1, rz) == 0 && getRaw(rx - 1, rz) == 0)
-                || (getRaw(rx, rz + 1) == 0 && getRaw(rx, rz - 1) == 0)) {
+        if (hasOppositeWalls(rx, rz)) {
             return false;
         }
 
@@ -618,11 +564,19 @@ public class TFMaze {
         return true;
     }
 
+    private boolean hasOutOfBoundsNeighbor(int x, int z) {
+        return getRaw(x + 1, z) == OOB || getRaw(x - 1, z) == OOB || getRaw(x, z + 1) == OOB || getRaw(x, z - 1) == OOB;
+    }
+
+    private boolean hasOppositeWalls(int x, int z) {
+        return (getRaw(x + 1, z) == 0 && getRaw(x - 1, z) == 0) || (getRaw(x, z + 1) == 0 && getRaw(x, z - 1) == 0);
+    }
+
     /**
      * Should we put a tree instead of a post?
-     * 
+     *
      * Essentially the answer is yes for the corners and the exits.
-     * 
+     *
      * @param rx
      * @param ry
      * @return
@@ -632,14 +586,13 @@ public class TFMaze {
             return true;
         } else if ((rz == 0 || rz == rawDepth - 1) && (getRaw(rx + 1, rz) != 0 || getRaw(rx - 1, rz) != 0)) {
             return true;
-        } else {
-            return rand.nextInt(50) == 0;
         }
+        return rand.nextInt(50) == 0;
     }
 
     /**
      * If the worldX is set properly, this returns where in that world the maze coordinate x lies
-     * 
+     *
      * @param x
      * @return
      */
@@ -649,7 +602,7 @@ public class TFMaze {
 
     /**
      * If the worldZ is set properly, this returns where in that world the maze coordinate z lies
-     * 
+     *
      * @param z
      * @return
      */
@@ -662,16 +615,16 @@ public class TFMaze {
      */
     public void carveRoom0(int cx, int cz) {
 
-        putCell(cx, cz, 5);
+        putCell(cx, cz, ROOM);
 
-        putCell(cx + 1, cz, 5);
-        putWall(cx, cz, cx + 1, cz, 5);
-        putCell(cx - 1, cz, 5);
-        putWall(cx, cz, cx - 1, cz, 5);
-        putCell(cx, cz + 1, 5);
-        putWall(cx, cz, cx, cz + 1, 5);
-        putCell(cx, cz - 1, 5);
-        putWall(cx, cz, cx, cz - 1, 5);
+        putCell(cx + 1, cz, ROOM);
+        putWall(cx, cz, cx + 1, cz, ROOM);
+        putCell(cx - 1, cz, ROOM);
+        putWall(cx, cz, cx - 1, cz, ROOM);
+        putCell(cx, cz + 1, ROOM);
+        putWall(cx, cz, cx, cz + 1, ROOM);
+        putCell(cx, cz - 1, ROOM);
+        putWall(cx, cz, cx, cz - 1, ROOM);
     }
 
     /**
@@ -689,6 +642,7 @@ public class TFMaze {
         }
 
         // mark the exit areas as unmazed
+        // keep the existing cell/raw coord conversion, changing it alters generated mazes
         putCell(rx, rz + 1, 0);
         putCell(rx, rz - 1, 0);
         putCell(rx + 1, rz, 0);
@@ -724,7 +678,7 @@ public class TFMaze {
 
     /**
      * Generates a maze using the recursive backtracking algorithm.
-     * 
+     *
      * @param sx The starting x coordinate
      * @param sz The starting y coordinate
      */
@@ -735,7 +689,7 @@ public class TFMaze {
     /**
      * Mark the cell as visited. If we have any unvisited neighbors, pick one randomly, carve the wall between them,
      * then call this function on that neighbor.
-     * 
+     *
      * @param sx
      * @param sz
      */
@@ -744,19 +698,11 @@ public class TFMaze {
         putCell(sx, sz, 1);
 
         // count the unvisted neighbors
-        int unvisited = 0;
-        if (cellEquals(sx + 1, sz, 0)) {
-            unvisited++;
-        }
-        if (cellEquals(sx - 1, sz, 0)) {
-            unvisited++;
-        }
-        if (cellEquals(sx, sz + 1, 0)) {
-            unvisited++;
-        }
-        if (cellEquals(sx, sz - 1, 0)) {
-            unvisited++;
-        }
+        boolean east = cellEquals(sx + 1, sz, 0);
+        boolean west = cellEquals(sx - 1, sz, 0);
+        boolean south = cellEquals(sx, sz + 1, 0);
+        boolean north = cellEquals(sx, sz - 1, 0);
+        int unvisited = (east ? 1 : 0) + (west ? 1 : 0) + (south ? 1 : 0) + (north ? 1 : 0);
 
         // if there are no unvisited neighbors, return
         if (unvisited == 0) {
@@ -768,28 +714,28 @@ public class TFMaze {
         int dx, dz;
         dx = dz = 0;
 
-        if (cellEquals(sx + 1, sz, 0)) {
+        if (east) {
             if (rn == 0) {
                 dx = sx + 1;
                 dz = sz;
             }
             rn--;
         }
-        if (cellEquals(sx - 1, sz, 0)) {
+        if (west) {
             if (rn == 0) {
                 dx = sx - 1;
                 dz = sz;
             }
             rn--;
         }
-        if (cellEquals(sx, sz + 1, 0)) {
+        if (south) {
             if (rn == 0) {
                 dx = sx;
                 dz = sz + 1;
             }
             rn--;
         }
-        if (cellEquals(sx, sz - 1, 0)) {
+        if (north) {
             if (rn == 0) {
                 dx = sx;
                 dz = sz - 1;
@@ -797,7 +743,7 @@ public class TFMaze {
         }
 
         // carve wall or door
-        if (rand.nextFloat() <= this.doorRarity) {
+        if (rand.nextFloat() <= doorRarity) {
             putWall(sx, sz, dx, dz, DOOR);
         } else {
             putWall(sx, sz, dx, dz, 2);
@@ -807,6 +753,7 @@ public class TFMaze {
         rbGen(dx, dz);
 
         // the destination has run out of free spaces, let's try this square again, up to 2 more times
+        // keep both calls, changing their order or count changes gen
         rbGen(sx, sz);
         rbGen(sx, sz);
     }
