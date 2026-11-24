@@ -9,13 +9,13 @@ public class ComponentTFDarkTowerEntranceBridge extends ComponentTFDarkTowerBrid
 
     public ComponentTFDarkTowerEntranceBridge() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     protected ComponentTFDarkTowerEntranceBridge(int i, int x, int y, int z, int pSize, int pHeight, int direction) {
         super(i, x, y, z, pSize, pHeight, direction);
     }
 
+    @Override
     public boolean makeTowerWing(List<StructureComponent> list, Random rand, int index, int x, int y, int z,
             int wingSize, int wingHeight, int rotation) {
         // make an entrance tower

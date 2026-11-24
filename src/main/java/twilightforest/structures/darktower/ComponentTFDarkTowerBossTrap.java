@@ -15,8 +15,8 @@ import twilightforest.structures.StructureTFComponent;
 public class ComponentTFDarkTowerBossTrap extends ComponentTFDarkTowerWing {
 
     public ComponentTFDarkTowerBossTrap() {
-        super();
-        // TODO Auto-generated constructor stub
+        // the structure loader uses this constructor too, it must not re enable monster spawns
+        this.spawnListIndex = -1;
     }
 
     protected ComponentTFDarkTowerBossTrap(int i, int x, int y, int z, int pSize, int pHeight, int direction) {

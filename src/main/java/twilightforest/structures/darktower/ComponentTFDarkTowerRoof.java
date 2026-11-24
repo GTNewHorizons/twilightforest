@@ -14,8 +14,8 @@ import twilightforest.structures.lichtower.ComponentTFTowerWing;
 public class ComponentTFDarkTowerRoof extends ComponentTFTowerRoof {
 
     public ComponentTFDarkTowerRoof() {
-        super();
-        // TODO Auto-generated constructor stub
+        // keep roof specific spawning when a structure component is loaded from nbt
+        this.spawnListIndex = 1;
     }
 
     public ComponentTFDarkTowerRoof(int i, ComponentTFTowerWing wing) {
