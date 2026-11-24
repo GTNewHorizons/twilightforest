@@ -7,6 +7,8 @@ import twilightforest.biomes.TFBiomeBase;
 
 public class GenLayerTFThornBorder extends GenLayer {
 
+    private static final int BORDER_RADIUS = 1;
+
     public GenLayerTFThornBorder(long l, GenLayer genlayer) {
         super(l);
         parent = genlayer;
@@ -17,81 +19,40 @@ public class GenLayerTFThornBorder extends GenLayer {
      */
     @Override
     public int[] getInts(int x, int z, int width, int depth) {
-        int nx = x - 1;
-        int nz = z - 1;
-        int nwidth = width + 2;
-        int ndepth = depth + 2;
-        int[] input = parent.getInts(nx, nz, nwidth, ndepth);
+        int inputWidth = width + BORDER_RADIUS * 2;
+        int[] input = parent.getInts(x - BORDER_RADIUS, z - BORDER_RADIUS, inputWidth, depth + BORDER_RADIUS * 2);
         int[] output = IntCache.getIntCache(width * depth);
+
+        int highlandsCenterId = TFBiomeBase.highlandsCenter.biomeID;
+        int thornlandsId = TFBiomeBase.thornlands.biomeID;
+
         for (int dz = 0; dz < depth; dz++) {
+            int inputRow = (dz + BORDER_RADIUS) * inputWidth + BORDER_RADIUS;
+            int outputRow = dz * width;
+
             for (int dx = 0; dx < width; dx++) {
-                int right = input[dx + 0 + (dz + 1) * nwidth];
-                int left = input[dx + 2 + (dz + 1) * nwidth];
-                int up = input[dx + 1 + (dz + 0) * nwidth];
-                int down = input[dx + 1 + (dz + 2) * nwidth];
-                int center = input[dx + 1 + (dz + 1) * nwidth];
+                int index = inputRow + dx;
+                int center = input[index];
+
                 // thorn border requires also checking diagonally
-                int ur = input[dx + 0 + (dz + 0) * nwidth];
-                int ul = input[dx + 2 + (dz + 0) * nwidth];
-                int dr = input[dx + 0 + (dz + 2) * nwidth];
-                int dl = input[dx + 2 + (dz + 2) * nwidth];
-                if (onBorder(TFBiomeBase.highlandsCenter.biomeID, center, right, left, up, down)) {
-                    output[dx + dz * width] = TFBiomeBase.thornlands.biomeID;
-                } else if (onBorder(TFBiomeBase.highlandsCenter.biomeID, center, ur, ul, dr, dl)) {
-                    output[dx + dz * width] = TFBiomeBase.thornlands.biomeID;
+                if (center != highlandsCenterId && touchesBiome(input, index, inputWidth, highlandsCenterId)) {
+                    output[outputRow + dx] = thornlandsId;
                 } else {
-                    output[dx + dz * width] = center;
+                    output[outputRow + dx] = center;
                 }
             }
-
         }
 
         return output;
     }
 
-    /**
-     * Returns true if the center biome is the first specified biome and any of the surrounding biomes are the second
-     * bioms
-     */
-    private boolean onBorder(int biomeID, int biomeID2, int center, int right, int left, int up, int down) {
-        if (center != biomeID) {
-            return false;
-        }
-
-        if (right == biomeID2) {
-            return true;
-        }
-        if (left == biomeID2) {
-            return true;
-        }
-        if (up == biomeID2) {
-            return true;
-        }
-        if (down == biomeID2) {
-            return true;
-        }
-
-        return false;
+    private static boolean touchesBiome(int[] biomes, int index, int stride, int biomeId) {
+        return biomes[index - 1] == biomeId || biomes[index + 1] == biomeId
+                || biomes[index - stride] == biomeId
+                || biomes[index + stride] == biomeId
+                || biomes[index - stride - 1] == biomeId
+                || biomes[index - stride + 1] == biomeId
+                || biomes[index + stride - 1] == biomeId
+                || biomes[index + stride + 1] == biomeId;
     }
-
-    /**
-     * Returns true if the center biome is not the specified biome and any of the surrounding biomes are the specified
-     * biomes
-     */
-    private boolean onBorder(int biomeID, int center, int right, int left, int up, int down) {
-        if (center == biomeID) {
-            return false;
-        } else if (right == biomeID) {
-            return true;
-        } else if (left == biomeID) {
-            return true;
-        } else if (up == biomeID) {
-            return true;
-        } else if (down == biomeID) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 }

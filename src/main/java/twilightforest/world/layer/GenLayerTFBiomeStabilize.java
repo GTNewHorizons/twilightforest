@@ -5,6 +5,10 @@ import net.minecraft.world.gen.layer.IntCache;
 
 public class GenLayerTFBiomeStabilize extends GenLayer {
 
+    private static final int GRID_MASK = 3;
+    private static final int UNSTABILIZED_OFFSET = 2;
+    private static final int NEIGHBOR_RADIUS = 1;
+
     public GenLayerTFBiomeStabilize(long l, GenLayer genlayer) {
         super(l);
         parent = genlayer;
@@ -15,42 +19,40 @@ public class GenLayerTFBiomeStabilize extends GenLayer {
      */
     @Override
     public int[] getInts(int x, int z, int width, int depth) {
-        int nx = x - 1;
-        int nz = z - 1;
-        int nwidth = width + 2;
-        int ndepth = depth + 2;
-        int[] input = parent.getInts(nx, nz, nwidth, ndepth);
+        int parentWidth = width + NEIGHBOR_RADIUS * 2;
+        int[] input = parent
+                .getInts(x - NEIGHBOR_RADIUS, z - NEIGHBOR_RADIUS, parentWidth, depth + NEIGHBOR_RADIUS * 2);
         int[] output = IntCache.getIntCache(width * depth);
 
-        int offX = x & 3;
-        int offZ = z & 3;
-
         for (int dz = 0; dz < depth; dz++) {
-            for (int dx = 0; dx < width; dx++) {
-                int centerX = ((dx + offX + 1) & 0xFFFFFFFC) - offX;
-                int centerZ = ((dz + offZ + 1) & 0xFFFFFFFC) - offZ;
+            int inputRow = (dz + NEIGHBOR_RADIUS) * parentWidth + NEIGHBOR_RADIUS;
+            int outputRow = dz * width;
+            int zOffset = (z + dz) & GRID_MASK;
 
-                // System.out.println("dx = " + dx + ", centerX = " + centerX + " dz = " + dz + ", centerZ = " +
-                // centerZ);
-
-                // if (dx == centerX && dz == centerZ)
-                // {
-                // output[dx + dz * width] = input[centerX + 1 + (centerZ + 1) * nwidth];
-                //// output[dx + dz * width] = TFBiomeBase.glacier.biomeID;
-                // }
-                // else
-                if (dx <= centerX + 1 && dx >= centerX - 1 && dz <= centerZ + 1 && dz >= centerZ - 1) {
-                    output[dx + dz * width] = input[centerX + 1 + (centerZ + 1) * nwidth];
-                    // output[dx + dz * width] = BiomeGenBase.desert.biomeID;
-                    // output[dx + dz * width] = input[dx + 1 + (dz + 1) * nwidth];
-                } else {
-                    output[dx + dz * width] = input[dx + 1 + (dz + 1) * nwidth];
-                }
+            // offset 2 lies outside the 3x3 area around every four block grid center
+            if (zOffset == UNSTABILIZED_OFFSET) {
+                System.arraycopy(input, inputRow, output, outputRow, width);
+                continue;
             }
 
+            int centerZ = dz + NEIGHBOR_RADIUS + getCenterOffset(zOffset);
+            int centerRow = centerZ * parentWidth;
+
+            for (int dx = 0; dx < width; dx++) {
+                int xOffset = (x + dx) & GRID_MASK;
+                if (xOffset == UNSTABILIZED_OFFSET) {
+                    output[outputRow + dx] = input[inputRow + dx];
+                } else {
+                    int centerX = dx + NEIGHBOR_RADIUS + getCenterOffset(xOffset);
+                    output[outputRow + dx] = input[centerRow + centerX];
+                }
+            }
         }
 
         return output;
     }
 
+    private static int getCenterOffset(int offset) {
+        return offset == GRID_MASK ? 1 : -offset;
+    }
 }

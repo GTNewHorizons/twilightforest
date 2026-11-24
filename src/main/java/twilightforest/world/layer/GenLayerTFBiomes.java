@@ -8,51 +8,56 @@ import twilightforest.biomes.TFBiomeBase;
 
 /**
  * Applies the twilight forest biomes to the map
- * 
+ *
  * @author Ben
  *
  */
-public class GenLayerTFBiomes extends GenLayer {
+public class GenLayerTFBiomes extends GenLayerTFBiomeSelection {
 
-    protected BiomeGenBase[] commonBiomes = (new BiomeGenBase[] { TFBiomeBase.twilightForest,
-            TFBiomeBase.twilightForest2, TFBiomeBase.highlands, TFBiomeBase.mushrooms, TFBiomeBase.tfSwamp,
-            TFBiomeBase.clearing, TFBiomeBase.darkForest });
-    protected BiomeGenBase[] rareBiomes = (new BiomeGenBase[] { TFBiomeBase.tfLake, TFBiomeBase.glacier,
-            TFBiomeBase.deepMushrooms, TFBiomeBase.enchantedForest, TFBiomeBase.fireSwamp });
+    // keep these arrays per instance and mutable for compatibility with biome customisation
+    protected BiomeGenBase[] commonBiomes = { TFBiomeBase.twilightForest, TFBiomeBase.twilightForest2,
+            TFBiomeBase.highlands, TFBiomeBase.mushrooms, TFBiomeBase.tfSwamp, TFBiomeBase.clearing,
+            TFBiomeBase.darkForest };
+    protected BiomeGenBase[] rareBiomes = { TFBiomeBase.tfLake, TFBiomeBase.glacier, TFBiomeBase.deepMushrooms,
+            TFBiomeBase.enchantedForest, TFBiomeBase.fireSwamp };
 
-    public GenLayerTFBiomes(long l, GenLayer genlayer) {
-        super(l);
-        parent = genlayer;
+    public GenLayerTFBiomes(long seed, GenLayer parent) {
+        super(seed);
+        this.parent = parent;
     }
 
-    public GenLayerTFBiomes(long l) {
-        super(l);
+    public GenLayerTFBiomes(long seed) {
+        super(seed);
     }
 
+    @Override
     public int[] getInts(int x, int z, int width, int depth) {
-        int[] dest = IntCache.getIntCache(width * depth);
-        for (int dz = 0; dz < depth; dz++) {
-            for (int dx = 0; dx < width; dx++) {
-                initChunkSeed(dx + x, dz + z);
-                if (nextInt(15) == 0) {
-                    // make rare biome
-                    dest[dx + dz * width] = rareBiomes[nextInt(rareBiomes.length)].biomeID;
-                } else {
-                    // make common biome
-                    dest[dx + dz * width] = commonBiomes[nextInt(commonBiomes.length)].biomeID;
-                }
-            }
+        return selectBiomes(x, z, width, depth, commonBiomes, rareBiomes);
+    }
+}
 
+// both biome selection variants must use an identical seed and random draw
+abstract class GenLayerTFBiomeSelection extends GenLayer {
+
+    private static final int RARE_BIOME_CHANCE = 15;
+
+    protected GenLayerTFBiomeSelection(long seed) {
+        super(seed);
+    }
+
+    protected final int[] selectBiomes(int x, int z, int width, int depth, BiomeGenBase[] commonBiomes,
+            BiomeGenBase[] rareBiomes) {
+        int[] biomes = IntCache.getIntCache(width * depth);
+
+        for (int dz = 0; dz < depth; dz++) {
+            int rowOffset = dz * width;
+            for (int dx = 0; dx < width; dx++) {
+                initChunkSeed(x + dx, z + dz);
+                BiomeGenBase[] candidates = nextInt(RARE_BIOME_CHANCE) == 0 ? rareBiomes : commonBiomes;
+                biomes[rowOffset + dx] = candidates[nextInt(candidates.length)].biomeID;
+            }
         }
 
-        // for (int i = 0; i < width * depth; i++)
-        // {
-        // if (dest[i] < 0 || dest[i] > TFBiomeBase.fireSwamp.biomeID)
-        // {
-        // System.err.printf("Made a bad ID, %d at %d, %d while generating\n", dest[i], x, z);
-        // }
-        // }
-
-        return dest;
+        return biomes;
     }
 }
