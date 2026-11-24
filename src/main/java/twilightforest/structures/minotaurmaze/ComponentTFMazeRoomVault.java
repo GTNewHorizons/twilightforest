@@ -13,7 +13,6 @@ public class ComponentTFMazeRoomVault extends ComponentTFMazeRoom {
 
     public ComponentTFMazeRoomVault() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeRoomVault(int i, Random rand, int x, int y, int z) {
@@ -58,8 +57,6 @@ public class ComponentTFMazeRoomVault extends ComponentTFMazeRoom {
         this.placeTreasureAtCurrentPosition(world, rand, 6, 2, 8, TFTreasure.labyrinth_vault, sbb);
         this.placeBlockAtCurrentPosition(world, Blocks.chest, 0, 9, 2, 8, sbb);
         this.placeTreasureAtCurrentPosition(world, rand, 9, 2, 7, TFTreasure.labyrinth_vault, sbb);
-
-        // mazebreaker!
 
         return true;
     }

@@ -13,11 +13,11 @@ public class ComponentTFMazeDeadEndRoots extends ComponentTFMazeDeadEnd {
 
     public ComponentTFMazeDeadEndRoots() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeDeadEndRoots(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
+        this.boundingBox.maxY = y + 6;
     }
 
     @Override
@@ -44,8 +44,9 @@ public class ComponentTFMazeDeadEndRoots extends ComponentTFMazeDeadEnd {
                                 sbb);
                     }
 
+                    // keep the 2 block wide central passage clear of solid gravel
                     // occasional gravel
-                    if (rand.nextInt(z + 1) > 1) {
+                    if ((x == 1 || x == 4) && z >= 2 && rand.nextInt(z + 1) > 1) {
                         this.placeBlockAtCurrentPosition(world, Blocks.gravel, 0, x, 1, z, sbb);
 
                         if (rand.nextInt(z + 1) > 1) {

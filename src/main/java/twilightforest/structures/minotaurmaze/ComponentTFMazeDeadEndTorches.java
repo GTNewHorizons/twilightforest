@@ -10,7 +10,6 @@ public class ComponentTFMazeDeadEndTorches extends ComponentTFMazeDeadEnd {
 
     public ComponentTFMazeDeadEndTorches() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeDeadEndTorches(int i, int x, int y, int z, int rotation) {
@@ -22,10 +21,13 @@ public class ComponentTFMazeDeadEndTorches extends ComponentTFMazeDeadEnd {
         // normal doorway
         super.addComponentParts(world, rand, sbb);
 
-        // torches!
-        this.fillWithMetadataBlocks(world, sbb, 2, 1, 4, 3, 4, 4, Blocks.torch, 0, Blocks.air, 0, false);
-        this.fillWithMetadataBlocks(world, sbb, 1, 1, 1, 1, 4, 4, Blocks.torch, 0, Blocks.air, 0, false);
-        this.fillWithMetadataBlocks(world, sbb, 4, 1, 1, 4, 4, 4, Blocks.torch, 0, Blocks.air, 0, false);
+        // floor mounted torches need floor, floating torch walls break on update
+        for (int z = 1; z <= 4; z++) {
+            this.placeBlockAtCurrentPosition(world, Blocks.torch, 5, 1, 1, z, sbb);
+            this.placeBlockAtCurrentPosition(world, Blocks.torch, 5, 4, 1, z, sbb);
+        }
+        this.placeBlockAtCurrentPosition(world, Blocks.torch, 5, 2, 1, 4, sbb);
+        this.placeBlockAtCurrentPosition(world, Blocks.torch, 5, 3, 1, 4, sbb);
 
         return true;
     }

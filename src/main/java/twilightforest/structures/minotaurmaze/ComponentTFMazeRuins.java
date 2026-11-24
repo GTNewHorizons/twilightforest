@@ -12,7 +12,7 @@ import twilightforest.structures.StructureTFComponent;
 /**
  * This component is the base for the maze/ruins combo feature. There are village-like ruins above and a maze
  * underneath.
- * 
+ *
  * @author Ben
  *
  */
@@ -20,7 +20,6 @@ public class ComponentTFMazeRuins extends StructureTFComponent {
 
     public ComponentTFMazeRuins() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeRuins(World world, Random rand, int i, int x, int y, int z) {
@@ -61,7 +60,7 @@ public class ComponentTFMazeRuins extends StructureTFComponent {
 
         // add aboveground maze entrance building
         ComponentTFMazeMound mazeAbove = new ComponentTFMazeMound(
-                2,
+                3,
                 random,
                 boundingBox.minX - 14,
                 boundingBox.minY,
