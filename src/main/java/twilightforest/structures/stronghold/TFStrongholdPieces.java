@@ -12,7 +12,7 @@ import twilightforest.structures.StructureTFComponent;
 
 public class TFStrongholdPieces {
 
-    private static final TFStrongholdPieceWeight[] pieceWeightArray = new TFStrongholdPieceWeight[] {
+    private static final TFStrongholdPieceWeight[] PIECE_WEIGHTS = new TFStrongholdPieceWeight[] {
             new TFStrongholdPieceWeight(ComponentTFStrongholdSmallHallway.class, 40, 0),
             new TFStrongholdPieceWeight(ComponentTFStrongholdLeftTurn.class, 20, 0),
             new TFStrongholdPieceWeight(ComponentTFStrongholdCrossing.class, 10, 4),
@@ -28,9 +28,9 @@ public class TFStrongholdPieces {
             new TFStrongholdPieceWeight(ComponentTFStrongholdBossRoom.class, 10, 1, 4) };
 
     private List<TFStrongholdPieceWeight> pieceList;
-    static int totalWeight = 0;
+    private int totalWeight;
 
-    private static Class<? extends StructureTFComponent> lastPieceMade;
+    private Class<? extends StructureTFComponent> lastPieceMade;
 
     public static void registerPieces() {
         MapGenStructureIO.func_143031_a(ComponentTFStrongholdSmallHallway.class, "TFSSH");
@@ -38,7 +38,7 @@ public class TFStrongholdPieces {
         MapGenStructureIO.func_143031_a(ComponentTFStrongholdCrossing.class, "TFSCr");
         MapGenStructureIO.func_143031_a(ComponentTFStrongholdRightTurn.class, "TFSRT");
         MapGenStructureIO.func_143031_a(ComponentTFStrongholdDeadEnd.class, "TFSDE");
-        MapGenStructureIO.func_143031_a(ComponentTFStrongholdBalconyRoom.class, "TFSBR");
+        MapGenStructureIO.func_143031_a(ComponentTFStrongholdBalconyRoom.class, "TFSBal");
         MapGenStructureIO.func_143031_a(ComponentTFStrongholdTrainingRoom.class, "TFSTR");
         MapGenStructureIO.func_143031_a(ComponentTFStrongholdSmallStairs.class, "TFSSS");
         MapGenStructureIO.func_143031_a(ComponentTFStrongholdTreasureCorridor.class, "TFSTC");
@@ -62,37 +62,44 @@ public class TFStrongholdPieces {
     public void prepareStructurePieces() {
         pieceList = new ArrayList<>();
 
-        for (TFStrongholdPieceWeight piece : pieceWeightArray) {
-            piece.instancesSpawned = 0;
-            pieceList.add(piece);
+        // weight definitions are shared but mutable spawn counts must belong to this structure
+        for (TFStrongholdPieceWeight definition : PIECE_WEIGHTS) {
+            pieceList.add(
+                    new TFStrongholdPieceWeight(
+                            definition.pieceClass,
+                            definition.pieceWeight,
+                            definition.instancesLimit,
+                            definition.minimumDepth));
         }
+        lastPieceMade = null;
+        totalWeight = 0;
     }
 
     public void markBossRoomUsed() {
-        // let's assume the boss room is the last one on the list
-        // System.out.println("Removing " + pieceList.get(pieceList.size() - 1).pieceClass);
-
-        pieceList.remove(pieceList.size() - 1);
+        // remove by class, the boss doesnt have to be the final entry after other pieces expire
+        if (pieceList != null) {
+            pieceList.removeIf(piece -> piece.pieceClass == ComponentTFStrongholdBossRoom.class);
+        }
     }
 
     private boolean hasMoreLimitedPieces() {
-        boolean flag = false;
+        boolean hasLimitedPieces = false;
         totalWeight = 0;
 
         for (TFStrongholdPieceWeight piece : pieceList) {
             totalWeight += piece.pieceWeight;
 
             if (piece.instancesLimit > 0 && piece.instancesSpawned < piece.instancesLimit) {
-                flag = true;
+                hasLimitedPieces = true;
             }
         }
 
-        return flag;
+        return hasLimitedPieces;
     }
 
     public StructureTFStrongholdComponent getNextComponent(StructureComponent parent, List<StructureComponent> list,
             Random random, int index, int facing, int x, int y, int z) {
-        if (!hasMoreLimitedPieces()) {
+        if (pieceList == null || !hasMoreLimitedPieces() || totalWeight <= 0) {
             return null;
         } else {
             // repeat up to 5 times if we're not getting the right thing
@@ -117,10 +124,15 @@ public class TFStrongholdPieces {
                                 y,
                                 z);
 
+                        // a missing or broken registered constructor must not crash world gen
+                        if (component == null || component.getBoundingBox() == null) {
+                            break;
+                        }
                         if (StructureComponent.findIntersecting(list, component.getBoundingBox()) == null) {
                             ++piece.instancesSpawned;
 
                             if (!piece.canSpawnMoreStructures()) {
+                                // preserve selection order on remaining pieces
                                 pieceList.remove(piece);
                             }
 
@@ -151,11 +163,9 @@ public class TFStrongholdPieces {
                     .newInstance(index, facing, x, y, z);
         } catch (InstantiationException | SecurityException | NoSuchMethodException | InvocationTargetException
                 | IllegalArgumentException | IllegalAccessException e) {
-            // TODO Auto-generated catch block
+            // keep generation if an optional constructor is broken
             e.printStackTrace();
         }
-
-        //// attempted = new ComponentTFStrongholdRoom(index, nFacing, nx, ny, nz);
 
         return null;
     }
