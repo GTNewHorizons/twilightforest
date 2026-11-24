@@ -21,6 +21,10 @@ import twilightforest.world.TFGenMyceliumBlob;
 
 public class ComponentTFTrollCaveMain extends StructureTFComponent {
 
+    private static final int DECORATION_X_MULTIPLIER = 321534781;
+    private static final int DECORATION_Z_MULTIPLIER = 756839;
+    private static final int SURFACE_SEARCH_HEIGHT = 32;
+
     protected int size;
     protected int height;
 
@@ -33,6 +37,7 @@ public class ComponentTFTrollCaveMain extends StructureTFComponent {
     }
 
     public ComponentTFTrollCaveMain(World world, Random rand, int i, int x, int y, int z) {
+        super(i);
         this.setCoordBaseMode(0);
 
         // adjust y
@@ -133,8 +138,7 @@ public class ComponentTFTrollCaveMain extends StructureTFComponent {
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        Random decoRNG = new Random(
-                world.getSeed() + (this.boundingBox.minX * 321534781) ^ (this.boundingBox.minZ * 756839));
+        Random decoRNG = createDecorationRandom(world);
 
         // clear inside
         hollowCaveMiddle(world, sbb, rand, 0, 0, 0, this.size - 1, this.height - 1, this.size - 1);
@@ -160,6 +164,16 @@ public class ComponentTFTrollCaveMain extends StructureTFComponent {
         return true;
     }
 
+    protected long getDecorationSeed(World world) {
+        // preserve the original integer multiplication and XOR precedence for seeded structures
+        return world.getSeed() + (boundingBox.minX * DECORATION_X_MULTIPLIER)
+                ^ (boundingBox.minZ * DECORATION_Z_MULTIPLIER);
+    }
+
+    protected Random createDecorationRandom(World world) {
+        return new Random(getDecorationSeed(world));
+    }
+
     protected ChunkCoordinates getCoordsInCave(Random rand) {
         return new ChunkCoordinates(
                 rand.nextInt(this.size - 1),
@@ -170,12 +184,13 @@ public class ComponentTFTrollCaveMain extends StructureTFComponent {
     /**
      * arguments: (World worldObj, StructureBoundingBox structBB, int minX, int minY, int minZ, int maxX, int maxY, int
      * maxZ)
-     * 
+     *
      * @param rand
      */
     protected void hollowCaveMiddle(World par1World, StructureBoundingBox par2StructureBoundingBox, Random rand,
             int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         int threshold = this.size / 5;
+        int thresholdSquared = threshold * threshold;
 
         for (int y = minY; y <= maxY; ++y) {
             for (int x = minX; x <= maxX; ++x) {
@@ -184,11 +199,11 @@ public class ComponentTFTrollCaveMain extends StructureTFComponent {
                     int ey = Math.min((y - minY) * 2, maxY - y);
                     int ez = Math.min(z - minZ, maxZ - z);
 
-                    double dist = Math.sqrt(ex * ey * ez);
-
-                    if (dist > threshold) {
+                    // squaring the integer threshold avoids a square root at every block position
+                    int distanceProduct = ex * ey * ez;
+                    if (distanceProduct > thresholdSquared) {
                         this.placeBlockAtCurrentPosition(par1World, Blocks.air, 0, x, y, z, par2StructureBoundingBox);
-                    } else if (dist == threshold && rand.nextInt(4) == 0
+                    } else if (distanceProduct == thresholdSquared && rand.nextInt(4) == 0
                             && this.getBlockAtCurrentPosition(par1World, x, y, z, par2StructureBoundingBox)
                                     == Blocks.stone) {
                                         this.placeBlockAtCurrentPosition(
@@ -292,15 +307,14 @@ public class ComponentTFTrollCaveMain extends StructureTFComponent {
         int dz = getZWithOffset(x, z);
         if (sbb.isVecInside(dx, dy, dz)) {
             // find surface above the listed coords
-            for (dy = y; dy < y + 32; dy++) {
+            for (dy = y; dy < y + SURFACE_SEARCH_HEIGHT; dy++) {
                 if (world.isAirBlock(dx, dy, dz)) {
                     // System.out.println("Found surface for generator. It's " + dy);
-
-                    break;
+                    generator.generate(world, rand, dx, dy, dz);
+                    return;
                 }
             }
-
-            generator.generate(world, rand, dx, dy, dz);
+            // dont place surface vegetation underground when the scan found no air
         }
     }
 

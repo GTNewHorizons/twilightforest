@@ -16,6 +16,11 @@ import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
 
+    private static final int WALL_COUNT = 4;
+    private static final int STALACTITE_COUNT = 32;
+    private static final int STALAGMITE_COUNT = 8;
+    private static final String OPENING_TAG_PREFIX = "openingTowards";
+
     protected boolean[] openingTowards = new boolean[] { false, false, true, false };
 
     public ComponentTFTrollCaveConnect() {}
@@ -36,10 +41,9 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
     protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
         super.func_143012_a(par1NBTTagCompound);
 
-        par1NBTTagCompound.setBoolean("openingTowards0", this.openingTowards[0]);
-        par1NBTTagCompound.setBoolean("openingTowards1", this.openingTowards[1]);
-        par1NBTTagCompound.setBoolean("openingTowards2", this.openingTowards[2]);
-        par1NBTTagCompound.setBoolean("openingTowards3", this.openingTowards[3]);
+        for (int side = 0; side < WALL_COUNT; side++) {
+            par1NBTTagCompound.setBoolean(OPENING_TAG_PREFIX + side, openingTowards[side]);
+        }
 
     }
 
@@ -50,11 +54,10 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
 
-        // too lazy to do this as a loop
-        this.openingTowards[0] = par1NBTTagCompound.getBoolean("openingTowards0");
-        this.openingTowards[1] = par1NBTTagCompound.getBoolean("openingTowards1");
-        this.openingTowards[2] = par1NBTTagCompound.getBoolean("openingTowards2");
-        this.openingTowards[3] = par1NBTTagCompound.getBoolean("openingTowards3");
+        // keep the 4 original keys so existing structure nbt stays compatible
+        for (int side = 0; side < WALL_COUNT; side++) {
+            openingTowards[side] = par1NBTTagCompound.getBoolean(OPENING_TAG_PREFIX + side);
+        }
     }
 
     @Override
@@ -62,7 +65,7 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
         // make 4 caves
         if (this.getComponentType() < 3) {
 
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < WALL_COUNT; i++) {
                 ChunkCoordinates dest = getValidOpening(rand, 2, i);
 
                 if (rand.nextBoolean() || !makeGardenCave(
@@ -99,30 +102,29 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
             // clear inside
             hollowCaveMiddle(world, sbb, rand, 0, 0, 0, this.size - 1, this.height - 1, this.size - 1);
 
-            Random decoRNG = new Random(
-                    world.getSeed() + (this.boundingBox.minX * 321534781) ^ (this.boundingBox.minZ * 756839));
+            Random decoRNG = createDecorationRandom(world);
 
             // wall decorations
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < WALL_COUNT; i++) {
                 if (!this.openingTowards[i]) {
                     decorateWall(world, sbb, decoRNG, i);
                 }
             }
 
-            decoRNG.setSeed(world.getSeed() + (this.boundingBox.minX * 321534781) ^ (this.boundingBox.minZ * 756839));
+            decoRNG.setSeed(getDecorationSeed(world));
             // stone stalactites!
-            for (int i = 0; i < 32; i++) {
+            for (int i = 0; i < STALACTITE_COUNT; i++) {
                 ChunkCoordinates dest = getCoordsInCave(decoRNG);
                 generateBlockStalactite(world, decoRNG, Blocks.stone, 0.5F, true, dest.posX, 3, dest.posZ, sbb);
             }
             // stone stalagmites!
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < STALAGMITE_COUNT; i++) {
                 ChunkCoordinates dest = getCoordsInCave(decoRNG);
                 generateBlockStalactite(world, decoRNG, Blocks.stone, 0.5F, false, dest.posX, 3, dest.posZ, sbb);
             }
 
             // possible treasure
-            decoRNG.setSeed(world.getSeed() + (this.boundingBox.minX * 321534781) ^ (this.boundingBox.minZ * 756839));
+            decoRNG.setSeed(getDecorationSeed(world));
             if (this.countExits() == 1 && decoRNG.nextInt(3) == 0) {
                 // treasure!
                 makeTreasureCrate(world, decoRNG, sbb);
@@ -183,7 +185,7 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
     private int countExits() {
         int count = 0;
         for (boolean openingToward : this.openingTowards) {
-            if (openingToward == true) {
+            if (openingToward) {
                 count++;
             }
         }
@@ -508,9 +510,8 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
             this.openingTowards[rotation] = true;
 
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     private StructureComponent findNearbyGarden(List<StructureComponent> list, StructureBoundingBox boundingBox) {
@@ -539,8 +540,7 @@ public class ComponentTFTrollCaveConnect extends ComponentTFTrollCaveMain {
         if (super.makeSmallerCave(list, rand, index, x, y, z, caveSize, caveHeight, rotation)) {
             this.openingTowards[rotation] = true;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 }

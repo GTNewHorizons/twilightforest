@@ -11,6 +11,10 @@ import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFTrollCloud extends StructureTFComponent {
 
+    private static final int CLOUD_SIZE = 40;
+    private static final int CLOUD_HEIGHT = 20;
+    private static final int CLOUD_LAYER_HEIGHT = 6;
+
     private int size;
     private int height;
 
@@ -20,8 +24,8 @@ public class ComponentTFTrollCloud extends StructureTFComponent {
         super(index);
         this.setCoordBaseMode(0);
 
-        this.size = 40;
-        this.height = 20;
+        this.size = CLOUD_SIZE;
+        this.height = CLOUD_HEIGHT;
 
         int radius = this.size / 2;
         this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(
@@ -60,7 +64,7 @@ public class ComponentTFTrollCloud extends StructureTFComponent {
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        placeCloud(world, sbb, 0, 0, 0, this.size - 1, 6, this.size - 1);
+        placeCloud(world, sbb, 0, 0, 0, size - 1, CLOUD_LAYER_HEIGHT, size - 1);
 
         return true;
     }

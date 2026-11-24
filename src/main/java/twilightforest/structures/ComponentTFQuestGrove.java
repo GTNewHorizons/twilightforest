@@ -4,6 +4,8 @@ import java.util.Random;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -13,6 +15,8 @@ import twilightforest.entity.passive.EntityTFQuestRam;
 public class ComponentTFQuestGrove extends StructureTFComponent {
 
     public static final int RADIUS = 13;
+    private static final String BEAST_PLACED_TAG = "beastPlaced";
+    private static final String DISPENSER_PLACED_TAG = "dispenserPlaced";
 
     protected boolean beastPlaced = false;
     protected boolean dispenserPlaced = false;
@@ -29,6 +33,20 @@ public class ComponentTFQuestGrove extends StructureTFComponent {
         // the maze is 25 x 25 for now
         this.boundingBox = StructureTFComponent
                 .getComponentToAddBoundingBox(x, y, z, -RADIUS, 0, -RADIUS, RADIUS * 2, 10, RADIUS * 2, 0);
+    }
+
+    @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setBoolean(BEAST_PLACED_TAG, beastPlaced);
+        nbt.setBoolean(DISPENSER_PLACED_TAG, dispenserPlaced);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        beastPlaced = nbt.getBoolean(BEAST_PLACED_TAG);
+        dispenserPlaced = nbt.getBoolean(DISPENSER_PLACED_TAG);
     }
 
     @Override
@@ -72,14 +90,16 @@ public class ComponentTFQuestGrove extends StructureTFComponent {
             int bz = this.getZWithOffset(13, 20);
 
             if (sbb.isVecInside(bx, by, bz)) {
-                dispenserPlaced = true;
-
-                world.setBlock(bx, by, bz, Blocks.dispenser, 2, 4);
-                TileEntityDispenser ted = (TileEntityDispenser) world.getTileEntity(bx, by, bz);
-
-                // add 4 random wool blocks
-                for (int i = 0; i < 4; i++) {
-                    ted.setInventorySlotContents(i, new ItemStack(Blocks.wool, 1, rand.nextInt(16)));
+                if (world.setBlock(bx, by, bz, Blocks.dispenser, 2, 4)) {
+                    TileEntity dispenser = world.getTileEntity(bx, by, bz);
+                    if (dispenser instanceof TileEntityDispenser) {
+                        TileEntityDispenser ted = (TileEntityDispenser) dispenser;
+                        // add 4 random wool blocks
+                        for (int i = 0; i < 4; i++) {
+                            ted.setInventorySlotContents(i, new ItemStack(Blocks.wool, 1, rand.nextInt(16)));
+                        }
+                        dispenserPlaced = true;
+                    }
                 }
             }
         }
@@ -91,13 +111,11 @@ public class ComponentTFQuestGrove extends StructureTFComponent {
             int bz = this.getZWithOffset(13, 13);
 
             if (sbb.isVecInside(bx, by, bz)) {
-                beastPlaced = true;
-
                 EntityTFQuestRam ram = new EntityTFQuestRam(world);
                 ram.setPosition(bx, by, bz);
                 ram.setHomeArea(bx, by, bz, 13);
 
-                world.spawnEntityInWorld(ram);
+                beastPlaced = world.spawnEntityInWorld(ram);
             }
         }
         return true;
@@ -106,57 +124,59 @@ public class ComponentTFQuestGrove extends StructureTFComponent {
     private void makeWallSide(World world, Random rand, int direction, StructureBoundingBox sbb) {
         int temp = this.getCoordBaseMode();
         this.setCoordBaseMode(direction);
+        try {
+            // arches
+            placeOuterArch(world, 3, -1, sbb);
+            placeOuterArch(world, 11, -1, sbb);
+            placeOuterArch(world, 19, -1, sbb);
 
-        // arches
-        placeOuterArch(world, 3, -1, sbb);
-        placeOuterArch(world, 11, -1, sbb);
-        placeOuterArch(world, 19, -1, sbb);
+            // connecting thingers
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 0, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 1, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 2, 0, sbb);
 
-        // connecting thingers
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 0, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 1, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 2, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 1, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 2, 3, 0, sbb);
 
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 3, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 1, 3, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 2, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 8, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 9, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 10, 3, 0, sbb);
 
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 8, 3, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 9, 3, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 10, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 16, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 17, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 18, 3, 0, sbb);
 
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 16, 3, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 17, 3, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 18, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 24, 3, 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 25, 3, 0, sbb);
 
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 24, 3, 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 25, 3, 0, sbb);
-
-        // inner arch
-        for (int x = 0; x < 9; x++) {
-            for (int y = 0; y < 9; y++) {
-                for (int z = 0; z < 2; z++) {
-                    if (x == 0 || x == 1 || x == 7 || x == 8 || y == 0 || y == 1 || y == 7 || y == 8) {
-                        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 1, x + 9, y - 2, z + 5, sbb);
+            // inner arch
+            for (int x = 0; x < 9; x++) {
+                for (int y = 0; y < 9; y++) {
+                    for (int z = 0; z < 2; z++) {
+                        if (x == 0 || x == 1 || x == 7 || x == 8 || y == 0 || y == 1 || y == 7 || y == 8) {
+                            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 1, x + 9, y - 2, z + 5, sbb);
+                        }
                     }
                 }
             }
+
+            // connecting thingers
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 0, 6, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 1, 6, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 2, 6, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 3, 6, sbb);
+
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 4, 6, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 7, 4, 6, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 8, 4, 6, sbb);
+
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 18, 4, 6, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 19, 4, 6, sbb);
+
+        } finally {
+            this.setCoordBaseMode(temp);
         }
-
-        // connecting thingers
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 0, 6, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 1, 6, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 2, 6, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 3, 6, sbb);
-
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 6, 4, 6, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 7, 4, 6, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 8, 4, 6, sbb);
-
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 18, 4, 6, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 19, 4, 6, sbb);
-
-        this.setCoordBaseMode(temp);
     }
 
     private void placeOuterArch(World world, int ox, int oy, StructureBoundingBox sbb) {
