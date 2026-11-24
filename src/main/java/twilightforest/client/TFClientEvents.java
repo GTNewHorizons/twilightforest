@@ -4,7 +4,6 @@ import java.util.Random;
 
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
@@ -19,11 +18,7 @@ import twilightforest.item.ItemTFBowBase;
 
 public class TFClientEvents {
 
-    private Random random;
-
-    public TFClientEvents() {
-        this.random = new Random();
-    }
+    private final Random random = new Random();
 
     /**
      * Do ice effect on slowed monsters
@@ -35,7 +30,7 @@ public class TFClientEvents {
                 && event.entity.getDataWatcher().getWatchableObjectByte(8) > 0) {
 
             // System.out.println("Rendering slowed entity");
-            this.renderIcedEntity(event.entity, event.renderer, event.x, event.y, event.z);
+            this.renderIcedEntity(event.entity, event.x, event.y, event.z);
         }
 
     }
@@ -62,8 +57,8 @@ public class TFClientEvents {
     /**
      * Render an entity with the ice effect. This just displays a bunch of ice cubes around on their model
      */
-    private void renderIcedEntity(EntityLivingBase entity, RendererLivingEntity renderer, double x, double y,
-            double z) {
+    private void renderIcedEntity(EntityLivingBase entity, double x, double y, double z) {
+        boolean blending = GL11.glIsEnabled(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -72,7 +67,7 @@ public class TFClientEvents {
         this.random.setSeed(entity.getEntityId() * entity.getEntityId() * 3121 + entity.getEntityId() * 45238971);
 
         // number of cubes
-        int numCubes = (int) (entity.height / 0.4F);
+        int numCubes = Math.min(32, Math.max(0, (int) (entity.height / 0.4F)));
 
         // make cubes
         for (int i = 0; i < numCubes; i++) {
@@ -90,7 +85,9 @@ public class TFClientEvents {
             GL11.glPopMatrix();
         }
 
-        GL11.glDisable(GL11.GL_BLEND);
+        if (!blending) {
+            GL11.glDisable(GL11.GL_BLEND);
+        }
     }
 
 }

@@ -48,9 +48,12 @@ public class RenderBlockTFNagastone2 implements ISimpleBlockRenderingHandler {
 
     private void RenderRotatedBlock(RenderBlocks renderer, BlockTFNagastone2 block, int x, int y, int z) {
         World world = Minecraft.getMinecraft().theWorld;
+        if (world == null || !(world.getTileEntity(x, y, z) instanceof TileEntityTFNagastone te)) {
+            renderer.renderStandardBlock(block, x, y, z);
+            return;
+        }
         int meta = world.getBlockMetadata(x, y, z);
         block.Check4Neighbours(world, x, y, z);
-        TileEntityTFNagastone te = (TileEntityTFNagastone) world.getTileEntity(x, y, z);
         Direction dir = block.DirectionFromMeta(meta);
         Yaw face = block.FacingFromMeta(meta);
 
@@ -1901,20 +1904,16 @@ public class RenderBlockTFNagastone2 implements ISimpleBlockRenderingHandler {
                 case SIDE:
                     iconYNeg = block.BOTTOM_LONG;
                     iconYPos = block.TOP_LONG;
-                    TileEntityTFNagastone upperTE = null;
                     Direction upperDirection = null;
                     Yaw upperFacing = null;
                     if (te.neighbourUp) {
-                        upperTE = (TileEntityTFNagastone) world.getTileEntity(x, y + 1, z);
                         int upperMeta = world.getBlockMetadata(x, y + 1, z);
                         upperDirection = block.DirectionFromMeta(upperMeta);
                         upperFacing = block.FacingFromMeta(upperMeta);
                     }
-                    TileEntityTFNagastone lowerTE = null;
                     Direction lowerDirection = null;
                     Yaw lowerFacing = null;
                     if (te.neighbourDown) {
-                        lowerTE = (TileEntityTFNagastone) world.getTileEntity(x, y - 1, z);
                         int lowerMeta = world.getBlockMetadata(x, y - 1, z);
                         lowerDirection = block.DirectionFromMeta(lowerMeta);
                         lowerFacing = block.FacingFromMeta(lowerMeta);
