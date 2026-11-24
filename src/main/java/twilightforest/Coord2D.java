@@ -6,7 +6,7 @@ import com.github.bsideup.jabel.Desugar;
 public record Coord2D(int x, int z) {
 
     public Coord2D add(Coord2D other) {
-        return new Coord2D(this.x + other.x, this.z + other.z);
+        return new Coord2D(x + other.x, z + other.z);
     }
 
     public Coord2D spiralNext() {
@@ -18,64 +18,41 @@ public record Coord2D(int x, int z) {
      * First step from (0,0) is always in the (1,0) direction. Looks expensive to call a million times, actually isn't.
      */
     public Coord2D spiralNext(int step) {
-        if (step > 0) return spiralNextCCW(step);
-        else if (step < 0) return spiralNextCW(-step);
-        return null;
+        if (step == 0) {
+            return null;
+        }
+        if (step == Integer.MIN_VALUE) {
+            throw new IllegalArgumentException("Spiral step magnitude exceeds the integer range");
+        }
+        if (step > 0) {
+            return spiralNextCCW(step);
+        }
+
+        // a spiral is the reflection of the spiral across the X axis
+        Coord2D next = new Coord2D(x, -z).spiralNextCCW(-step);
+        return new Coord2D(next.x, -next.z);
     }
 
     private Coord2D spiralNextCCW(int step) {
         // always called with positive step
-        int x = this.x;
-        int z = this.z;
-
-        if (x == 0 && z == 0) return new Coord2D(step, 0);
-
+        if (x == 0 && z == 0) {
+            return new Coord2D(step, 0);
+        }
         if (x == z) {
-            if (x > 0) return new Coord2D(x - step, z);
-            else return new Coord2D(x + step, z);
+            return x > 0 ? new Coord2D(x - step, z) : new Coord2D(x + step, z);
         }
-
         if (x == -z) {
-            if (x > 0) return new Coord2D(x + step, z); // step into next radius here
-            else return new Coord2D(x, z - step);
+            // step into next radius here
+            return x > 0 ? new Coord2D(x + step, z) : new Coord2D(x, z - step);
         }
-
         if (x > z) {
-            if (x > -z) return new Coord2D(x, z + step);
-            else return new Coord2D(x + step, z);
-        } else {
-            if (x > -z) return new Coord2D(x - step, z);
-            else return new Coord2D(x, z - step);
+            return x > -z ? new Coord2D(x, z + step) : new Coord2D(x + step, z);
         }
-    }
-
-    private Coord2D spiralNextCW(int step) {
-        // always called with positive step
-        int x = this.x;
-        int z = this.z;
-
-        if (x == 0 && z == 0) return new Coord2D(step, 0);
-
-        if (x == z) {
-            if (x > 0) return new Coord2D(x + step, z); // step into next radius here
-            else return new Coord2D(x, z + step);
-        }
-
-        if (x == -z) {
-            if (x > 0) return new Coord2D(x - step, z);
-            else return new Coord2D(x + step, z);
-        }
-
-        if (x > z) {
-            if (x > -z) return new Coord2D(x, z - step);
-            else return new Coord2D(x - step, z);
-        } else {
-            if (x > -z) return new Coord2D(x + step, z);
-            else return new Coord2D(x, z + step);
-        }
+        return x > -z ? new Coord2D(x - step, z) : new Coord2D(x, z - step);
     }
 
     public int rad() {
-        return Math.max(Math.abs(this.x), Math.abs(this.z));
+        // saturate instead of overflowing when one coordinate is Integer.MIN_VALUE
+        return (int) Math.min(Integer.MAX_VALUE, Math.max(Math.abs((long) x), Math.abs((long) z)));
     }
 }

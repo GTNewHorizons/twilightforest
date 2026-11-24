@@ -5,29 +5,29 @@ import net.minecraft.world.storage.MapData;
 
 public class TFMazeMapData extends MapData {
 
+    private static final String Y_CENTER_TAG = "yCenter";
+
     public int yCenter;
 
-    public TFMazeMapData(String par1Str) {
-        super(par1Str);
+    public TFMazeMapData(String mapName) {
+        super(mapName);
     }
 
     /**
      * reads in data from the NBTTagCompound into this MapDataBase
      */
     @Override
-    public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
-        super.readFromNBT(par1NBTTagCompound);
-
-        this.yCenter = par1NBTTagCompound.getInteger("yCenter");
+    public void readFromNBT(NBTTagCompound data) {
+        super.readFromNBT(data);
+        this.yCenter = data.getInteger(Y_CENTER_TAG);
     }
 
     /**
      * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
      */
     @Override
-    public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
-        super.writeToNBT(par1NBTTagCompound);
-
-        par1NBTTagCompound.setInteger("yCenter", this.yCenter);
+    public void writeToNBT(NBTTagCompound data) {
+        super.writeToNBT(data);
+        data.setInteger(Y_CENTER_TAG, this.yCenter);
     }
 }

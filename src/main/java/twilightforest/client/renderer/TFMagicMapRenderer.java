@@ -30,8 +30,8 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
             TwilightForestMod.GUI_DIR + "mapicons.png");
     private static final ResourceLocation mapBackgroundTextures = new ResourceLocation(
             "textures/map/map_background.png");
-    private int[] intArray = new int[16384];
-    private DynamicTexture bufferedImage;
+    private final int[] intArray;
+    private final DynamicTexture bufferedImage;
     private final ResourceLocation textureLoc;
 
     public TFMagicMapRenderer(GameSettings par1GameSettings, TextureManager par2TextureManager) {
@@ -44,7 +44,7 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
 
     /**
      * Checks if this renderer should handle a specific item's render type
-     * 
+     *
      * @param item The item we are trying to render
      * @param type A render type to check if this renderer handles
      * @return true if this renderer should handle the given render type, otherwise false
@@ -57,7 +57,7 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
 
     /**
      * Checks if certain helper functionality should be executed for this renderer. See ItemRendererHelper for more info
-     * 
+     *
      * @param type   The render type
      * @param item   The ItemStack being rendered
      * @param helper The type of helper functionality to be ran
@@ -71,7 +71,7 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
     /**
      * Called to do the actual rendering, see ItemRenderType for details on when specific types are run, and what extra
      * data is passed into the data parameter.
-     * 
+     *
      * @param type The render type
      * @param item The ItemStack being rendered
      * @param data Extra Type specific data
@@ -79,7 +79,10 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 
-        if (type == ItemRenderType.FIRST_PERSON_MAP) {
+        if (type == ItemRenderType.FIRST_PERSON_MAP && data.length >= 3
+                && data[0] instanceof EntityPlayer
+                && data[1] instanceof TextureManager
+                && data[2] instanceof TFMagicMapData) {
             // get our stuff out of that object array
             EntityPlayer player = (EntityPlayer) data[0];
             TextureManager renderEngine = (TextureManager) data[1];
@@ -88,33 +91,34 @@ public class TFMagicMapRenderer implements net.minecraftforge.client.IItemRender
             if (mapData != null && mapData instanceof TFMagicMapData) {
                 renderMap(player, renderEngine, (TFMagicMapData) mapData);
             }
-        } else if (RenderItem.renderInFrame) {
-            EntityItem entity = (EntityItem) data[1];
+        } else if (type == ItemRenderType.ENTITY && RenderItem.renderInFrame
+                && data.length >= 2
+                && data[1] instanceof EntityItem) {
+                    EntityItem entity = (EntityItem) data[1];
 
-            TFMagicMapData mapData = ((ItemTFMagicMap) TFItems.magicMap).getMapData(item, entity.worldObj);
+                    TFMagicMapData mapData = ((ItemTFMagicMap) TFItems.magicMap).getMapData(item, entity.worldObj);
 
-            // if we have data, render it
-            if (mapData != null) {
-                renderMapInFrame(item, RenderManager.instance, mapData);
-            }
-        }
+                    // if we have data, render it
+                    if (mapData != null) {
+                        renderMapInFrame(item, RenderManager.instance, mapData);
+                    }
+                }
     }
 
     public void renderMap(EntityPlayer par1EntityPlayer, TextureManager par2TextureManager,
             TFMagicMapData par3MapData) {
         TFMagicMapData magicMapData = par3MapData;
 
-        for (int i = 0; i < 16384; ++i) {
-            int colorByte = par3MapData.colors[i] & 0xFF;
-
+        BiomeGenBase[] biomes = BiomeGenBase.getBiomeGenArray();
+        for (int i = 0; i < this.intArray.length; ++i) {
+            int colorByte = i < par3MapData.colors.length ? par3MapData.colors[i] & 0xFF : 0;
             if (colorByte == 0) {
                 this.intArray[i] = (i + i / 128 & 1) * 8 + 16 << 24;
             } else {
                 int biomeID = colorByte - 1;
-                BiomeGenBase biome = BiomeGenBase.getBiomeGenArray()[biomeID];
-                if (biome != null) {
-                    this.intArray[i] = -16777216 | biome.color;
-                }
+                BiomeGenBase biome = biomeID < biomes.length ? biomes[biomeID] : null;
+                // always overwrite the pixel, even if ID no longer resolves to a biome
+                this.intArray[i] = biome == null ? 0xFF000000 : 0xFF000000 | biome.color;
             }
         }
 

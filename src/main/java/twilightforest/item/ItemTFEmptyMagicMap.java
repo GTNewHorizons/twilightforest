@@ -25,7 +25,8 @@ public class ItemTFEmptyMagicMap extends ItemMapBase {
      */
     @Override
     public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player) {
-        if (world.provider.dimensionId != TwilightForestMod.dimensionID) {
+        // map IDs and their persistent data must only be allocated on the server
+        if (world.isRemote || world.provider.dimensionId != TwilightForestMod.dimensionID) {
             return itemStack;
         }
         ItemStack mapItem = new ItemStack(TFItems.magicMap, 1, world.getUniqueDataId(ItemTFMagicMap.STR_ID));
@@ -38,14 +39,16 @@ public class ItemTFEmptyMagicMap extends ItemMapBase {
         mapData.zCenter = (int) (Math.round(player.posZ / step) * step);
         mapData.dimension = (byte) world.provider.dimensionId;
         mapData.markDirty();
-        --itemStack.stackSize;
+        if (!player.capabilities.isCreativeMode) {
+            --itemStack.stackSize;
+        }
 
         // cheevo
         if (mapItem.getItem() == TFItems.magicMap) {
             player.triggerAchievement(TFAchievementPage.twilightMagicMap);
         }
 
-        if (itemStack.stackSize <= 0) {
+        if (!player.capabilities.isCreativeMode && itemStack.stackSize <= 0) {
             return mapItem;
         } else {
             if (!player.inventory.addItemStackToInventory(mapItem.copy())) {

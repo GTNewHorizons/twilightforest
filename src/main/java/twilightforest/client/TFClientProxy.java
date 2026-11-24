@@ -10,6 +10,7 @@ import net.minecraft.client.model.ModelSlime;
 import net.minecraft.client.model.ModelWolf;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.particle.EntitySmokeFX;
+import net.minecraft.client.renderer.entity.RenderFireball;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.init.Items;
@@ -306,6 +307,7 @@ public class TFClientProxy extends TFCommonProxy {
         RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.EntityTFRovingCube.class, new RenderTFRovingCube());
 
         // projectiles
+        RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.boss.EntityTFUrGhastFireball.class, new RenderFireball(2.0F));
         RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.EntityTFNatureBolt.class, new RenderSnowball(Items.wheat_seeds));
         RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.boss.EntityTFLichBolt.class, new RenderSnowball(Items.ender_pearl));
         RenderingRegistry.registerEntityRenderingHandler(twilightforest.entity.EntityTFTwilightWandBolt.class, new RenderSnowball(Items.ender_pearl));
@@ -667,7 +669,12 @@ public class TFClientProxy extends TFCommonProxy {
         //
         // }
 
-        byte four = 4;
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc == null || mc.theWorld != worldObj || mc.gameSettings.particleSetting == 2) {
+            return;
+        }
+
+        int four = mc.gameSettings.particleSetting == 1 ? 2 : 4;
 
         for (int dx = 0; dx < four; ++dx) {
             for (int dy = 0; dy < four; ++dy) {
@@ -692,16 +699,16 @@ public class TFClientProxy extends TFCommonProxy {
 
     public boolean checkForSound(ChunkCoordinates chunkcoordinates) {
         Minecraft mc = Minecraft.getMinecraft();
-        ISound isound = (ISound) mc.renderGlobal.mapSoundPositions.get(chunkcoordinates);
-        if (isound == null) return false;
-        else {
-            if (mc.getSoundHandler().isSoundPlaying(isound)) return true;
-            else {
-                mc.getSoundHandler().stopSound(isound);
-                mc.renderGlobal.mapSoundPositions.remove(chunkcoordinates);
-                return false;
-            }
+        ISound sound = (ISound) mc.renderGlobal.mapSoundPositions.get(chunkcoordinates);
+        if (sound == null) {
+            return false;
         }
+        if (mc.getSoundHandler().isSoundPlaying(sound)) {
+            return true;
+        }
+        mc.getSoundHandler().stopSound(sound);
+        mc.renderGlobal.mapSoundPositions.remove(chunkcoordinates);
+        return false;
     }
 
     public void stopSound(World worldIn, int x, int y, int z) {
@@ -709,10 +716,9 @@ public class TFClientProxy extends TFCommonProxy {
         Minecraft mc = Minecraft.getMinecraft();
         ISound isound = (ISound) mc.renderGlobal.mapSoundPositions.get(chunkcoordinates);
 
-        while (isound != null) {
+        if (isound != null) {
             mc.getSoundHandler().stopSound(isound);
             mc.renderGlobal.mapSoundPositions.remove(chunkcoordinates);
-            isound = (ISound) mc.renderGlobal.mapSoundPositions.get(chunkcoordinates);
         }
     }
 
@@ -726,7 +732,11 @@ public class TFClientProxy extends TFCommonProxy {
                 (float) chunkcoordinates.posY,
                 (float) chunkcoordinates.posZ);
         Minecraft mc = Minecraft.getMinecraft();
-        mc.renderGlobal.mapSoundPositions.put(chunkcoordinates, positionedsoundrecord);
+        // stop a previous sound registered at this position before replacing entry
+        ISound oldSound = (ISound) mc.renderGlobal.mapSoundPositions.put(chunkcoordinates, positionedsoundrecord);
+        if (oldSound != null) {
+            mc.getSoundHandler().stopSound(oldSound);
+        }
         mc.getSoundHandler().playSound(positionedsoundrecord);
     }
 

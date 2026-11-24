@@ -1,5 +1,7 @@
 package twilightforest.item;
 
+import java.util.Locale;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -77,7 +79,11 @@ public class ItemTFMazeMap extends ItemMap {
     public void updateMapData(World par1World, Entity par2Entity, TFMazeMapData par3MapData) {
         int yDraw = MathHelper.floor_double(par2Entity.posY - (double) par3MapData.yCenter);
 
-        if (par1World.provider.dimensionId == par3MapData.dimension && yDraw > -YSEARCH && yDraw < YSEARCH) {
+        if (par2Entity instanceof EntityPlayer player && par1World.provider.dimensionId == par3MapData.dimension
+                && yDraw > -YSEARCH
+                && yDraw < YSEARCH
+                && par3MapData.yCenter >= 0
+                && par3MapData.yCenter < par1World.getActualHeight()) {
             short xSize = 128;
             short zSize = 128;
             int xCenter = par3MapData.xCenter;
@@ -86,7 +92,7 @@ public class ItemTFMazeMap extends ItemMap {
             int zDraw = MathHelper.floor_double(par2Entity.posZ - (double) zCenter) + zSize / 2;
             int drawSize = 16;
 
-            MapInfo mapInfo = par3MapData.func_82568_a((EntityPlayer) par2Entity);
+            MapInfo mapInfo = par3MapData.func_82568_a(player);
             ++mapInfo.field_82569_d;
 
             for (int xStep = xDraw - drawSize + 1; xStep < xDraw + drawSize; ++xStep) {
@@ -118,7 +124,11 @@ public class ItemTFMazeMap extends ItemMap {
 
                             if (blockID == Blocks.stone && mapOres) {
                                 for (int i = -YSEARCH; i <= YSEARCH; i++) {
-                                    Block searchID = chunk.getBlock(x15, heightValue + i, z15);
+                                    int searchY = heightValue + i;
+                                    if (searchY < 0 || searchY >= par1World.getActualHeight()) {
+                                        continue;
+                                    }
+                                    Block searchID = chunk.getBlock(x15, searchY, z15);
                                     if (searchID != Blocks.stone) {
                                         blockID = searchID;
                                         if (i > 0) {
@@ -157,7 +167,7 @@ public class ItemTFMazeMap extends ItemMap {
                                 } else if (blockID == Blocks.emerald_ore) {
                                     colorIndex = MapColor.emeraldColor.colorIndex;
                                 } else if (blockID != Blocks.air
-                                        && blockID.getUnlocalizedName().toLowerCase().contains("ore")) {
+                                        && blockID.getUnlocalizedName().toLowerCase(Locale.ROOT).contains("ore")) {
                                             // any other ore, catchall
                                             colorIndex = MapColor.pinkColor.colorIndex;
                                         }
@@ -198,7 +208,9 @@ public class ItemTFMazeMap extends ItemMap {
     public void onUpdate(ItemStack par1ItemStack, World par2World, Entity par3Entity, int par4, boolean isActiveItem) {
         if (!par2World.isRemote) {
             TFMazeMapData mapData = this.getMapData(par1ItemStack, par2World);
-
+            if (mapData == null) {
+                return;
+            }
             if (par3Entity instanceof EntityPlayer player) {
                 mapData.updateVisiblePlayers(player, par1ItemStack);
 
@@ -213,7 +225,7 @@ public class ItemTFMazeMap extends ItemMap {
                 }
             }
 
-            if (isActiveItem) {
+            if (isActiveItem && par3Entity instanceof EntityPlayer) {
                 this.updateMapData(par2World, par3Entity, mapData);
             }
         }
@@ -224,6 +236,10 @@ public class ItemTFMazeMap extends ItemMap {
      */
     @Override
     public void onCreated(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer) {
+        // The client must not allocate its own persistent map ID.
+        if (par2World.isRemote || par3EntityPlayer == null) {
+            return;
+        }
         par1ItemStack.setItemDamage(par2World.getUniqueDataId(STR_ID));
         String mapName = STR_ID + "_" + par1ItemStack.getItemDamage();
         TFMazeMapData mapData = new TFMazeMapData(mapName);
@@ -254,7 +270,7 @@ public class ItemTFMazeMap extends ItemMap {
 
     /**
      * returns null if no update is to be sent
-     * 
+     *
      * We have re-written this to provide a Packet250CustomPayload to be sent, since the map data packet is only for the
      * actual map map.
      */
@@ -263,9 +279,13 @@ public class ItemTFMazeMap extends ItemMap {
         // System.out.println("Making maze map packet");
         // System.out.println("yCenter = " + this.getMapData(itemStack, world).yCenter);
 
-        byte[] mapBytes = this.getMapData(itemStack, world).getUpdatePacketData(itemStack, world, player);
+        TFMazeMapData mapData = this.getMapData(itemStack, world);
+        if (mapData == null) {
+            return null;
+        }
+        byte[] mapBytes = mapData.getUpdatePacketData(itemStack, world, player);
 
-        if (mapBytes == null) {
+        if (mapBytes == null || mapBytes.length == 0) {
             return null;
         } else {
             short uniqueID = (short) itemStack.getItemDamage();
