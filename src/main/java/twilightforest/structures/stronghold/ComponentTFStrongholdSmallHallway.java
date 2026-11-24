@@ -9,10 +9,7 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 public class ComponentTFStrongholdSmallHallway extends StructureTFStrongholdComponent {
 
-    public ComponentTFStrongholdSmallHallway() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdSmallHallway() {}
 
     public ComponentTFStrongholdSmallHallway(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
