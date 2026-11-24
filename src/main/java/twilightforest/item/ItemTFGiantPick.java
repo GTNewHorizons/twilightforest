@@ -24,7 +24,7 @@ import twilightforest.block.TFBlocks;
 
 public class ItemTFGiantPick extends ItemPickaxe {
 
-    private float damageVsEntity;
+    private final float damageVsEntity;
     private GiantItemIcon giantIcon;
 
     protected ItemTFGiantPick(Item.ToolMaterial par2EnumToolMaterial) {
@@ -36,7 +36,7 @@ public class ItemTFGiantPick extends ItemPickaxe {
 
     /**
      * Return an item rarity from EnumRarity
-     * 
+     *
      * This is automatically rare
      */
     @Override
@@ -50,8 +50,8 @@ public class ItemTFGiantPick extends ItemPickaxe {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with knightmetal ingots
-        return par2ItemStack.getItem() == TFItems.knightMetal ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return par2ItemStack != null && (par2ItemStack.getItem() == TFItems.knightMetal
+                || super.getIsRepairable(par1ItemStack, par2ItemStack));
     }
 
     /**
@@ -69,18 +69,14 @@ public class ItemTFGiantPick extends ItemPickaxe {
      * Return the correct icon for rendering based on the supplied ItemStack and render pass.
      *
      * Defers to {@link #getIconFromDamageForRenderPass(int, int)}
-     * 
+     *
      * @param stack to render for
      * @param pass  the multi-render pass
      * @return the icon
      */
     public IIcon getIcon(ItemStack stack, int pass) {
         // render pass 1 gives the giant Icon
-        if (pass == -1) {
-            return this.giantIcon;
-        } else {
-            return super.getIcon(stack, pass);
-        }
+        return pass == -1 && this.giantIcon != null ? this.giantIcon : super.getIcon(stack, pass);
     }
 
     /**
@@ -97,29 +93,19 @@ public class ItemTFGiantPick extends ItemPickaxe {
     /**
      * Gets a map of item attribute modifiers, used by ItemSword to increase hit damage.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Multimap getItemAttributeModifiers() {
-        Multimap multimap = super.getItemAttributeModifiers();
-        // remove old damage value
-        multimap.removeAll(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName());
-        // add new one
-        multimap.put(
-                SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(),
-                new AttributeModifier(field_111210_e, "Tool modifier", this.damageVsEntity, 0));
-        return multimap;
+    @Override
+    public Multimap<String, AttributeModifier> getItemAttributeModifiers() {
+        Multimap<String, AttributeModifier> modifiers = super.getItemAttributeModifiers();
+        String damageAttribute = SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName();
+        modifiers.removeAll(damageAttribute);
+        modifiers.put(damageAttribute, new AttributeModifier(field_111210_e, "Tool modifier", this.damageVsEntity, 0));
+        return modifiers;
     }
 
     @Override
-    public float func_150893_a(ItemStack par1ItemStack, Block par2Block) {
-        float strVsBlock = super.func_150893_a(par1ItemStack, par2Block);
-        // extra 64X strength vs giant obsidian
-        strVsBlock *= (par2Block == TFBlocks.giantObsidian) ? 64 : 1;
-        // 64x strength vs giant blocks
-        return isGiantBlock(par2Block) ? strVsBlock * 64 : strVsBlock;
-    }
-
-    private boolean isGiantBlock(Block block) {
-        return block instanceof BlockTFGiantBlock;
+    public float func_150893_a(ItemStack stack, Block block) {
+        float speed = super.func_150893_a(stack, block);
+        return (block == TFBlocks.giantObsidian || block instanceof BlockTFGiantBlock) ? speed * 64.0F : speed;
     }
 
 }

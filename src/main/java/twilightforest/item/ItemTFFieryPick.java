@@ -101,7 +101,7 @@ public class ItemTFFieryPick extends ItemPickaxe {
 
     /**
      * Return an item rarity from EnumRarity
-     * 
+     *
      * This is automatically rare
      */
     @Override
@@ -125,15 +125,15 @@ public class ItemTFFieryPick extends ItemPickaxe {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with fiery ingots
-        return par2ItemStack.getItem() == TFItems.fieryIngot ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return par2ItemStack != null && (par2ItemStack.getItem() == TFItems.fieryIngot
+                || super.getIsRepairable(par1ItemStack, par2ItemStack));
     }
 
     /**
      * Returns if the item (tool) can harvest results from the block type. (canHarvestBlock)
      */
     public boolean func_150897_b(Block block) {
-        return block == Blocks.obsidian ? true : super.func_150897_b(block);
+        return block == Blocks.obsidian || super.func_150897_b(block);
     }
 
     /**

@@ -14,6 +14,9 @@ import twilightforest.block.TFBlocks;
 
 public class TileEntityTFFlameJet extends TileEntity {
 
+    private static final int ACTIVE_DURATION = 60;
+    private static final int DAMAGE_INTERVAL = 5;
+
     int counter = 0;
     private int nextMeta;
 
@@ -31,7 +34,7 @@ public class TileEntityTFFlameJet extends TileEntity {
      */
     @Override
     public void updateEntity() {
-        if (++counter > 60) {
+        if (++counter > ACTIVE_DURATION) {
             counter = 0;
             // idle again
             if (!worldObj.isRemote && worldObj.getBlock(this.xCoord, this.yCoord, this.zCoord) == TFBlocks.fireJet) {
@@ -47,15 +50,7 @@ public class TileEntityTFFlameJet extends TileEntity {
                     0.0D,
                     0.0D,
                     0.0D);
-            TwilightForestMod.proxy.spawnParticle(
-                    this.worldObj,
-                    "largeflame",
-                    this.xCoord + 0.5,
-                    this.yCoord + 1.0,
-                    this.zCoord + 0.5,
-                    0.0D,
-                    0.5D,
-                    0.0D);
+            spawnFlameParticle(0.5D, 0.5D, 0.0D, 0.0D);
             // TwilightForestMod.proxy.spawnParticle("largeflame", this.xCoord + 0.5, this.yCoord + 1.0, this.zCoord +
             // 0.5,
             // Math.cos(counter / 4.0) * 0.2, 0.35D, Math.sin(counter / 4.0) * 0.2);
@@ -69,42 +64,10 @@ public class TileEntityTFFlameJet extends TileEntity {
             // Math.PI), this.yCoord + 1.0, this.zCoord + 0.5 + Math.sin(counter / 4.0 + Math.PI),
             // Math.sin(counter / 4.0 + Math.PI) * 0.05, 0.35D, Math.cos(counter / 4.0 + Math.PI) * 0.05);
 
-            TwilightForestMod.proxy.spawnParticle(
-                    this.worldObj,
-                    "largeflame",
-                    this.xCoord - 0.5,
-                    this.yCoord + 1.0,
-                    this.zCoord + 0.5,
-                    0.05D,
-                    0.5D,
-                    0.0D);
-            TwilightForestMod.proxy.spawnParticle(
-                    this.worldObj,
-                    "largeflame",
-                    this.xCoord + 0.5,
-                    this.yCoord + 1.0,
-                    this.zCoord - 0.5,
-                    0.0D,
-                    0.5D,
-                    0.05D);
-            TwilightForestMod.proxy.spawnParticle(
-                    this.worldObj,
-                    "largeflame",
-                    this.xCoord + 1.5,
-                    this.yCoord + 1.0,
-                    this.zCoord + 0.5,
-                    -0.05D,
-                    0.5D,
-                    0.0D);
-            TwilightForestMod.proxy.spawnParticle(
-                    this.worldObj,
-                    "largeflame",
-                    this.xCoord + 0.5,
-                    this.yCoord + 1.0,
-                    this.zCoord + 1.5,
-                    0.0D,
-                    0.5D,
-                    -0.05D);
+            spawnFlameParticle(-0.5D, 0.5D, 0.05D, 0.0D);
+            spawnFlameParticle(0.5D, -0.5D, 0.0D, 0.05D);
+            spawnFlameParticle(1.5D, 0.5D, -0.05D, 0.0D);
+            spawnFlameParticle(0.5D, 1.5D, 0.0D, -0.05D);
 
         }
 
@@ -130,7 +93,7 @@ public class TileEntityTFFlameJet extends TileEntity {
 
         // actual fire effects
         if (!worldObj.isRemote) {
-            if (counter % 5 == 0) {
+            if (counter % DAMAGE_INTERVAL == 0) {
                 // find entities in the area of effect
                 List<Entity> entitiesInRange = worldObj.getEntitiesWithinAABB(
                         Entity.class,
@@ -152,9 +115,22 @@ public class TileEntityTFFlameJet extends TileEntity {
         }
     }
 
+    private void spawnFlameParticle(double offsetX, double offsetZ, double motionX, double motionZ) {
+        TwilightForestMod.proxy.spawnParticle(
+                worldObj,
+                "largeflame",
+                xCoord + offsetX,
+                yCoord + 1.0D,
+                zCoord + offsetZ,
+                motionX,
+                0.5D,
+                motionZ);
+    }
+
     /**
      * Reads a tile entity from NBT.
      */
+    @Override
     public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
         super.readFromNBT(par1NBTTagCompound);
         this.nextMeta = par1NBTTagCompound.getInteger("NextMeta");
@@ -163,6 +139,7 @@ public class TileEntityTFFlameJet extends TileEntity {
     /**
      * Writes a tile entity to NBT.
      */
+    @Override
     public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
         super.writeToNBT(par1NBTTagCompound);
         par1NBTTagCompound.setInteger("NextMeta", this.nextMeta);

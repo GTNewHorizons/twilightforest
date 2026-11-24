@@ -55,7 +55,7 @@ public class ItemTFTrophy extends ItemArmor {
 
     /**
      * Return an item rarity from EnumRarity
-     * 
+     *
      * This is automatically uncommon
      */
     @Override
@@ -200,11 +200,11 @@ public class ItemTFTrophy extends ItemArmor {
 
     /**
      * Override this method to have an item handle its own armor rendering.
-     * 
+     *
      * @param entityLiving The entity wearing the armor
      * @param itemStack    The itemStack to render the model of
      * @param armorSlot    0=head, 1=torso, 2=legs, 3=feet
-     * 
+     *
      * @return A ModelBiped to render instead of the default
      */
     @SideOnly(Side.CLIENT)

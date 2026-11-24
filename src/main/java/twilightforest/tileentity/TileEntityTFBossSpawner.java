@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.EnumDifficulty;
@@ -13,20 +14,31 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
     protected String mobID = "Pig";
     protected int counter;
 
-    protected Entity displayCreature = null;
-
-    public TileEntityTFBossSpawner() {}
+    protected Entity displayCreature;
 
     /**
      * Is there a player in our detection range?
      */
     public boolean anyPlayerInRange() {
-        return worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, getRange()) != null;
+        return isPlayerInRange(getRange(), Integer.MAX_VALUE);
+    }
+
+    // keep the Y restriction separate from the distance check used by each boss
+    protected final boolean isPlayerInRange(double range, int maximumBelowSpawner) {
+        double rangeSq = range * range;
+        for (Object entry : worldObj.playerEntities) {
+            if (entry instanceof EntityPlayer player && player.isEntityAlive()
+                    && player.posY > (double) yCoord - maximumBelowSpawner
+                    && player.getDistanceSq(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D) < rangeSq) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Determines if this TileEntity requires update calls.
-     * 
+     *
      * @return True if you want updateEntity() to be called, false if not
      */
     @Override
@@ -53,8 +65,7 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
             } else {
                 // System.out.println("Thinking about boss!");
 
-                if (worldObj.difficultySetting != EnumDifficulty.PEACEFUL) {
-                    spawnMyBoss();
+                if (worldObj.difficultySetting != EnumDifficulty.PEACEFUL && spawnMyBoss()) {
 
                     // destroy block
                     worldObj.setBlock(xCoord, yCoord, zCoord, Blocks.air, 0, 2);
@@ -69,9 +80,13 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
     /**
      * Spawn the boss
      */
-    protected void spawnMyBoss() {
+    protected boolean spawnMyBoss() {
         // spawn creature
         EntityLiving myCreature = makeMyCreature();
+
+        if (myCreature == null) {
+            return false;
+        }
 
         double rx = xCoord + 0.5D;
         double ry = yCoord + 0.5D;
@@ -82,7 +97,7 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
         initializeCreature(myCreature);
 
         // spawn it
-        worldObj.spawnEntityInWorld(myCreature);
+        return worldObj.spawnEntityInWorld(myCreature);
     }
 
     /**
@@ -100,8 +115,8 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
      * Any post-creation initialization goes here
      */
     protected void initializeCreature(EntityLiving myCreature) {
-        if (myCreature instanceof EntityCreature) {
-            ((EntityCreature) myCreature).setHomeArea(xCoord, yCoord, zCoord, 46);
+        if (myCreature instanceof EntityCreature creature) {
+            creature.setHomeArea(xCoord, yCoord, zCoord, 46);
         }
     }
 
@@ -116,6 +131,7 @@ public abstract class TileEntityTFBossSpawner extends TileEntity {
      * Create a copy of what we spawn
      */
     protected EntityLiving makeMyCreature() {
-        return (EntityLiving) EntityList.createEntityByName(mobID, worldObj);
+        Entity creature = EntityList.createEntityByName(mobID, worldObj);
+        return creature instanceof EntityLiving ? (EntityLiving) creature : null;
     }
 }

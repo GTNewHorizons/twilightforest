@@ -13,13 +13,15 @@ import twilightforest.structures.StructureTFComponent;
 
 /**
  * A blob of leaves used to make trees
- * 
+ *
  * @author Ben
  *
  */
 public class ComponentTFLeafSphere extends StructureTFComponent {
 
-    int radius; // radius
+    private static final int LEAF_UPDATE_FLAGS = 2;
+
+    int radius;
 
     public ComponentTFLeafSphere() {
         super();
@@ -27,7 +29,7 @@ public class ComponentTFLeafSphere extends StructureTFComponent {
 
     /**
      * Make a blob of leaves
-     * 
+     *
      * @param index
      * @param x
      * @param y
@@ -61,7 +63,8 @@ public class ComponentTFLeafSphere extends StructureTFComponent {
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
 
-        this.radius = par1NBTTagCompound.getInteger("leafRadius");
+        this.radius = par1NBTTagCompound.hasKey("leafRadius") ? par1NBTTagCompound.getInteger("leafRadius")
+                : (boundingBox.maxX - boundingBox.minX) / 2;
     }
 
     /**
@@ -69,56 +72,26 @@ public class ComponentTFLeafSphere extends StructureTFComponent {
      */
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-
-        int sx = radius;
-        int sy = radius;
-        int sz = radius;
-
-        // then trace out a quadrant
-        for (byte dx = 0; dx <= radius; dx++) {
-            for (byte dy = 0; dy <= radius; dy++) {
-                for (byte dz = 0; dz <= radius; dz++) {
-                    // determine how far we are from the center.
-                    byte dist = 0;
-
-                    if (dx >= dy && dx >= dz) {
-                        dist = (byte) (dx + (byte) ((Math.max(dy, dz) * 0.5) + (Math.min(dy, dz) * 0.25)));
-                    } else if (dy >= dx && dy >= dz) {
-                        dist = (byte) (dy + (byte) ((Math.max(dx, dz) * 0.5) + (Math.min(dx, dz) * 0.25)));
-                    } else {
-                        dist = (byte) (dz + (byte) ((Math.max(dx, dy) * 0.5) + (Math.min(dx, dy) * 0.25)));
-                    }
-
-                    // if we're inside the blob, fill it
-                    if (dist <= radius) {
-                        // do eight at a time for easiness!
-                        placeBlockIfEmpty(world, TFBlocks.leaves, 0, sx + dx, sy + dy, sz + dz, sbb);
-                        placeBlockIfEmpty(world, TFBlocks.leaves, 0, sx + dx, sy + dy, sz - dz, sbb);
-                        placeBlockIfEmpty(world, TFBlocks.leaves, 0, sx - dx, sy + dy, sz + dz, sbb);
-                        placeBlockIfEmpty(world, TFBlocks.leaves, 0, sx - dx, sy + dy, sz - dz, sbb);
-                        placeBlockIfEmpty(world, TFBlocks.leaves, 0, sx + dx, sy - dy, sz + dz, sbb);
-                        placeBlockIfEmpty(world, TFBlocks.leaves, 0, sx + dx, sy - dy, sz - dz, sbb);
-                        placeBlockIfEmpty(world, TFBlocks.leaves, 0, sx - dx, sy - dy, sz + dz, sbb);
-                        placeBlockIfEmpty(world, TFBlocks.leaves, 0, sx - dx, sy - dy, sz - dz, sbb);
-
-                    }
-                }
-            }
+        for (int[] offset : HollowTreeBlobGeometry.getOffsets(radius)) {
+            placeBlockIfEmpty(
+                    world,
+                    TFBlocks.leaves,
+                    0,
+                    radius + offset[0],
+                    radius + offset[1],
+                    radius + offset[2],
+                    sbb);
         }
-
         return true;
     }
 
-    /**
-     * Puts a block only if the block that's there is air.
-     * 
-     * TODO: This could be more efficient by combining the duplicate logic of the getBlockAtCurrentPosition and
-     * placeBlockAtCurrentPosition functions.
-     */
-    protected void placeBlockIfEmpty(World world, Block blockID, int meta, int x, int y, int z,
+    protected void placeBlockIfEmpty(World world, Block block, int meta, int x, int y, int z,
             StructureBoundingBox sbb) {
-        if (getBlockAtCurrentPosition(world, x, y, z, sbb) == Blocks.air) {
-            placeBlockAtCurrentPosition(world, blockID, meta, x, y, z, sbb);
+        int worldX = getXWithOffset(x, z);
+        int worldY = getYWithOffset(y);
+        int worldZ = getZWithOffset(x, z);
+        if (sbb.isVecInside(worldX, worldY, worldZ) && world.getBlock(worldX, worldY, worldZ) == Blocks.air) {
+            world.setBlock(worldX, worldY, worldZ, block, meta, LEAF_UPDATE_FLAGS);
         }
     }
 

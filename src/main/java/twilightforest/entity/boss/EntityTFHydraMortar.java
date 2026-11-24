@@ -1,6 +1,5 @@
 package twilightforest.entity.boss;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -8,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -44,7 +44,7 @@ public class EntityTFHydraMortar extends EntityThrowable {
         super.onUpdate();
 
         this.func_145771_j(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ); // push out of
-                                                                                                          // block
+        // block
 
         if (this.onGround) {
             if (!worldObj.isRemote) {
@@ -55,7 +55,7 @@ public class EntityTFHydraMortar extends EntityThrowable {
             }
 
             // eventually explode
-            if (this.fuse-- <= 0) {
+            if (!this.worldObj.isRemote && --this.fuse <= 0) {
                 detonate();
             }
 
@@ -74,6 +74,9 @@ public class EntityTFHydraMortar extends EntityThrowable {
      */
     @Override
     protected void onImpact(MovingObjectPosition mop) {
+        if (this.worldObj.isRemote || this.isDead) {
+            return;
+        }
         if (mop.entityHit == null && !megaBlast) {
             // we hit the ground
             this.motionY = 0;
@@ -99,6 +102,9 @@ public class EntityTFHydraMortar extends EntityThrowable {
     }
 
     protected void detonate() {
+        if (this.worldObj.isRemote || this.isDead) {
+            return;
+        }
         // this.worldObj.playAuxSFX(2004, (int)Math.round(this.posX), (int)Math.round(this.posY),
         // (int)Math.round(this.posZ), 32764);
 
@@ -106,13 +112,13 @@ public class EntityTFHydraMortar extends EntityThrowable {
         // true);
 
         float explosionPower = megaBlast ? 4.0F : 0.1F;
-        this.worldObj.newExplosion(this, this.posX, this.posY, this.posZ, explosionPower, true, true);
+        boolean canGrief = this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing");
+        this.worldObj.newExplosion(this, this.posX, this.posY, this.posZ, explosionPower, true, canGrief);
 
         if (!worldObj.isRemote) {
             // damage nearby things
-            List<Entity> nearbyList = new ArrayList<>(
-                    this.worldObj
-                            .getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(1.0D, 1.0D, 1.0D)));
+            List<Entity> nearbyList = this.worldObj
+                    .getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(1.0D, 1.0D, 1.0D));
 
             for (Entity nearby : nearbyList) {
                 if (nearby.attackEntityFrom(DamageSource.causeFireballDamage(null, this.getThrower()), DIRECT_DAMAGE)
@@ -132,13 +138,16 @@ public class EntityTFHydraMortar extends EntityThrowable {
     public boolean attackEntityFrom(DamageSource damagesource, float i) {
         // System.out.println("Hydra mortar being attacked!");
 
+        if (this.worldObj.isRemote || this.isDead) {
+            return false;
+        }
         setBeenAttacked();
-        if (damagesource.getEntity() != null && !this.worldObj.isRemote) {
+        if (damagesource.getEntity() != null) {
             Vec3 vec3d = damagesource.getEntity().getLookVec();
             if (vec3d != null) {
                 this.setThrowableHeading(vec3d.xCoord, vec3d.yCoord + 1, vec3d.zCoord, 1.5F, 0.1F); // reflect faster
-                                                                                                    // and more
-                                                                                                    // accurately
+                // and more
+                // accurately
                 this.onGround = false;
                 this.fuse += 20;
 
@@ -162,6 +171,20 @@ public class EntityTFHydraMortar extends EntityThrowable {
         } else {
             return super.getThrower();
         }
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
+        this.fuse = nbt.hasKey("Fuse") ? Math.max(1, nbt.getInteger("Fuse")) : 80;
+        this.megaBlast = nbt.getBoolean("MegaBlast");
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound nbt) {
+        super.writeEntityToNBT(nbt);
+        nbt.setInteger("Fuse", this.fuse);
+        nbt.setBoolean("MegaBlast", this.megaBlast);
     }
 
     /**

@@ -11,12 +11,11 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 public class ComponentTFStrongholdBalconyRoom extends StructureTFStrongholdComponent {
 
+    private static final String NBT_ENTER_BOTTOM = "enterBottom";
+
     boolean enterBottom;
 
-    public ComponentTFStrongholdBalconyRoom() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdBalconyRoom() {}
 
     public ComponentTFStrongholdBalconyRoom(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -29,7 +28,7 @@ public class ComponentTFStrongholdBalconyRoom extends StructureTFStrongholdCompo
     protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
         super.func_143012_a(par1NBTTagCompound);
 
-        par1NBTTagCompound.setBoolean("enterBottom", this.enterBottom);
+        par1NBTTagCompound.setBoolean(NBT_ENTER_BOTTOM, this.enterBottom);
     }
 
     /**
@@ -38,7 +37,7 @@ public class ComponentTFStrongholdBalconyRoom extends StructureTFStrongholdCompo
     @Override
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
-        this.enterBottom = par1NBTTagCompound.getBoolean("enterBottom");
+        this.enterBottom = par1NBTTagCompound.getBoolean(NBT_ENTER_BOTTOM);
     }
 
     /**
@@ -132,34 +131,26 @@ public class ComponentTFStrongholdBalconyRoom extends StructureTFStrongholdCompo
 
         this.fillBlocksRotated(world, sbb, 13, 1, 4, 13, 12, 4, deco.pillarID, deco.pillarMeta, rotation);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(3 + rotation), 13, 1, 5, rotation, sbb);
-        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(0 + rotation), 12, 1, 4, rotation, sbb);
+        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(rotation), 12, 1, 4, rotation, sbb);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(3 + rotation) + 4, 13, 5, 5, rotation, sbb);
-        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(0 + rotation) + 4, 12, 5, 4, rotation, sbb);
+        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(rotation) + 4, 12, 5, 4, rotation, sbb);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(3 + rotation) + 4, 13, 12, 5, rotation, sbb);
-        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(0 + rotation) + 4, 12, 12, 4, rotation, sbb);
+        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(rotation) + 4, 12, 12, 4, rotation, sbb);
 
         this.fillBlocksRotated(world, sbb, 13, 1, 8, 13, 12, 8, deco.pillarID, deco.pillarMeta, rotation);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(3 + rotation), 13, 1, 9, rotation, sbb);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(1 + rotation), 13, 1, 7, rotation, sbb);
-        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(0 + rotation), 12, 1, 8, rotation, sbb);
+        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(rotation), 12, 1, 8, rotation, sbb);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(3 + rotation) + 4, 13, 5, 9, rotation, sbb);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(1 + rotation) + 4, 13, 5, 7, rotation, sbb);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(3 + rotation) + 4, 13, 12, 9, rotation, sbb);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(1 + rotation) + 4, 13, 12, 7, rotation, sbb);
-        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(0 + rotation) + 4, 12, 12, 8, rotation, sbb);
+        this.placeBlockRotated(world, deco.stairID, this.getStairMeta(rotation) + 4, 12, 12, 8, rotation, sbb);
 
         for (int y = 1; y < 8; y++) {
             for (int z = 5; z < 8; z++) {
                 this.placeBlockRotated(world, Blocks.air, 0, y + 6, y + 1, z, rotation, sbb);
-                this.placeBlockRotated(
-                        world,
-                        deco.stairID,
-                        this.getStairMeta(0 + rotation),
-                        y + 6,
-                        y,
-                        z,
-                        rotation,
-                        sbb);
+                this.placeBlockRotated(world, deco.stairID, this.getStairMeta(rotation), y + 6, y, z, rotation, sbb);
                 this.placeBlockRotated(world, deco.blockID, deco.blockMeta, y + 6, y - 1, z, rotation, sbb);
             }
         }

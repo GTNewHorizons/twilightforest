@@ -126,6 +126,7 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
         super.writeEntityToNBT(par1NBTTagCompound);
         par1NBTTagCompound.setBoolean("hasArmor", this.hasArmor());
         par1NBTTagCompound.setBoolean("hasShield", this.hasShield());
+        par1NBTTagCompound.setInteger("shieldHits", this.shieldHits);
     }
 
     /**
@@ -136,6 +137,7 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
         super.readEntityFromNBT(par1NBTTagCompound);
         this.setHasArmor(par1NBTTagCompound.getBoolean("hasArmor"));
         this.setHasShield(par1NBTTagCompound.getBoolean("hasShield"));
+        this.shieldHits = Math.max(0, par1NBTTagCompound.getInteger("shieldHits"));
     }
 
     /**
@@ -179,17 +181,19 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
         double py = this.boundingBox.minY - 0.75;
         double pz = this.posZ + vector.zCoord * dist;
 
-        for (int i = 0; i < 50; i++) {
-            // worldObj.spawnParticle("crit", px + (rand.nextFloat() - rand.nextFloat()) * 0.5F, py +
-            // rand.nextFloat(), pz + (rand.nextFloat() - rand.nextFloat()) * 0.5F, 0, 0.5, 0);
-            worldObj.spawnParticle(
-                    "largesmoke",
-                    px,
-                    py,
-                    pz,
-                    (rand.nextFloat() - rand.nextFloat()) * 0.25F,
-                    0,
-                    (rand.nextFloat() - rand.nextFloat()) * 0.25F);
+        if (this.worldObj.isRemote) {
+            for (int i = 0; i < 50; i++) {
+                // worldObj.spawnParticle("crit", px + (rand.nextFloat() - rand.nextFloat()) * 0.5F, py +
+                // rand.nextFloat(), pz + (rand.nextFloat() - rand.nextFloat()) * 0.5F, 0, 0.5, 0);
+                worldObj.spawnParticle(
+                        "largesmoke",
+                        px,
+                        py,
+                        pz,
+                        (rand.nextFloat() - rand.nextFloat()) * 0.25F,
+                        0,
+                        (rand.nextFloat() - rand.nextFloat()) * 0.25F);
+            }
         }
 
         // damage things in front that aren't us or our "mount"
@@ -198,11 +202,12 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
         AxisAlignedBB spearBB = AxisAlignedBB
                 .getBoundingBox(px - radius, py - radius, pz - radius, px + radius, py + radius, pz + radius);
 
-        List<Entity> inBox = worldObj.getEntitiesWithinAABB(Entity.class, spearBB);
-
-        for (Entity entity : inBox) {
-            if (this.ridingEntity != null && entity != this.ridingEntity && entity != this) {
-                super.attackEntityAsMob(entity);
+        if (!this.worldObj.isRemote) {
+            List<Entity> inBox = worldObj.getEntitiesWithinAABB(Entity.class, spearBB);
+            for (Entity entity : inBox) {
+                if (entity != this.ridingEntity && entity != this && entity instanceof EntityLivingBase) {
+                    super.attackEntityAsMob(entity);
+                }
             }
         }
 
@@ -286,14 +291,7 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
         }
 
         // check the angle of attack, if applicable
-        Entity attacker = null;
-        if (par1DamageSource.getEntity() != null) {
-            attacker = par1DamageSource.getEntity();
-        }
-
-        if (par1DamageSource.getEntity() != null) {
-            attacker = par1DamageSource.getEntity();
-        }
+        Entity attacker = par1DamageSource.getEntity();
 
         if (attacker != null) {
             // determine angle
@@ -302,12 +300,12 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
             double dz = this.posZ - attacker.posZ;
             float angle = (float) ((Math.atan2(dz, dx) * 180D) / Math.PI) - 90F;
 
-            float difference = MathHelper.abs((this.renderYawOffset - angle) % 360);
+            float difference = MathHelper.abs(MathHelper.wrapAngleTo180_float(this.renderYawOffset - angle));
 
             // System.out.println("Difference in angle of approach is " + difference);
 
             // if we have a shield, the shield will take the damage instead
-            if (this.hasShield() && difference > 150 && difference < 230) {
+            if (this.hasShield() && difference > 150) {
                 if (takeHitOnShield(par1DamageSource, damageAmount)) {
                     return false;
                 }
@@ -319,7 +317,7 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
             }
 
             // break armor?
-            if (this.hasArmor() && (difference > 300 || difference < 60)) {
+            if (this.hasArmor() && (difference < 60)) {
                 breakArmor();
             }
         }
@@ -340,6 +338,9 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
      * Break our armor
      */
     public void breakArmor() {
+        if (!this.hasArmor() || this.worldObj.isRemote) {
+            return;
+        }
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
@@ -351,7 +352,9 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
      * Break our shield
      */
     public void breakShield() {
-
+        if (!this.hasShield() || this.worldObj.isRemote) {
+            return;
+        }
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
@@ -403,6 +406,9 @@ public class EntityTFGoblinKnightUpper extends EntityMob {
         // MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ), 0);
         this.worldObj.playSoundAtEntity(this, "mob.zombie.metal", 0.25F, 0.25F);
 
+        if (this.worldObj.isRemote) {
+            return;
+        }
         this.shieldHits++;
 
         if (!worldObj.isRemote && this.shieldHits >= 3) {

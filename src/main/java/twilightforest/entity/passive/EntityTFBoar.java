@@ -13,7 +13,6 @@ public class EntityTFBoar extends EntityPig {
 
     public EntityTFBoar(World world) {
         super(world);
-        // texture = TwilightForestMod.MODEL_DIR + "wildboar.png";
         setSize(0.9F, 0.9F);
     }
 
@@ -36,9 +35,9 @@ public class EntityTFBoar extends EntityPig {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        if (par1DamageSource.getEntity() instanceof EntityPlayer player
+                && player.dimension == TwilightForestMod.dimensionID) {
+            player.triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 

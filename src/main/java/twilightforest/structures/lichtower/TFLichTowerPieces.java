@@ -2,8 +2,11 @@ package twilightforest.structures.lichtower;
 
 import net.minecraft.world.gen.structure.MapGenStructureIO;
 
-public class TFLichTowerPieces {
+public final class TFLichTowerPieces {
 
+    private TFLichTowerPieces() {}
+
+    // these IDs are serialised into existing world saves
     public static void registerPieces() {
         MapGenStructureIO.func_143031_a(ComponentTFTowerBeard.class, "TFLTBea");
         MapGenStructureIO.func_143031_a(ComponentTFTowerBeardAttached.class, "TFLTBA");

@@ -1,5 +1,7 @@
 package twilightforest.item;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
@@ -9,74 +11,85 @@ import net.minecraft.item.ItemLilyPad;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.event.ForgeEventFactory;
 
 import twilightforest.block.TFBlocks;
 
 public class ItemBlockTFHugeLilyPad extends ItemLilyPad {
 
-    Random rand = new Random();
+    private static final long ORIENTATION_SEED = 8890919293L;
+    private static final int[][] OFFSETS = { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 } };
 
     public ItemBlockTFHugeLilyPad(Block block) {
         super(block);
     }
 
-    /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-     */
-    public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player) {
-        MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(world, player, true);
+    @Override
+    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+        MovingObjectPosition target = getMovingObjectPositionFromPlayer(world, player, true);
+        if (target == null || target.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK || stack.stackSize <= 0) {
+            return stack;
+        }
 
-        if (movingobjectposition == null) {
-            return itemStack;
-        } else {
-            if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-                int x = movingobjectposition.blockX;
-                int y = movingobjectposition.blockY;
-                int z = movingobjectposition.blockZ;
+        int x = target.blockX & ~1;
+        int y = target.blockY;
+        int z = target.blockZ & ~1;
 
-                // 2x2 lily pads go in a larger grid
-                int bx = (x >> 1) << 1;
-                int by = y;
-                int bz = (z >> 1) << 1;
-
-                if (this.canPlacePadOn(itemStack, world, player, bx, by, bz)
-                        && this.canPlacePadOn(itemStack, world, player, bx + 1, by, bz)
-                        && this.canPlacePadOn(itemStack, world, player, bx, by, bz + 1)
-                        && this.canPlacePadOn(itemStack, world, player, bx + 1, by, bz + 1)) {
-
-                    // this seems like a difficult way to generate 2 pseudorandom bits
-                    rand.setSeed(8890919293L);
-                    rand.setSeed((bx * rand.nextLong()) ^ (bz * rand.nextLong()) ^ 8890919293L);
-                    int orient = rand.nextInt(4) << 2;
-
-                    world.setBlock(bx, by + 1, bz, TFBlocks.hugeLilyPad, 0 | orient, 2);
-                    world.setBlock(bx + 1, by + 1, bz, TFBlocks.hugeLilyPad, 1 | orient, 2);
-                    world.setBlock(bx + 1, by + 1, bz + 1, TFBlocks.hugeLilyPad, 2 | orient, 2);
-                    world.setBlock(bx, by + 1, bz + 1, TFBlocks.hugeLilyPad, 3 | orient, 2);
-
-                    if (!player.capabilities.isCreativeMode) {
-                        --itemStack.stackSize;
-                    }
-
-                }
+        for (int[] offset : OFFSETS) {
+            if (!canPlacePadOn(stack, world, player, x + offset[0], y, z + offset[1])) {
+                return stack;
             }
+        }
 
-            return itemStack;
+        // only the server commits the 4 block transaction, clients receive normal block updates
+        if (world.isRemote) {
+            return stack;
+        }
+
+        List<BlockSnapshot> snapshots = new ArrayList<>(OFFSETS.length);
+        for (int[] offset : OFFSETS) {
+            snapshots.add(BlockSnapshot.getBlockSnapshot(world, x + offset[0], y + 1, z + offset[1]));
+        }
+
+        int orientation = getOrientation(x, z);
+        for (int i = 0; i < OFFSETS.length; i++) {
+            int[] offset = OFFSETS[i];
+            if (!world.setBlock(x + offset[0], y + 1, z + offset[1], TFBlocks.hugeLilyPad, orientation | i, 2)) {
+                restoreSnapshots(snapshots);
+                return stack;
+            }
+        }
+
+        if (ForgeEventFactory.onPlayerMultiBlockPlace(player, snapshots, ForgeDirection.UP).isCanceled()) {
+            restoreSnapshots(snapshots);
+            return stack;
+        }
+
+        if (!player.capabilities.isCreativeMode) {
+            --stack.stackSize;
+        }
+        return stack;
+    }
+
+    private static int getOrientation(int x, int z) {
+        Random random = new Random(ORIENTATION_SEED);
+        random.setSeed((x * random.nextLong()) ^ (z * random.nextLong()) ^ ORIENTATION_SEED);
+        return random.nextInt(4) << 2;
+    }
+
+    private static void restoreSnapshots(List<BlockSnapshot> snapshots) {
+        for (BlockSnapshot snapshot : snapshots) {
+            snapshot.restore(true, false);
         }
     }
 
-    public boolean canPlacePadOn(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
-        if (!world.canMineBlock(player, x, y, z)) {
-            return false;
-        }
-
-        if (!player.canPlayerEdit(x, y, z, 1, itemStack)) {
-            return false;
-        }
-
-        return world.getBlock(x, y, z).getMaterial() == Material.water && world.getBlockMetadata(x, y, z) == 0
+    public boolean canPlacePadOn(ItemStack stack, World world, EntityPlayer player, int x, int y, int z) {
+        return world.canMineBlock(player, x, y, z) && player.canPlayerEdit(x, y, z, 1, stack)
+                && player.canPlayerEdit(x, y + 1, z, 1, stack)
+                && world.getBlock(x, y, z).getMaterial() == Material.water
+                && world.getBlockMetadata(x, y, z) == 0
                 && world.isAirBlock(x, y + 1, z);
-
     }
-
 }

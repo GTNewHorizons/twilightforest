@@ -25,38 +25,28 @@ public class EntityTFTinyFirefly extends EntityWeatherEffect {
     public void onUpdate() {
         super.onUpdate();
 
-        if (lifeTime <= 1) {
+        if (--lifeTime <= 0) {
             setDead();
-        } else {
-            lifeTime--;
         }
 
     }
 
     public float getGlowBrightness() {
-        if (lifeTime <= halfLife) {
-            return (float) lifeTime / (float) halfLife;
-        } else {
-            return 1.0f - (((float) lifeTime - halfLife) / halfLife);
+        if (halfLife <= 0) {
+            return 0.0F;
         }
+        float brightness = lifeTime <= halfLife ? (float) lifeTime / halfLife
+                : 1.0F - (float) (lifeTime - halfLife) / halfLife;
+        return Math.max(0.0F, Math.min(1.0F, brightness));
     }
 
     @Override
-    protected void entityInit() {
-        // TODO Auto-generated method stub
-
-    }
+    protected void entityInit() {}
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-        // TODO Auto-generated method stub
-
-    }
+    protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {}
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-        // TODO Auto-generated method stub
-
-    }
+    protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {}
 
 }

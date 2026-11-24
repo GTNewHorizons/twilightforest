@@ -12,12 +12,11 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 public class ComponentTFStrongholdFoundry extends StructureTFStrongholdComponent {
 
+    private static final String NBT_ENTRANCE_LEVEL = "entranceLevel";
+
     int entranceLevel;
 
-    public ComponentTFStrongholdFoundry() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdFoundry() {}
 
     public ComponentTFStrongholdFoundry(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -30,7 +29,7 @@ public class ComponentTFStrongholdFoundry extends StructureTFStrongholdComponent
     protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
         super.func_143012_a(par1NBTTagCompound);
 
-        par1NBTTagCompound.setInteger("entranceLevel", this.entranceLevel);
+        par1NBTTagCompound.setInteger(NBT_ENTRANCE_LEVEL, this.entranceLevel);
     }
 
     /**
@@ -39,7 +38,7 @@ public class ComponentTFStrongholdFoundry extends StructureTFStrongholdComponent
     @Override
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
-        this.entranceLevel = par1NBTTagCompound.getInteger("entranceLevel");
+        this.entranceLevel = par1NBTTagCompound.getInteger(NBT_ENTRANCE_LEVEL);
     }
 
     @Override
@@ -151,52 +150,22 @@ public class ComponentTFStrongholdFoundry extends StructureTFStrongholdComponent
         }
 
         // add some redstone ore
-        for (int i = 0; i < 8; i++) {
-            Block blockID = Blocks.redstone_ore;
-            int blockMeta = 0;
-
-            addOreToMass(world, sbb, massRandom, blockID, blockMeta);
-        }
+        addOrePatches(world, sbb, massRandom, Blocks.redstone_ore, 8);
 
         // add some iron ore
-        for (int i = 0; i < 8; i++) {
-            Block blockID = Blocks.iron_ore;
-            int blockMeta = 0;
-
-            addOreToMass(world, sbb, massRandom, blockID, blockMeta);
-        }
+        addOrePatches(world, sbb, massRandom, Blocks.iron_ore, 8);
 
         // add some gold ore
-        for (int i = 0; i < 6; i++) {
-            Block blockID = Blocks.gold_ore;
-            int blockMeta = 0;
-
-            addOreToMass(world, sbb, massRandom, blockID, blockMeta);
-        }
+        addOrePatches(world, sbb, massRandom, Blocks.gold_ore, 6);
 
         // add some glowstone
-        for (int i = 0; i < 2; i++) {
-            Block blockID = Blocks.glowstone;
-            int blockMeta = 0;
-
-            addOreToMass(world, sbb, massRandom, blockID, blockMeta);
-        }
+        addOrePatches(world, sbb, massRandom, Blocks.glowstone, 2);
 
         // add some emerald ore
-        for (int i = 0; i < 2; i++) {
-            Block blockID = Blocks.emerald_ore;
-            int blockMeta = 0;
-
-            addOreToMass(world, sbb, massRandom, blockID, blockMeta);
-        }
+        addOrePatches(world, sbb, massRandom, Blocks.emerald_ore, 2);
 
         // add some diamond ore
-        for (int i = 0; i < 4; i++) {
-            Block blockID = Blocks.diamond_ore;
-            int blockMeta = 0;
-
-            addOreToMass(world, sbb, massRandom, blockID, blockMeta);
-        }
+        addOrePatches(world, sbb, massRandom, Blocks.diamond_ore, 4);
 
         // doors
         placeDoors(world, rand, sbb);
@@ -207,6 +176,12 @@ public class ComponentTFStrongholdFoundry extends StructureTFStrongholdComponent
     /**
      * Add a block of ore to the mass
      */
+    private void addOrePatches(World world, StructureBoundingBox sbb, Random massRandom, Block block, int count) {
+        for (int i = 0; i < count; i++) {
+            addOreToMass(world, sbb, massRandom, block, 0);
+        }
+    }
+
     private void addOreToMass(World world, StructureBoundingBox sbb, Random massRandom, Block blockID, int blockMeta) {
         for (int i = 0; i < 10; i++) {
             int dx = massRandom.nextInt(9) + 5;

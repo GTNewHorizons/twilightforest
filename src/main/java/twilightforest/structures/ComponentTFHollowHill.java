@@ -16,25 +16,26 @@ import twilightforest.world.TFGenCaveStalactite;
 
 public class ComponentTFHollowHill extends StructureTFComponent {
 
+    private static final int[] STALACTITE_COUNTS = { 0, 128, 256, 512 };
+    private static final int[] SPAWNER_COUNTS = { 0, 1, 4, 9 };
+    private static final int[] TREASURE_COUNTS = { 0, 2, 6, 12 };
+
     int hillSize;
     int radius;
 
-    public ComponentTFHollowHill() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFHollowHill() {}
 
     public ComponentTFHollowHill(World world, Random rand, int i, int size, int x, int y, int z) {
         super(i);
 
-        this.setCoordBaseMode(0);
+        setCoordBaseMode(0);
 
         // get the size of this hill?
-        this.hillSize = size;
-        radius = ((hillSize * 2 + 1) * 8) - 6;
+        hillSize = size;
+        radius = calculateRadius(hillSize);
 
         // can we determine the size here?
-        this.boundingBox = StructureTFComponent
+        boundingBox = StructureTFComponent
                 .getComponentToAddBoundingBox(x, y, z, -radius, -3, -radius, radius * 2, 10, radius * 2, 0);
     }
 
@@ -42,20 +43,24 @@ public class ComponentTFHollowHill extends StructureTFComponent {
      * Save to NBT
      */
     @Override
-    protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
-        super.func_143012_a(par1NBTTagCompound);
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
 
-        par1NBTTagCompound.setInteger("hillSize", this.hillSize);
+        nbt.setInteger("hillSize", hillSize);
     }
 
     /**
      * Load from NBT
      */
     @Override
-    protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
-        super.func_143011_b(par1NBTTagCompound);
-        this.hillSize = par1NBTTagCompound.getInteger("hillSize");
-        this.radius = ((hillSize * 2 + 1) * 8) - 6;
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        hillSize = nbt.getInteger("hillSize");
+        radius = calculateRadius(hillSize);
+    }
+
+    private static int calculateRadius(int size) {
+        return ((size * 2 + 1) * 8) - 6;
     }
 
     /**
@@ -81,12 +86,10 @@ public class ComponentTFHollowHill extends StructureTFComponent {
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
         // int area = (int)(Math.PI * radius * radius);
         // int sn = area / 16; // number of stalactites (there will actually be around twice this number)
-        int[] sna = { 0, 128, 256, 512 };
-        int sn = sna[hillSize]; // number of stalactites mga = {0, 3, 9, 18}
-        int[] mga = { 0, 1, 4, 9 };
-        int mg = mga[hillSize]; // number of monster generators mga = {0, 3, 9, 18} (reduced due to "natural" spawning)
-        int[] tca = { 0, 2, 6, 12 };
-        int tc = tca[hillSize]; // number of treasure chests tca = {0, 2, 6, 12};
+        int sn = STALACTITE_COUNTS[hillSize]; // number of stalactites mga = {0, 3, 9, 18}
+        int mg = SPAWNER_COUNTS[hillSize]; // number of monster generators mga = {0, 3, 9, 18} (reduced due to "natural"
+        // spawning)
+        int tc = TREASURE_COUNTS[hillSize]; // number of treasure chests tca = {0, 2, 6, 12}
 
         // fill in features
 
@@ -105,20 +108,11 @@ public class ComponentTFHollowHill extends StructureTFComponent {
         }
 
         // ore or glowing stalactites! (smaller, less plentiful)
-        for (int i = 0; i < sn; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateOreStalactite(world, dest[0], 1, dest[1], sbb);
-        }
+        generateRandomOreStalactites(world, rand, sn, 1, sbb);
         // stone stalactites!
-        for (int i = 0; i < sn; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateBlockStalactite(world, Blocks.stone, 1.0F, true, dest[0], 1, dest[1], sbb);
-        }
+        generateRandomBlockStalactites(world, rand, sn, Blocks.stone, 1.0F, true, 1, sbb);
         // stone stalagmites!
-        for (int i = 0; i < sn; i++) {
-            int[] dest = getCoordsInHill2D(rand);
-            generateBlockStalactite(world, Blocks.stone, 0.9F, false, dest[0], 1, dest[1], sbb);
-        }
+        generateRandomBlockStalactites(world, rand, sn, Blocks.stone, 0.9F, false, 1, sbb);
 
         // level 3 hills get 2 mid-air wraith spawners
         // if (hillSize == 3) {
@@ -128,6 +122,22 @@ public class ComponentTFHollowHill extends StructureTFComponent {
         // placeWraithSpawner(dest[0], hy + 10, dest[1]);
         // }
         return true;
+    }
+
+    // dont combine ore and block passes, their random calls remain ordered
+    protected void generateRandomOreStalactites(World world, Random rand, int count, int y, StructureBoundingBox sbb) {
+        for (int i = 0; i < count; i++) {
+            int[] dest = getCoordsInHill2D(rand);
+            generateOreStalactite(world, dest[0], y, dest[1], sbb);
+        }
+    }
+
+    protected void generateRandomBlockStalactites(World world, Random rand, int count, Block block, float length,
+            boolean upwards, int y, StructureBoundingBox sbb) {
+        for (int i = 0; i < count; i++) {
+            int[] dest = getCoordsInHill2D(rand);
+            generateBlockStalactite(world, block, length, upwards, dest[0], y, dest[1], sbb);
+        }
     }
 
     /**
@@ -160,14 +170,14 @@ public class ComponentTFHollowHill extends StructureTFComponent {
         int dx = getXWithOffset(x, z);
         int dy = getYWithOffset(y);
         int dz = getZWithOffset(x, z);
-        if (sbb.isVecInside(dx, dy, dz) && world.getBlock(dx, dy, dz) != Blocks.mob_spawner) {
+        if (canGenerateStalactite(world, sbb, dx, dy, dz)) {
             // generate an RNG for this stalactite
             // TODO: MOAR RANDOM!
             Random stalRNG = new Random(world.getSeed() + dx * dz);
 
             // make the actual stalactite
-            TFGenCaveStalactite stalag = makeRandomOreStalactite(stalRNG);
-            stalag.generate(world, stalRNG, dx, dy, dz);
+            TFGenCaveStalactite stalactite = makeRandomOreStalactite(stalRNG);
+            stalactite.generate(world, stalRNG, dx, dy, dz);
         }
     }
 
@@ -188,7 +198,7 @@ public class ComponentTFHollowHill extends StructureTFComponent {
         int dx = getXWithOffset(x, z);
         int dy = getYWithOffset(y);
         int dz = getZWithOffset(x, z);
-        if (sbb.isVecInside(dx, dy, dz) && world.getBlock(dx, dy, dz) != Blocks.mob_spawner) {
+        if (canGenerateStalactite(world, sbb, dx, dy, dz)) {
             // generate an RNG for this stalactite
             // TODO: MOAR RANDOM!
             Random stalRNG = new Random(world.getSeed() + dx * dz);
@@ -198,12 +208,16 @@ public class ComponentTFHollowHill extends StructureTFComponent {
             }
 
             // make the actual stalactite
-            (new TFGenCaveStalactite(blockToGenerate, length, up)).generate(world, stalRNG, dx, dy, dz);
+            new TFGenCaveStalactite(blockToGenerate, length, up).generate(world, stalRNG, dx, dy, dz);
         }
     }
 
+    private boolean canGenerateStalactite(World world, StructureBoundingBox sbb, int x, int y, int z) {
+        return sbb.isVecInside(x, y, z) && world.getBlock(x, y, z) != Blocks.mob_spawner;
+    }
+
     /**
-     * 
+     *
      * @param cx
      * @param cz
      * @return true if the coordinates would be inside the hill on the "floor" of the hill
@@ -211,9 +225,7 @@ public class ComponentTFHollowHill extends StructureTFComponent {
     boolean isInHill(int cx, int cz) {
         int dx = radius - cx;
         int dz = radius - cz;
-        int dist = (int) Math.sqrt(dx * dx + dz * dz);
-
-        return dist < radius;
+        return dx * dx + dz * dz < radius * radius;
     }
 
     /**
@@ -222,8 +234,8 @@ public class ComponentTFHollowHill extends StructureTFComponent {
     boolean isInHill(int mapX, int mapY, int mapZ) {
         int dx = boundingBox.minX + radius - mapX;
         int dy = (boundingBox.minY - mapY) * 2; // hill is half as high as it is wide, thus we just double y distance
-                                                // from center. I *think* that
-                                                // math works!
+        // from center. I *think* that
+        // math works!
         int dz = boundingBox.minZ + radius - mapZ;
         int dist = dx * dx + dy * dy + dz * dz;
         return dist < radius * radius;
@@ -234,7 +246,7 @@ public class ComponentTFHollowHill extends StructureTFComponent {
     }
 
     /**
-     * 
+     *
      * @return a two element array containing some coordinates in the hill
      */
     int[] getCoordsInHill2D(Random rand, int rad) {
@@ -244,20 +256,19 @@ public class ComponentTFHollowHill extends StructureTFComponent {
             rz = rand.nextInt(2 * rad);
         } while (!isInHill(rx, rz));
 
-        int[] coords = { rx, rz };
-        return coords;
+        return new int[] { rx, rz };
     }
 
     /**
      * Gets the id of a mob appropriate to the current hill size.
      */
     protected String getMobID(Random rand) {
-        return getMobID(rand, this.hillSize);
+        return getMobID(rand, hillSize);
     }
 
     /**
      * Gets the id of a mob appropriate to the specified hill size.
-     * 
+     *
      * @param level
      * @return
      */

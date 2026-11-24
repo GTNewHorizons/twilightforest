@@ -16,6 +16,7 @@ public class TileEntityTFHydraSpawner extends TileEntityTFBossSpawner {
     /**
      * Get a temporary copy of the creature we're going to summon for display purposes
      */
+    @Override
     public Entity getDisplayEntity() {
         if (this.displayCreature == null) {
             this.displayCreature = EntityList.createEntityByName("HydraHead", worldObj);
@@ -29,8 +30,8 @@ public class TileEntityTFHydraSpawner extends TileEntityTFBossSpawner {
      */
     @Override
     protected void initializeCreature(EntityLiving myCreature) {
-        if (myCreature instanceof EntityTFHydra) {
-            ((EntityTFHydra) myCreature).setHomeArea(xCoord, yCoord, zCoord, 46);
+        if (myCreature instanceof EntityTFHydra hydra) {
+            hydra.setHomeArea(xCoord, yCoord, zCoord, 46);
         }
     }
 }

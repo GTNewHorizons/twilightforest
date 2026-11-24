@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -17,6 +18,9 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
 
     public static final int LOWEST_DOOR = 144;
     public static final int HIGHEST_DOOR = 222;
+
+    private static final String NBT_MAZE_TYPE = "castleMazeType";
+    private static final int TOWER_COLLISION_PADDING = 6;
 
     public int type;
 
@@ -88,6 +92,18 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
     }
 
     @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setInteger(NBT_MAZE_TYPE, type);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        type = nbt.getInteger(NBT_MAZE_TYPE);
+    }
+
+    @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         if (parent != null && parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
@@ -108,7 +124,8 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
     /**
      * Build more components towards the destination
      */
-    public void buildTowards(StructureComponent parent, List list, Random rand, ChunkCoordinates dest) {
+    public void buildTowards(StructureComponent parent, List<StructureComponent> list, Random rand,
+            ChunkCoordinates dest) {
         // regular building first, adds roof/foundation
         this.buildComponent(parent, list, rand);
 
@@ -149,15 +166,15 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
         this.buildNonCriticalTowers(parent, list, rand);
     }
 
-    protected void buildNonCriticalTowers(StructureComponent parent, List list, Random rand) {
+    protected void buildNonCriticalTowers(StructureComponent parent, List<StructureComponent> list, Random rand) {
         // pick a random direction
         int dir = rand.nextInt(4);
 
         // if there isn't something in that direction, check if we can add a wrecked tower
-        if (this.openingTowards[dir] == false) {
+        if (!this.openingTowards[dir]) {
             if (!buildDamagedTower(list, rand, dir)) {
                 dir = (dir + rand.nextInt(4)) % 4;
-                if (!buildDamagedTower(list, rand, dir)) {
+                if (this.openingTowards[dir] || !buildDamagedTower(list, rand, dir)) {
                     // maybe just a balcony?
                     // buildBalconyTowards(list, rand, dir);
                 }
@@ -166,71 +183,41 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
     }
 
     private int findBestDirectionTowards(ChunkCoordinates dest) {
-
-        // center of tower
-        int cx = this.boundingBox.minX + 6;
-        int cz = this.boundingBox.minZ + 6;
-
-        // difference
-        int dx = cx - dest.posX;
-        int dz = cz - dest.posZ;
-
-        int absoluteDir = 0;
-        if (Math.abs(dx) > Math.abs(dz)) {
-            absoluteDir = (dx >= 0) ? 2 : 0;
-        } else {
-            absoluteDir = (dz >= 0) ? 3 : 1;
-        }
-
-        int relativeDir = (absoluteDir + 4 - this.coordBaseMode) % 4;
-
-        // System.out.println("Determining best direction! center is at " + cx + ", " + cz + " and dest is at " + dest +
-        // " offset is " + dx + ", " + dz + " so the best absolute direction is " + absoluteDir + " and relative dir is
-        // " + relativeDir);
-
-        return relativeDir;
+        return findDirectionTowards(dest, false);
     }
 
     private int findSecondDirectionTowards(ChunkCoordinates dest) {
+        return findDirectionTowards(dest, true);
+    }
 
-        // center of tower
-        int cx = this.boundingBox.minX + 6;
-        int cz = this.boundingBox.minZ + 6;
+    private int findDirectionTowards(ChunkCoordinates dest, boolean secondary) {
+        int dx = boundingBox.minX + size / 2 - dest.posX;
+        int dz = boundingBox.minZ + size / 2 - dest.posZ;
 
-        // difference
-        int dx = cx - dest.posX;
-        int dz = cz - dest.posZ;
-
-        int absoluteDir = 0;
-        if (Math.abs(dx) < Math.abs(dz)) { // reversed from findBestDirectionTowards
-            absoluteDir = (dx >= 0) ? 2 : 0;
-        } else {
-            absoluteDir = (dz >= 0) ? 3 : 1;
-        }
-        int relativeDir = (absoluteDir + 4 - this.coordBaseMode) % 4;
-
-        // System.out.println("Determining second direction! center is at " + cx + ", " + cz + " and dest is at " + dest
-        // + " offset is " + dx + ", " + dz + " so the best absolute direction is " + absoluteDir + " and relative dir
-        // is " + relativeDir);
-
-        return relativeDir;
+        // for a diagonal tie, try the other axis rather than repeating the first direction
+        boolean alongX = secondary ? Math.abs(dx) <= Math.abs(dz) : Math.abs(dx) > Math.abs(dz);
+        int absolute = alongX ? (dx >= 0 ? 2 : 0) : (dz >= 0 ? 3 : 1);
+        return (absolute + 4 - coordBaseMode) % 4;
     }
 
     private int findThirdDirectionTowards(ChunkCoordinates dest) {
-        int first = this.findBestDirectionTowards(dest);
-        int second = this.findSecondDirectionTowards(dest);
-
-        if (first == 0 && second == 1) {
-            return 3;
-        } else if (first == 1 && second == 3) {
-            return 0;
-        } else {
-            return 1;
+        int first = findBestDirectionTowards(dest);
+        int second = findSecondDirectionTowards(dest);
+        int oppositeSecond = (second + 2) % 4;
+        if (oppositeSecond != 0 && oppositeSecond != first) {
+            return oppositeSecond;
         }
+
+        for (int direction = 1; direction < 4; direction++) {
+            if (direction != first && direction != second) {
+                return direction;
+            }
+        }
+        return (first + 2) % 4;
     }
 
-    private boolean buildContinueTowerTowards(List list, Random rand, ChunkCoordinates dest, int direction,
-            int howFar) {
+    private boolean buildContinueTowerTowards(List<StructureComponent> list, Random rand, ChunkCoordinates dest,
+            int direction, int howFar) {
         ChunkCoordinates opening = this.getValidOpeningCC(rand, direction);
 
         // adjust opening towards dest.posY if we are getting close to dest
@@ -274,18 +261,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
                     this.type,
                     direction);
 
-            StructureBoundingBox largerBB = new StructureBoundingBox(sTower.getBoundingBox());
-
-            largerBB.minX -= 6;
-            largerBB.minZ -= 6;
-            largerBB.maxX += 6;
-            largerBB.maxZ += 6;
-            largerBB.minY = 0;
-            largerBB.maxY = 255;
-
-            StructureComponent intersect = StructureComponent.findIntersecting(list, largerBB);
-
-            if (intersect == null) {
+            if (!intersectsOtherTower(list, sTower, true)) {
                 // System.out.println("tower success!");
                 list.add(sTower);
                 sTower.buildTowards(this, list, rand, dest);
@@ -316,7 +292,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
         }
     }
 
-    protected boolean buildDamagedTower(List list, Random rand, int direction) {
+    protected boolean buildDamagedTower(List<StructureComponent> list, Random rand, int direction) {
         ChunkCoordinates opening = this.getValidOpeningCC(rand, direction);
 
         direction += this.coordBaseMode;
@@ -329,16 +305,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
         // what type of tower?
         ComponentTFFinalCastleMazeTower13 eTower = makeNewDamagedTower(rand, direction, tc);
 
-        StructureBoundingBox largerBB = new StructureBoundingBox(eTower.getBoundingBox());
-
-        largerBB.minX -= 6;
-        largerBB.minZ -= 6;
-        largerBB.maxX += 6;
-        largerBB.maxZ += 6;
-
-        StructureComponent intersect = StructureComponent.findIntersecting(list, largerBB);
-
-        if (intersect == null) {
+        if (!intersectsOtherTower(list, eTower, false)) {
             // System.out.println("wreck tower success! tower is at " + tc.posX + ", " + tc.posY + ", " +
             // tc.posZ);
             list.add(eTower);
@@ -365,6 +332,20 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
         }
     }
 
+    private static boolean intersectsOtherTower(List<StructureComponent> list, StructureComponent tower,
+            boolean checkEntireHeight) {
+        StructureBoundingBox candidate = new StructureBoundingBox(tower.getBoundingBox());
+        candidate.minX -= TOWER_COLLISION_PADDING;
+        candidate.minZ -= TOWER_COLLISION_PADDING;
+        candidate.maxX += TOWER_COLLISION_PADDING;
+        candidate.maxZ += TOWER_COLLISION_PADDING;
+        if (checkEntireHeight) {
+            candidate.minY = 0;
+            candidate.maxY = 255;
+        }
+        return StructureComponent.findIntersecting(list, candidate) != null;
+    }
+
     protected ComponentTFFinalCastleMazeTower13 makeNewDamagedTower(Random rand, int direction, ChunkCoordinates tc) {
         return new ComponentTFFinalCastleDamagedTower(
                 rand,
@@ -376,21 +357,18 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
     }
 
     private int adjustOpening(int posY, ChunkCoordinates dest) {
-        int openY = posY;
-
-        int realOpeningY = this.getYWithOffset(openY);
-        if (realOpeningY - dest.posY < 12) {
-            // if it is too low, move it to the top floor
-            openY = this.height - 9;
-        } else if (dest.posY - realOpeningY < 12) {
-            // if the opening is too high, move it to the bottom floor
-            openY = 0;
+        int deltaY = dest.posY - getYWithOffset(posY);
+        if (deltaY > 12) {
+            return height - 9;
         }
-
-        return openY;
+        if (deltaY < -12) {
+            return 0;
+        }
+        return posY;
     }
 
-    private boolean buildEndTowerTowards(List list, Random rand, ChunkCoordinates dest, int direction, int howFar) {
+    private boolean buildEndTowerTowards(List<StructureComponent> list, Random rand, ChunkCoordinates dest,
+            int direction, int howFar) {
         ChunkCoordinates opening = this.getValidOpeningCC(rand, direction);
 
         // adjust opening towards dest.posY
@@ -426,16 +404,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
                     direction);
         }
 
-        StructureBoundingBox largerBB = new StructureBoundingBox(eTower.getBoundingBox());
-
-        largerBB.minX -= 6;
-        largerBB.minZ -= 6;
-        largerBB.maxX += 6;
-        largerBB.maxZ += 6;
-
-        StructureComponent intersect = StructureComponent.findIntersecting(list, largerBB);
-
-        if (intersect == null) {
+        if (!intersectsOtherTower(list, eTower, false)) {
             // System.out.println("entrance tower success! tower is at " + tc.posX + ", " + tc.posY + ", " +
             // tc.posZ + " and dest is " + dest.posX + ", " + dest.posY + ", " + dest.posZ);
             list.add(eTower);
@@ -543,7 +512,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
         }
 
         // add branching runes
-        int numBranches = 2 + decoRNG.nextInt(4) + +decoRNG.nextInt(3);
+        int numBranches = 2 + decoRNG.nextInt(4) + decoRNG.nextInt(3);
         for (int i = 0; i < numBranches; i++) {
             makeGlyphBranches(world, decoRNG, this.getGlyphMeta(), sbb);
         }
@@ -621,7 +590,7 @@ public class ComponentTFFinalCastleMazeTower13 extends ComponentTFTowerWing {
             this.placeBlockRotated(world, deco.blockID, deco.blockMeta, sx, sy - 1, sz, rotation, sbb);
             this.placeBlockRotated(world, deco.stairID, getStairMeta(1 + rotation), sx - 1, sy, sz, rotation, sbb);
             this.placeBlockRotated(world, deco.blockID, deco.blockMeta, sx - 1, sy - 1, sz, rotation, sbb);
-            this.fillAirRotated(world, sbb, sx, sy + 1, sz, sx - 1, sy + 3, sz, rotation);
+            this.fillAirRotated(world, sbb, sx - 1, sy + 1, sz, sx, sy + 3, sz, rotation);
         }
     }
 

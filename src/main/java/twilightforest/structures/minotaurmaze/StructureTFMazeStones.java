@@ -16,11 +16,11 @@ public class StructureTFMazeStones extends StructureComponent.BlockSelector {
             this.selectedBlockMetaData = 0;
         } else {
             this.field_151562_a = TFBlocks.mazestone;
-            float rf = par1Random.nextFloat();
+            float variant = par1Random.nextFloat();
 
-            if (rf < 0.2F) {
+            if (variant < 0.2F) {
                 this.selectedBlockMetaData = 5;
-            } else if (rf < 0.5F) {
+            } else if (variant < 0.5F) {
                 this.selectedBlockMetaData = 4;
             } else {
                 this.selectedBlockMetaData = 1;

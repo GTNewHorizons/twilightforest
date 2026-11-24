@@ -36,7 +36,7 @@ public class EntityTFSnowGuardian extends EntityMob {
 
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23000000417232513D);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23D);
         this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(3.0D);
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D);
     }
@@ -84,7 +84,8 @@ public class EntityTFSnowGuardian extends EntityMob {
         int type = rand.nextInt(4);
 
         this.setCurrentItemOrArmor(0, new ItemStack(this.makeItemForSlot(0, type)));
-
+        this.setCurrentItemOrArmor(1, new ItemStack(this.makeItemForSlot(1, type)));
+        this.setCurrentItemOrArmor(2, new ItemStack(this.makeItemForSlot(2, type)));
         this.setCurrentItemOrArmor(3, new ItemStack(this.makeItemForSlot(3, type)));
         this.setCurrentItemOrArmor(4, new ItemStack(this.makeItemForSlot(4, type)));
     }
@@ -158,6 +159,9 @@ public class EntityTFSnowGuardian extends EntityMob {
      */
     public void onLivingUpdate() {
         super.onLivingUpdate();
+        if (!worldObj.isRemote) {
+            return;
+        }
         // make snow particles
         for (int i = 0; i < 3; i++) {
             float px = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.3F;

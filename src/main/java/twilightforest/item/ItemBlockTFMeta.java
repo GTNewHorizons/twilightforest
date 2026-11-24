@@ -51,15 +51,17 @@ public class ItemBlockTFMeta extends ItemBlock {
             boolean par4) {
         super.addInformation(par1ItemStack, par2EntityPlayer, par3List, par4);
 
+        String displayName = par1ItemStack.getDisplayName();
+
         // add warning for [WIP] tag
-        if (par1ItemStack.getDisplayName().contains("[WIP]")) {
+        if (displayName.contains("[WIP]")) {
             par3List.add("This block is a work in progress");
             par3List.add("and may have bugs or unintended");
             par3List.add("effects that may damage your world.");
             par3List.add("Use with caution.");
         }
         // add warning for [NYI] tag
-        if (par1ItemStack.getDisplayName().contains("[NYI]")) {
+        if (displayName.contains("[NYI]")) {
             par3List.add("This block has effects");
             par3List.add("that are not yet implemented.");
         }

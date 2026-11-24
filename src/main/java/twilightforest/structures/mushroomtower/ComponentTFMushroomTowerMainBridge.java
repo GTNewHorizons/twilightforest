@@ -3,7 +3,10 @@ package twilightforest.structures.mushroomtower;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
+
+import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFMushroomTowerMainBridge extends ComponentTFMushroomTowerBridge {
 
@@ -15,6 +18,22 @@ public class ComponentTFMushroomTowerMainBridge extends ComponentTFMushroomTower
     protected ComponentTFMushroomTowerMainBridge(int i, int x, int y, int z, int pSize, int pHeight, int direction) {
         // bridge only 11 long
         super(i, x, y, z, 11, pHeight, direction);
+    }
+
+    @Override
+    public StructureBoundingBox getWingBB() {
+        int[] dest = offsetTowerCoords(dSize - 1, 1, 1, MAIN_SIZE, getCoordBaseMode());
+        return StructureTFComponent.getComponentToAddBoundingBox(
+                dest[0],
+                dest[1],
+                dest[2],
+                0,
+                0,
+                0,
+                MAIN_SIZE - 1,
+                dHeight - 1,
+                MAIN_SIZE - 1,
+                getCoordBaseMode());
     }
 
     @Override
@@ -33,10 +52,24 @@ public class ComponentTFMushroomTowerMainBridge extends ComponentTFMushroomTower
                 dx[0],
                 dx[1],
                 dx[2],
-                15,
+                MAIN_SIZE,
                 wingHeight,
                 direction);
 
+        // main bridges used to create a tower even when it overlapped an existing room
+        for (Object candidate : list) {
+            if (candidate instanceof StructureComponent component && component != this
+                    && !(component instanceof ComponentTFTowerRoofMushroom)
+                    && !(component instanceof ComponentTFMushroomTowerBridge)
+                    && component.getBoundingBox() != null
+                    && component.getBoundingBox().intersectsWith(wing.getBoundingBox())) {
+                return false;
+            }
+        }
+
+        if (list.isEmpty() || !(list.get(0) instanceof StructureComponent)) {
+            return false;
+        }
         list.add(wing);
         wing.buildComponent((StructureComponent) list.get(0), list, rand);
         addOpening(x, y, z, rotation);

@@ -40,6 +40,7 @@ public class ItemTFCharm extends ItemTF implements IBauble {
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer player, List<String> list, boolean par4) {
+        super.addInformation(itemStack, player, list, par4);
         if (TwilightForestMod.areBaublesLoaded) {
             list.add(EnumChatFormatting.AQUA + StatCollector.translateToLocal("item.charm.tooltip"));
         }

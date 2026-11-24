@@ -1,13 +1,11 @@
 package twilightforest.enchantment;
 
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnumEnchantmentType;
 
-public class EnchantmentTFChillAura extends Enchantment {
+public class EnchantmentTFChillAura extends TFEnchantment {
 
-    public EnchantmentTFChillAura(int par1, int par2) {
-        super(par1, par2, EnumEnchantmentType.armor);
-        this.setName("tfChillAura");
-
+    public EnchantmentTFChillAura(int id, int weight) {
+        super(id, weight, EnumEnchantmentType.armor);
+        setName("tfChillAura");
     }
 }

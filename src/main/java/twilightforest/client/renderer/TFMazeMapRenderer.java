@@ -28,7 +28,7 @@ public class TFMazeMapRenderer implements IItemRenderer {
 
     /**
      * Checks if this renderer should handle a specific item's render type
-     * 
+     *
      * @param item The item we are trying to render
      * @param type A render type to check if this renderer handles
      * @return true if this renderer should handle the given render type, otherwise false
@@ -41,7 +41,7 @@ public class TFMazeMapRenderer implements IItemRenderer {
 
     /**
      * Checks if certain helper functionality should be executed for this renderer. See ItemRendererHelper for more info
-     * 
+     *
      * @param type   The render type
      * @param item   The ItemStack being rendered
      * @param helper The type of helper functionality to be ran
@@ -55,7 +55,7 @@ public class TFMazeMapRenderer implements IItemRenderer {
     /**
      * Called to do the actual rendering, see ItemRenderType for details on when specific types are run, and what extra
      * data is passed into the data parameter.
-     * 
+     *
      * @param type The render type
      * @param item The ItemStack being rendered
      * @param data Extra Type specific data
@@ -63,11 +63,14 @@ public class TFMazeMapRenderer implements IItemRenderer {
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 
-        if (RenderItem.renderInFrame) {
+        if (type == ItemRenderType.ENTITY && RenderItem.renderInFrame
+                && data.length >= 2
+                && data[1] instanceof EntityItem) {
             // RenderBlocks renderBlocks = (RenderBlocks)data[0];
             EntityItem entity = (EntityItem) data[1];
 
-            TFMazeMapData mapData = ((ItemTFMazeMap) TFItems.mazeMap).getMapData(item, entity.worldObj);
+            // ore and maze maps can have different IDs, resolve data from the item
+            TFMazeMapData mapData = ((ItemTFMazeMap) item.getItem()).getMapData(item, entity.worldObj);
 
             // if we have data, render it
             if (mapData != null) {

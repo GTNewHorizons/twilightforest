@@ -3,6 +3,7 @@ package twilightforest.structures.minotaurmaze;
 import java.util.Random;
 
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 
@@ -13,7 +14,6 @@ public class ComponentTFMazeRoomBoss extends ComponentTFMazeRoom {
 
     public ComponentTFMazeRoomBoss() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     private boolean taurPlaced = false;
@@ -45,7 +45,7 @@ public class ComponentTFMazeRoomBoss extends ComponentTFMazeRoom {
         for (int x = 1; x < 14; x++) {
             for (int z = 1; z < 14; z++) {
                 // calculate distance from middle
-                int dist = (int) Math.round(7 / Math.sqrt((7.5 - x) * (7.5 - x) + (7.5 - z) * (7.5 - z)));
+                int dist = ComponentTFMazeMushRoom.mushroomDensity(x, z);
                 boolean mycelium = rand.nextInt(dist + 1) > 0;
                 boolean mushroom = rand.nextInt(dist) > 0;
                 boolean mushRed = rand.nextBoolean();
@@ -104,16 +104,29 @@ public class ComponentTFMazeRoomBoss extends ComponentTFMazeRoom {
             int bz = this.getZWithOffset(7, 7);
 
             if (sbb.isVecInside(bx, by, bz)) {
-                taurPlaced = true;
-
                 EntityTFMinoshroom taur = new EntityTFMinoshroom(world);
-                taur.setPosition(bx, by, bz);
+                taur.setPosition(bx + 0.5D, by, bz + 0.5D);
                 taur.setHomeArea(bx, by, bz, 7);
 
-                world.spawnEntityInWorld(taur);
+                // record the spawn only after it has succeeded to avoid a lost boss
+                if (world.spawnEntityInWorld(taur)) {
+                    taurPlaced = true;
+                }
             }
         }
 
         return true;
+    }
+
+    @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setBoolean("tfMinoshroomPlaced", taurPlaced);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        taurPlaced = nbt.getBoolean("tfMinoshroomPlaced");
     }
 }

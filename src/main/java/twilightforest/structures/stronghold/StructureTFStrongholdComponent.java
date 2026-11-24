@@ -1,6 +1,5 @@
 package twilightforest.structures.stronghold;
 
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,7 +21,6 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
 
     public StructureTFStrongholdComponent() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public StructureTFStrongholdComponent(int i, int facing, int x, int y, int z) {
@@ -45,15 +43,14 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
      * Turn the openings array into an array of ints.
      */
     private int[] getDoorsAsIntArray() {
-        IntBuffer ibuffer = IntBuffer.allocate(this.doors.size() * 3);
-
+        int[] coordinates = new int[doors.size() * 3];
+        int index = 0;
         for (ChunkCoordinates door : doors) {
-            ibuffer.put(door.posX);
-            ibuffer.put(door.posY);
-            ibuffer.put(door.posZ);
+            coordinates[index++] = door.posX;
+            coordinates[index++] = door.posY;
+            coordinates[index++] = door.posZ;
         }
-
-        return ibuffer.array();
+        return coordinates;
     }
 
     /**
@@ -71,10 +68,10 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
      * Read in openings from int array
      */
     private void readOpeningsFromArray(int[] intArray) {
-        for (int i = 0; i < intArray.length; i += 3) {
-            ChunkCoordinates door = new ChunkCoordinates(intArray[i], intArray[i + 1], intArray[i + 2]);
-
-            this.doors.add(door);
+        doors.clear();
+        // ignore any incomplete trailing nbt data instead of indexing past the array
+        for (int i = 0; i + 2 < intArray.length; i += 3) {
+            doors.add(new ChunkCoordinates(intArray[i], intArray[i + 1], intArray[i + 2]));
         }
     }
 
@@ -126,7 +123,7 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
     }
@@ -156,7 +153,13 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
             return;
         }
 
+        if (!(entrance instanceof ComponentTFStrongholdEntrance)) {
+            return;
+        }
         TFStrongholdPieces pieceList = ((ComponentTFStrongholdEntrance) entrance).lowerPieces;
+        if (pieceList == null) {
+            return;
+        }
 
         StructureTFStrongholdComponent nextComponent = pieceList
                 .getNextComponent(entrance, list, random, index, nFacing, nx, ny, nz);
@@ -173,22 +176,23 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
     /**
      * Check the list for components we can break in to at the specified point
      */
-    protected StructureTFStrongholdComponent findBreakInComponent(List<StructureTFStrongholdComponent> list, int x,
-            int y, int z) {
-        for (StructureTFStrongholdComponent component : list) {
-            if (component.boundingBox != null && component.boundingBox.isVecInside(x, y, z)) {
-                return component;
+    protected StructureTFStrongholdComponent findBreakInComponent(List<? extends StructureComponent> list, int x, int y,
+            int z) {
+        // lists can contain vanilla or third party components as well as TF stronghold pieces
+        for (StructureComponent candidate : list) {
+            if (candidate instanceof StructureTFStrongholdComponent) {
+                StructureTFStrongholdComponent component = (StructureTFStrongholdComponent) candidate;
+                if (component.boundingBox != null && component.boundingBox.isVecInside(x, y, z)) {
+                    return component;
+                }
             }
         }
-
         return null;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void addNewUpperComponent(StructureComponent parent, List list, Random random, int facing, int x, int y,
             int z) {
-        StructureTFStrongholdComponent attempted = null;
-
         int index = this.componentType + 1;
         int nFacing = (this.coordBaseMode + facing) % 4;
         int nx = this.getXWithOffset(x, z);
@@ -201,7 +205,7 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
         }
 
         // find a new component
-        attempted = switch (random.nextInt(5)) {
+        StructureTFStrongholdComponent attempted = switch (random.nextInt(5)) {
             default -> new ComponentTFStrongholdUpperTIntersection(index, nFacing, nx, ny, nz);
             case 1 -> new ComponentTFStrongholdUpperLeftTurn(index, nFacing, nx, ny, nz);
             case 2 -> new ComponentTFStrongholdUpperRightTurn(index, nFacing, nx, ny, nz);
@@ -210,7 +214,8 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
         };
 
         // is it clear?
-        if (attempted != null && StructureComponent.findIntersecting(list, attempted.getBoundingBox()) == null) {
+        if (attempted.getBoundingBox() != null
+                && StructureComponent.findIntersecting(list, attempted.getBoundingBox()) == null) {
             // if so, add it
             list.add(attempted);
             attempted.buildComponent(parent, list, random);
@@ -224,6 +229,9 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
      */
     private boolean isOutOfRange(StructureComponent parent, int nx, int ny, int nz, int range) {
 
+        if (parent == null || parent.getBoundingBox() == null) {
+            return true;
+        }
         return Math.abs(nx - parent.getBoundingBox().minX) > range
                 || Math.abs(nz - parent.getBoundingBox().minZ) > range;
     }
@@ -650,13 +658,8 @@ public abstract class StructureTFStrongholdComponent extends StructureTFComponen
      * Place any doors on our list
      */
     public void placeDoors(World world, Random rand, StructureBoundingBox sbb) {
-        if (this.doors != null) {
-            for (ChunkCoordinates doorCoords : doors) {
-                this.placeDoorwayAt(world, rand, doorCoords.posX, doorCoords.posY, doorCoords.posZ, sbb);
-
-                // this.placeBlockAtCurrentPosition(world, Blocks.wool, doorCoords.posX, doorCoords.posX,
-                // doorCoords.posY + 2, doorCoords.posZ, sbb);
-            }
+        for (ChunkCoordinates door : doors) {
+            placeDoorwayAt(world, rand, door.posX, door.posY, door.posZ, sbb);
         }
     }
 

@@ -143,7 +143,7 @@ public class EntityTFFireBeetle extends EntityMob implements IBreathAttacker {
         super.onLivingUpdate();
 
         // when breathing fire, spew particles
-        if (isBreathing()) {
+        if (isBreathing() && this.worldObj.isRemote) {
             Vec3 look = this.getLookVec();
 
             double dist = 0.9;
@@ -170,6 +170,8 @@ public class EntityTFFireBeetle extends EntityMob implements IBreathAttacker {
                 worldObj.spawnParticle(getFlameParticle(), px, py, pz, dx, dy, dz);
             }
 
+        }
+        if (isBreathing() && !this.worldObj.isRemote) {
             playBreathSound();
         }
 
@@ -244,7 +246,8 @@ public class EntityTFFireBeetle extends EntityMob implements IBreathAttacker {
      */
     @Override
     public void doBreathAttack(Entity target) {
-        if (!target.isImmuneToFire() && target.attackEntityFrom(DamageSource.inFire, BREATH_DAMAGE)) {
+        if (!this.worldObj.isRemote && !target.isImmuneToFire()
+                && target.attackEntityFrom(DamageSource.inFire, BREATH_DAMAGE)) {
             target.setFire(BREATH_DURATION);
         }
     }

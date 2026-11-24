@@ -2,9 +2,12 @@ package twilightforest.structures.minotaurmaze;
 
 import net.minecraft.world.gen.structure.MapGenStructureIO;
 
-public class TFMinotaurMazePieces {
+public final class TFMinotaurMazePieces {
+
+    private TFMinotaurMazePieces() {}
 
     public static void registerPieces() {
+        // these IDs are saved in structure nbt
         MapGenStructureIO.func_143031_a(ComponentTFMazeCorridor.class, "TFMMC");
         MapGenStructureIO.func_143031_a(ComponentTFMazeCorridorIronFence.class, "TFMMCIF");
         MapGenStructureIO.func_143031_a(ComponentTFMazeCorridorRoots.class, "TFMMCR");
@@ -32,34 +35,4 @@ public class TFMinotaurMazePieces {
         MapGenStructureIO.func_143031_a(ComponentTFMazeUpperEntrance.class, "TFMMUE");
         MapGenStructureIO.func_143031_a(ComponentTFMinotaurMaze.class, "TFMMaze");
     }
-
 }
-/*
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeCorridor.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeCorridorIronFence.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeCorridorRoots.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeCorridorShrooms.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEnd.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEndChest.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEndFountain.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEndFountainLava.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEndPainting.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEndRoots.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEndShrooms.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEndTorches.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeDeadEndTrappedChest.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeEntranceShaft.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeMound.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeMushRoom.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeRoom.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeRoomBoss.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeRoomCollapse.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeRoomExit.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeRoomFountain.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeRoomSpawnerChests.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeRoomVault.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeRuins.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMazeUpperEntrance.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/ComponentTFMinotaurMaze.java
- * /Minecraft/src/twilightforest/structures/minotaurmaze/TFMinotaurMazePieces.java
- */

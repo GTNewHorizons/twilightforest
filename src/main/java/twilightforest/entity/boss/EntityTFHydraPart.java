@@ -1,5 +1,7 @@
 package twilightforest.entity.boss;
 
+import java.util.UUID;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -11,6 +13,7 @@ import net.minecraft.world.World;
 public class EntityTFHydraPart extends EntityLiving {
 
     public EntityTFHydra hydraObj;
+    private UUID hydraId;
 
     public EntityTFHydraPart(World world) {
         super(world);
@@ -20,7 +23,7 @@ public class EntityTFHydraPart extends EntityLiving {
     public EntityTFHydraPart(EntityTFHydra hydra, String s, float f, float f1) {
         super(hydra.worldObj);
         setSize(f, f1);
-        hydraObj = hydra;
+        bindToHydra(hydra);
         setPartName(s);
 
         // texture = TwilightForestMod.MODEL_DIR + "hydra4.png";
@@ -32,6 +35,24 @@ public class EntityTFHydraPart extends EntityLiving {
     protected void entityInit() {
         super.entityInit();
         dataWatcher.addObject(17, "");
+        dataWatcher.addObject(20, -1);
+    }
+
+    public void bindToHydra(EntityTFHydra hydra) {
+        hydraObj = hydra;
+        if (!worldObj.isRemote) {
+            hydraId = hydra.getUniqueID();
+            dataWatcher.updateObject(20, hydra.getEntityId());
+        }
+    }
+
+    public boolean belongsTo(EntityTFHydra hydra) {
+        return worldObj.isRemote ? dataWatcher.getWatchableObjectInt(20) == hydra.getEntityId()
+                : hydraId != null && hydraId.equals(hydra.getUniqueID());
+    }
+
+    public boolean hasNoOwner() {
+        return !worldObj.isRemote && hydraId == null && hydraObj == null;
     }
 
     public String getPartName() {
@@ -46,12 +67,19 @@ public class EntityTFHydraPart extends EntityLiving {
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         super.writeEntityToNBT(nbttagcompound);
         nbttagcompound.setString("PartName", getPartName());
+        if (hydraId != null) {
+            nbttagcompound.setLong("HydraMost", hydraId.getMostSignificantBits());
+            nbttagcompound.setLong("HydraLeast", hydraId.getLeastSignificantBits());
+        }
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
         super.readEntityFromNBT(nbttagcompound);
         setPartName(nbttagcompound.getString("PartName"));
+        if (nbttagcompound.hasKey("HydraMost", 99) && nbttagcompound.hasKey("HydraLeast", 99)) {
+            hydraId = new UUID(nbttagcompound.getLong("HydraMost"), nbttagcompound.getLong("HydraLeast"));
+        }
     }
 
     /**
@@ -59,13 +87,15 @@ public class EntityTFHydraPart extends EntityLiving {
      */
     @Override
     public void onUpdate() {
-        if (this.hydraObj != null && this.hydraObj.deathTime > 190) {
+        if (this.hydraObj != null && (this.hydraObj.isDead || this.hydraObj.deathTime > 190)) {
             setDead();
+            return;
         }
 
         // just die if we've been alive 60 seconds and there's still no body
-        if (this.hydraObj == null && this.ticksExisted > 1200) {
+        if (!worldObj.isRemote && this.hydraObj == null && this.ticksExisted > 1200) {
             setDead();
+            return;
         }
 
         super.onEntityUpdate();

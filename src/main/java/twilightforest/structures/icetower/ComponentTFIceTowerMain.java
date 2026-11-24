@@ -25,8 +25,8 @@ public class ComponentTFIceTowerMain extends ComponentTFIceTowerWing {
         super(index, x, y, z, SIZE, 31 + (rand.nextInt(3) * 10), rotation);
 
         // decorator
-        if (this.deco == null) {
-            this.deco = new StructureDecoratorIceTower();
+        if (deco == null) {
+            deco = new StructureDecoratorIceTower();
         }
     }
 
@@ -57,20 +57,19 @@ public class ComponentTFIceTowerMain extends ComponentTFIceTowerWing {
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
         super.buildComponent(parent, list, rand);
 
-        // add entrance tower
+        // place the outer entrance beyond the bounds of existing pieces
         StructureBoundingBox towerBB = StructureBoundingBox.getNewBoundingBox();
 
         for (StructureComponent structurecomponent : list) {
             towerBB.expandTo(structurecomponent.getBoundingBox());
         }
 
-        // TODO: make this more general
-        ChunkCoordinates myDoor = this.openings.get(0);
+        // the first opening is the towe's original entrance
+        ChunkCoordinates myDoor = openings.get(0);
         ChunkCoordinates entranceDoor = new ChunkCoordinates(myDoor);
 
         if (myDoor.posX == 0) {
-            int length = this.getBoundingBox().minX - towerBB.minX;
-            // System.out.println("Offset for door -x = " + length);
+            int length = getBoundingBox().minX - towerBB.minX;
             if (length >= 0) {
                 entranceDoor.posX -= length;
                 makeEntranceBridge(
@@ -90,8 +89,8 @@ public class ComponentTFIceTowerMain extends ComponentTFIceTowerWing {
         if (myDoor.posZ == 0) {
             entranceDoor.posZ += towerBB.minZ - this.getBoundingBox().minZ;
         }
-        if (myDoor.posX == this.size - 1) {
-            entranceDoor.posZ += towerBB.maxZ - this.getBoundingBox().maxZ;
+        if (myDoor.posZ == size - 1) {
+            entranceDoor.posZ += towerBB.maxZ - getBoundingBox().maxZ;
         }
 
         makeEntranceTower(

@@ -21,6 +21,10 @@ import twilightforest.world.TFWorld;
 
 public class TFDarkForestBiomeDecorator extends TFBiomeDecorator {
 
+    private static final int CHUNK_SIZE = 16;
+    private static final int CHUNK_OFFSET = 8;
+    private static final int RANDOM_PLANT_HEIGHT = 128;
+
     TFTreeGenerator darkCanopyTreeGen;
     TFGenTallGrass worldGenDeadBush;
     WorldGenTallGrass worldGenForestGrass;
@@ -44,89 +48,99 @@ public class TFDarkForestBiomeDecorator extends TFBiomeDecorator {
         TFFeature nearFeature = TFFeature.getNearestFeature(mapX >> 4, mapZ >> 4, world);
         if (nearFeature.areChunkDecorationsEnabled) {
             // add dark canopy trees
-            int nc = (int) canopyPerChunk + ((rand.nextFloat() < (canopyPerChunk - (int) canopyPerChunk)) ? 1 : 0);
-            for (int i = 0; i < nc; i++) {
-                int rx = mapX + rand.nextInt(16) + 8;
-                int rz = mapZ + rand.nextInt(16) + 8;
-                int ry = world.getHeightValue(rx, rz);
-                darkCanopyTreeGen.generate(world, rand, rx, ry, rz);
-            }
+            generateDarkCanopyTrees(world, rand, mapX, mapZ);
 
             // regular trees
-            for (int i = 0; i < this.treesPerChunk; ++i) {
-                int rx = mapX + rand.nextInt(16) + 8;
-                int rz = mapZ + rand.nextInt(16) + 8;
-                int ry = getGroundLevel(world, rx, rz);
-                WorldGenerator var5 = biome.func_150567_a(rand);
-                var5.setScale(1.0D, 1.0D, 1.0D);
-                var5.generate(world, rand, rx, ry, rz);
-            }
+            generateRegularTrees(world, rand, biome, mapX, mapZ);
 
             // dead bushes
-            for (int i = 0; i < this.deadBushPerChunk; ++i) {
-                int rx = mapX + rand.nextInt(16) + 8;
-                int rz = mapZ + rand.nextInt(16) + 8;
-                int ry = rand.nextInt(128);
-                worldGenDeadBush.generate(world, rand, rx, ry, rz);
-            }
+            generateRandomHeightPlants(world, rand, mapX, mapZ, deadBushPerChunk, worldGenDeadBush);
 
             // forest grass bushes
-            for (int i = 0; i < this.deadBushPerChunk; ++i) {
-                int rx = mapX + rand.nextInt(16) + 8;
-                int rz = mapZ + rand.nextInt(16) + 8;
-                int ry = rand.nextInt(128);
-                worldGenForestGrass.generate(world, rand, rx, ry, rz);
-            }
+            generateRandomHeightPlants(world, rand, mapX, mapZ, deadBushPerChunk, worldGenForestGrass);
 
             // mushrooms
-            for (int i = 0; i < this.mushroomsPerChunk; ++i) {
-                if (rand.nextInt(8) == 0) {
-                    int rx = mapX + rand.nextInt(16) + 8;
-                    int rz = mapZ + rand.nextInt(16) + 8;
-                    int ry = getGroundLevel(world, rx, rz);
-                    this.mushroomBrownGen.generate(world, rand, rx, ry, rz);
-                }
-                if (rand.nextInt(16) == 0) {
-                    int rx = mapX + rand.nextInt(16) + 8;
-                    int rz = mapZ + rand.nextInt(16) + 8;
-                    int ry = getGroundLevel(world, rx, rz);
-                    this.mushroomRedGen.generate(world, rand, rx, ry, rz);
-                }
-                if (rand.nextInt(24) == 0) {
-                    int rx = mapX + rand.nextInt(16) + 8;
-                    int rz = mapZ + rand.nextInt(16) + 8;
-                    int ry = getGroundLevel(world, rx, rz);
-                    // mushglooms
-                    worldGenMushgloom.generate(world, rand, rx, ry, rz);
-                }
-            }
-            if (rand.nextInt(4) == 0) {
-                int rx = mapX + rand.nextInt(16) + 8;
-                int rz = mapZ + rand.nextInt(16) + 8;
-                int ry = rand.nextInt(128);
-                this.mushroomBrownGen.generate(world, rand, rx, ry, rz);
-            }
-            if (rand.nextInt(8) == 0) {
-                int rx = mapX + rand.nextInt(16) + 8;
-                int rz = mapZ + rand.nextInt(16) + 8;
-                int ry = rand.nextInt(128);
-                this.mushroomRedGen.generate(world, rand, rx, ry, rz);
-            }
+            generateMushrooms(world, rand, mapX, mapZ);
 
             // pumpkins
-            if (rand.nextInt(32) == 0) {
-                int rx = mapX + rand.nextInt(16) + 8;
-                int rz = mapZ + rand.nextInt(16) + 8;
-                int ry = getGroundLevel(world, rx, rz);
-                (new WorldGenPumpkin()).generate(world, rand, rx, ry, rz);
-            }
-
+            generatePumpkins(world, rand, mapX, mapZ);
         }
 
         // do underground decorations
         decorateUnderground(world, rand, mapX, mapZ);
         decorateOnlyOres(world, rand, mapX, mapZ);
+    }
 
+    private void generateDarkCanopyTrees(World world, Random rand, int mapX, int mapZ) {
+        int canopyCount = (int) canopyPerChunk + (rand.nextFloat() < canopyPerChunk - (int) canopyPerChunk ? 1 : 0);
+        for (int i = 0; i < canopyCount; i++) {
+            int x = mapX + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+            int z = mapZ + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+            int y = world.getHeightValue(x, z);
+            darkCanopyTreeGen.generate(world, rand, x, y, z);
+        }
+    }
+
+    private void generateRegularTrees(World world, Random rand, BiomeGenBase biome, int mapX, int mapZ) {
+        for (int i = 0; i < treesPerChunk; i++) {
+            int x = mapX + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+            int z = mapZ + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+            int y = getGroundLevel(world, x, z);
+            WorldGenerator tree = biome.func_150567_a(rand);
+            tree.setScale(1.0D, 1.0D, 1.0D);
+            tree.generate(world, rand, x, y, z);
+        }
+    }
+
+    private void generateRandomHeightPlants(World world, Random rand, int mapX, int mapZ, int count,
+            WorldGenerator generator) {
+        for (int i = 0; i < count; i++) {
+            generateAtRandomHeight(world, rand, mapX, mapZ, generator);
+        }
+    }
+
+    private void generateMushrooms(World world, Random rand, int mapX, int mapZ) {
+        for (int i = 0; i < mushroomsPerChunk; i++) {
+            if (rand.nextInt(8) == 0) {
+                generateAtGroundLevel(world, rand, mapX, mapZ, mushroomBrownGen);
+            }
+            if (rand.nextInt(16) == 0) {
+                generateAtGroundLevel(world, rand, mapX, mapZ, mushroomRedGen);
+            }
+            if (rand.nextInt(24) == 0) {
+                // mushglooms
+                generateAtGroundLevel(world, rand, mapX, mapZ, worldGenMushgloom);
+            }
+        }
+        if (rand.nextInt(4) == 0) {
+            generateAtRandomHeight(world, rand, mapX, mapZ, mushroomBrownGen);
+        }
+        if (rand.nextInt(8) == 0) {
+            generateAtRandomHeight(world, rand, mapX, mapZ, mushroomRedGen);
+        }
+    }
+
+    private void generatePumpkins(World world, Random rand, int mapX, int mapZ) {
+        if (rand.nextInt(32) == 0) {
+            int x = mapX + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+            int z = mapZ + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+            int y = getGroundLevel(world, x, z);
+            (new WorldGenPumpkin()).generate(world, rand, x, y, z);
+        }
+    }
+
+    private void generateAtGroundLevel(World world, Random rand, int mapX, int mapZ, WorldGenerator generator) {
+        int x = mapX + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+        int z = mapZ + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+        int y = getGroundLevel(world, x, z);
+        generator.generate(world, rand, x, y, z);
+    }
+
+    private void generateAtRandomHeight(World world, Random rand, int mapX, int mapZ, WorldGenerator generator) {
+        int x = mapX + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+        int z = mapZ + rand.nextInt(CHUNK_SIZE) + CHUNK_OFFSET;
+        int y = rand.nextInt(RANDOM_PLANT_HEIGHT);
+        generator.generate(world, rand, x, y, z);
     }
 
     public int getGroundLevel(World world, int x, int z) {
@@ -146,5 +160,4 @@ public class TFDarkForestBiomeDecorator extends TFBiomeDecorator {
 
         return lastDirt;
     }
-
 }

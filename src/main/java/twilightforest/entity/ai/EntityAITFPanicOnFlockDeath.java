@@ -12,13 +12,15 @@ import twilightforest.entity.EntityTFKobold;
 
 public class EntityAITFPanicOnFlockDeath extends EntityAIBase {
 
-    private EntityCreature flockCreature;
-    private float speed;
+    private final EntityCreature flockCreature;
+    private final float speed;
     private double fleeX;
     private double fleeY;
     private double fleeZ;
 
-    int fleeTimer;
+    private int fleeTimer;
+    private int scanCooldown;
+    private int recoveryCooldown;
 
     public EntityAITFPanicOnFlockDeath(EntityCreature par1EntityCreature, float par2) {
         this.flockCreature = par1EntityCreature;
@@ -32,33 +34,39 @@ public class EntityAITFPanicOnFlockDeath extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        boolean yikes = fleeTimer > 0;
-
-        // check if any of us is dead within 4 squares
-        List<? extends EntityLiving> flockList = this.flockCreature.worldObj.getEntitiesWithinAABB(
-                this.flockCreature.getClass(),
-                this.flockCreature.boundingBox.expand(4.0D, 2.0D, 4.0D));
-        for (EntityLiving flocker : flockList) {
-            if (flocker.deathTime > 0) {
-                yikes = true;
+        if (recoveryCooldown > 0) {
+            --recoveryCooldown;
+            return false;
+        }
+        if (scanCooldown > 0) {
+            --scanCooldown;
+            return false;
+        }
+        scanCooldown = 10;
+        List<? extends EntityLiving> nearby = flockCreature.worldObj
+                .getEntitiesWithinAABB(flockCreature.getClass(), flockCreature.boundingBox.expand(4.0D, 2.0D, 4.0D));
+        EntityLiving casualty = null;
+        for (EntityLiving member : nearby) {
+            if (member != flockCreature && member.deathTime > 0) {
+                casualty = member;
                 break;
             }
         }
-
-        if (!yikes) {
+        if (casualty == null) {
             return false;
-        } else {
-            Vec3 var1 = RandomPositionGenerator.findRandomTarget(this.flockCreature, 5, 4);
-
-            if (var1 == null) {
-                return false;
-            } else {
-                this.fleeX = var1.xCoord;
-                this.fleeY = var1.yCoord;
-                this.fleeZ = var1.zCoord;
-                return true;
-            }
         }
+        Vec3 danger = Vec3.createVectorHelper(casualty.posX, casualty.posY, casualty.posZ);
+        Vec3 flee = RandomPositionGenerator.findRandomTargetBlockAwayFrom(flockCreature, 8, 4, danger);
+        if (flee == null) {
+            flee = RandomPositionGenerator.findRandomTarget(flockCreature, 5, 4);
+        }
+        if (flee == null) {
+            return false;
+        }
+        fleeX = flee.xCoord;
+        fleeY = flee.yCoord;
+        fleeZ = flee.zCoord;
+        return true;
     }
 
     /**
@@ -66,10 +74,8 @@ public class EntityAITFPanicOnFlockDeath extends EntityAIBase {
      */
     @Override
     public void startExecuting() {
-        this.fleeTimer = 40;
-        this.flockCreature.getNavigator().tryMoveToXYZ(this.fleeX, this.fleeY, this.fleeZ, this.speed);
-
-        // panic flag for kobold animations
+        fleeTimer = 40;
+        flockCreature.getNavigator().tryMoveToXYZ(fleeX, fleeY, fleeZ, speed);
         if (flockCreature instanceof EntityTFKobold) {
             ((EntityTFKobold) flockCreature).setPanicked(true);
         }
@@ -80,7 +86,7 @@ public class EntityAITFPanicOnFlockDeath extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        return fleeTimer > 0 && !this.flockCreature.getNavigator().noPath();
+        return fleeTimer > 0 && !flockCreature.getNavigator().noPath();
     }
 
     /**
@@ -96,9 +102,8 @@ public class EntityAITFPanicOnFlockDeath extends EntityAIBase {
      */
     @Override
     public void resetTask() {
-        fleeTimer -= 20;
-
-        // panic flag for kobold animations
+        fleeTimer = 0;
+        recoveryCooldown = 40;
         if (flockCreature instanceof EntityTFKobold) {
             ((EntityTFKobold) flockCreature).setPanicked(false);
         }

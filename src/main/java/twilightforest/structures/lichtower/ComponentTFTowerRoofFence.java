@@ -10,36 +10,40 @@ public class ComponentTFTowerRoofFence extends ComponentTFTowerRoof {
 
     public ComponentTFTowerRoofFence() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoofFence(int i, ComponentTFTowerWing wing) {
         super(i, wing);
 
         // same alignment
-        this.setCoordBaseMode(wing.getCoordBaseMode());
+        setCoordBaseMode(wing.getCoordBaseMode());
+
         // same size
-        this.size = wing.size; // assuming only square towers and roofs right now.
-        this.height = 0;
+        size = wing.size; // assuming only square towers and roofs right now
+        // the railing sits one block above the tower, so the bounding box includes it
+        height = 1;
 
         // just hang out at the very top of the tower
         makeCapBB(wing);
     }
 
-    /**
-     * A fence around the roof!
-     */
+    // a fence around the roof
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        int y = height + 1;
-        for (int x = 0; x <= size - 1; x++) {
-            for (int z = 0; z <= size - 1; z++) {
-                if (x == 0 || x == size - 1 || z == 0 || z == size - 1) {
+        int y = height;
+        int last = size - 1;
+
+        for (int x = 0; x < size; x++) {
+            if (x == 0 || x == last) {
+                for (int z = 0; z < size; z++) {
                     placeBlockAtCurrentPosition(world, Blocks.fence, 0, x, y, z, sbb);
                 }
+            } else {
+                placeBlockAtCurrentPosition(world, Blocks.fence, 0, x, y, 0, sbb);
+                placeBlockAtCurrentPosition(world, Blocks.fence, 0, x, y, last, sbb);
             }
         }
+
         return true;
     }
-
 }

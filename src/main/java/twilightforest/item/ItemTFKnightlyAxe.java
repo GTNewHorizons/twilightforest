@@ -12,7 +12,6 @@ import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 
 import com.google.common.collect.Multimap;
@@ -23,9 +22,6 @@ import twilightforest.TwilightForestMod;
 
 public class ItemTFKnightlyAxe extends ItemAxe {
 
-    private static final int BONUS_DAMAGE = 2;
-    private EntityPlayer bonusDamageAttacker;
-    private Entity bonusDamageTarget;
     private float damageVsEntity;
 
     protected ItemTFKnightlyAxe(Item.ToolMaterial par2EnumToolMaterial) {
@@ -37,7 +33,7 @@ public class ItemTFKnightlyAxe extends ItemAxe {
 
     /**
      * Return an item rarity from EnumRarity
-     * 
+     *
      * This is automatically rare
      */
     @Override
@@ -51,14 +47,14 @@ public class ItemTFKnightlyAxe extends ItemAxe {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with knightmetal ingots
-        return par2ItemStack.getItem() == TFItems.knightMetal ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return par2ItemStack != null && (par2ItemStack.getItem() == TFItems.knightMetal
+                || super.getIsRepairable(par1ItemStack, par2ItemStack));
     }
 
     /**
      * Called when the player Left Clicks (attacks) an entity. Processed before damage is done, if return value is true
      * further processing is canceled and the entity is not attacked.
-     * 
+     *
      * @param stack  The Item being used
      * @param player The player that is attacking
      * @param entity The entity being attacked
@@ -66,26 +62,13 @@ public class ItemTFKnightlyAxe extends ItemAxe {
      */
     @Override
     public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-        // extra damage to unarmored target
-        if (entity instanceof EntityLivingBase && ((EntityLivingBase) entity).getTotalArmorValue() == 0) {
-            this.bonusDamageTarget = entity;
-            this.bonusDamageAttacker = player;
-        }
-
+        // the armor condition is evaluated on the actual hit, not stored on the shared item
         return false;
     }
 
     @Override
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-        if (this.bonusDamageAttacker != null && this.bonusDamageTarget != null && target == this.bonusDamageTarget) {
-            // System.out.println("Knightly Axe extra damage!");
-            if (bonusDamageAttacker instanceof EntityPlayer)
-                ((EntityPlayer) this.bonusDamageAttacker).onEnchantmentCritical(bonusDamageTarget);
-            if (this.bonusDamageTarget instanceof EntityLivingBase) target.lastDamage = 0;
-            this.bonusDamageTarget.attackEntityFrom(DamageSource.causeMobDamage(bonusDamageAttacker), BONUS_DAMAGE);
-            this.bonusDamageAttacker = null;
-            this.bonusDamageTarget = null;
-        }
+        KnightlyBonusDamage.apply(target, attacker, false);
         return super.hitEntity(stack, target, attacker);
     }
 
@@ -112,7 +95,7 @@ public class ItemTFKnightlyAxe extends ItemAxe {
 
     /**
      * Gets a map of item attribute modifiers, used by ItemSword to increase hit damage.
-     * 
+     *
      * Sergius Onesimus: Probably no need for this anymore since additional damage is now calculated on hit
      */
     public Multimap<String, AttributeModifier> getItemAttributeModifiers() {

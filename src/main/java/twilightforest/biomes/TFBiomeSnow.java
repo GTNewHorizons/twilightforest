@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package twilightforest.biomes;
 
@@ -40,28 +40,29 @@ public class TFBiomeSnow extends TFBiomeBase {
     public TFBiomeSnow(int i) {
         super(i);
 
-        getTFBiomeDecorator().setTreesPerChunk(7);
-        getTFBiomeDecorator().setGrassPerChunk(1);
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        decorator.setTreesPerChunk(7);
+        decorator.setGrassPerChunk(1);
 
         this.temperature = 0.125F;
         this.rainfall = 0.9F;
 
-        getTFBiomeDecorator().canopyPerChunk = -999;
-        getTFBiomeDecorator().generateLakes = false;
+        decorator.canopyPerChunk = -999;
+        decorator.generateLakes = false;
 
         this.spawnableMonsterList.add(new SpawnListEntry(EntityTFYeti.class, 20, 4, 4));
         this.spawnableMonsterList.add(new SpawnListEntry(EntityTFWinterWolf.class, 5, 1, 4));
-
     }
 
+    @Override
     public WorldGenAbstractTree func_150567_a(Random random) {
         if (random.nextInt(3) == 0) {
             return new WorldGenTaiga1();
-        } else if (random.nextInt(8) == 0) {
-            return new TFGenLargeWinter();
-        } else {
-            return new WorldGenTaiga2(true);
         }
+        if (random.nextInt(8) == 0) {
+            return new TFGenLargeWinter();
+        }
+        return new WorldGenTaiga2(true);
     }
 
     /**
@@ -84,21 +85,27 @@ public class TFBiomeSnow extends TFBiomeBase {
      * Returns the correspondent list of the EnumCreatureType informed.
      */
     @Override
-    public List<BiomeGenBase.SpawnListEntry> getSpawnableList(EnumCreatureType par1EnumCreatureType) {
+    public List<BiomeGenBase.SpawnListEntry> getSpawnableList(EnumCreatureType creatureType) {
         // if is is monster, then only give it the real list 1/MONSTER_SPAWN_RATE of the time
-        if (par1EnumCreatureType == EnumCreatureType.monster) {
+        if (creatureType == EnumCreatureType.monster) {
             return monsterRNG.nextInt(MONSTER_SPAWN_RATE) == 0 ? this.spawnableMonsterList : emptyList;
-        } else {
-            return par1EnumCreatureType == EnumCreatureType.creature ? this.spawnableCreatureList
-                    : (par1EnumCreatureType == EnumCreatureType.waterCreature ? this.spawnableWaterCreatureList
-                            : (par1EnumCreatureType == EnumCreatureType.ambient ? this.spawnableCaveCreatureList
-                                    : null));
         }
+        if (creatureType == EnumCreatureType.creature) {
+            return this.spawnableCreatureList;
+        }
+        if (creatureType == EnumCreatureType.waterCreature) {
+            return this.spawnableWaterCreatureList;
+        }
+        if (creatureType == EnumCreatureType.ambient) {
+            return this.spawnableCaveCreatureList;
+        }
+        return null;
     }
 
     /**
      * If there is a required achievement to be here, return it, otherwise return null
      */
+    @Override
     protected Achievement getRequiredAchievement() {
         return TFAchievementPage.twilightProgressUrghast;
     }
@@ -106,15 +113,17 @@ public class TFBiomeSnow extends TFBiomeBase {
     /**
      * Do something bad to a player in the wrong biome.
      */
+    @Override
     public void enforceProgession(EntityPlayer player, World world) {
-        if (!world.isRemote && world.getWorldTime() % 60 == 0) {
-            player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 100, 2));
+        if (world.isRemote || world.getWorldTime() % 60 != 0) {
+            return;
+        }
 
-            // hint monster?
-            if (world.rand.nextInt(4) == 0) {
-                TFFeature.yetiCave.trySpawnHintMonster(world, player);
-            }
+        player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 100, 2));
+
+        // hint monster?
+        if (world.rand.nextInt(4) == 0) {
+            TFFeature.yetiCave.trySpawnHintMonster(world, player);
         }
     }
-
 }

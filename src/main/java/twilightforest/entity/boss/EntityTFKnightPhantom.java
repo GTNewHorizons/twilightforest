@@ -122,7 +122,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         despawnIfInvalid();
         super.onLivingUpdate();
 
-        if (this.isChargingAtPlayer()) {
+        if (this.worldObj.isRemote && this.isChargingAtPlayer()) {
             // make particles
             for (int i = 0; i < 4; ++i) {
                 Item particleID = this.rand.nextBoolean() ? TFItems.phantomHelm : TFItems.knightlySword;
@@ -162,9 +162,13 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
             ChunkCoordinates home = this.getHomePosition();
             if (worldObj.getBlock(home.posX, home.posY, home.posZ) != TFBlocks.bossSpawner) {
                 worldObj.setBlock(home.posX, home.posY, home.posZ, TFBlocks.bossSpawner, 4, 2);
-                TileEntityTFKnightPhantomsSpawner spawner = (TileEntityTFKnightPhantomsSpawner) worldObj
-                        .getTileEntity(home.posX, home.posY, home.posZ);
-                spawner.knightsCount = getNearbyKnights().size();
+                if (worldObj.getTileEntity(
+                        home.posX,
+                        home.posY,
+                        home.posZ) instanceof TileEntityTFKnightPhantomsSpawner spawner) {
+                    spawner.knightsCount = Math.max(1, getNearbyKnights().size());
+                    spawner.markDirty();
+                }
             }
         }
         setDead();
@@ -175,6 +179,9 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
     protected void onDeathUpdate() {
         super.onDeathUpdate();
 
+        if (!this.worldObj.isRemote) {
+            return;
+        }
         for (int i = 0; i < 20; ++i) {
             double d0 = this.rand.nextGaussian() * 0.02D;
             double d1 = this.rand.nextGaussian() * 0.02D;
@@ -200,41 +207,30 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
             ((EntityPlayer) damageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightProgressKnights);
         }
 
-        // mark the stronghold as defeated
-        if (!worldObj.isRemote && worldObj.provider instanceof WorldProviderTwilightForest) {
-            int dx = getHomePosition().posX;
-            int dy = getHomePosition().posY;
-            int dz = getHomePosition().posZ;
-
-            ChunkProviderTwilightForest chunkProvider = ((WorldProviderTwilightForest) worldObj.provider)
-                    .getChunkProvider();
-            TFFeature nearbyFeature = ((TFWorldChunkManager) worldObj.provider.worldChunkMgr)
-                    .getFeatureAt(dx, dz, worldObj);
-
-            if (nearbyFeature == TFFeature.tfStronghold) {
-                chunkProvider.setStructureConquered(dx, dy, dz, true);
+        // only the last Knight defeats the whole stronghold and generates the reward
+        if (!this.worldObj.isRemote && getNearbyKnights().stream().noneMatch(knight -> knight != this)) {
+            if (hasHome() && worldObj.provider instanceof WorldProviderTwilightForest) {
+                ChunkProviderTwilightForest chunkProvider = ((WorldProviderTwilightForest) worldObj.provider)
+                        .getChunkProvider();
+                int dx = getHomePosition().posX;
+                int dy = getHomePosition().posY;
+                int dz = getHomePosition().posZ;
+                TFFeature nearbyFeature = ((TFWorldChunkManager) worldObj.provider.worldChunkMgr)
+                        .getFeatureAt(dx, dz, worldObj);
+                if (nearbyFeature == TFFeature.tfStronghold) {
+                    chunkProvider.setStructureConquered(dx, dy, dz, true);
+                }
             }
-        }
-
-        // make treasure for killing the last knight
-        if (!this.worldObj.isRemote) {
-            // am I the last one?!?!
-            List<EntityTFKnightPhantom> nearbyKnights = getNearbyKnights();
-            if (nearbyKnights.size() <= 1) {
-                // make a treasure!'
-                // System.out.println("I think I'm the last one!");
-                this.makeATreasure();
-            }
+            this.makeATreasure();
         }
     }
 
     // Make a treasure for when we're dead
     private void makeATreasure() {
-        if (this.getHomePosition().posX != 0) {
+        if (this.hasHome()) {
             // if we have a proper home position, generate the treasure there
-            TFTreasure.stronghold_boss.generate(
+            TFTreasure.stronghold_boss.generateBossReward(
                     worldObj,
-                    null,
                     getHomePosition().posX,
                     getHomePosition().posY - 1,
                     getHomePosition().posZ);
@@ -244,7 +240,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
             int py = MathHelper.floor_double(this.lastTickPosY);
             int pz = MathHelper.floor_double(this.lastTickPosZ);
 
-            TFTreasure.stronghold_boss.generate(worldObj, null, px, py, pz);
+            TFTreasure.stronghold_boss.generateBossReward(worldObj, px, py, pz);
         }
     }
 
@@ -305,9 +301,11 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
 
         double speed = 0.1D;// this.isChargingAtPlayer() ? 0.1D : 0.05D;
 
-        this.motionX += moveX / factor * speed;
-        this.motionY += moveY / factor * speed;
-        this.motionZ += moveZ / factor * speed;
+        if (factor > 1.0E-6D) {
+            this.motionX += moveX / factor * speed;
+            this.motionY += moveY / factor * speed;
+            this.motionZ += moveZ / factor * speed;
+        }
 
         if (target != null) {
             this.faceEntity(target, 10.0F, 500.0F);
@@ -388,7 +386,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
 
     /**
      * How much damage do we deal, per attack?
-     * 
+     *
      * @return
      */
     private float getAttackDamage() {
@@ -403,10 +401,13 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
 
     /**
      * Fires an axe at the target
-     * 
+     *
      * @param targetedEntity
      */
     protected void launchAxeAt(Entity targetedEntity) {
+        if (this.worldObj.isRemote || targetedEntity == null || !targetedEntity.isEntityAlive()) {
+            return;
+        }
         float bodyFacingAngle = ((renderYawOffset * 3.141593F) / 180F);
         double sx = posX + (MathHelper.cos(bodyFacingAngle) * 1);
         double sy = posY + (height * 0.82);
@@ -434,6 +435,9 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
     }
 
     protected void launchPicks() {
+        if (this.worldObj.isRemote) {
+            return;
+        }
         worldObj.playSoundAtEntity(
                 this,
                 "random.bow",
@@ -477,9 +481,11 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         this.motionX /= 2.0D;
         this.motionY /= 2.0D;
         this.motionZ /= 2.0D;
-        this.motionX -= par3 / (double) f * (double) distance;
+        if (f > 1.0E-6F) {
+            this.motionX -= par3 / (double) f * (double) distance;
+            this.motionZ -= par5 / (double) f * (double) distance;
+        }
         this.motionY += distance;
-        this.motionZ -= par5 / (double) f * (double) distance;
 
         if (this.motionY > 0.4000000059604645D) {
             this.motionY = 0.4000000059604645D;
@@ -488,7 +494,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
 
     /**
      * Called each time the current formation ends.
-     * 
+     *
      * If the current knight is the leader knight, it will pick and broadcast a new formation.
      */
     public void switchToNextFormation() {
@@ -543,6 +549,10 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
                 AxisAlignedBB
                         .getBoundingBox(this.posX, this.posY, this.posZ, this.posX + 1, this.posY + 1, this.posZ + 1)
                         .expand(32.0D, 8.0D, 32.0D));
+        // Preserve this knight while onDeath runs, but ignore other dead/dying knights.
+        nearbyKnights.removeIf(
+                knight -> knight != this && (!knight.isEntityAlive() || hasHome() != knight.hasHome()
+                        || hasHome() && !getHomePosition().equals(knight.getHomePosition())));
         return nearbyKnights;
     }
 
@@ -567,7 +577,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
 
     /**
      * Check within 20ish squares. If this phantom is the lowest numbered one, return true
-     * 
+     *
      * @param nearbyKnights
      */
     private boolean isThisTheLeader(List<EntityTFKnightPhantom> nearbyKnights) {
@@ -579,7 +589,9 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         // find more knights
 
         for (EntityTFKnightPhantom knight : nearbyKnights) {
-            if (knight.getNumber() < this.getNumber()) {
+            if (knight != this && !knight.isDead
+                    && (knight.getNumber() < this.getNumber()
+                            || (knight.getNumber() == this.getNumber() && knight.getEntityId() < this.getEntityId()))) {
                 iAmTheLowest = false;
                 break; // don't bother checking more
             }
@@ -600,6 +612,9 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
 
     // Tell a random knight from the list to charge
     private void makeARandomKnightCharge(List<EntityTFKnightPhantom> nearbyKnights) {
+        if (nearbyKnights.isEmpty()) {
+            return;
+        }
         int randomNum = rand.nextInt(nearbyKnights.size());
 
         nearbyKnights.get(randomNum).switchToFormation(Formation.ATTACK_PLAYER_START);
@@ -658,9 +673,10 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
 
     private void switchToFormationByNumber(int formationNumber) {
 
-        currentFormation = Formation.values()[formationNumber];
-
-        this.ticksProgress = 0;
+        Formation[] formations = Formation.values();
+        this.switchToFormation(
+                formationNumber >= 0 && formationNumber < formations.length ? formations[formationNumber]
+                        : Formation.HOVER);
     }
 
     public void switchToFormation(Formation formation) {
@@ -771,12 +787,9 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         double dDist = Math.sqrt(ox * ox + oz * oz);
 
         if (dDist > distance) {
-            // System.out.println("Phantom hovering beyond normal bounds");
-
-            // normalize back to boundaries
-
-            dx = this.getHomePosition().posX + (ox / dDist * distance);
-            dz = this.getHomePosition().posZ + (oz / dDist * distance);
+            // the vector points *towards* home, so subtract it to clamp the actual position
+            dx = this.getHomePosition().posX - (ox / dDist * distance);
+            dz = this.getHomePosition().posZ - (oz / dDist * distance);
         }
 
         return Vec3.createVectorHelper(dx, dy, dz);
@@ -831,6 +844,7 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
+        nbttagcompound.setInteger("TFHomeRadius", (int) getMaximumHomeDistance());
         nbttagcompound.setInteger("MyNumber", this.getNumber());
         nbttagcompound.setInteger("Formation", this.getFormationAsNumber());
         nbttagcompound.setInteger("TicksProgress", this.getTicksProgress());
@@ -845,7 +859,11 @@ public class EntityTFKnightPhantom extends EntityFlying implements IMob {
             int hx = (int) nbttaglist.func_150309_d(0);
             int hy = (int) nbttaglist.func_150309_d(1);
             int hz = (int) nbttaglist.func_150309_d(2);
-            this.setHomeArea(hx, hy, hz, 20);
+            this.setHomeArea(
+                    hx,
+                    hy,
+                    hz,
+                    nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
         }
         if (!nbttagcompound.getBoolean("HasHome")) {
             this.detachHome();

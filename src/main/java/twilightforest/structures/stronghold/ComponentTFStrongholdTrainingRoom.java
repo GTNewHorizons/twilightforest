@@ -10,10 +10,7 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 public class ComponentTFStrongholdTrainingRoom extends StructureTFStrongholdComponent {
 
-    public ComponentTFStrongholdTrainingRoom() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdTrainingRoom() {}
 
     public ComponentTFStrongholdTrainingRoom(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -84,7 +81,7 @@ public class ComponentTFStrongholdTrainingRoom extends StructureTFStrongholdComp
         this.placeBlockRotated(world, Blocks.planks, 2, 6, 2, 6, rotation, sbb);
         this.placeBlockRotated(world, Blocks.fence, 0, 5, 2, 6, rotation, sbb);
         this.placeBlockRotated(world, Blocks.fence, 0, 7, 2, 6, rotation, sbb);
-        this.placeBlockRotated(world, Blocks.pumpkin, this.getStairMeta(0 + rotation), 6, 3, 6, rotation, sbb);
+        this.placeBlockRotated(world, Blocks.pumpkin, this.getStairMeta(rotation), 6, 3, 6, rotation, sbb);
     }
 
 }

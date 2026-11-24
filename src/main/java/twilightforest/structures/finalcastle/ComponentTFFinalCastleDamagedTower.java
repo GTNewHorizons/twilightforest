@@ -69,7 +69,7 @@ public class ComponentTFFinalCastleDamagedTower extends ComponentTFFinalCastleMa
 
     public void destroyTower(World world, Random rand, StructureBoundingBox sbb) {
 
-        // make list of destroyed areas
+        // each region is replaced when its destruction has passed the current layer
         ArrayList<DestroyArea> areas = makeInitialDestroyList(rand);
 
         boolean hitDeadRock = false;
@@ -88,24 +88,23 @@ public class ComponentTFFinalCastleDamagedTower extends ComponentTFFinalCastleMa
                 }
             }
 
-            // check to see if any of our DestroyAreas are entirely above the current y value
-            DestroyArea removeArea = null;
-
-            for (DestroyArea dArea : areas) {
-                if (dArea == null || dArea.isEntirelyAbove(y)) {
-                    removeArea = dArea;
+            // retire all expired areas, not only the last one found.
+            // descending indices prevent newly created areas from being processed twice
+            for (int i = areas.size() - 1; i >= 0; i--) {
+                DestroyArea area = areas.get(i);
+                if (area == null || area.isEntirelyAbove(y)) {
+                    areas.remove(i);
+                    DestroyArea replacement = DestroyArea.createNonIntersecting(getBoundingBox(), rand, y, areas);
+                    if (replacement != null) {
+                        areas.add(replacement);
+                    }
                 }
-            }
-            // if so, replace them with new ones
-            if (removeArea != null) {
-                areas.remove(removeArea);
-                areas.add(DestroyArea.createNonIntersecting(this.getBoundingBox(), rand, y, areas));
             }
         }
     }
 
     protected ArrayList<DestroyArea> makeInitialDestroyList(Random rand) {
-        ArrayList<DestroyArea> areas = new ArrayList<>(2);
+        ArrayList<DestroyArea> areas = new ArrayList<>(3);
 
         areas.add(
                 DestroyArea.createNonIntersecting(this.getBoundingBox(), rand, this.getBoundingBox().maxY - 1, areas));
@@ -120,6 +119,7 @@ public class ComponentTFFinalCastleDamagedTower extends ComponentTFFinalCastleMa
         for (DestroyArea dArea : areas) {
             if (dArea != null && dArea.isVecInside(x, y, z)) {
                 world.setBlockToAir(x, y, z);
+                return;
             }
         }
     }

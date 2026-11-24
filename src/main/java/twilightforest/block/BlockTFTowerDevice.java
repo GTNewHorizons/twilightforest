@@ -29,9 +29,9 @@ import twilightforest.tileentity.TileEntityTFReverter;
 import twilightforest.tileentity.TileEntityTFTowerBuilder;
 
 /**
- * 
+ *
  * Tower wood is a type of plank block that forms the walls of Dark Towers
- * 
+ *
  * @author Ben
  *
  */
@@ -453,9 +453,8 @@ public class BlockTFTowerDevice extends Block {
      */
     private void letsBuild(World par1World, int x, int y, int z) {
         BlockSourceImpl blockSource = new BlockSourceImpl(par1World, x, y, z);
-        TileEntityTFTowerBuilder tileEntity = (TileEntityTFTowerBuilder) blockSource.getBlockTileEntity();
-
-        if (tileEntity != null && !tileEntity.makingBlocks) {
+        if (blockSource.getBlockTileEntity() instanceof TileEntityTFTowerBuilder tileEntity
+                && !tileEntity.makingBlocks) {
             tileEntity.startBuilding();
         }
 
@@ -466,13 +465,7 @@ public class BlockTFTowerDevice extends Block {
      */
     private boolean isInactiveTrapCharged(World par1World, int x, int y, int z) {
         BlockSourceImpl blockSource = new BlockSourceImpl(par1World, x, y, z);
-        TileEntityTFGhastTrapInactive tileEntity = (TileEntityTFGhastTrapInactive) blockSource.getBlockTileEntity();
-
-        if (tileEntity != null && tileEntity.isCharged()) {
-            return true;
-        } else {
-            return false;
-        }
+        return blockSource.getBlockTileEntity() instanceof TileEntityTFGhastTrapInactive trap && trap.isCharged();
     }
 
     /**
@@ -593,7 +586,7 @@ public class BlockTFTowerDevice extends Block {
 
     /**
      * Get a light value for this block, normal ranges are between 0 and 15
-     * 
+     *
      * @param world The current world
      * @param x     X Position
      * @param y     Y position

@@ -11,16 +11,16 @@ import twilightforest.entity.EntityTFRedcap;
 
 public class EntityAITFAvoidFrontalAttack extends EntityAIBase {
 
-    EntityLivingBase entityTarget;
-    EntityLiving me;
-    float speed;
+    private EntityLivingBase entityTarget;
+    private final EntityLiving me;
+    private final float speed;
     boolean lefty;
     double xPosition;
     double yPosition;
     double zPosition;
 
-    double minDistance = 3.0;
-    double maxDistance = 6.0;
+    private static final double MIN_DISTANCE_SQ = 9.0D;
+    private static final double MAX_DISTANCE_SQ = 36.0D;
 
     public EntityAITFAvoidFrontalAttack(EntityTFRedcap entityTFRedcap, float moveSpeed) {
         this.me = entityTFRedcap;
@@ -31,26 +31,16 @@ public class EntityAITFAvoidFrontalAttack extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        EntityLivingBase attackTarget = this.me.getAttackTarget();
-
-        if (attackTarget == null || attackTarget.getDistanceToEntity(me) > maxDistance
-                || attackTarget.getDistanceToEntity(me) < minDistance
-                || !isTargetLookingAtMe(attackTarget)) {
+        EntityLivingBase target = me.getAttackTarget();
+        if (target == null || !target.isEntityAlive() || !isInRange(target) || !isTargetLookingAtMe(target)) {
             return false;
-        } else {
-            this.entityTarget = attackTarget;
-            Vec3 avoidPos = findCirclePoint(me, entityTarget, 5, lefty ? 1 : -1);
-
-            if (avoidPos == null) {
-                return false;
-            } else {
-                this.xPosition = avoidPos.xCoord;
-                this.yPosition = avoidPos.yCoord;
-                this.zPosition = avoidPos.zCoord;
-                return true;
-            }
         }
-
+        entityTarget = target;
+        Vec3 point = findCirclePoint(me, target, 5.0D, lefty ? 1.0D : -1.0D);
+        xPosition = point.xCoord;
+        yPosition = point.yCoord;
+        zPosition = point.zCoord;
+        return true;
     }
 
     /**
@@ -58,8 +48,12 @@ public class EntityAITFAvoidFrontalAttack extends EntityAIBase {
      */
     @Override
     public void startExecuting() {
-        // System.out.println("avoid ai starting");
-        this.me.getNavigator().tryMoveToXYZ(this.xPosition, this.yPosition, this.zPosition, this.speed);
+        if (!me.getNavigator().tryMoveToXYZ(xPosition, yPosition, zPosition, speed)) {
+            // alternate the direction when an obstruction blocks the original flank
+            lefty = !lefty;
+            Vec3 alternative = findCirclePoint(me, entityTarget, 5.0D, lefty ? 1.0D : -1.0D);
+            me.getNavigator().tryMoveToXYZ(alternative.xCoord, alternative.yCoord, alternative.zCoord, speed);
+        }
     }
 
     /**
@@ -67,23 +61,11 @@ public class EntityAITFAvoidFrontalAttack extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        EntityLivingBase attackTarget = this.me.getAttackTarget();
-
-        if (attackTarget == null) {
-            return false;
-        } else if (!this.entityTarget.isEntityAlive()) {
-            return false;
-        } else if (this.me.getNavigator().noPath()) {
-            return false;
-        }
-
-        boolean shouldContinue = attackTarget.getDistanceToEntity(me) < maxDistance
-                && attackTarget.getDistanceToEntity(me) > minDistance
-                && isTargetLookingAtMe(attackTarget);
-
-        // System.out.println("ai evaluating should continue to " + shouldContinue);
-
-        return shouldContinue;
+        return entityTarget != null && entityTarget.isEntityAlive()
+                && entityTarget == me.getAttackTarget()
+                && isInRange(entityTarget)
+                && isTargetLookingAtMe(entityTarget)
+                && !me.getNavigator().noPath();
     }
 
     /**
@@ -99,8 +81,9 @@ public class EntityAITFAvoidFrontalAttack extends EntityAIBase {
      */
     @Override
     public void resetTask() {
-        this.entityTarget = null;
-        this.me.getNavigator().clearPathEntity();
+        entityTarget = null;
+        me.getNavigator().clearPathEntity();
+        lefty = !lefty;
     }
 
     /**
@@ -126,20 +109,24 @@ public class EntityAITFAvoidFrontalAttack extends EntityAIBase {
 
     /**
      * Fairly straightforward. Returns true in a 120 degree arc in front of the target's view.
-     * 
+     *
      * @return
      */
-    public boolean isTargetLookingAtMe(EntityLivingBase attackTarget) {
-        // find angle of approach
-        double dx = me.posX - attackTarget.posX;
-        double dz = me.posZ - attackTarget.posZ;
-        float angle = (float) ((Math.atan2(dz, dx) * 180D) / 3.1415927410125732D) - 90F;
+    public boolean isTargetLookingAtMe(EntityLivingBase target) {
+        double dx = me.posX - target.posX;
+        double dz = me.posZ - target.posZ;
+        double horizontalDistanceSq = dx * dx + dz * dz;
+        if (horizontalDistanceSq < 0.0001D) {
+            return true;
+        }
+        Vec3 look = target.getLookVec();
+        // dot product >= cos(60 degrees), a 120-degree cone in front of the target
+        return look.xCoord * dx + look.zCoord * dz >= Math.sqrt(horizontalDistanceSq) * 0.5D;
+    }
 
-        float difference = MathHelper.abs((attackTarget.rotationYaw - angle) % 360);
-
-        // System.out.println("Difference in angle of approach is " + difference);
-
-        return difference < 60 || difference > 300;
+    private boolean isInRange(EntityLivingBase target) {
+        double distance = me.getDistanceSqToEntity(target);
+        return distance >= MIN_DISTANCE_SQ && distance <= MAX_DISTANCE_SQ;
     }
 
 }

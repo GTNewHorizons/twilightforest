@@ -69,9 +69,12 @@ public class ItemTFMagicMap extends ItemMap {
 
     private int[] biomeFreqCache;
 
-    private int[] getBiomeFreqCache() {
+    private int[] getBiomeFreqCache(int biomeID) {
         if (this.biomeFreqCache == null) {
-            this.biomeFreqCache = new int[TwilightForestMod.maxBiomeIDs];
+            this.biomeFreqCache = new int[Math.max(256, TwilightForestMod.maxBiomeIDs)];
+        }
+        if (biomeID >= this.biomeFreqCache.length) {
+            this.biomeFreqCache = Arrays.copyOf(this.biomeFreqCache, biomeID + 1);
         }
         return this.biomeFreqCache;
     }
@@ -106,7 +109,7 @@ public class ItemTFMagicMap extends ItemMap {
                                     > (drawSize - 2) * (drawSize - 2);
                             final int xDraw2 = (xCenter / scaleFactor + xStep - xSize / 2) * scaleFactor;
                             final int zDraw2 = (zCenter / scaleFactor + zStep - zSize / 2) * scaleFactor;
-                            final int[] biomeFrequencies = getBiomeFreqCache();
+                            int[] biomeFrequencies = this.biomeFreqCache;
                             int zStep2;
                             int xStep2;
 
@@ -118,7 +121,10 @@ public class ItemTFMagicMap extends ItemMap {
                             for (xStep2 = 0; xStep2 < scaleFactor; ++xStep2) {
                                 for (zStep2 = 0; zStep2 < scaleFactor; ++zStep2) {
                                     biomeID = world.getBiomeGenForCoords(xDraw2 + xStep2, zDraw2 + zStep2).biomeID;
-
+                                    if (biomeID < 0) {
+                                        continue;
+                                    }
+                                    biomeFrequencies = getBiomeFreqCache(biomeID);
                                     biomeFrequencies[biomeID]++;
                                     if (biomeID < minBiomeID) minBiomeID = biomeID;
                                     if (biomeID > maxBiomeID) maxBiomeID = biomeID;
@@ -198,22 +204,16 @@ public class ItemTFMagicMap extends ItemMap {
         if (!world.isRemote) {
             TFMagicMapData mapData = this.getMapData(itemStack, world);
 
-            if (entity instanceof EntityPlayer var7) {
-                mapData.updateVisiblePlayers(var7, itemStack);
+            if (mapData == null) {
+                return;
             }
-
-            if (par5) {
-                this.updateMapData(world, entity, mapData);
+            if (entity instanceof EntityPlayer player) {
+                mapData.updateVisiblePlayers(player, itemStack);
+                if (par5) {
+                    this.updateMapData(world, player, mapData);
+                }
             }
         }
-    }
-
-    /**
-     * Called when item is crafted/smelted. Used only by maps so far.
-     */
-    @Override
-    public void onCreated(ItemStack itemStack, World world, EntityPlayer player) {
-        // we don't need to do anything here, I think
     }
 
     /**
@@ -234,32 +234,31 @@ public class ItemTFMagicMap extends ItemMap {
 
     /**
      * returns null if no update is to be sent
-     * 
+     *
      * We have re-written this to provide a Packet250CustomPayload to be sent, since the map data packet is only for the
      * actual map map.
-     * 
+     *
      * Also every 4 player update packets we send is actually a feature icon update packet.
      */
     @Override
     public Packet func_150911_c(ItemStack itemStack, World world, EntityPlayer player) {
-        // System.out.println("Getting magic map packet");
-
-        byte[] mapBytes = this.getMapData(itemStack, world).getUpdatePacketData(itemStack, world, player);
-
-        if (mapBytes == null) {
+        TFMagicMapData mapData = this.getMapData(itemStack, world);
+        if (mapData == null) {
             return null;
-        } else {
-            // hijack random player data packets for our feature data packets?
-            if (mapBytes[0] == 1 && world.rand.nextInt(4) == 0) {
-                this.getMapData(itemStack, world).checkExistingFeatures(world);
-                mapBytes = this.getMapData(itemStack, world).makeFeatureStorageArray();
-            }
-
-            // short mapItemID = (short) TFItems.magicMap;
-            short uniqueID = (short) itemStack.getItemDamage();
-
-            return TFMapPacketHandler.makeMagicMapPacket(ItemTFMagicMap.STR_ID, uniqueID, mapBytes);
         }
+        byte[] update = mapData.getUpdatePacketData(itemStack, world, player);
+        if (update == null || update.length == 0) {
+            return null;
+        }
+        // preserve the existing 1 in 4 feature refresh for player location packets
+        if (update[0] == 1 && world.rand.nextInt(4) == 0) {
+            mapData.checkExistingFeatures(world);
+            update = mapData.makeFeatureStorageArray();
+            if (update == null || update.length == 0) {
+                return null;
+            }
+        }
+        return TFMapPacketHandler.makeMagicMapPacket(STR_ID, (short) itemStack.getItemDamage(), update);
     }
 
     // Add the map number to the tooltip

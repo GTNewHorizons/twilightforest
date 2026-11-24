@@ -1,6 +1,9 @@
 package twilightforest.item;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
@@ -24,9 +27,19 @@ import twilightforest.TwilightForestMod;
 public class ItemTFMinotaurAxe extends ItemAxe {
 
     public static final int BONUS_CHARGING_DAMAGE = 7;
-    private Entity bonusDamageTarget;
-    private EntityLivingBase bonusDamageAttacker;
-    private float damageVsEntity;
+    private final Map<EntityLivingBase, PendingCharge> pendingCharges = new WeakHashMap<>();
+    private final float damageVsEntity;
+
+    private static final class PendingCharge {
+
+        private final WeakReference<Entity> target;
+        private final long tick;
+
+        private PendingCharge(Entity target, long tick) {
+            this.target = new WeakReference<>(target);
+            this.tick = tick;
+        }
+    }
 
     protected ItemTFMinotaurAxe(Item.ToolMaterial par2EnumToolMaterial) {
         super(par2EnumToolMaterial);
@@ -47,7 +60,7 @@ public class ItemTFMinotaurAxe extends ItemAxe {
     /**
      * Called when the player Left Clicks (attacks) an entity. Processed before damage is done, if return value is true
      * further processing is canceled and the entity is not attacked.
-     * 
+     *
      * @param stack  The Item being used
      * @param player The player that is attacking
      * @param entity The entity being attacked
@@ -55,26 +68,29 @@ public class ItemTFMinotaurAxe extends ItemAxe {
      */
     @Override
     public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-        // if the player is sprinting, keep the entity, we will do extra damage to it
-        if (player.isSprinting()) {
-            this.bonusDamageTarget = entity;
-            this.bonusDamageAttacker = player;
+        if (!player.worldObj.isRemote) {
+            // replace any stale charge even when this swing is not a sprint attack
+            pendingCharges.remove(player);
+            if (player.isSprinting() && entity instanceof EntityLivingBase) {
+                pendingCharges.put(player, new PendingCharge(entity, player.worldObj.getTotalWorldTime()));
+            }
         }
-
         return false;
     }
 
     @Override
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-        if (this.bonusDamageAttacker != null && this.bonusDamageTarget != null && target == this.bonusDamageTarget) {
-            // System.out.println("Minotaur Axe extra damage!");
-            if (bonusDamageAttacker instanceof EntityPlayer)
-                ((EntityPlayer) this.bonusDamageAttacker).onEnchantmentCritical(bonusDamageTarget);
-            if (this.bonusDamageTarget instanceof EntityLivingBase) target.lastDamage = 0;
-            this.bonusDamageTarget
-                    .attackEntityFrom(DamageSource.causeMobDamage(bonusDamageAttacker), BONUS_CHARGING_DAMAGE);
-            this.bonusDamageAttacker = null;
-            this.bonusDamageTarget = null;
+        if (!attacker.worldObj.isRemote) {
+            PendingCharge charge = pendingCharges.remove(attacker);
+            if (charge != null && charge.target.get() == target
+                    && attacker.worldObj.getTotalWorldTime() - charge.tick <= 1L
+                    && attacker.worldObj.getTotalWorldTime() >= charge.tick) {
+                if (attacker instanceof EntityPlayer player) {
+                    player.onEnchantmentCritical(target);
+                }
+                target.lastDamage = 0;
+                target.attackEntityFrom(DamageSource.causeMobDamage(attacker), BONUS_CHARGING_DAMAGE);
+            }
         }
         return super.hitEntity(stack, target, attacker);
     }
@@ -110,7 +126,7 @@ public class ItemTFMinotaurAxe extends ItemAxe {
 
     /**
      * Gets a map of item attribute modifiers, used by ItemSword to increase hit damage.
-     * 
+     *
      * Sergius Onesimus: Probably no need for this anymore since additional damage is now calculated on hit
      */
     public Multimap<String, AttributeModifier> getItemAttributeModifiers() {

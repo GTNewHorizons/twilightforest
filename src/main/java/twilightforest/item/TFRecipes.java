@@ -661,7 +661,7 @@ public class TFRecipes {
 
     /**
      * Add a recipe for an enchanted item. Always shaped.
-     * 
+     *
      * @param item
      * @param enchantment
      * @param enchantmentLevel
@@ -679,7 +679,7 @@ public class TFRecipes {
 
     /**
      * Add a recipe for an enchanted item. Always shaped.
-     * 
+     *
      * @param item
      * @param enchantment
      * @param enchantmentLevel

@@ -12,7 +12,7 @@ import twilightforest.TwilightForestMod;
 
 public class RenderTFNagaSegment extends Render {
 
-    private ModelBase model;
+    private final ModelBase model;
     private static final ResourceLocation textureLoc = new ResourceLocation(
             TwilightForestMod.MODEL_DIR + "nagasegment.png");
 
@@ -26,10 +26,13 @@ public class RenderTFNagaSegment extends Render {
     public void renderMe(Entity par1Entity, double par2, double par4, double par6, float par8, float time) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float) par2, (float) par4, (float) par6);
-        GL11.glRotatef(180 - MathHelper.wrapAngleTo180_float(par8), 0.0F, 1.0F, 0.0F);
+        float yaw = par1Entity.prevRotationYaw
+                + MathHelper.wrapAngleTo180_float(par1Entity.rotationYaw - par1Entity.prevRotationYaw) * time;
+        GL11.glRotatef(180 - yaw, 0.0F, 1.0F, 0.0F);
 
         // pitch
-        float pitch = par1Entity.prevRotationPitch + (par1Entity.rotationPitch - par1Entity.prevRotationPitch) * time;
+        float pitch = par1Entity.prevRotationPitch
+                + MathHelper.wrapAngleTo180_float(par1Entity.rotationPitch - par1Entity.prevRotationPitch) * time;
 
         GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
 
@@ -50,6 +53,7 @@ public class RenderTFNagaSegment extends Render {
      * (Render<T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,
      * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
      */
+    @Override
     public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9) {
         this.renderMe(par1Entity, par2, par4, par6, par8, par9);
     }
@@ -57,6 +61,7 @@ public class RenderTFNagaSegment extends Render {
     /**
      * Return our specific texture
      */
+    @Override
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         return textureLoc;
     }

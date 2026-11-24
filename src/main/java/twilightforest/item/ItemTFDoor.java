@@ -19,7 +19,7 @@ import twilightforest.block.TFBlocks;
 
 public class ItemTFDoor extends Item {
 
-    private int doorMaterial;
+    private final int doorMaterial;
 
     public ItemTFDoor(int material) {
         this.doorMaterial = material;
@@ -33,7 +33,7 @@ public class ItemTFDoor extends Item {
      */
     public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_,
             int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_) {
-        if (p_77648_7_ != 1) {
+        if (p_77648_7_ != 1 || p_77648_1_.stackSize <= 0) {
             return false;
         } else {
             ++p_77648_5_;
@@ -73,8 +73,12 @@ public class ItemTFDoor extends Item {
                 } else {
                     int i1 = MathHelper
                             .floor_double((double) ((p_77648_2_.rotationYaw + 180.0F) * 4.0F / 360.0F) - 0.5D) & 3;
-                    placeDoorBlock(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, i1, block);
-                    --p_77648_1_.stackSize;
+                    if (!placeDoorBlockChecked(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, i1, block)) {
+                        return false;
+                    }
+                    if (!p_77648_2_.capabilities.isCreativeMode) {
+                        --p_77648_1_.stackSize;
+                    }
                     return true;
                 }
             } else {
@@ -84,6 +88,11 @@ public class ItemTFDoor extends Item {
     }
 
     public static void placeDoorBlock(World p_150924_0_, int p_150924_1_, int p_150924_2_, int p_150924_3_,
+            int p_150924_4_, Block p_150924_5_) {
+        placeDoorBlockChecked(p_150924_0_, p_150924_1_, p_150924_2_, p_150924_3_, p_150924_4_, p_150924_5_);
+    }
+
+    private static boolean placeDoorBlockChecked(World p_150924_0_, int p_150924_1_, int p_150924_2_, int p_150924_3_,
             int p_150924_4_, Block p_150924_5_) {
         byte b0 = 0;
         byte b1 = 0;
@@ -120,10 +129,19 @@ public class ItemTFDoor extends Item {
             flag2 = true;
         }
 
-        p_150924_0_.setBlock(p_150924_1_, p_150924_2_, p_150924_3_, p_150924_5_, p_150924_4_, 2);
-        p_150924_0_.setBlock(p_150924_1_, p_150924_2_ + 1, p_150924_3_, p_150924_5_, 8 | (flag2 ? 1 : 0), 2);
+        // keep both halves consistent if a placement fails after the lower half was written
+        Block previousLower = p_150924_0_.getBlock(p_150924_1_, p_150924_2_, p_150924_3_);
+        int previousMeta = p_150924_0_.getBlockMetadata(p_150924_1_, p_150924_2_, p_150924_3_);
+        if (!p_150924_0_.setBlock(p_150924_1_, p_150924_2_, p_150924_3_, p_150924_5_, p_150924_4_, 2)) {
+            return false;
+        }
+        if (!p_150924_0_.setBlock(p_150924_1_, p_150924_2_ + 1, p_150924_3_, p_150924_5_, 8 | (flag2 ? 1 : 0), 2)) {
+            p_150924_0_.setBlock(p_150924_1_, p_150924_2_, p_150924_3_, previousLower, previousMeta, 3);
+            return false;
+        }
         p_150924_0_.notifyBlocksOfNeighborChange(p_150924_1_, p_150924_2_, p_150924_3_, p_150924_5_);
         p_150924_0_.notifyBlocksOfNeighborChange(p_150924_1_, p_150924_2_ + 1, p_150924_3_, p_150924_5_);
+        return true;
     }
 
     /**

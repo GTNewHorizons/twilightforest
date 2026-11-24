@@ -11,12 +11,15 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenCanopyOak extends TFGenCanopyTree {
 
+    private static final int MAX_BRANCH_SPREAD = 5;
+    private static final int CANOPY_HEIGHT_ABOVE_TRUNK = 5;
+
     public TFGenCanopyOak() {
         this(false);
     }
 
-    public TFGenCanopyOak(boolean par1) {
-        super(par1);
+    public TFGenCanopyOak(boolean notify) {
+        super(notify);
         this.treeBlock = TFBlocks.log;
         this.treeMeta = 0;
         this.branchMeta = 12;
@@ -24,13 +27,10 @@ public class TFGenCanopyOak extends TFGenCanopyTree {
         this.leafMeta = 0;
         this.rootBlock = TFBlocks.root;
         this.rootMeta = BlockTFRoots.ROOT_META;
-
     }
 
     @Override
     public boolean generate(World world, Random random, int x, int y, int z) {
-        int treeHeight;
-
         // check if we're on dirt or grass
         Material materialUnder = world.getBlock(x, y - 1, z).getMaterial();
         if ((materialUnder != Material.grass && materialUnder != Material.ground) || y >= world.getHeight() - 12) {
@@ -38,7 +38,7 @@ public class TFGenCanopyOak extends TFGenCanopyTree {
         }
 
         // determine a height
-        treeHeight = minHeight;
+        int treeHeight = minHeight;
         if (random.nextInt(chanceAddFirstFive) == 0) {
             treeHeight += random.nextInt(5);
 
@@ -47,27 +47,31 @@ public class TFGenCanopyOak extends TFGenCanopyTree {
             }
         }
 
+        // the highest branch leaves can extend five blocks above the trunk.
+        if ((long) y + treeHeight + CANOPY_HEIGHT_ABOVE_TRUNK >= world.getHeight()) {
+            return false;
+        }
+
         // okay build a tree! Go up to the height
         buildTrunk(world, x, y, z, treeHeight);
 
         // make 12 - 20 branches
         int numBranches = 12 + random.nextInt(9);
-        float bangle = random.nextFloat();
-        for (int b = 0; b < numBranches; b++) {
-            float btilt = 0.15F + (random.nextFloat() * 0.35F);
-            buildBranch(world, x, y, z, treeHeight - 10 + (b / 2), 5, bangle, btilt, false, random);
+        float branchAngle = random.nextFloat();
+        for (int branch = 0; branch < numBranches; branch++) {
+            float branchTilt = 0.15F + (random.nextFloat() * 0.35F);
+            buildBranch(world, x, y, z, treeHeight - 10 + (branch / 2), 5, branchAngle, branchTilt, false, random);
 
-            bangle += (random.nextFloat() * 0.4F);
-            if (bangle > 1.0F) {
-                bangle -= 1.0F;
+            branchAngle += (random.nextFloat() * 0.4F);
+            if (branchAngle > 1.0F) {
+                branchAngle -= 1.0F;
             }
         }
 
-        makeRoots(world, random, x + 0, y, z + 0);
-        makeRoots(world, random, x + 1, y, z + 0);
-        makeRoots(world, random, x + 0, y, z + 1);
+        makeRoots(world, random, x, y, z);
+        makeRoots(world, random, x + 1, y, z);
+        makeRoots(world, random, x, y, z + 1);
         makeRoots(world, random, x + 1, y, z + 1);
-
         return true;
     }
 
@@ -82,59 +86,48 @@ public class TFGenCanopyOak extends TFGenCanopyTree {
         // roots!
         int numRoots = 1 + random.nextInt(2);
         float offset = random.nextFloat();
-        for (int b = 0; b < numRoots; b++) {
-            buildRoot(world, x, y, z, offset, b);
+        for (int root = 0; root < numRoots; root++) {
+            buildRoot(world, x, y, z, offset, root);
         }
     }
 
-    private void buildTrunk(World world, int sx, int sy, int sz, int treeHeight) {
+    private void buildTrunk(World world, int x, int y, int z, int treeHeight) {
         for (int dy = 0; dy < treeHeight; dy++) {
-            this.setBlockAndMetadata(world, sx + 0, sy + dy, sz + 0, this.treeBlock, this.treeMeta);
-            this.setBlockAndMetadata(world, sx + 1, sy + dy, sz + 0, this.treeBlock, this.treeMeta);
-            this.setBlockAndMetadata(world, sx + 0, sy + dy, sz + 1, this.treeBlock, this.treeMeta);
-            this.setBlockAndMetadata(world, sx + 1, sy + dy, sz + 1, this.treeBlock, this.treeMeta);
+            this.setBlockAndMetadata(world, x, y + dy, z, this.treeBlock, this.treeMeta);
+            this.setBlockAndMetadata(world, x + 1, y + dy, z, this.treeBlock, this.treeMeta);
+            this.setBlockAndMetadata(world, x, y + dy, z + 1, this.treeBlock, this.treeMeta);
+            this.setBlockAndMetadata(world, x + 1, y + dy, z + 1, this.treeBlock, this.treeMeta);
         }
 
-        drawLeafBlob(world, sx + 0, sy + treeHeight, sz + 0, 3, leafBlock, leafMeta);
-
+        drawLeafBlob(world, x, y + treeHeight, z, 3, leafBlock, leafMeta);
     }
 
     /**
      * Build a branch with a flat blob of leaves at the end.
-     * 
+     *
      * @param height
      * @param length
      * @param angle
      * @param tilt
      */
+    @Override
     void buildBranch(World world, int x, int y, int z, int height, double length, double angle, double tilt,
             boolean trunk, Random treeRNG) {
-        ChunkCoordinates src = new ChunkCoordinates(x, y + height, z);
-        ChunkCoordinates dest = translateCoords(src.posX, src.posY, src.posZ, length, angle, tilt);
+        ChunkCoordinates source = new ChunkCoordinates(x, y + height, z);
+        ChunkCoordinates destination = translateCoords(source.posX, source.posY, source.posZ, length, angle, tilt);
 
         // constrain branch spread
-        int limit = 5;
-        if ((dest.posX - x) < -limit) {
-            dest.posX = x - limit;
-        }
-        if ((dest.posX - x) > limit) {
-            dest.posX = x + limit;
-        }
-        if ((dest.posZ - z) < -limit) {
-            dest.posZ = z - limit;
-        }
-        if ((dest.posZ - z) > limit) {
-            dest.posZ = z + limit;
-        }
+        destination.posX = limitBranchSpread(destination.posX, x);
+        destination.posZ = limitBranchSpread(destination.posZ, z);
 
         drawBresehnam(
                 world,
-                src.posX,
-                src.posY,
-                src.posZ,
-                dest.posX,
-                dest.posY,
-                dest.posZ,
+                source.posX,
+                source.posY,
+                source.posZ,
+                destination.posX,
+                destination.posY,
+                destination.posZ,
                 treeBlock,
                 trunk ? treeMeta : branchMeta);
 
@@ -145,17 +138,25 @@ public class TFGenCanopyOak extends TFGenCanopyTree {
         }
 
         int blobSize = 2;// + treeRNG.nextInt(2);
-
-        drawLeafBlob(world, dest.posX, dest.posY, dest.posZ, blobSize, leafBlock, leafMeta);
+        drawLeafBlob(world, destination.posX, destination.posY, destination.posZ, blobSize, leafBlock, leafMeta);
 
         // makeLeafCircle(world, dest.posX, dest.posY - 1, dest.posZ, 3, leafBlock, leafMeta, true);
         // makeLeafCircle(world, dest.posX, dest.posY, dest.posZ, 4, leafBlock, leafMeta, true);
         // makeLeafCircle(world, dest.posX, dest.posY + 1, dest.posZ, 2, leafBlock, leafMeta, true);
 
-        setBlockAndMetadata(world, dest.posX + 1, dest.posY, dest.posZ, treeBlock, branchMeta);
-        setBlockAndMetadata(world, dest.posX - 1, dest.posY, dest.posZ, treeBlock, branchMeta);
-        setBlockAndMetadata(world, dest.posX, dest.posY, dest.posZ + 1, treeBlock, branchMeta);
-        setBlockAndMetadata(world, dest.posX, dest.posY, dest.posZ - 1, treeBlock, branchMeta);
+        setBlockAndMetadata(world, destination.posX + 1, destination.posY, destination.posZ, treeBlock, branchMeta);
+        setBlockAndMetadata(world, destination.posX - 1, destination.posY, destination.posZ, treeBlock, branchMeta);
+        setBlockAndMetadata(world, destination.posX, destination.posY, destination.posZ + 1, treeBlock, branchMeta);
+        setBlockAndMetadata(world, destination.posX, destination.posY, destination.posZ - 1, treeBlock, branchMeta);
+    }
 
+    private static int limitBranchSpread(int coordinate, int origin) {
+        if (coordinate - origin < -MAX_BRANCH_SPREAD) {
+            return origin - MAX_BRANCH_SPREAD;
+        }
+        if (coordinate - origin > MAX_BRANCH_SPREAD) {
+            return origin + MAX_BRANCH_SPREAD;
+        }
+        return coordinate;
     }
 }

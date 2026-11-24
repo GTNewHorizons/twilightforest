@@ -207,7 +207,7 @@ public class BlockTFNagastone2 extends Block {
     }
 
     public void Check4Neighbours(World world, int x, int y, int z) {
-        TileEntityTFNagastone te = (TileEntityTFNagastone) world.getTileEntity(x, y, z);
+        if (!(world.getTileEntity(x, y, z) instanceof TileEntityTFNagastone te)) return;
         te.NoNeighbours();
         te.neighbourDown = CanConnectTo(world, x, y, z, 0);
         te.neighbourUp = CanConnectTo(world, x, y, z, 1);
@@ -219,7 +219,6 @@ public class BlockTFNagastone2 extends Block {
     }
 
     public boolean CanConnectTo(World world, int x, int y, int z, int direction) {
-        TileEntityTFNagastone currentTE = (TileEntityTFNagastone) world.getTileEntity(x, y, z);
         int currentMeta = world.getBlockMetadata(x, y, z);
 
         Direction currentDirection = DirectionFromMeta(currentMeta);
@@ -251,7 +250,6 @@ public class BlockTFNagastone2 extends Block {
                 default:
                     return false;
             }
-            TileEntityTFNagastone neighbourTE = (TileEntityTFNagastone) world.getTileEntity(x + dx, y + dy, z + dz);
             int neighbourMeta = world.getBlockMetadata(x + dx, y + dy, z + dz);
 
             Direction neighbourDirection = DirectionFromMeta(neighbourMeta);
@@ -421,10 +419,10 @@ public class BlockTFNagastone2 extends Block {
 
     /**
      * From the specified side and block metadata retrieves the blocks texture. Args: side, metadata
-     * 
+     *
      * 0 - 3 head directions 4 - 7 bend down 8 - 11 bend up 12 straight n/s 13 straight e/w 14 straight u/d 15 weird
      * middle piece
-     * 
+     *
      * TODO: Surely there is a way to do this that's not just specifying all 6 * 16 values.
      */
     @Override

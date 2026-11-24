@@ -13,14 +13,17 @@ import twilightforest.TFTreasure;
 
 public class ComponentTFStrongholdSmallStairs extends StructureTFStrongholdComponent {
 
+    private static final String NBT_CHEST_TRAPPED = "chestTrapped";
+
+    private static final String NBT_HAS_TREASURE = "hasTreasure";
+
+    private static final String NBT_ENTER_BOTTOM = "enterBottom";
+
     private boolean enterBottom;
     public boolean hasTreasure;
     public boolean chestTrapped;
 
-    public ComponentTFStrongholdSmallStairs() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdSmallStairs() {}
 
     public ComponentTFStrongholdSmallStairs(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -33,9 +36,9 @@ public class ComponentTFStrongholdSmallStairs extends StructureTFStrongholdCompo
     protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
         super.func_143012_a(par1NBTTagCompound);
 
-        par1NBTTagCompound.setBoolean("enterBottom", this.enterBottom);
-        par1NBTTagCompound.setBoolean("hasTreasure", this.hasTreasure);
-        par1NBTTagCompound.setBoolean("chestTrapped", this.chestTrapped);
+        par1NBTTagCompound.setBoolean(NBT_ENTER_BOTTOM, this.enterBottom);
+        par1NBTTagCompound.setBoolean(NBT_HAS_TREASURE, this.hasTreasure);
+        par1NBTTagCompound.setBoolean(NBT_CHEST_TRAPPED, this.chestTrapped);
     }
 
     /**
@@ -44,9 +47,9 @@ public class ComponentTFStrongholdSmallStairs extends StructureTFStrongholdCompo
     @Override
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
-        this.enterBottom = par1NBTTagCompound.getBoolean("enterBottom");
-        this.hasTreasure = par1NBTTagCompound.getBoolean("hasTreasure");
-        this.chestTrapped = par1NBTTagCompound.getBoolean("chestTrapped");
+        this.enterBottom = par1NBTTagCompound.getBoolean(NBT_ENTER_BOTTOM);
+        this.hasTreasure = par1NBTTagCompound.getBoolean(NBT_HAS_TREASURE);
+        this.chestTrapped = par1NBTTagCompound.getBoolean(NBT_CHEST_TRAPPED);
     }
 
     /**

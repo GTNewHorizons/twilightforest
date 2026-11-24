@@ -164,33 +164,33 @@ public class TFItems {
 
     public static void registerItems() {
         int nagaScaleRenderID = TwilightForestMod.proxy.registerArmorRenderID("twilightforest/nagascale_"); // the
-                                                                                                            // prefix
-                                                                                                            // doesn't
-                                                                                                            // seem to
-                                                                                                            // matter
+        // prefix
+        // doesn't
+        // seem to
+        // matter
         int ironwoodRenderID = TwilightForestMod.proxy.registerArmorRenderID("twilightforest/ironwood_"); // the prefix
-                                                                                                          // doesn't
-                                                                                                          // seem to
-                                                                                                          // matter
+        // doesn't
+        // seem to
+        // matter
         int fieryRenderID = TwilightForestMod.proxy.registerArmorRenderID("twilightforest/fiery_"); // the prefix
-                                                                                                    // doesn't seem to
-                                                                                                    // matter
+        // doesn't seem to
+        // matter
         int steeleafRenderID = TwilightForestMod.proxy.registerArmorRenderID("twilightforest/steeleaf_"); // the prefix
-                                                                                                          // doesn't
-                                                                                                          // seem to
-                                                                                                          // matter
+        // doesn't
+        // seem to
+        // matter
         int knightlyRenderID = TwilightForestMod.proxy.registerArmorRenderID("twilightforest/knightly_"); // the prefix
-                                                                                                          // doesn't
-                                                                                                          // seem to
-                                                                                                          // matter
+        // doesn't
+        // seem to
+        // matter
         int phantomRenderID = TwilightForestMod.proxy.registerArmorRenderID("twilightforest/phantom_"); // the prefix
-                                                                                                        // doesn't seem
-                                                                                                        // to matter
+        // doesn't seem
+        // to matter
         int yetiRenderID = TwilightForestMod.proxy.registerArmorRenderID("twilightforest/yeti_"); // the prefix doesn't
-                                                                                                  // seem to matter
+        // seem to matter
         int arcticRenderID = TwilightForestMod.proxy.registerArmorRenderID("twilightforest/arctic_"); // the prefix
-                                                                                                      // doesn't seem to
-                                                                                                      // matter
+        // doesn't seem to
+        // matter
 
         nagaScale = new ItemTF().setUnlocalizedName("nagaScale");
         plateNaga = new ItemTFNagaArmor(ARMOR_NAGA, nagaScaleRenderID, 1).setUnlocalizedName("plateNaga")

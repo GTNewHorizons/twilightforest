@@ -73,119 +73,53 @@ public class TileEntityTFNagastone extends TileEntity {
         return neighbourCount;
     }
 
+    // bit positions represent the 4 directions visible on each face
+    // the lookup preserves the original priority and connection type names
+    private static final ConnectionType[] HORIZONTAL_CONNECTIONS = { ConnectionType.NO, ConnectionType.E,
+            ConnectionType.W, ConnectionType.EW, ConnectionType.N, ConnectionType.EN, ConnectionType.WN,
+            ConnectionType.triS, ConnectionType.S, ConnectionType.ES, ConnectionType.WS, ConnectionType.triN,
+            ConnectionType.NS, ConnectionType.triW, ConnectionType.triE, ConnectionType.CROSS };
+
+    private static final ConnectionType[] NORTH_SOUTH_CONNECTIONS = { ConnectionType.NO, ConnectionType.D,
+            ConnectionType.U, ConnectionType.UD, ConnectionType.N, ConnectionType.DN, ConnectionType.UN,
+            ConnectionType.triS, ConnectionType.S, ConnectionType.DS, ConnectionType.US, ConnectionType.triN,
+            ConnectionType.NS, ConnectionType.triU, ConnectionType.triD, ConnectionType.CROSS };
+
+    private static final ConnectionType[] EAST_WEST_CONNECTIONS = { ConnectionType.NO, ConnectionType.D,
+            ConnectionType.U, ConnectionType.UD, ConnectionType.E, ConnectionType.DE, ConnectionType.UE,
+            ConnectionType.triW, ConnectionType.W, ConnectionType.DW, ConnectionType.UW, ConnectionType.triE,
+            ConnectionType.EW, ConnectionType.triU, ConnectionType.triD, ConnectionType.CROSS };
+
+    // keep this legacy public method name for callers in the block renderer
     public ConnectionType GetConnectionType(int side) {
-        ConnectionType ct = ConnectionType.NO;
-        int x = -1;
         switch (side) {
-            default:
-                break;
             case 0:
             case 1:
-                x = this.UpdateNeighbourCount() - (this.neighbourDown ? 1 : 0) - (this.neighbourUp ? 1 : 0);
-                switch (x) {
-                    default:
-                        break;
-                    case 1:
-                        if (this.neighbourEast) ct = ConnectionType.E;
-                        else if (this.neighbourWest) ct = ConnectionType.W;
-                        else if (this.neighbourNorth) ct = ConnectionType.N;
-                        else if (this.neighbourSouth) ct = ConnectionType.S;
-                        break;
-                    case 2:
-                        if (this.neighbourEast) {
-                            if (this.neighbourNorth) ct = ConnectionType.EN;
-                            else if (this.neighbourWest) ct = ConnectionType.EW;
-                            else ct = ConnectionType.ES;
-                        } else if (this.neighbourWest) {
-
-                            if (this.neighbourNorth) ct = ConnectionType.WN;
-                            else ct = ConnectionType.WS;
-                        } else ct = ConnectionType.NS;
-
-                        break;
-                    case 3:
-                        if (!this.neighbourEast) ct = ConnectionType.triE;
-                        else if (!this.neighbourWest) ct = ConnectionType.triW;
-                        else if (!this.neighbourNorth) ct = ConnectionType.triN;
-                        else ct = ConnectionType.triS;
-                        break;
-                    case 4:
-                        ct = ConnectionType.CROSS;
-                        break;
-                }
-                break;
+                UpdateNeighbourCount();
+                return HORIZONTAL_CONNECTIONS[connectionMask(
+                        neighbourEast,
+                        neighbourWest,
+                        neighbourNorth,
+                        neighbourSouth)];
             case 2:
             case 3:
-                x = this.UpdateNeighbourCount() - (this.neighbourEast ? 1 : 0) - (this.neighbourWest ? 1 : 0);
-                switch (x) {
-                    default:
-                        break;
-                    case 1:
-                        if (this.neighbourDown) ct = ConnectionType.D;
-                        else if (this.neighbourUp) ct = ConnectionType.U;
-                        else if (this.neighbourNorth) ct = ConnectionType.N;
-                        else if (this.neighbourSouth) ct = ConnectionType.S;
-                        break;
-                    case 2:
-                        if (this.neighbourDown) {
-                            if (this.neighbourNorth) ct = ConnectionType.DN;
-                            else if (this.neighbourUp) ct = ConnectionType.UD;
-                            else ct = ConnectionType.DS;
-                        } else if (this.neighbourUp) {
-
-                            if (this.neighbourNorth) ct = ConnectionType.UN;
-                            else ct = ConnectionType.US;
-                        } else ct = ConnectionType.NS;
-
-                        break;
-                    case 3:
-                        if (!this.neighbourUp) ct = ConnectionType.triU;
-                        else if (!this.neighbourDown) ct = ConnectionType.triD;
-                        else if (!this.neighbourNorth) ct = ConnectionType.triN;
-                        else ct = ConnectionType.triS;
-                        break;
-                    case 4:
-                        ct = ConnectionType.CROSS;
-                        break;
-                }
-                break;
+                UpdateNeighbourCount();
+                return NORTH_SOUTH_CONNECTIONS[connectionMask(
+                        neighbourDown,
+                        neighbourUp,
+                        neighbourNorth,
+                        neighbourSouth)];
             case 4:
             case 5:
-                x = this.UpdateNeighbourCount() - (this.neighbourNorth ? 1 : 0) - (this.neighbourSouth ? 1 : 0);
-                switch (x) {
-                    default:
-                        break;
-                    case 1:
-                        if (this.neighbourDown) ct = ConnectionType.D;
-                        else if (this.neighbourUp) ct = ConnectionType.U;
-                        else if (this.neighbourEast) ct = ConnectionType.E;
-                        else if (this.neighbourWest) ct = ConnectionType.W;
-                        break;
-                    case 2:
-                        if (this.neighbourDown) {
-                            if (this.neighbourEast) ct = ConnectionType.DE;
-                            else if (this.neighbourUp) ct = ConnectionType.UD;
-                            else ct = ConnectionType.DW;
-                        } else if (this.neighbourUp) {
-
-                            if (this.neighbourEast) ct = ConnectionType.UE;
-                            else ct = ConnectionType.UW;
-                        } else ct = ConnectionType.EW;
-
-                        break;
-                    case 3:
-                        if (!this.neighbourUp) ct = ConnectionType.triU;
-                        else if (!this.neighbourDown) ct = ConnectionType.triD;
-                        else if (!this.neighbourEast) ct = ConnectionType.triE;
-                        else ct = ConnectionType.triW;
-                        break;
-                    case 4:
-                        ct = ConnectionType.CROSS;
-                        break;
-                }
-                break;
+                UpdateNeighbourCount();
+                return EAST_WEST_CONNECTIONS[connectionMask(neighbourDown, neighbourUp, neighbourEast, neighbourWest)];
+            default:
+                return ConnectionType.NO;
         }
-        return ct;
+    }
+
+    private static int connectionMask(boolean first, boolean second, boolean third, boolean fourth) {
+        return (first ? 1 : 0) | (second ? 2 : 0) | (third ? 4 : 0) | (fourth ? 8 : 0);
     }
 
     @Override
@@ -239,21 +173,13 @@ public class TileEntityTFNagastone extends TileEntity {
 
     /**
      * Determines if this TileEntity requires update calls.
-     * 
+     *
      * @return True if you want updateEntity() to be called, false if not
      */
     @Override
     public boolean canUpdate() {
-        return true;
-    }
-
-    /**
-     * Allows the entity to update its state. Overridden in most subclasses, e.g. the mob spawner uses this to count
-     * ticks and creates a new spawn inside its implementation.
-     */
-    @Override
-    public void updateEntity() {
-        super.updateEntity();
+        // Connection state changes are handled by block updates and NBT packets.
+        return false;
     }
 
 }

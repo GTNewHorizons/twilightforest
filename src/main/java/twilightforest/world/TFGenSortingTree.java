@@ -33,7 +33,8 @@ public class TFGenSortingTree extends TFGenerator {
     public boolean generate(World world, Random rand, int x, int y, int z) {
         // check soil
         Material materialUnder = world.getBlock(x, y - 1, z).getMaterial();
-        if ((materialUnder != Material.grass && materialUnder != Material.ground) || y >= world.getHeight() - 12) {
+        if (y < 1 || (materialUnder != Material.grass && materialUnder != Material.ground)
+                || y >= world.getHeight() - 12) {
             return false;
         }
 
@@ -56,7 +57,7 @@ public class TFGenSortingTree extends TFGenerator {
         for (int lx = -1; lx <= 1; lx++) {
             for (int ly = -1; ly <= 1; ly++) {
                 for (int lz = -1; lz <= 1; lz++) {
-                    if (!bushy && Math.abs(ly) > 0 && (Math.abs(lx) + Math.abs(lz)) > 1) {
+                    if (!bushy && ly != 0 && Math.abs(lx) + Math.abs(lz) > 1) {
                         continue;
                     }
                     putLeafBlock(world, bx + lx, by + ly, bz + lz, leafBlock, leafMeta);

@@ -15,16 +15,11 @@ public class ComponentTFFinalCastleEntranceBottomTower extends ComponentTFFinalC
     public ComponentTFFinalCastleEntranceBottomTower(Random rand, int i, int x, int y, int z, int floors,
             int entranceFloor, int direction) {
         super(rand, i, x, y, z, floors, entranceFloor, 0, direction);
-
-        // addOpening(12, 1, size / 2, 0);
-        // addOpening(size / 2, 1, 0, 1);
-        // addOpening(0, 1, size / 2, 2);
-        // addOpening(size / 2, 1, 12, 3);
     }
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 
@@ -38,8 +33,7 @@ public class ComponentTFFinalCastleEntranceBottomTower extends ComponentTFFinalC
     /**
      * Add some stairs leading to this tower
      */
-    private boolean addStairs(List<StructureComponent> list, Random rand, int index, int x, int y, int z,
-            int rotation) {
+    private void addStairs(List<StructureComponent> list, Random rand, int index, int x, int y, int z, int rotation) {
         // add door
         this.addOpening(x, y, z, rotation);
 
@@ -55,7 +49,6 @@ public class ComponentTFFinalCastleEntranceBottomTower extends ComponentTFFinalC
 
         list.add(stairs);
         stairs.buildComponent(list.get(0), list, rand);
-        return true;
     }
 
     protected boolean hasAccessibleRoof() {

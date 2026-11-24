@@ -16,12 +16,11 @@ import twilightforest.world.TFGenSmallTwilightOak;
 
 public class ComponentTFStrongholdAtrium extends StructureTFStrongholdComponent {
 
+    private static final String NBT_ENTER_BOTTOM = "enterBottom";
+
     private boolean enterBottom;
 
-    public ComponentTFStrongholdAtrium() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdAtrium() {}
 
     public ComponentTFStrongholdAtrium(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -34,7 +33,7 @@ public class ComponentTFStrongholdAtrium extends StructureTFStrongholdComponent 
     protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
         super.func_143012_a(par1NBTTagCompound);
 
-        par1NBTTagCompound.setBoolean("enterBottom", this.enterBottom);
+        par1NBTTagCompound.setBoolean(NBT_ENTER_BOTTOM, this.enterBottom);
     }
 
     /**
@@ -43,7 +42,7 @@ public class ComponentTFStrongholdAtrium extends StructureTFStrongholdComponent 
     @Override
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
-        this.enterBottom = par1NBTTagCompound.getBoolean("enterBottom");
+        this.enterBottom = par1NBTTagCompound.getBoolean(NBT_ENTER_BOTTOM);
     }
 
     /**
@@ -142,6 +141,9 @@ public class ComponentTFStrongholdAtrium extends StructureTFStrongholdComponent 
         int dy = getYWithOffset(y);
         int dz = getZWithOffset(x, z);
         if (sbb.isVecInside(dx, dy, dz)) {
+            // use a stable tree seed instead of global world rng, which varies with chunk gen order
+            Random treeRandom = new Random(
+                    world.getSeed() ^ ((long) dx * 341873128712L) ^ ((long) dz * 132897987541L) ^ dy);
             WorldGenerator treeGen;
             // grow a tree
             int minHeight = 8;
@@ -161,7 +163,7 @@ public class ComponentTFStrongholdAtrium extends StructureTFStrongholdComponent 
             };
 
             for (int i = 0; i < 100; i++) {
-                if (treeGen.generate(world, world.rand, dx, dy, dz)) {
+                if (treeGen.generate(world, treeRandom, dx, dy, dz)) {
                     break;
                 }
 

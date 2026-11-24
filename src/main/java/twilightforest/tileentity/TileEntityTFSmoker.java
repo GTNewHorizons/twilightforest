@@ -6,7 +6,9 @@ import twilightforest.TwilightForestMod;
 
 public class TileEntityTFSmoker extends TileEntity {
 
-    public long counter = 0;
+    private static final int SMOKE_INTERVAL_TICKS = 4;
+
+    public long counter;
 
     /**
      * Allows the entity to update its state. Overridden in most subclasses, e.g. the mob spawner uses this to count
@@ -14,7 +16,7 @@ public class TileEntityTFSmoker extends TileEntity {
      */
     @Override
     public void updateEntity() {
-        if (++counter % 4 == 0) {
+        if (++counter % SMOKE_INTERVAL_TICKS == 0) {
             TwilightForestMod.proxy.spawnParticle(
                     this.worldObj,
                     "hugesmoke",

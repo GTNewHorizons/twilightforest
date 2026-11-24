@@ -8,93 +8,93 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.common.network.IGuiHandler;
 import twilightforest.client.GuiTFCinderFurnace;
+import twilightforest.client.GuiTFGoblinCrafting;
 import twilightforest.inventory.ContainerTFCinderFurnace;
 import twilightforest.inventory.ContainerTFUncrafting;
+import twilightforest.tileentity.TileEntityTFCinderFurnace;
 
 public class TFCommonProxy implements IGuiHandler {
+
+    private static final int NO_RENDER_ID = 0;
 
     /**
      * Called during the pre-load step. Register stuff here. Obviously most stuff in the common category will be just
      * registered in the mod file
      */
-    public void doPreLoadRegistration() {
-        ;
-    }
+    public void doPreLoadRegistration() {}
 
     /**
      * Called during the load step. Register stuff here. Obviously most stuff in the common category will be just
      * registered in the mod file
      */
-    public void doOnLoadRegistration() {
-        ;
-    }
+    public void doOnLoadRegistration() {}
 
     public int getCritterBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getPlantBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getCakeBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getChestBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getComplexBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getNagastoneBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getNewNagastoneBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getNagastoneEtchedStairsBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getSpiralBricksBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getMagicLeavesBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getPedestalBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getThornsBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getKnightmetalBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getFieryMetalBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getHugeLilyPadBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int getCastleMagicBlockRenderID() {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public int registerArmorRenderID(String prefix) {
-        return 0;
+        return NO_RENDER_ID;
     }
 
     public World getClientWorld() {
@@ -106,16 +106,16 @@ public class TFCommonProxy implements IGuiHandler {
      * except on the client.
      */
     public void spawnParticle(World world, String particleType, double x, double y, double z, double velX, double velY,
-            double velZ) {
-        ;
-    }
+            double velZ) {}
 
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         if (id == TwilightForestMod.GUI_ID_UNCRAFTING) {
             return new ContainerTFUncrafting(player.inventory, world, x, y, z);
         } else if (id == TwilightForestMod.GUI_ID_FURNACE) {
-            return new ContainerTFCinderFurnace(player.inventory, world, x, y, z);
+            return world.getTileEntity(x, y, z) instanceof TileEntityTFCinderFurnace
+                    ? new ContainerTFCinderFurnace(player.inventory, world, x, y, z)
+                    : null;
         } else {
             return null;
         }
@@ -124,9 +124,11 @@ public class TFCommonProxy implements IGuiHandler {
     @Override
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         if (id == TwilightForestMod.GUI_ID_UNCRAFTING) {
-            return new twilightforest.client.GuiTFGoblinCrafting(player.inventory, world, x, y, z);
+            return new GuiTFGoblinCrafting(player.inventory, world, x, y, z);
         } else if (id == TwilightForestMod.GUI_ID_FURNACE) {
-            return new GuiTFCinderFurnace(player.inventory, world, x, y, z);
+            return world.getTileEntity(x, y, z) instanceof TileEntityTFCinderFurnace
+                    ? new GuiTFCinderFurnace(player.inventory, world, x, y, z)
+                    : null;
         } else {
             return null;
         }

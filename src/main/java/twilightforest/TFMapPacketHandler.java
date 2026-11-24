@@ -6,7 +6,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S34PacketMaps;
+import net.minecraft.world.World;
 
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -28,10 +30,11 @@ public class TFMapPacketHandler {
         S34PacketMaps mapPacket = new S34PacketMaps();
         try {
             mapPacket.readPacketData(new PacketBuffer(byteBuf));
-        } catch (IOException e) {
-            e.printStackTrace();
+            return mapPacket;
+        } catch (IOException | RuntimeException e) {
+            FMLLog.warning("[TwilightForest] Ignoring malformed map packet: %s", e);
+            return null;
         }
-        return mapPacket;
     }
 
     /**
@@ -40,16 +43,12 @@ public class TFMapPacketHandler {
     public static Packet makeMagicMapPacket(String mapChannel, short mapID, byte[] datas) {
         S34PacketMaps mapPacket = new S34PacketMaps(mapID, datas);
         PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
-
         try {
             mapPacket.writePacketData(payload);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Failed to encode Twilight Forest map packet", e);
         }
-
-        FMLProxyPacket pkt = new FMLProxyPacket(payload, mapChannel);
-
-        return pkt;
+        return new FMLProxyPacket(payload, mapChannel);
     }
 
     /**
@@ -58,16 +57,33 @@ public class TFMapPacketHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void incomingPacket(ClientCustomPacketEvent event) {
-        if (event.packet.channel().equals(ItemTFMagicMap.STR_ID)) {
-            S34PacketMaps mapPacket = readMapPacket(event.packet.payload());
-            ItemTFMagicMap.getMPMapData(mapPacket.func_149188_c(), TwilightForestMod.proxy.getClientWorld())
-                    .updateMPMapData(mapPacket.func_149187_d());
-        } else if (event.packet.channel().equals(ItemTFMazeMap.STR_ID)) {
-            S34PacketMaps mapPacket = readMapPacket(event.packet.payload());
-            TFMazeMapData data = ItemTFMazeMap
-                    .getMPMapData(mapPacket.func_149188_c(), TwilightForestMod.proxy.getClientWorld());
-            data.updateMPMapData(mapPacket.func_149187_d());
-            Minecraft.getMinecraft().entityRenderer.getMapItemRenderer().func_148246_a(data);
+        String channel = event.packet.channel();
+        boolean magicMap = ItemTFMagicMap.STR_ID.equals(channel);
+        if (!magicMap && !ItemTFMazeMap.STR_ID.equals(channel)) {
+            return;
+        }
+
+        World world = TwilightForestMod.proxy.getClientWorld();
+        if (world == null) {
+            return;
+        }
+
+        S34PacketMaps mapPacket = readMapPacket(event.packet.payload());
+        if (mapPacket == null) {
+            return;
+        }
+
+        if (magicMap) {
+            TFMagicMapData data = ItemTFMagicMap.getMPMapData(mapPacket.func_149188_c(), world);
+            if (data != null) {
+                data.updateMPMapData(mapPacket.func_149187_d());
+            }
+        } else {
+            TFMazeMapData data = ItemTFMazeMap.getMPMapData(mapPacket.func_149188_c(), world);
+            if (data != null) {
+                data.updateMPMapData(mapPacket.func_149187_d());
+                Minecraft.getMinecraft().entityRenderer.getMapItemRenderer().func_148246_a(data);
+            }
         }
     }
 }

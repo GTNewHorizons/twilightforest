@@ -14,8 +14,15 @@ public class EntityTFProtectionBox extends Entity {
     public int sizeY;
     public int sizeZ;
 
+    public EntityTFProtectionBox(World world) {
+        super(world);
+        this.lifeTime = 60;
+        this.sizeX = this.sizeY = this.sizeZ = 1;
+        this.setSize(1.0F, 1.0F);
+    }
+
     public EntityTFProtectionBox(World worldObj, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        super(worldObj);
+        this(worldObj);
 
         this.setLocationAndAngles(minX, minY, minZ, 0.0F, 0.0F);
 
@@ -25,8 +32,6 @@ public class EntityTFProtectionBox extends Entity {
 
         this.setSize(Math.max(sizeX, sizeZ), sizeY);
 
-        this.lifeTime = 60;
-
         // System.out.println("Made new box");
 
     }
@@ -35,10 +40,8 @@ public class EntityTFProtectionBox extends Entity {
     public void onUpdate() {
         super.onUpdate();
 
-        if (lifeTime <= 1) {
+        if (!worldObj.isRemote && --lifeTime <= 0) {
             setDead();
-        } else {
-            lifeTime--;
         }
 
     }
@@ -56,21 +59,23 @@ public class EntityTFProtectionBox extends Entity {
     }
 
     @Override
-    protected void entityInit() {
-        // TODO Auto-generated method stub
+    protected void entityInit() {}
 
+    @Override
+    protected void readEntityFromNBT(NBTTagCompound nbt) {
+        lifeTime = nbt.getInteger("LifeTime");
+        sizeX = Math.max(1, nbt.getInteger("SizeX"));
+        sizeY = Math.max(1, nbt.getInteger("SizeY"));
+        sizeZ = Math.max(1, nbt.getInteger("SizeZ"));
+        setSize(Math.max(sizeX, sizeZ), sizeY);
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound var1) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    protected void writeEntityToNBT(NBTTagCompound var1) {
-        // TODO Auto-generated method stub
-
+    protected void writeEntityToNBT(NBTTagCompound nbt) {
+        nbt.setInteger("LifeTime", lifeTime);
+        nbt.setInteger("SizeX", sizeX);
+        nbt.setInteger("SizeY", sizeY);
+        nbt.setInteger("SizeZ", sizeZ);
     }
 
     /**

@@ -14,6 +14,8 @@ import twilightforest.block.TFBlocks;
 public class TileEntityTFTowerBuilder extends TileEntity {
 
     private static final int RANGE = 16;
+    private static final int BUILD_INTERVAL_TICKS = 10;
+    private static final int RESET_DELAY_TICKS = 60;
 
     int ticksRunning = 0;
     int blockedCounter = 0;
@@ -41,12 +43,16 @@ public class TileEntityTFTowerBuilder extends TileEntity {
     public void startBuilding() {
         this.makingBlocks = true;
         this.blocksMade = 0;
+        this.blockedCounter = 0;
+        this.ticksRunning = 0;
+        this.ticksStopped = 0;
+        this.trackedPlayer = null;
         this.lastBlockCoords = new ChunkCoordinates(this.xCoord, this.yCoord, this.zCoord);
     }
 
     /**
      * Determines if this TileEntity requires update calls.
-     * 
+     *
      * @return True if you want updateEntity() to be called, false if not
      */
     @Override
@@ -60,59 +66,61 @@ public class TileEntityTFTowerBuilder extends TileEntity {
      */
     @Override
     public void updateEntity() {
-        if (!worldObj.isRemote && this.makingBlocks) {
-            // if we are not tracking the nearest player, start tracking them
-            if (trackedPlayer == null) {
-                this.trackedPlayer = findClosestValidPlayer();
+        if (worldObj.isRemote) {
+            return;
+        }
+
+        if (makingBlocks) {
+            updateBuilding();
+        } else {
+            updateStopped();
+        }
+    }
+
+    private void updateBuilding() {
+        // if we're not tracking the nearest player, start tracking them
+        if (trackedPlayer == null) {
+            trackedPlayer = findClosestValidPlayer();
+        }
+
+        nextFacing = findNextFacing();
+        ticksRunning++;
+
+        // build a block every half second while the player has a valid facing
+        if (ticksRunning % BUILD_INTERVAL_TICKS == 0 && lastBlockCoords != null && nextFacing != -1) {
+            int nextX = lastBlockCoords.posX + Facing.offsetsXForSide[nextFacing];
+            int nextY = lastBlockCoords.posY + Facing.offsetsYForSide[nextFacing];
+            int nextZ = lastBlockCoords.posZ + Facing.offsetsZForSide[nextFacing];
+
+            if (blocksMade < RANGE && isInBounds(nextX, nextY, nextZ) && worldObj.isAirBlock(nextX, nextY, nextZ)) {
+                worldObj.setBlock(nextX, nextY, nextZ, blockBuiltID, blockBuiltMeta, 3);
+                worldObj.playAuxSFX(1001, nextX, nextY, nextZ, 0);
+
+                lastBlockCoords.posX = nextX;
+                lastBlockCoords.posY = nextY;
+                lastBlockCoords.posZ = nextZ;
+
+                blockedCounter = 0;
+                blocksMade++;
+            } else {
+                blockedCounter++;
             }
+        }
 
-            // find player facing
-            this.nextFacing = findNextFacing();
+        // stop when the next block cant be placed
+        if (blockedCounter > 0) {
+            makingBlocks = false;
+            trackedPlayer = null;
+            ticksStopped = 0;
+        }
+    }
 
-            ++this.ticksRunning;
-
-            // if we are at the half second marker, make a block and advance the block cursor
-            if (this.ticksRunning % 10 == 0 && lastBlockCoords != null && nextFacing != -1) {
-                int nextX = lastBlockCoords.posX + Facing.offsetsXForSide[nextFacing];
-                int nextY = lastBlockCoords.posY + Facing.offsetsYForSide[nextFacing];
-                int nextZ = lastBlockCoords.posZ + Facing.offsetsZForSide[nextFacing];
-
-                // make a block
-                if (blocksMade <= RANGE && worldObj.isAirBlock(nextX, nextY, nextZ)) {
-                    worldObj.setBlock(nextX, nextY, nextZ, blockBuiltID, blockBuiltMeta, 3);
-
-                    worldObj.playAuxSFX(1001, nextX, nextY, nextZ, 0);
-
-                    this.lastBlockCoords.posX = nextX;
-                    this.lastBlockCoords.posY = nextY;
-                    this.lastBlockCoords.posZ = nextZ;
-
-                    blockedCounter = 0;
-                    blocksMade++;
-                } else {
-                    blockedCounter++;
-                }
-            }
-
-            // if we're blocked for more than a second, shut down block making
-            if (blockedCounter > 0) {
-                this.makingBlocks = false;
-                this.trackedPlayer = null;
-                ticksStopped = 0;
-            }
-        } else if (!worldObj.isRemote && !this.makingBlocks) {
-            this.trackedPlayer = null;
-            if (++ticksStopped == 60) {
-                // force the builder back into an inactive state
-                worldObj.setBlock(
-                        this.xCoord,
-                        this.yCoord,
-                        this.zCoord,
-                        TFBlocks.towerDevice,
-                        BlockTFTowerDevice.META_BUILDER_TIMEOUT,
-                        3);
-                worldObj.scheduleBlockUpdate(this.xCoord, this.yCoord, this.zCoord, TFBlocks.towerDevice, 4);
-            }
+    private void updateStopped() {
+        trackedPlayer = null;
+        if (++ticksStopped == RESET_DELAY_TICKS) {
+            // force the builder back into an inactive state
+            worldObj.setBlock(xCoord, yCoord, zCoord, TFBlocks.towerDevice, BlockTFTowerDevice.META_BUILDER_TIMEOUT, 3);
+            worldObj.scheduleBlockUpdate(xCoord, yCoord, zCoord, TFBlocks.towerDevice, 4);
         }
     }
 
@@ -120,11 +128,11 @@ public class TileEntityTFTowerBuilder extends TileEntity {
      * Are the specified destination coordinates within our build range?
      */
     private boolean isInBounds(int nextX, int nextY, int nextZ) {
-        return nextX > this.xCoord - RANGE && nextX < this.xCoord + RANGE
-                && nextY > this.yCoord - RANGE
-                && nextY < this.yCoord + RANGE
-                && nextZ > this.zCoord - RANGE
-                && nextZ < this.zCoord + RANGE;
+        return nextX >= this.xCoord - RANGE && nextX <= this.xCoord + RANGE
+                && nextY >= this.yCoord - RANGE
+                && nextY <= this.yCoord + RANGE
+                && nextZ >= this.zCoord - RANGE
+                && nextZ <= this.zCoord + RANGE;
     }
 
     /**
@@ -167,7 +175,7 @@ public class TileEntityTFTowerBuilder extends TileEntity {
      * Who is the closest player? Used to find which player we should track when building
      */
     private EntityPlayer findClosestValidPlayer() {
-        return worldObj.getClosestPlayer(this.xCoord + 0.5, this.yCoord + 0.5, this.zCoord + 0.5, 16);
+        return worldObj.getClosestPlayer(this.xCoord + 0.5, this.yCoord + 0.5, this.zCoord + 0.5, RANGE);
     }
 
 }

@@ -31,6 +31,7 @@ public class ModelTFKobold extends ModelBiped {
         bipedHead = new ModelRenderer(this, 0, 0);
         bipedHead.addBox(-3.5F, -7F, -3F, 7, 6, 6);
         bipedHead.setRotationPoint(0F, 13F, 0F);
+        bipedHeadwear.showModel = false;
 
         bipedBody = new ModelRenderer(this, 12, 19);
         bipedBody.addBox(0F, 0F, 0F, 7, 7, 4);
@@ -40,8 +41,8 @@ public class ModelTFKobold extends ModelBiped {
         bipedRightArm.addBox(-3F, -1F, -1.5F, 3, 7, 3);
         bipedRightArm.setRotationPoint(-3.5F, 12F, 0F);
 
-        bipedLeftArm.mirror = true;
         bipedLeftArm = new ModelRenderer(this, 36, 17);
+        bipedLeftArm.mirror = true;
         bipedLeftArm.addBox(0F, -1F, -1.5F, 3, 7, 3);
         bipedLeftArm.setRotationPoint(3.5F, 12F, 0F);
 
@@ -87,12 +88,12 @@ public class ModelTFKobold extends ModelBiped {
     /**
      * Sets the models various rotation angles.
      */
-    public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6) {
+    @Override
+    public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6,
+            Entity entity) {
         this.bipedHead.rotateAngleY = par4 / (180F / (float) Math.PI);
         this.bipedHead.rotateAngleX = par5 / (180F / (float) Math.PI);
 
-        this.bipedRightArm.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float) Math.PI) * 2.0F * par2 * 0.5F;
-        this.bipedLeftArm.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 2.0F * par2 * 0.5F;
         this.bipedRightArm.rotateAngleZ = 0.0F;
         this.bipedLeftArm.rotateAngleZ = 0.0F;
 
@@ -127,8 +128,9 @@ public class ModelTFKobold extends ModelBiped {
         this.isJumping = par1EntityLiving.motionY > 0;
     }
 
+    @Override
     public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
-        setRotationAngles(f, f1, f2, f3, f4, f5);
+        setRotationAngles(f, f1, f2, f3, f4, f5, entity);
         bipedHead.render(f5);
         bipedBody.render(f5);
         bipedRightArm.render(f5);

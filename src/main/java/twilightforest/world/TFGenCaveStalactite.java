@@ -26,7 +26,7 @@ public class TFGenCaveStalactite extends TFGenerator {
 
     /**
      * Initializes a stalactite builder. Actually also makes stalagmites
-     * 
+     *
      * @param size
      * @param stone
      */
@@ -51,11 +51,11 @@ public class TFGenCaveStalactite extends TFGenerator {
 
     /**
      * Makes a random stalactite appropriate to the cave size
-     * 
+     *
      * All include iron, coal and glowstone.
-     * 
+     *
      * Gold and redstone appears in size 2 and larger caves.
-     * 
+     *
      * Diamonds and lapis only appear in size 3 and larger caves.
      */
     public static TFGenCaveStalactite makeRandomOreStalactite(Random rand, int hillSize) {
@@ -126,14 +126,17 @@ public class TFGenCaveStalactite extends TFGenerator {
             }
             // if we get something that's not cave material, fail!
             // actually stalactites can hang above water or lava
-            if (m != Material.ground && m != Material.rock
-                    && (!hang && m != Material.water)
-                    && (!hang && m != Material.lava)) {
+            if (m != Material.ground && m != Material.rock && (!hang || (m != Material.water && m != Material.lava))) {
                 return false;
             }
             // okay, we found a valid floor.
             floor = ty;
             break;
+        }
+
+        // without a cave floor there is no valid span to generate into
+        if (floor < 0) {
+            return false;
         }
 
         int length = (int) ((ceiling - floor) * this.sizeFactor * random.nextFloat());
@@ -152,6 +155,10 @@ public class TFGenCaveStalactite extends TFGenerator {
     }
 
     public boolean makeSpike(World world, Random random, int x, int y, int z, int maxLength) {
+
+        if (maxLength <= 0) {
+            return false;
+        }
 
         int diameter = (int) (maxLength / 4.5); // diameter of the base
 

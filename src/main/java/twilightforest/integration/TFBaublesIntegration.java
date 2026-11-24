@@ -15,7 +15,10 @@ import twilightforest.TwilightForestMod;
 
 public class TFBaublesIntegration {
 
+    // keep the public map and username keys compatible with existing event handlers
     public static HashMap<String, InventoryBaubles> playerBaublesMap = new HashMap<>();
+
+    private TFBaublesIntegration() {}
 
     public static void clearPlayerMap(EntityPlayer player) {
         if (TwilightForestMod.areBaublesLoaded) {
@@ -24,11 +27,7 @@ public class TFBaublesIntegration {
     }
 
     public static InventoryBaubles getPlayerKeepBaubles(EntityPlayer player) {
-        if (!playerBaublesMap.containsKey(player.getCommandSenderName())) {
-            InventoryBaubles inventory = new InventoryBaubles(player);
-            playerBaublesMap.put(player.getCommandSenderName(), inventory);
-        }
-        return playerBaublesMap.get(player.getCommandSenderName());
+        return playerBaublesMap.computeIfAbsent(player.getCommandSenderName(), name -> new InventoryBaubles(player));
     }
 
     public static void setPlayerKeepBaubles(EntityPlayer player, InventoryBaubles inventory) {
@@ -36,32 +35,39 @@ public class TFBaublesIntegration {
     }
 
     public static void loadPlayerKeepBaubles(EntityPlayer player, NBTTagCompound data) {
-        if (TwilightForestMod.areBaublesLoaded) {
-            InventoryBaubles keepBaubles = new InventoryBaubles(player);
-            keepBaubles.readNBT(data);
-            playerBaublesMap.put(player.getCommandSenderName(), keepBaubles);
+        if (!TwilightForestMod.areBaublesLoaded) {
+            return;
         }
+
+        InventoryBaubles keepBaubles = new InventoryBaubles(player);
+        keepBaubles.readNBT(data);
+        setPlayerKeepBaubles(player, keepBaubles);
     }
 
     public static void savePlayerKeepBaubles(EntityPlayer player, NBTTagCompound data) {
         if (TwilightForestMod.areBaublesLoaded) {
-            InventoryBaubles inventory = getPlayerKeepBaubles(player);
-            inventory.saveNBT(data);
+            getPlayerKeepBaubles(player).saveNBT(data);
         }
     }
 
     public static Boolean consumeBaublesItem(EntityPlayer player, Item item) {
-        if (TwilightForestMod.areBaublesLoaded) {
-            InventoryBaubles inventoryBaubles = PlayerHandler.getPlayerBaubles(player);
-            for (int a = 0; a < inventoryBaubles.getSizeInventory(); a++) {
-                ItemStack stackInSlot = inventoryBaubles.getStackInSlot(a);
-                if (stackInSlot != null && stackInSlot.getItem() == item) {
-                    if (--stackInSlot.stackSize <= 0) {
-                        inventoryBaubles.setInventorySlotContents(a, null);
-                    }
-                    return true;
-                }
+        if (!TwilightForestMod.areBaublesLoaded || item == null) {
+            return false;
+        }
+
+        InventoryBaubles inventory = PlayerHandler.getPlayerBaubles(player);
+        for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
+            ItemStack stack = inventory.getStackInSlot(slot);
+            if (stack == null || stack.stackSize <= 0 || stack.getItem() != item) {
+                continue;
             }
+
+            if (--stack.stackSize == 0) {
+                inventory.setInventorySlotContents(slot, null);
+            } else {
+                inventory.markDirty();
+            }
+            return true;
         }
         return false;
     }
@@ -70,33 +76,51 @@ public class TFBaublesIntegration {
      * Move the full baubles inventory to the keep pile
      */
     public static ItemStack[] keepAllBaubles(EntityPlayer player) {
-        ItemStack[] baublesInventory = null;
-        if (TwilightForestMod.areBaublesLoaded) {
-            InventoryBaubles inventoryBaubles = PlayerHandler.getPlayerBaubles(player);
-            baublesInventory = new ItemStack[inventoryBaubles.getSizeInventory()];
-            for (int i = 0; i < inventoryBaubles.getSizeInventory(); i++) {
-                baublesInventory[i] = ItemStack.copyItemStack(inventoryBaubles.getStackInSlot(i));
-                inventoryBaubles.setInventorySlotContents(i, null);
-            }
+        if (!TwilightForestMod.areBaublesLoaded) {
+            return null;
         }
-        return baublesInventory;
+
+        InventoryBaubles inventory = PlayerHandler.getPlayerBaubles(player);
+        ItemStack[] retained = new ItemStack[inventory.getSizeInventory()];
+        for (int slot = 0; slot < retained.length; slot++) {
+            retained[slot] = ItemStack.copyItemStack(inventory.getStackInSlot(slot));
+            inventory.setInventorySlotContents(slot, null);
+        }
+        return retained;
     }
 
     public static void restoreBaubles(EntityPlayer player, ItemStack[] baublesInventory) {
-        if (TwilightForestMod.areBaublesLoaded && baublesInventory != null) {
-            InventoryBaubles inventoryBaubles = PlayerHandler.getPlayerBaubles(player);
-            for (int i = 0; i < inventoryBaubles.getSizeInventory(); i++) {
-                if (baublesInventory[i] != null) inventoryBaubles.setInventorySlotContents(i, baublesInventory[i]);
+        if (!TwilightForestMod.areBaublesLoaded || baublesInventory == null) {
+            return;
+        }
+
+        InventoryBaubles inventory = PlayerHandler.getPlayerBaubles(player);
+        for (int slot = 0; slot < baublesInventory.length; slot++) {
+            ItemStack saved = baublesInventory[slot];
+            if (saved == null || saved.stackSize <= 0) {
+                continue;
+            }
+
+            if (slot < inventory.getSizeInventory() && inventory.getStackInSlot(slot) == null) {
+                inventory.setInventorySlotContents(slot, saved.copy());
+                baublesInventory[slot] = null;
+            } else if (!player.worldObj.isRemote) {
+                // never overwrite an equipped bauble, consume the snapshot after returning the item
+                player.dropPlayerItemWithRandomChoice(saved.copy(), false);
+                baublesInventory[slot] = null;
             }
         }
     }
 
     public static void playerSaveDo(EntityPlayer player, File directory) {
-        if (TwilightForestMod.areBaublesLoaded) PlayerHandler.savePlayerBaubles(
-                player,
-                TFEventListener.getPlayerFile(TFEventListener.fileName, directory, player.getCommandSenderName()),
-                TFEventListener
-                        .getPlayerFile(TFEventListener.fileNameBackup, directory, player.getCommandSenderName()));
-    }
+        if (!TwilightForestMod.areBaublesLoaded) {
+            return;
+        }
 
+        String playerName = player.getCommandSenderName();
+        PlayerHandler.savePlayerBaubles(
+                player,
+                TFEventListener.getPlayerFile(TFEventListener.fileName, directory, playerName),
+                TFEventListener.getPlayerFile(TFEventListener.fileNameBackup, directory, playerName));
+    }
 }

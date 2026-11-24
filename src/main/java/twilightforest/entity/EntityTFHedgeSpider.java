@@ -13,7 +13,7 @@ import twilightforest.TwilightForestMod;
 
 /**
  * The hedge spider is just like a normal spider, but it can spawn in the daytime.
- * 
+ *
  * @author Ben
  *
  */
@@ -36,8 +36,7 @@ public class EntityTFHedgeSpider extends EntitySpider {
     @Override
     protected Entity findPlayerToAttack() {
         // kill at all times!
-        double var2 = 16.0D;
-        return this.worldObj.getClosestVulnerablePlayerToEntity(this, var2);
+        return this.worldObj.getClosestVulnerablePlayerToEntity(this, 16.0D);
     }
 
     /**

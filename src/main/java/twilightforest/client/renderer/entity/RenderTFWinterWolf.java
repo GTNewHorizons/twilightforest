@@ -57,6 +57,7 @@ public class RenderTFWinterWolf extends RenderWolf {
     /**
      * Return our specific texture
      */
+    @Override
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         return textureLoc;
     }

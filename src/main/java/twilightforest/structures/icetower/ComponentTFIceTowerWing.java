@@ -53,8 +53,8 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
-            this.deco = ((StructureTFComponent) parent).deco;
+        if (parent instanceof StructureTFComponent towerParent) {
+            deco = towerParent.deco;
         }
 
         // we should have a door where we started
@@ -63,7 +63,7 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
         // should we build a base
         this.hasBase = this.shouldHaveBase(rand);
 
-        // limit sprawl to a reasonable amount
+        // limit recursive expansion while leaving the depth boss attempts intact
         if (this.getComponentType() < 5) {
 
             int dirOffset = rand.nextInt(4);
@@ -110,8 +110,8 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
             }
         }
 
-        // figure out where the treasure goes
-        int floors = this.height / 10;
+        // decide which lower floor gets loot, using the original random draw
+        int floors = height / 10;
 
         // set treasure to a floor if we need to
         if (this.treasureFloor == -1 && floors > 1) {
@@ -135,80 +135,59 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
     /**
      * Have we strayed more than range blocks away from the center?
      */
-    private boolean isOutOfRange(StructureComponent parent, int nx, int ny, int nz, int range) {
-
-        // System.out.println("x range is " + Math.abs(nx - parent.getBoundingBox().minX));
-        // System.out.println("z range is " + Math.abs(nz - parent.getBoundingBox().minZ));
-        // System.out.println("nz is " + nz + ", parent.minz is " + parent.getBoundingBox().minZ);
-
-        return Math.abs(nx - parent.getBoundingBox().getCenterX()) > range
-                || Math.abs(nz - parent.getBoundingBox().getCenterZ()) > range;
+    private boolean isOutOfRange(StructureComponent root, int x, int z) {
+        StructureBoundingBox box = root.getBoundingBox();
+        return Math.abs(x - box.getCenterX()) > RANGE || Math.abs(z - box.getCenterZ()) > RANGE;
     }
 
-    /**
-     * Make a new wing
-     */
+    // ordinary wings stay near the main tower
+    @Override
     public boolean makeTowerWing(List<StructureComponent> list, Random rand, int index, int x, int y, int z,
             int wingSize, int wingHeight, int rotation) {
-        int direction = (getCoordBaseMode() + rotation) % 4;
-        int[] dx = offsetTowerCoords(x, y, z, wingSize, direction);
-
-        // System.out.println("Making tower, index = " + index + ", list.size() = " + list.size());
-
-        // stop if out of range
-        if (isOutOfRange(list.get(0), dx[0], dx[1], dx[2], RANGE)) {
-            return false;
-        }
-
-        ComponentTFIceTowerWing wing = new ComponentTFIceTowerWing(
-                index,
-                dx[0],
-                dx[1],
-                dx[2],
-                wingSize,
-                wingHeight,
-                direction);
-        // check to see if it intersects something already there
-        StructureComponent intersect = StructureComponent.findIntersecting(list, wing.getBoundingBox());
-        if (intersect == null || intersect == this) {
-            list.add(wing);
-            wing.buildComponent(list.get(0), list, rand);
-            addOpening(x, y, z, rotation);
-            return true;
-        } else {
-            return false;
-        }
-
+        return attachWing(list, rand, index, x, y, z, wingSize, wingHeight, rotation, false);
     }
 
-    /**
-     * Make a new wing
-     */
+    // boss wings can extend beyond the ordinary wing distance limit
     public boolean makeBossTowerWing(List<StructureComponent> list, Random rand, int index, int x, int y, int z,
             int wingSize, int wingHeight, int rotation) {
+        return attachWing(list, rand, index, x, y, z, wingSize, wingHeight, rotation, true);
+    }
 
+    private boolean attachWing(List<StructureComponent> list, Random rand, int index, int x, int y, int z, int wingSize,
+            int wingHeight, int rotation, boolean boss) {
         int direction = (getCoordBaseMode() + rotation) % 4;
-        int[] dx = offsetTowerCoords(x, y, z, wingSize, direction);
-
-        ComponentTFIceTowerWing wing = new ComponentTFIceTowerBossWing(
-                index,
-                dx[0],
-                dx[1],
-                dx[2],
-                wingSize,
-                wingHeight,
-                direction);
-        // check to see if it intersects something already there
-        StructureComponent intersect = StructureComponent.findIntersecting(list, wing.getBoundingBox());
-        if (intersect == null || intersect == this) {
-            list.add(wing);
-            wing.buildComponent(list.get(0), list, rand);
-            addOpening(x, y, z, rotation);
-            return true;
-        } else {
+        int[] position = offsetTowerCoords(x, y, z, wingSize, direction);
+        if (!boss && isOutOfRange(list.get(0), position[0], position[2])) {
             return false;
         }
 
+        ComponentTFIceTowerWing wing = boss
+                ? new ComponentTFIceTowerBossWing(
+                        index,
+                        position[0],
+                        position[1],
+                        position[2],
+                        wingSize,
+                        wingHeight,
+                        direction)
+                : new ComponentTFIceTowerWing(
+                        index,
+                        position[0],
+                        position[1],
+                        position[2],
+                        wingSize,
+                        wingHeight,
+                        direction);
+
+        StructureComponent intersecting = StructureComponent.findIntersecting(list, wing.getBoundingBox());
+        if (intersecting != null && intersecting != this) {
+            return false;
+        }
+
+        list.add(wing);
+        wing.buildComponent(list.get(0), list, rand);
+        addOpening(x, y, z, rotation);
+        return true;
     }
 
     /**
@@ -218,7 +197,8 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
 
         int floors = this.height / 10;
 
-        return 11 + (rand.nextInt(floors - 1) * 10);
+        // short custom wings dont have enough floors for a random upper landing
+        return floors > 1 ? 11 + rand.nextInt(floors - 1) * 10 : 1;
     }
 
     @Override
@@ -342,7 +322,7 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
     /**
      * Called to decorate each floor. This is responsible for adding a ladder up, the stub of the ladder going down,
      * then picking a theme for each floor and executing it.
-     * 
+     *
      * @param floor
      * @param bottom
      * @param top
@@ -402,7 +382,6 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
     }
 
     private boolean isNoDoorAreaRotated(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, int rotation) {
-        boolean isClear = true;
         // make a bounding box of the area
         StructureBoundingBox exclusionBox = switch (rotation) {
             default -> new StructureBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
@@ -417,15 +396,14 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
             case 3 -> new StructureBoundingBox(minZ, minY, this.size - 1 - maxX, maxZ, maxY, this.size - 1 - minX);
         };
 
-        for (ChunkCoordinates door : this.openings) {
-            if (exclusionBox.isVecInside(door.posX, door.posY, door.posZ)) {
-                isClear = false;
-
-                // System.out.println("Found door in exclusion box, door = " + door);
+        for (ChunkCoordinates door : openings) {
+            // doorways occupy 2 vertical blocks, not just the lower block
+            if (exclusionBox.isVecInside(door.posX, door.posY, door.posZ)
+                    || exclusionBox.isVecInside(door.posX, door.posY + 1, door.posZ)) {
+                return false;
             }
         }
-
-        return isClear;
+        return true;
     }
 
     protected void decorateTopFloor(World world, Random rand, int floor, int bottom, int top, int ladderUpDir,
@@ -471,63 +449,19 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
 
     private void decoratePillarsGrid(World world, Random rand, int bottom, int top, int rotation,
             StructureBoundingBox sbb) {
-        int beamMetaNS = ((this.coordBaseMode + rotation) % 2 == 0) ? 4 : 8;
-        int beamMetaEW = (beamMetaNS == 4) ? 8 : 4;
-
-        this.fillBlocksRotated(
-                world,
-                sbb,
-                3,
-                bottom + 5,
-                1,
-                3,
-                bottom + 5,
-                9,
-                deco.pillarID,
-                deco.pillarMeta + beamMetaEW,
-                rotation);
-        this.fillBlocksRotated(
-                world,
-                sbb,
-                7,
-                bottom + 5,
-                1,
-                7,
-                bottom + 5,
-                9,
-                deco.pillarID,
-                deco.pillarMeta + beamMetaEW,
-                rotation);
-        this.fillBlocksRotated(
-                world,
-                sbb,
-                1,
-                bottom + 5,
-                3,
-                9,
-                bottom + 5,
-                3,
-                deco.pillarID,
-                deco.pillarMeta + beamMetaNS,
-                rotation);
-        this.fillBlocksRotated(
-                world,
-                sbb,
-                1,
-                bottom + 5,
-                7,
-                9,
-                bottom + 5,
-                7,
-                deco.pillarID,
-                deco.pillarMeta + beamMetaNS,
-                rotation);
-
-        this.decoratePillars(world, rand, bottom, top, rotation, sbb);
+        placePillarBeams(world, bottom, rotation, sbb);
+        decoratePillars(world, rand, bottom, top, rotation, sbb);
     }
 
     private void decoratePillarsCorners(World world, Random rand, int bottom, int top, int rotation,
             StructureBoundingBox sbb) {
+        placePillarBeams(world, bottom, rotation, sbb);
+        fillAirRotated(world, sbb, 3, bottom + 5, 3, 7, bottom + 5, 7, rotation);
+        decoratePillars(world, rand, bottom, top, rotation, sbb);
+    }
+
+    // shared by the grid, corner and entrance variants, placement order is important
+    protected void placePillarBeams(World world, int bottom, int rotation, StructureBoundingBox sbb) {
         int beamMetaNS = ((this.coordBaseMode + rotation) % 2 == 0) ? 4 : 8;
         int beamMetaEW = (beamMetaNS == 4) ? 8 : 4;
 
@@ -579,10 +513,6 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
                 deco.pillarID,
                 deco.pillarMeta + beamMetaNS,
                 rotation);
-
-        this.fillAirRotated(world, sbb, 3, bottom + 5, 3, 7, bottom + 5, 7, rotation);
-
-        this.decoratePillars(world, rand, bottom, top, rotation, sbb);
     }
 
     private void decorateFarWallSteps(World world, Random rand, int bottom, int top, int ladderUpDir, int ladderDownDir,
@@ -1299,7 +1229,7 @@ public class ComponentTFIceTowerWing extends ComponentTFTowerWing {
 
     /**
      * Attach a roof to this tower.
-     * 
+     *
      * This function keeps trying roofs starting with the largest and fanciest, and then keeps trying smaller and
      * plainer ones
      */

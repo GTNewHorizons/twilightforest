@@ -38,7 +38,18 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
 
     public ComponentTFDarkTowerMain() {
         super();
-        // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    protected void func_143012_a(NBTTagCompound tag) {
+        super.func_143012_a(tag);
+        tag.setBoolean("placedKeys", placedKeys);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound tag) {
+        super.func_143011_b(tag);
+        placedKeys = tag.getBoolean("placedKeys");
     }
 
     public ComponentTFDarkTowerMain(World world, Random rand, int index, int x, int y, int z) {
@@ -50,7 +61,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
 
         // check to make sure we can build the whole tower
         if (this.boundingBox.maxY > 245) {
-            int amtToLower = (((this.boundingBox.maxY - 245) / 5) * 5) + 5;
+            int amtToLower = ((this.boundingBox.maxY - 245 + 4) / 5) * 5;
 
             FMLLog.info("[TwilightForest] Lowering Dark Tower max height by %d to be within world bounds", amtToLower);
 
@@ -150,8 +161,6 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
             // count how many size 9 towers we have hanging off us
             ArrayList<ComponentTFDarkTowerWing> possibleKeyTowers = new ArrayList<>();
 
-            int smallTowers = 0;
-
             for (Object piece : list) {
                 if (piece instanceof ComponentTFDarkTowerWing wing) {
 
@@ -159,8 +168,6 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                         // System.out.println("I found one of my small towers! Its type is " + wing.getComponentType() +
                         // "
                         // and mine is " + this.getComponentType());
-
-                        smallTowers++;
 
                         possibleKeyTowers.add(wing);
                     }
@@ -353,37 +360,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
      * Add a bunch of 3/4 floors
      */
     protected void addThreeQuarterFloors(World world, Random decoRNG, StructureBoundingBox sbb, int bottom, int top) {
-
-        int spacing = 5;
-        int rotation = (this.boundingBox.minY + bottom) % 4;
-        if (bottom == 0) {
-            makeLargeStairsUp(world, sbb, rotation, 0);
-            rotation += 3;
-            rotation %= 4;
-            makeBottomEntrance(world, decoRNG, sbb, rotation, bottom);
-            bottom += spacing;
-        }
-
-        // fill with 3/4 floors
-        for (int y = bottom; y < top; y += spacing) {
-            boolean isBottomFloor = (y == bottom && bottom != spacing);
-            boolean isTopFloor = (y >= top - spacing);
-            boolean isTowerTopFloor = (y >= height - spacing - 2);
-
-            makeThreeQuarterFloor(world, sbb, rotation, y, isBottomFloor, isTowerTopFloor);
-
-            if (!isTopFloor) {
-                makeLargeStairsUp(world, sbb, rotation, y);
-            }
-
-            if (!isTopFloor || isTowerTopFloor) {
-                decorateFloor(world, decoRNG, sbb, rotation, y, isBottomFloor, isTopFloor);
-            }
-
-            rotation += 3;
-            rotation %= 4;
-
-        }
+        buildThreeQuarterFloors(world, decoRNG, sbb, bottom, top, false);
     }
 
     /**
@@ -391,33 +368,38 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
      */
     protected void addThreeQuarterFloorsDecorateBoss(World world, Random decoRNG, StructureBoundingBox sbb, int bottom,
             int top) {
+        buildThreeQuarterFloors(world, decoRNG, sbb, bottom, top, true);
+    }
 
+    private void buildThreeQuarterFloors(World world, Random decoRNG, StructureBoundingBox sbb, int bottom, int top,
+            boolean bossFloors) {
         int spacing = 5;
-        int rotation = (this.boundingBox.minY + bottom) % 4;
+        int rotation = Math.floorMod(this.boundingBox.minY + bottom, 4);
         if (bottom == 0) {
             makeLargeStairsUp(world, sbb, rotation, 0);
-            rotation += 3;
-            rotation %= 4;
+            rotation = (rotation + 3) % 4;
+            if (!bossFloors) {
+                makeBottomEntrance(world, decoRNG, sbb, rotation, bottom);
+            }
             bottom += spacing;
         }
 
-        // fill with 3/4 floors
         for (int y = bottom; y < top; y += spacing) {
-            boolean isBottomFloor = (y == bottom && bottom != spacing);
-            boolean isTopFloor = (y >= top - spacing);
-            boolean isTowerTopFloor = (y >= height - spacing - 2);
+            boolean isBottomFloor = y == bottom && bottom != spacing;
+            boolean isTopFloor = y >= top - spacing;
+            boolean isTowerTopFloor = y >= height - spacing - 2;
 
             makeThreeQuarterFloor(world, sbb, rotation, y, isBottomFloor, isTowerTopFloor);
-
             if (!isTopFloor) {
                 makeLargeStairsUp(world, sbb, rotation, y);
-                decorateExperiment(world, decoRNG, sbb, rotation, y);
-
+                if (bossFloors) {
+                    decorateExperiment(world, decoRNG, sbb, rotation, y);
+                }
             }
-
-            rotation += 3;
-            rotation %= 4;
-
+            if (!bossFloors && (!isTopFloor || isTowerTopFloor)) {
+                decorateFloor(world, decoRNG, sbb, rotation, y, isBottomFloor, isTopFloor);
+            }
+            rotation = (rotation + 3) % 4;
         }
     }
 
@@ -485,7 +467,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
 
     /**
      * Make a single three quarter floor
-     * 
+     *
      * @param isTowerTopFloor
      */
     protected void makeThreeQuarterFloor(World world, StructureBoundingBox sbb, int rotation, int y, boolean isBottom,
@@ -1027,10 +1009,10 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
                 getStairMeta(3 + rotation),
                 rotation);
 
-        this.makeWoodPillar(world, deco, 13, y, 1, getStairMeta(3 + rotation), rotation, sbb);
-        this.makeWoodPillar(world, deco, 15, y, 1, getStairMeta(3 + rotation), rotation, sbb);
-        this.makeWoodPillar(world, deco, 17, y, 3, getStairMeta(0 + rotation), rotation, sbb);
-        this.makeWoodPillar(world, deco, 17, y, 5, getStairMeta(0 + rotation), rotation, sbb);
+        this.makeWoodPillar(world, 13, y, 1, rotation, sbb);
+        this.makeWoodPillar(world, 15, y, 1, rotation, sbb);
+        this.makeWoodPillar(world, 17, y, 3, rotation, sbb);
+        this.makeWoodPillar(world, 17, y, 5, rotation, sbb);
 
         // framing pillars
         this.makeStonePillar(world, deco, 12, y, 1, getStairMeta(3 + rotation), rotation, sbb);
@@ -1130,8 +1112,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
         placeBlockRotated(world, Blocks.sticky_piston, 5 - getStairMeta(0 + rotation), 9, y + 2, 14, rotation, sbb);
     }
 
-    private void makeWoodPillar(World world, StructureTFDecorator forgeDeco, int x, int y, int z, int stairMeta,
-            int rotation, StructureBoundingBox sbb) {
+    private void makeWoodPillar(World world, int x, int y, int z, int rotation, StructureBoundingBox sbb) {
         this.placeBlockRotated(world, TFBlocks.log, 3, x, y + 2, z, rotation, sbb);
         this.placeBlockRotated(world, TFBlocks.log, 3, x, y + 3, z, rotation, sbb);
         this.placeBlockRotated(world, TFBlocks.log, 3, x, y + 4, z, rotation, sbb);
@@ -1347,9 +1328,9 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
             int dz = getZWithOffsetAsIfRotated(x, z, rotation);
             if (sbb.isVecInside(dx, dy, dz) && world.getBlock(dx, dy, dz) == Blocks.furnace) {
                 // put charcoal in the oven
-                IInventory inv = (IInventory) world.getTileEntity(dx, dy, dz);
-
-                inv.setInventorySlotContents(1, new ItemStack(Items.coal, amount, 1));
+                if (world.getTileEntity(dx, dy, dz) instanceof IInventory inv) {
+                    inv.setInventorySlotContents(1, new ItemStack(Items.coal, amount, 1));
+                }
             }
         }
 
@@ -1374,7 +1355,9 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
         }
 
         if (sbb.isVecInside(sx, sy, sz)) {
-            world.setBlock(sx, sy + 0, sz, forgeDeco.stairID, stairMeta, 0);
+            world.setBlock(sx, sy, sz, forgeDeco.stairID, stairMeta, 0);
+        }
+        if (sbb.isVecInside(sx, sy + 3, sz)) {
             world.setBlock(sx, sy + 3, sz, forgeDeco.stairID, stairMeta + 4, 0);
         }
     }
@@ -1572,7 +1555,7 @@ public class ComponentTFDarkTowerMain extends ComponentTFDarkTowerWing {
 
     /**
      * Make a lattice of log blocks
-     * 
+     *
      * @param top
      */
     protected void makeTimberBeams(World world, Random rand, StructureBoundingBox sbb, int rotation, int y,

@@ -6,6 +6,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.BlockEvent;
 
 import twilightforest.block.TFBlocks;
 import twilightforest.world.WorldProviderTwilightForest;
@@ -21,22 +23,28 @@ public class ItemTFMagicBeans extends ItemTF {
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
     @Override
-    public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer player, World world, int x, int y, int z, int side,
+    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side,
             float hitX, float hitY, float hitZ) {
-        Block blockAt = world.getBlock(x, y, z);
-
-        int minY = y + 1;
-        int maxY = Math.max(y + 100, (int) (getCloudHeight(world) + 25));
-        if (y < maxY && blockAt == TFBlocks.uberousSoil) {
-
-            if (!world.isRemote) {
-                makeHugeStalk(world, x, z, minY, maxY);
-            }
-
-            return true;
-        } else {
+        if (stack.stackSize <= 0 || world.getBlock(x, y, z) != TFBlocks.uberousSoil
+                || !world.canMineBlock(player, x, y, z)
+                || !player.canPlayerEdit(x, y + 1, z, side, stack)) {
             return false;
         }
+        int minY = y + 1;
+        int maxY = Math.min(world.getActualHeight(), Math.max(y + 100, (int) (getCloudHeight(world) + 25)));
+        if (minY >= maxY) {
+            return false;
+        }
+        if (world.isRemote) {
+            return true;
+        }
+        if (!makeHugeStalk(world, player, stack, x, z, minY, maxY)) {
+            return false;
+        }
+        if (!player.capabilities.isCreativeMode) {
+            --stack.stackSize;
+        }
+        return true;
     }
 
     /**
@@ -49,7 +57,7 @@ public class ItemTFMagicBeans extends ItemTF {
         return world.provider.terrainType.getCloudHeight();
     }
 
-    private void makeHugeStalk(World world, int x, int z, int minY, int maxY) {
+    private boolean makeHugeStalk(World world, EntityPlayer player, ItemStack stack, int x, int z, int minY, int maxY) {
         int yOffset = world.rand.nextInt(100);
 
         float cScale = world.rand.nextFloat() * 0.25F + 0.125F; // spiral tightness scaling
@@ -65,6 +73,7 @@ public class ItemTFMagicBeans extends ItemTF {
 
         // make stalk
         boolean isClear = true;
+        boolean placedAny = false;
         for (int dy = minY; dy < maxY && isClear; dy++) {
             // make radius a little wavy
             radius = 5F + MathHelper.sin((dy + yOffset) * rScale) * 2.5F;
@@ -89,7 +98,9 @@ public class ItemTFMagicBeans extends ItemTF {
             for (int dx = minX; dx < maxX; dx++) {
                 for (int dz = minZ; dz < maxZ; dz++) {
                     if ((dx - cx) * (dx - cx) + (dz - cz) * (dz - cz) < stalkThickness * stalkThickness) {
-                        isClear &= this.tryToPlaceStalk(world, dx, dy, dz);
+                        boolean placed = this.tryToPlaceStalk(world, player, stack, dx, dy, dz);
+                        placedAny |= placed;
+                        isClear &= placed;
                     }
                 }
             }
@@ -101,29 +112,30 @@ public class ItemTFMagicBeans extends ItemTF {
                 int lx = (int) (x + MathHelper.sin((dy + yOffset) * cScale) * (radius + stalkThickness));
                 int lz = (int) (z + MathHelper.cos((dy + yOffset) * cScale) * (radius + stalkThickness));
 
-                this.placeLeaves(world, lx, dy, lz);
+                this.placeLeaves(world, player, stack, lx, dy, lz);
 
                 nextLeafY = dy + 5 + world.rand.nextInt(10);
             }
         }
+        return placedAny;
     }
 
-    private void placeLeaves(World world, int x, int y, int z) {
-        // stalk at center
-        world.setBlock(x, y, z, TFBlocks.hugeStalk);
+    private void placeLeaves(World world, EntityPlayer player, ItemStack stack, int x, int y, int z) {
+        // dont overwrite a protected or obstructing block in the middle of a leaf cluster
+        this.tryToPlaceStalk(world, player, stack, x, y, z);
 
         // small squares
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                this.tryToPlaceLeaves(world, x + dx, y - 1, z + dz);
-                this.tryToPlaceLeaves(world, x + dx, y + 1, z + dz);
+                this.tryToPlaceLeaves(world, player, stack, x + dx, y - 1, z + dz);
+                this.tryToPlaceLeaves(world, player, stack, x + dx, y + 1, z + dz);
             }
         }
         // larger square
         for (int dx = -2; dx <= 2; dx++) {
             for (int dz = -2; dz <= 2; dz++) {
                 if (!((dx == 2 || dx == -2) && (dz == 2 || dz == -2))) {
-                    this.tryToPlaceLeaves(world, x + dx, y + 0, z + dz);
+                    this.tryToPlaceLeaves(world, player, stack, x + dx, y, z + dz);
                 }
             }
         }
@@ -132,24 +144,47 @@ public class ItemTFMagicBeans extends ItemTF {
     /**
      * Place the stalk block only if the destination is clear. Return false if blocked.
      */
-    private boolean tryToPlaceStalk(World world, int x, int y, int z) {
-        Block blockThere = world.getBlock(x, y, z);
-        if (blockThere == Blocks.air || blockThere.isReplaceable(world, x, y, z)
-                || blockThere.canBeReplacedByLeaves(world, x, y, z)
-                || blockThere.isLeaves(world, x, y, z)
-                || blockThere.canSustainLeaves(world, x, y, z)) {
-            world.setBlock(x, y, z, TFBlocks.hugeStalk);
-            return true;
-        } else {
+    private boolean tryToPlaceStalk(World world, EntityPlayer player, ItemStack stack, int x, int y, int z) {
+        Block previous = world.getBlock(x, y, z);
+        if (previous != Blocks.air && !previous.isReplaceable(world, x, y, z)
+                && !previous.canBeReplacedByLeaves(world, x, y, z)
+                && !previous.isLeaves(world, x, y, z)
+                && !previous.canSustainLeaves(world, x, y, z)) {
             return false;
+        }
+        if (!canReplace(world, player, stack, x, y, z)) {
+            return false;
+        }
+        return world.setBlock(x, y, z, TFBlocks.hugeStalk);
+    }
+
+    private void tryToPlaceLeaves(World world, EntityPlayer player, ItemStack stack, int x, int y, int z) {
+        Block previous = world.getBlock(x, y, z);
+        if ((previous == Blocks.air || previous.canBeReplacedByLeaves(world, x, y, z))
+                && canReplace(world, player, stack, x, y, z)) {
+            world.setBlock(x, y, z, TFBlocks.leaves3, 1, 2);
         }
     }
 
-    private void tryToPlaceLeaves(World world, int x, int y, int z) {
-        Block blockThere = world.getBlock(x, y, z);
-        if (blockThere == Blocks.air || blockThere.canBeReplacedByLeaves(world, x, y, z)) {
-            world.setBlock(x, y, z, TFBlocks.leaves3, 1, 2);
+    private boolean canReplace(World world, EntityPlayer player, ItemStack stack, int x, int y, int z) {
+        if (y < 0 || y >= world.getActualHeight()
+                || !world.canMineBlock(player, x, y, z)
+                || !player.canPlayerEdit(x, y, z, 1, stack)) {
+            return false;
         }
+        Block previous = world.getBlock(x, y, z);
+        if (previous == Blocks.air) {
+            return true;
+        }
+        BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(
+                x,
+                y,
+                z,
+                world,
+                previous,
+                world.getBlockMetadata(x, y, z),
+                player);
+        return !MinecraftForge.EVENT_BUS.post(event);
     }
 
 }

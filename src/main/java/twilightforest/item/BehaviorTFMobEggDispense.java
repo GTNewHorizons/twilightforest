@@ -10,11 +10,12 @@ public class BehaviorTFMobEggDispense extends BehaviorDefaultDispenseItem {
     /**
      * Dispense the specified stack, play the dispense sound and spawn particles.
      */
+    @Override
     public ItemStack dispenseStack(IBlockSource blockSource, ItemStack itemStack) {
         EnumFacing facing = EnumFacing.getFront(blockSource.getBlockMetadata());
-        double x = blockSource.getX() + (double) facing.getFrontOffsetX();
+        double x = blockSource.getX() + facing.getFrontOffsetX();
         double y = blockSource.getY() + 0.2D;
-        double z = blockSource.getZ() + (double) facing.getFrontOffsetZ();
+        double z = blockSource.getZ() + facing.getFrontOffsetZ();
         ItemTFSpawnEgg.spawnCreature(blockSource.getWorld(), itemStack.getItemDamage(), x, y, z);
         itemStack.splitStack(1);
         return itemStack;

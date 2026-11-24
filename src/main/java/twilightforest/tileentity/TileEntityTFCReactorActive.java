@@ -12,6 +12,27 @@ import twilightforest.entity.EntityTFMiniGhast;
 
 public class TileEntityTFCReactorActive extends TileEntity {
 
+    // keep shell placement order, neighbouring updates can observe intermediate blocks
+    private static final int[][] REACTOR_SHELL = { { 1, 1, 1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { 1, 1, -1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { -1, 1, 1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { -1, 1, -1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { 0, 1, 1, BlockTFTowerTranslucent.META_FAKE_GOLD }, { 0, 1, -1, BlockTFTowerTranslucent.META_FAKE_GOLD },
+            { 1, 1, 0, BlockTFTowerTranslucent.META_FAKE_GOLD }, { -1, 1, 0, BlockTFTowerTranslucent.META_FAKE_GOLD },
+            { 1, 0, 1, BlockTFTowerTranslucent.META_FAKE_GOLD }, { 1, 0, -1, BlockTFTowerTranslucent.META_FAKE_GOLD },
+            { -1, 0, 1, BlockTFTowerTranslucent.META_FAKE_GOLD }, { -1, 0, -1, BlockTFTowerTranslucent.META_FAKE_GOLD },
+            { 0, 0, 1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { 0, 0, -1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { 1, 0, 0, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { -1, 0, 0, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { 1, -1, 1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { 1, -1, -1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { -1, -1, 1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { -1, -1, -1, BlockTFTowerTranslucent.META_FAKE_DIAMOND },
+            { 0, -1, 1, BlockTFTowerTranslucent.META_FAKE_GOLD }, { 0, -1, -1, BlockTFTowerTranslucent.META_FAKE_GOLD },
+            { 1, -1, 0, BlockTFTowerTranslucent.META_FAKE_GOLD },
+            { -1, -1, 0, BlockTFTowerTranslucent.META_FAKE_GOLD } };
+
     int counter = 0;
 
     int secX, secY, secZ;
@@ -52,180 +73,15 @@ public class TileEntityTFCReactorActive extends TileEntity {
             if (counter % 5 == 0) {
                 if (counter == 5) {
                     // transformation!
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord + 1,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord + 1,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord + 1,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord + 1,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-
-                    worldObj.setBlock(
-                            this.xCoord + 0,
-                            this.yCoord + 1,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 0,
-                            this.yCoord + 1,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord + 1,
-                            this.zCoord + 0,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord + 1,
-                            this.zCoord + 0,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord + 0,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord + 0,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord + 0,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord + 0,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-
-                    worldObj.setBlock(
-                            this.xCoord + 0,
-                            this.yCoord + 0,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 0,
-                            this.yCoord + 0,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord + 0,
-                            this.zCoord + 0,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord + 0,
-                            this.zCoord + 0,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord - 1,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord - 1,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord - 1,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord - 1,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_DIAMOND,
-                            2);
-
-                    worldObj.setBlock(
-                            this.xCoord + 0,
-                            this.yCoord - 1,
-                            this.zCoord + 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 0,
-                            this.yCoord - 1,
-                            this.zCoord - 1,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord + 1,
-                            this.yCoord - 1,
-                            this.zCoord + 0,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-                    worldObj.setBlock(
-                            this.xCoord - 1,
-                            this.yCoord - 1,
-                            this.zCoord + 0,
-                            TFBlocks.towerTranslucent,
-                            BlockTFTowerTranslucent.META_FAKE_GOLD,
-                            2);
-
+                    for (int[] entry : REACTOR_SHELL) {
+                        worldObj.setBlock(
+                                xCoord + entry[0],
+                                yCoord + entry[1],
+                                zCoord + entry[2],
+                                TFBlocks.towerTranslucent,
+                                entry[3],
+                                2);
+                    }
                 }
 
                 // primary burst
@@ -363,84 +219,17 @@ public class TileEntityTFCReactorActive extends TileEntity {
 
                 for (byte dz = 0; dz <= rad; dz++) {
                     // determine how far we are from the center.
-                    byte dist = 0;
-                    if (dx >= dy && dx >= dz) {
-                        dist = (byte) (dx + (byte) ((Math.max(dy, dz) * 0.5) + (Math.min(dy, dz) * 0.25)));
-                    } else if (dy >= dx && dy >= dz) {
-                        dist = (byte) (dy + (byte) ((Math.max(dx, dz) * 0.5) + (Math.min(dx, dz) * 0.25)));
-                    } else {
-                        dist = (byte) (dz + (byte) ((Math.max(dx, dy) * 0.5) + (Math.min(dx, dy) * 0.25)));
-                    }
+                    int largest = Math.max(dx, Math.max(dy, dz));
+                    int smallest = Math.min(dx, Math.min(dy, dz));
+                    int middle = dx + dy + dz - largest - smallest;
+                    int distance = largest + (int) (middle * 0.5D + smallest * 0.25D);
 
-                    // if we're inside the blob, fill it
-                    if (dist == rad && !(dx == 0 && dy == 0 && dz == 0)) {
-                        // do eight at a time for easiness!
-                        switch (fuzzX) {
-                            case 0 -> transformBlock(
-                                    sx + dx,
-                                    sy + dy,
-                                    sz + dz,
-                                    blockValue,
-                                    metaValue,
-                                    fuzzY,
-                                    netherTransform);
-                            case 1 -> transformBlock(
-                                    sx + dx,
-                                    sy + dy,
-                                    sz - dz,
-                                    blockValue,
-                                    metaValue,
-                                    fuzzY,
-                                    netherTransform);
-                            case 2 -> transformBlock(
-                                    sx - dx,
-                                    sy + dy,
-                                    sz + dz,
-                                    blockValue,
-                                    metaValue,
-                                    fuzzY,
-                                    netherTransform);
-                            case 3 -> transformBlock(
-                                    sx - dx,
-                                    sy + dy,
-                                    sz - dz,
-                                    blockValue,
-                                    metaValue,
-                                    fuzzY,
-                                    netherTransform);
-                            case 4 -> transformBlock(
-                                    sx + dx,
-                                    sy - dy,
-                                    sz + dz,
-                                    blockValue,
-                                    metaValue,
-                                    fuzzY,
-                                    netherTransform);
-                            case 5 -> transformBlock(
-                                    sx + dx,
-                                    sy - dy,
-                                    sz - dz,
-                                    blockValue,
-                                    metaValue,
-                                    fuzzY,
-                                    netherTransform);
-                            case 6 -> transformBlock(
-                                    sx - dx,
-                                    sy - dy,
-                                    sz + dz,
-                                    blockValue,
-                                    metaValue,
-                                    fuzzY,
-                                    netherTransform);
-                            case 7 -> transformBlock(
-                                    sx - dx,
-                                    sy - dy,
-                                    sz - dz,
-                                    blockValue,
-                                    metaValue,
-                                    fuzzY,
-                                    netherTransform);
-                        }
+                    // only the shell is transformed, preserve the original phase offset pattern
+                    if (distance == rad && !(dx == 0 && dy == 0 && dz == 0) && fuzzX >= 0) {
+                        int targetX = sx + ((fuzzX & 2) == 0 ? dx : -dx);
+                        int targetY = sy + ((fuzzX & 4) == 0 ? dy : -dy);
+                        int targetZ = sz + ((fuzzX & 1) == 0 ? dz : -dz);
+                        transformBlock(targetX, targetY, targetZ, blockValue, metaValue, fuzzY, netherTransform);
                     }
                 }
             }
@@ -448,7 +237,7 @@ public class TileEntityTFCReactorActive extends TileEntity {
     }
 
     /**
-     * 
+     *
      */
     protected void transformBlock(int x, int y, int z, Block blockValue, int metaValue, int fuzz,
             boolean netherTransform) {

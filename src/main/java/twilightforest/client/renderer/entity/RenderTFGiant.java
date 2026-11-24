@@ -15,26 +15,39 @@ import twilightforest.TwilightForestMod;
 
 public class RenderTFGiant extends RenderBiped {
 
-    private ResourceLocation textureLoc;
+    private static final ResourceLocation textureLoc = new ResourceLocation("textures/entity/steve.png");
+    private final ModelRenderer normalRightArm;
+    private final ModelRenderer normalLeftArm;
+    private final ModelRenderer slimRightArm;
+    private final ModelRenderer slimLeftArm;
 
     public RenderTFGiant() {
         super(new ModelBiped(), 0.625F);
 
-        this.textureLoc = new ResourceLocation("textures/entity/steve.png");
+        normalRightArm = this.modelBipedMain.bipedRightArm;
+        normalLeftArm = this.modelBipedMain.bipedLeftArm;
+        slimRightArm = new ModelRenderer(this.modelBipedMain, 40, 16);
+        slimRightArm.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, 0);
+        slimRightArm.setRotationPoint(-5.0F, 2.0F, 0.0F);
+        slimLeftArm = new ModelRenderer(this.modelBipedMain, 40, 16);
+        slimLeftArm.mirror = true;
+        slimLeftArm.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, 0);
+        slimLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
     }
 
     /**
      * Return our specific texture
      */
+    @Override
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         ResourceLocation skin;
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-        if (player.getLocationSkin() != null) {
-            skin = Minecraft.getMinecraft().thePlayer.getLocationSkin();
+        if (player != null && player.getLocationSkin() != null) {
+            skin = player.getLocationSkin();
         } else {
             skin = textureLoc;
         }
-        if (TwilightForestMod.isSkinportLoaded) {
+        if (TwilightForestMod.isSkinportLoaded && player != null) {
             skin = RenderTFGiantSkinportIntegration.getSkin(player, skin, textureLoc);
         }
         return skin;
@@ -45,18 +58,10 @@ public class RenderTFGiant extends RenderBiped {
      * entityLiving, partialTickTime
      */
     protected void preRenderCallback(EntityLivingBase par1EntityLivingBase, float par2) {
-        if (TwilightForestMod.isSkinportLoaded) {
-            if (RenderTFGiantSkinportIntegration.isSlim(Minecraft.getMinecraft().thePlayer)) {
-                this.modelBipedMain.bipedRightArm = new ModelRenderer(this.modelBipedMain, 40, 16);
-                this.modelBipedMain.bipedRightArm.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, 0);
-                this.modelBipedMain.bipedRightArm.setRotationPoint(-5.0F, 2.0F, 0.0F);
-
-                this.modelBipedMain.bipedLeftArm = new ModelRenderer(this.modelBipedMain, 40, 16);
-                this.modelBipedMain.bipedLeftArm.mirror = true;
-                this.modelBipedMain.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, 0);
-                this.modelBipedMain.bipedLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
-            }
-        }
+        boolean slim = TwilightForestMod.isSkinportLoaded && Minecraft.getMinecraft().thePlayer != null
+                && RenderTFGiantSkinportIntegration.isSlim(Minecraft.getMinecraft().thePlayer);
+        this.modelBipedMain.bipedRightArm = slim ? slimRightArm : normalRightArm;
+        this.modelBipedMain.bipedLeftArm = slim ? slimLeftArm : normalLeftArm;
 
         float scale = 4.0F;
         GL11.glScalef(scale, scale, scale);

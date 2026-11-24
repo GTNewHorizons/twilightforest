@@ -10,15 +10,18 @@ import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFCloudTree extends StructureTFComponent {
 
+    private static final int GIANT_BLOCK_SHIFT = 2;
+
     public ComponentTFCloudTree() {}
 
     public ComponentTFCloudTree(int index, int x, int y, int z) {
+        super(index);
         this.setCoordBaseMode(0);
 
         // adjust x, y, z
-        x = (x >> 2) << 2;
-        y = (y >> 2) << 2;
-        z = (z >> 2) << 2;
+        x = (x >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
+        y = (y >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
+        z = (z >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
 
         this.boundingBox = StructureTFComponent.getComponentToAddBoundingBox(x, y, z, -8, 0, -8, 20, 28, 20, 0);
 
@@ -30,62 +33,10 @@ public class ComponentTFCloudTree extends StructureTFComponent {
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
 
         // leaves
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                0,
-                12,
-                0,
-                19,
-                19,
-                19,
-                TFBlocks.giantLeaves,
-                0,
-                TFBlocks.giantLeaves,
-                0,
-                false);
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                4,
-                20,
-                4,
-                15,
-                23,
-                15,
-                TFBlocks.giantLeaves,
-                0,
-                TFBlocks.giantLeaves,
-                0,
-                false);
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                8,
-                24,
-                4,
-                11,
-                27,
-                15,
-                TFBlocks.giantLeaves,
-                0,
-                TFBlocks.giantLeaves,
-                0,
-                false);
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                4,
-                24,
-                8,
-                15,
-                27,
-                11,
-                TFBlocks.giantLeaves,
-                0,
-                TFBlocks.giantLeaves,
-                0,
-                false);
+        fillLeaves(world, sbb, 0, 12, 0, 19, 19, 19);
+        fillLeaves(world, sbb, 4, 20, 4, 15, 23, 15);
+        fillLeaves(world, sbb, 8, 24, 4, 11, 27, 15);
+        fillLeaves(world, sbb, 4, 24, 8, 15, 27, 11);
 
         // trunk
         this.fillWithMetadataBlocks(world, sbb, 8, 0, 8, 11, 23, 11, TFBlocks.giantLog, 0, TFBlocks.giantLog, 0, false);
@@ -109,4 +60,21 @@ public class ComponentTFCloudTree extends StructureTFComponent {
         return true;
     }
 
+    private void fillLeaves(World world, StructureBoundingBox sbb, int minX, int minY, int minZ, int maxX, int maxY,
+            int maxZ) {
+        fillWithMetadataBlocks(
+                world,
+                sbb,
+                minX,
+                minY,
+                minZ,
+                maxX,
+                maxY,
+                maxZ,
+                TFBlocks.giantLeaves,
+                0,
+                TFBlocks.giantLeaves,
+                0,
+                false);
+    }
 }

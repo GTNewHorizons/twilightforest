@@ -27,7 +27,7 @@ public class ComponentTFFinalCastleStairTower extends ComponentTFTowerWing {
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
         // add crown
@@ -83,22 +83,7 @@ public class ComponentTFFinalCastleStairTower extends ComponentTFTowerWing {
                 false);
 
         // stairs
-        for (int f = 0; f < 5; f++) {
-            int rotation = (f + 2) % 4;
-            int y = f * 3 + 1;
-            for (int i = 0; i < 3; i++) {
-                int sx = 3 + i;
-                int sy = y + i;
-                int sz = 1;
-
-                this.placeBlockRotated(world, deco.stairID, getStairMeta(0 + rotation), sx, sy, sz, rotation, sbb);
-                this.placeBlockRotated(world, deco.blockID, deco.blockMeta, sx, sy - 1, sz, rotation, sbb);
-                this.placeBlockRotated(world, deco.stairID, getStairMeta(0 + rotation), sx, sy, sz + 1, rotation, sbb);
-                this.placeBlockRotated(world, deco.blockID, deco.blockMeta, sx, sy - 1, sz + 1, rotation, sbb);
-            }
-            // landing
-            this.fillBlocksRotated(world, sbb, 6, y + 2, 1, 7, y + 2, 2, deco.blockID, deco.blockMeta, rotation);
-        }
+        buildStairFlights(world, sbb, 5, 1, 2);
 
         // door, second floor
         this.fillWithMetadataBlocks(
@@ -205,22 +190,7 @@ public class ComponentTFFinalCastleStairTower extends ComponentTFTowerWing {
                 false);
 
         // stairs
-        for (int f = 0; f < 7; f++) {
-            int rotation = (f + 0) % 4;
-            int y = f * 3 + 18;
-            for (int i = 0; i < 3; i++) {
-                int sx = 3 + i;
-                int sy = y + i;
-                int sz = 1;
-
-                this.placeBlockRotated(world, deco.stairID, getStairMeta(0 + rotation), sx, sy, sz, rotation, sbb);
-                this.placeBlockRotated(world, deco.blockID, deco.blockMeta, sx, sy - 1, sz, rotation, sbb);
-                this.placeBlockRotated(world, deco.stairID, getStairMeta(0 + rotation), sx, sy, sz + 1, rotation, sbb);
-                this.placeBlockRotated(world, deco.blockID, deco.blockMeta, sx, sy - 1, sz + 1, rotation, sbb);
-            }
-            // landing
-            this.fillBlocksRotated(world, sbb, 6, y + 2, 1, 7, y + 2, 2, deco.blockID, deco.blockMeta, rotation);
-        }
+        buildStairFlights(world, sbb, 7, 18, 0);
 
         // roof access landing
         this.fillWithMetadataBlocks(
@@ -253,6 +223,25 @@ public class ComponentTFFinalCastleStairTower extends ComponentTFTowerWing {
                 false);
 
         return true;
+    }
+
+    private void buildStairFlights(World world, StructureBoundingBox sbb, int count, int firstY, int rotationOffset) {
+        for (int floor = 0; floor < count; floor++) {
+            int rotation = (floor + rotationOffset) % 4;
+            int y = firstY + (floor * 3);
+            int stairMeta = getStairMeta(rotation);
+
+            for (int i = 0; i < 3; i++) {
+                int x = 3 + i;
+                int stairY = y + i;
+                this.placeBlockRotated(world, deco.stairID, stairMeta, x, stairY, 1, rotation, sbb);
+                this.placeBlockRotated(world, deco.blockID, deco.blockMeta, x, stairY - 1, 1, rotation, sbb);
+                this.placeBlockRotated(world, deco.stairID, stairMeta, x, stairY, 2, rotation, sbb);
+                this.placeBlockRotated(world, deco.blockID, deco.blockMeta, x, stairY - 1, 2, rotation, sbb);
+            }
+            // landing
+            this.fillBlocksRotated(world, sbb, 6, y + 2, 1, 7, y + 2, 2, deco.blockID, deco.blockMeta, rotation);
+        }
     }
 
     public int getGlyphMeta() {

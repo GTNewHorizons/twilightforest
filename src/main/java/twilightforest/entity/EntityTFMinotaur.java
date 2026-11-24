@@ -67,23 +67,25 @@ public class EntityTFMinotaur extends EntityMob implements ITFCharger {
         return true;
     }
 
+    @Override
     public boolean isCharging() {
-        return dataWatcher.getWatchableObjectByte(17) != 0;
+        return this.dataWatcher.getWatchableObjectByte(17) != 0;
     }
 
-    public void setCharging(boolean flag) {
-        if (flag) {
-            dataWatcher.updateObject(17, (byte) 127);
-        } else {
-            dataWatcher.updateObject(17, (byte) 0);
+    @Override
+    public void setCharging(boolean charging) {
+        if (this.isCharging() != charging) {
+            this.dataWatcher.updateObject(17, (byte) (charging ? 127 : 0));
         }
     }
 
+    @Override
     public boolean attackEntityAsMob(Entity par1Entity) {
         boolean success = super.attackEntityAsMob(par1Entity);
 
         if (success && this.isCharging()) {
             par1Entity.motionY += 0.4000000059604645D;
+            par1Entity.velocityChanged = true;
             this.worldObj.playSoundAtEntity(this, "mob.irongolem.throw", 1.0F, 1.0F);
         }
 
@@ -99,7 +101,7 @@ public class EntityTFMinotaur extends EntityMob implements ITFCharger {
         super.onLivingUpdate();
 
         // when charging, move legs fast
-        if (isCharging()) {
+        if (this.worldObj.isRemote && isCharging()) {
             this.limbSwingAmount += 0.6;
         }
 
@@ -173,16 +175,6 @@ public class EntityTFMinotaur extends EntityMob implements ITFCharger {
     protected void dropRareDrop(int par1) {
         this.dropItem(TFItems.mazeMapFocus, 1);
     }
-
-    // /**
-    // * Initialize this creature.
-    // */
-    // @Override
-    // public void initCreature()
-    // {
-    // //this.func_82164_bB();
-    // this.func_82162_bC();
-    // }
 
     /**
      * Trigger achievement when killed

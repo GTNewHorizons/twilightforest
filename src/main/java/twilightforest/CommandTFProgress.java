@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 
 public class CommandTFProgress extends CommandBase {
 
-    String[] bosses = new String[] { "none", "naga", "lich", "mooshroom", "hydra", "knights", "urghast", "yeti",
+    private static final String[] BOSSES = { "none", "naga", "lich", "mooshroom", "hydra", "knights", "urghast", "yeti",
             "snowqueen", "giants", "final" };
 
     @Override
@@ -26,87 +26,89 @@ public class CommandTFProgress extends CommandBase {
     /**
      * Return the required permission level for this command.
      */
+    @Override
     public int getRequiredPermissionLevel() {
         return 2;
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        if (args.length < 2) {
-            throw new WrongUsageException("tfprogress <player> <boss>");
-        } else {
-            EntityPlayerMP player = getPlayer(sender, args[0]);
-            int bossIndex = getBossIndex(args[1]);
-
-            func_152373_a(
-                    sender,
-                    this,
-                    "Setting player %s progress to past boss %s.",
-                    player.getCommandSenderName(),
-                    bosses[bossIndex]);
-
-            setProgress(player, bossIndex);
+        if (args.length != 2) {
+            throw new WrongUsageException(getCommandUsage(sender));
         }
+
+        int bossIndex = getBossIndex(args[1]);
+        if (bossIndex < 0) {
+            throw new WrongUsageException(getCommandUsage(sender));
+        }
+
+        EntityPlayerMP player = getPlayer(sender, args[0]);
+        setProgress(player, bossIndex);
+        func_152373_a(
+                sender,
+                this,
+                "Setting player %s progress to past boss %s.",
+                player.getCommandSenderName(),
+                BOSSES[bossIndex]);
     }
 
     private void setProgress(EntityPlayerMP player, int bossIndex) {
-
         // give previous achievements, if necessary
-        if (bossIndex > 0) {
-            for (int i = 0; i < bossIndex; i++) {
-                setProgress(player, i);
-            }
-        }
-
         // give achievements
-        switch (bossIndex) {
-            case 1 -> {
-                player.triggerAchievement(TFAchievementPage.twilightPortal);
-                player.triggerAchievement(TFAchievementPage.twilightArrival);
-                player.triggerAchievement(TFAchievementPage.twilightHunter);
-                player.triggerAchievement(TFAchievementPage.twilightKillNaga);
-                player.triggerAchievement(TFAchievementPage.twilightProgressNaga);
-            }
-            case 2 -> {
-                player.triggerAchievement(TFAchievementPage.twilightKillLich);
-                player.triggerAchievement(TFAchievementPage.twilightProgressLich);
-            }
-            case 3 -> player.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
-            case 4 -> {
-                player.triggerAchievement(TFAchievementPage.twilightKillHydra);
-                player.triggerAchievement(TFAchievementPage.twilightProgressHydra);
-            }
-            case 5 -> {
-                player.triggerAchievement(TFAchievementPage.twilightProgressTrophyPedestal);
-                player.triggerAchievement(TFAchievementPage.twilightProgressKnights);
-            }
-            case 6 -> player.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
-            case 7 -> player.triggerAchievement(TFAchievementPage.twilightProgressYeti);
-            case 8 -> player.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
-            case 9 -> player.triggerAchievement(TFAchievementPage.twilightProgressTroll);
-            case 10 -> {
-                player.triggerAchievement(TFAchievementPage.twilightProgressThorns);
-                player.triggerAchievement(TFAchievementPage.twilightProgressCastle);
+        for (int index = 1; index <= bossIndex; index++) {
+            switch (index) {
+                case 1 -> {
+                    player.triggerAchievement(TFAchievementPage.twilightPortal);
+                    player.triggerAchievement(TFAchievementPage.twilightArrival);
+                    player.triggerAchievement(TFAchievementPage.twilightHunter);
+                    player.triggerAchievement(TFAchievementPage.twilightKillNaga);
+                    player.triggerAchievement(TFAchievementPage.twilightProgressNaga);
+                }
+                case 2 -> {
+                    player.triggerAchievement(TFAchievementPage.twilightKillLich);
+                    player.triggerAchievement(TFAchievementPage.twilightProgressLich);
+                }
+                case 3 -> player.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
+                case 4 -> {
+                    player.triggerAchievement(TFAchievementPage.twilightKillHydra);
+                    player.triggerAchievement(TFAchievementPage.twilightProgressHydra);
+                }
+                case 5 -> {
+                    player.triggerAchievement(TFAchievementPage.twilightProgressTrophyPedestal);
+                    player.triggerAchievement(TFAchievementPage.twilightProgressKnights);
+                }
+                case 6 -> player.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
+                case 7 -> player.triggerAchievement(TFAchievementPage.twilightProgressYeti);
+                case 8 -> player.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
+                case 9 -> player.triggerAchievement(TFAchievementPage.twilightProgressTroll);
+                case 10 -> {
+                    player.triggerAchievement(TFAchievementPage.twilightProgressThorns);
+                    player.triggerAchievement(TFAchievementPage.twilightProgressCastle);
+                }
+                default -> throw new IllegalStateException("Unexpected progression stage: " + index);
             }
         }
     }
 
-    private int getBossIndex(String string) {
-        for (int i = 0; i < bosses.length; i++) {
-            if (bosses[i].equalsIgnoreCase(string)) {
-                return i;
+    private static int getBossIndex(String boss) {
+        for (int index = 0; index < BOSSES.length; index++) {
+            if (BOSSES[index].equalsIgnoreCase(boss)) {
+                return index;
             }
         }
-
-        return 0;
+        return -1;
     }
 
     /**
      * Adds the strings available in this command to the given list of tab completion options.
      */
+    @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args) {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, this.getListOfPlayers())
-                : (args.length == 2 ? getListOfStringsMatchingLastWord(args, bosses) : null);
+        return switch (args.length) {
+            case 1 -> getListOfStringsMatchingLastWord(args, getListOfPlayers());
+            case 2 -> getListOfStringsMatchingLastWord(args, BOSSES);
+            default -> null;
+        };
     }
 
     protected String[] getListOfPlayers() {
@@ -116,7 +118,8 @@ public class CommandTFProgress extends CommandBase {
     /**
      * Return whether the specified command parameter index is a username parameter.
      */
-    public boolean isUsernameIndex(String[] p_82358_1_, int p_82358_2_) {
-        return p_82358_2_ == 0;
+    @Override
+    public boolean isUsernameIndex(String[] args, int index) {
+        return index == 0;
     }
 }

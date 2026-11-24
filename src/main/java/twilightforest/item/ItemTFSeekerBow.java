@@ -19,6 +19,7 @@ public class ItemTFSeekerBow extends ItemTFBowBase {
      */
     @Override
     protected EntityArrow getArrow(World world, EntityPlayer entityPlayer, float velocity) {
+        // seeker arrows deliberately launch at half the base bow velocity
         return new EntitySeekerArrow(world, entityPlayer, velocity * 0.5F);
     }
 

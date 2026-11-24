@@ -37,7 +37,7 @@ public class ComponentTFTowerRoofMushroom extends ComponentTFTowerRoof {
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
     }
@@ -79,11 +79,12 @@ public class ComponentTFTowerRoofMushroom extends ComponentTFTowerRoof {
                 // determine how far we are from the center.
                 // int ax = Math.abs(dx);
                 // int az = Math.abs(dz);
-                float dist = MathHelper.sqrt_float(dx * dx + dz * dz);
+                // the squared distance test is exact for this integer block grid
+                int distanceSquared = dx * dx + dz * dz;
 
                 // make a trunk!
-                if (dist <= (radius + 0.5F)) {
-                    if (dist > hollow) {
+                if (distanceSquared <= radius * (radius + 1)) {
+                    if (hollow < 0 || distanceSquared > hollow * hollow) {
                         placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, dx + cx, y, dz + cz, sbb);
                     } else {
                         // spore
