@@ -124,7 +124,8 @@ public class EntityAITFBreathAttack extends EntityAIBase {
                 direction.xCoord * breathRange,
                 direction.yCoord * breathRange,
                 direction.zCoord * breathRange);
-        MovingObjectPosition wall = entityHost.worldObj.rayTraceBlocks(origin, end);
+        MovingObjectPosition wall = entityHost.worldObj
+                .rayTraceBlocks(Vec3.createVectorHelper(origin.xCoord, origin.yCoord, origin.zCoord), end);
         double maximum = wall == null ? breathRange : origin.distanceTo(wall.hitVec);
         Entity nearest = null;
         double nearestDistance = maximum;

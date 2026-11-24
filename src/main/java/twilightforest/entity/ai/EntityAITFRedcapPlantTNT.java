@@ -71,7 +71,8 @@ public class EntityAITFRedcapPlantTNT extends EntityAITFRedcapBase {
         int x = MathHelper.floor_double(this.entityObj.posX);
         int y = MathHelper.floor_double(this.entityObj.posY);
         int z = MathHelper.floor_double(this.entityObj.posZ);
-        if (!world.blockExists(x, y, z) || !world.isAirBlock(x, y, z)) {
+        if (!world.blockExists(x, y, z) || !world.isAirBlock(x, y, z)
+                || world.isBlockIndirectlyGettingPowered(x, y, z)) {
             return;
         }
 

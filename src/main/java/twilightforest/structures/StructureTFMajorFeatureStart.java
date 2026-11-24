@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.structure.MapGenStructureIO;
@@ -231,6 +232,19 @@ public class StructureTFMajorFeatureStart extends StructureStart {
         nbt.setBoolean(CONQUERED_NBT_KEY, isConquered);
         nbt.setInteger(FEATURE_ID_NBT_KEY, feature != null ? feature.featureID : TFFeature.nothing.featureID);
         nbt.setByteArray(LOCKS_NBT_KEY, lockBytes != null ? lockBytes : new byte[NUM_LOCKS]);
+    }
+
+    @Override
+    public void func_143020_a(World world, NBTTagCompound nbt) {
+        NBTTagList children = nbt.getTagList("Children", 10);
+        for (int i = 0; i < children.tagCount(); i++) {
+            NBTTagCompound child = children.getCompoundTagAt(i);
+            // old balconies shared the boss room ID but only balconies saved enterBottom
+            if ("TFSBR".equals(child.getString("id")) && child.hasKey("enterBottom", 1)) {
+                child.setString("id", "TFSBal");
+            }
+        }
+        super.func_143020_a(world, nbt);
     }
 
     @Override

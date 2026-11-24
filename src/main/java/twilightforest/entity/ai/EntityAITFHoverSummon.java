@@ -114,7 +114,7 @@ public class EntityAITFHoverSummon extends EntityAIBase {
                 return;
             }
         }
-        SnowQueenHoverHelper.steerToward(attacker, hoverPosX, hoverPosY, hoverPosZ, 0.05D);
+        SnowQueenHoverHelper.steerToward(attacker, hoverPosX, hoverPosY, hoverPosZ);
         attacker.faceEntity(target, 30.0F, 30.0F);
         attacker.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
     }

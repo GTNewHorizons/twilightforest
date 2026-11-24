@@ -344,6 +344,7 @@ public class HydraHeadContainer {
             this.headEntity = findNearbyHead("head" + this.headNum);
         }
         if (this.headEntity == null) {
+            // give neighbouring chunks time to load their saved head entities before repairing a missing head
             if (!hydraObj.worldObj.isRemote && ++missingHeadTicks >= 100 && hydraObj.isEntityAlive()) {
                 int x = MathHelper.floor_double(hydraObj.posX);
                 int y = MathHelper.floor_double(hydraObj.posY);
@@ -901,7 +902,8 @@ public class HydraHeadContainer {
         Vec3 srcVec = Vec3.createVectorHelper(headEntity.posX, headEntity.posY + 1.0, headEntity.posZ);
         Vec3 lookVec = headEntity.getLook(1.0F);
         Vec3 destVec = srcVec.addVector(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range);
-        MovingObjectPosition blockHit = headEntity.worldObj.rayTraceBlocks(srcVec, destVec);
+        MovingObjectPosition blockHit = headEntity.worldObj
+                .rayTraceBlocks(Vec3.createVectorHelper(srcVec.xCoord, srcVec.yCoord, srcVec.zCoord), destVec);
         if (blockHit != null && blockHit.hitVec != null) {
             destVec = blockHit.hitVec;
         }

@@ -119,7 +119,7 @@ public class EntityAITFHoverBeam extends EntityAIBase {
             }
             hoverPosY = Math.max(beamY, hoverPosY - 0.05D);
         }
-        SnowQueenHoverHelper.steerToward(attacker, hoverPosX, hoverPosY, hoverPosZ, 0.02D);
+        SnowQueenHoverHelper.steerToward(attacker, hoverPosX, hoverPosY, hoverPosZ);
         EntityLivingBase target = attacker.getAttackTarget();
         if (target != null) {
             float tracking = isInPosition ? 1.0F : 20.0F;

@@ -9,6 +9,7 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.StructureStart;
 
+import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import twilightforest.TFFeature;
 import twilightforest.structures.StructureTFComponent;
 import twilightforest.structures.StructureTFMajorFeatureStart;
@@ -117,7 +118,7 @@ public class MapGenTFMajorFeature extends MapGenStructure {
             }
 
             if (data == null) {
-                data = getOrCreateStructureData();
+                data = getStructureData();
             }
 
             feature.isConquered = conquered;
@@ -221,15 +222,8 @@ public class MapGenTFMajorFeature extends MapGenStructure {
         return start.getComponents();
     }
 
-    private MapGenStructureData getOrCreateStructureData() {
-        MapGenStructureData data = (MapGenStructureData) worldObj
-                .loadItemData(MapGenStructureData.class, STRUCTURE_DATA_NAME);
-
-        if (data == null) {
-            data = new MapGenStructureData(STRUCTURE_DATA_NAME);
-            worldObj.setItemData(STRUCTURE_DATA_NAME, data);
-        }
-
-        return data;
+    private MapGenStructureData getStructureData() {
+        // use the generators dim specific data, not global map storage
+        return ObfuscationReflectionHelper.getPrivateValue(MapGenStructure.class, this, "field_143029_e");
     }
 }

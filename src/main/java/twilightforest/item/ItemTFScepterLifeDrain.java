@@ -85,7 +85,8 @@ public class ItemTFScepterLifeDrain extends ItemTF {
         Vec3 lookVec = player.getLook(1.0F);
         Vec3 destVec = srcVec.addVector(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range);
         // respect solid walls, the original entity only ray could drain creatures through blocks
-        MovingObjectPosition blockHit = worldObj.rayTraceBlocks(srcVec, destVec);
+        MovingObjectPosition blockHit = worldObj
+                .rayTraceBlocks(Vec3.createVectorHelper(srcVec.xCoord, srcVec.yCoord, srcVec.zCoord), destVec);
         if (blockHit != null && blockHit.hitVec != null) {
             destVec = blockHit.hitVec;
         }

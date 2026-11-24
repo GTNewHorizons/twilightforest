@@ -13,7 +13,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
@@ -86,8 +85,9 @@ public class BlockTFCinderFurnace extends BlockContainer {
      */
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase p_149689_5_, ItemStack itemStack) {
 
-        if (itemStack.hasDisplayName() && world.getTileEntity(x, y, z) instanceof TileEntityFurnace furnace) {
-            furnace.func_145951_a(itemStack.getDisplayName());
+        if (!world.isRemote && itemStack.hasDisplayName()
+                && world.getTileEntity(x, y, z) instanceof TileEntityTFCinderFurnace furnace) {
+            furnace.setCustomName(itemStack.getDisplayName());
         }
     }
 

@@ -123,7 +123,7 @@ public class EntityAITFHoverThenDrop extends EntityAIBase {
             if (arrived) {
                 ++hoverTimer;
             }
-            SnowQueenHoverHelper.steerToward(attacker, hoverPosX, hoverPosY, hoverPosZ, 0.05D);
+            SnowQueenHoverHelper.steerToward(attacker, hoverPosX, hoverPosY, hoverPosZ);
         } else {
             ++dropTimer;
             if (!attacker.worldObj.isRemote && attacker.posY > dropY

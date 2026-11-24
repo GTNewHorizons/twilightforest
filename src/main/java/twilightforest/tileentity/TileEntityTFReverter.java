@@ -214,7 +214,7 @@ public class TileEntityTFReverter extends TileEntity {
                     Block blockID = worldObj.getBlock(this.xCoord + x, this.yCoord + y, this.zCoord + z);
                     byte meta = (byte) worldObj.getBlockMetadata(this.xCoord + x, this.yCoord + y, this.zCoord + z);
 
-                    if (blockData[index] != blockID || metaData[index] != meta) {
+                    if (blockData[index] != blockID) {
                         if (revertBlock(
                                 this.xCoord + x,
                                 this.yCoord + y,

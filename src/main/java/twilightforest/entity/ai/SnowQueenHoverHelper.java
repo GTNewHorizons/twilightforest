@@ -40,23 +40,21 @@ final class SnowQueenHoverHelper {
                 Vec3.createVectorHelper(x, y, z)) == null;
     }
 
-    static void steerToward(EntityTFSnowQueen queen, double x, double y, double z, double verticalBias) {
+    static void steerToward(EntityTFSnowQueen queen, double x, double y, double z) {
         double dx = x - queen.posX;
         double dy = y - queen.posY;
         double dz = z - queen.posZ;
-        double distanceSq = dx * dx + dy * dy + dz * dz;
-        if (distanceSq < 0.0001D) {
-            // brake on arrival, never divide by zero or accelerate indefinitely
-            queen.addVelocity(-queen.motionX * 0.12D, verticalBias - queen.motionY * 0.12D, -queen.motionZ * 0.12D);
-            return;
-        }
-        double distance = Math.sqrt(distanceSq);
+        double distance = Math.max(1.0D, Math.sqrt(dx * dx + dy * dy + dz * dz));
         double desiredX = dx / distance * 0.2D;
-        double desiredY = dy / distance * 0.2D;
         double desiredZ = dz / distance * 0.2D;
+        double desiredY = MathHelper.clamp_double(dy * 0.2D, -0.35D, 0.35D);
+
+        double gravityStep = 0.08D * 0.98D;
+        double verticalMotion = queen.motionY + gravityStep;
+        double verticalAcceleration = gravityStep + (desiredY - verticalMotion) * 0.35D;
         queen.addVelocity(
                 MathHelper.clamp_double((desiredX - queen.motionX) * 0.15D, -0.05D, 0.05D),
-                MathHelper.clamp_double((desiredY - queen.motionY) * 0.15D + verticalBias, -0.07D, 0.07D),
+                MathHelper.clamp_double(verticalAcceleration, -0.15D, 0.15D),
                 MathHelper.clamp_double((desiredZ - queen.motionZ) * 0.15D, -0.05D, 0.05D));
     }
 
@@ -64,7 +62,8 @@ final class SnowQueenHoverHelper {
         Vec3 origin = Vec3.createVectorHelper(queen.posX, queen.posY + queen.getEyeHeight(), queen.posZ);
         Vec3 look = queen.getLook(1.0F);
         Vec3 end = origin.addVector(look.xCoord * range, look.yCoord * range, look.zCoord * range);
-        MovingObjectPosition wall = queen.worldObj.rayTraceBlocks(origin, end);
+        MovingObjectPosition wall = queen.worldObj
+                .rayTraceBlocks(Vec3.createVectorHelper(origin.xCoord, origin.yCoord, origin.zCoord), end);
         double nearestDistance = wall == null ? range : origin.distanceTo(wall.hitVec);
         Entity nearest = null;
         for (Entity candidate : queen.worldObj.getEntitiesWithinAABBExcludingEntity(

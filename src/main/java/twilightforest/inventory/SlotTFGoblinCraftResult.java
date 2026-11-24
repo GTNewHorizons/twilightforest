@@ -6,8 +6,6 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 
-import twilightforest.TwilightForestMod;
-
 public class SlotTFGoblinCraftResult extends SlotCrafting {
 
     protected final EntityPlayer thePlayer;
@@ -35,8 +33,7 @@ public class SlotTFGoblinCraftResult extends SlotCrafting {
         if (input == null) {
             return true;
         }
-        return !TwilightForestMod.disableUncrafting && uncraftingMatrix.numberOfInputItems > 0
-                && input.stackSize >= uncraftingMatrix.numberOfInputItems
+        return uncraftingMatrix.numberOfInputItems > 0 && input.stackSize >= uncraftingMatrix.numberOfInputItems
                 && (player.capabilities.isCreativeMode || player.experienceLevel >= uncraftingMatrix.recraftingCost);
     }
 

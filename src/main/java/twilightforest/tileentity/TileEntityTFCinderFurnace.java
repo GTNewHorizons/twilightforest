@@ -17,6 +17,9 @@ import net.minecraft.item.ItemTool;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraftforge.oredict.OreDictionary;
@@ -135,6 +138,29 @@ public class TileEntityTFCinderFurnace extends TileEntity implements ISidedInven
     @Override
     public boolean hasCustomInventoryName() {
         return this.customName != null && this.customName.length() > 0;
+    }
+
+    public void setCustomName(String name) {
+        this.customName = name;
+        markDirty();
+        if (worldObj != null && !worldObj.isRemote) {
+            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+        }
+    }
+
+    @Override
+    public Packet getDescriptionPacket() {
+        NBTTagCompound tag = new NBTTagCompound();
+        if (hasCustomInventoryName()) {
+            tag.setString(NBT_CUSTOM_NAME, customName);
+        }
+        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 3, tag);
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager manager, S35PacketUpdateTileEntity packet) {
+        NBTTagCompound tag = packet.func_148857_g();
+        customName = tag.hasKey(NBT_CUSTOM_NAME, 8) ? tag.getString(NBT_CUSTOM_NAME) : null;
     }
 
     @Override
