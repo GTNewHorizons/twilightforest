@@ -17,91 +17,74 @@ public class ComponentTFNagaCourtyardWallPadder extends ComponentTFNagaCourtyard
 
     public ComponentTFNagaCourtyardWallPadder(int i, int x, int y, int z, int rotation) {
         super(i, x, y, z, rotation);
-        this.coordBaseMode = rotation;
         this.boundingBox = new StructureBoundingBox(x, y, z, x, y + 8, z + 2);
+        normalizeRotatedFootprint();
+    }
+
+    @Override
+    protected void normalizeRotatedFootprint() {
+        fitRotatedFootprint(1, 3);
     }
 
     @Override
     public boolean addComponentParts(World world, Random random, StructureBoundingBox structureBoundingBox) {
         // Brick base
-        this.fillWithBlocks(world, structureBoundingBox, 0, 0, 0, 0, 0, 2, Blocks.stonebrick, Blocks.air, false);
+        fillWithBlocks(world, structureBoundingBox, 0, 0, 0, 0, 0, 2, Blocks.stonebrick, Blocks.air, false);
 
         // Middle brick layer
-        this.fillWithBlocks(world, structureBoundingBox, 0, 1, 1, 0, 7, 1, Blocks.stonebrick, Blocks.air, false);
+        fillWithBlocks(world, structureBoundingBox, 0, 1, 1, 0, 7, 1, Blocks.stonebrick, Blocks.air, false);
 
         // Upper slab rows
-        this.placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, 0, 8, 0, structureBoundingBox);
-        this.placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, 0, 8, 2, structureBoundingBox);
+        for (int z = 0; z <= 2; z += 2) {
+            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, 0, 8, z, structureBoundingBox);
+        }
 
         // Columns
-        this.fillWithMetadataBlocks(
-                world,
-                structureBoundingBox,
-                0,
-                2,
-                0,
-                0,
-                7,
-                0,
-                TFBlocks.nagastonePillar,
-                0,
-                Blocks.air,
-                0,
-                false);
-        this.fillWithMetadataBlocks(
-                world,
-                structureBoundingBox,
-                0,
-                2,
-                2,
-                0,
-                7,
-                2,
-                TFBlocks.nagastonePillar,
-                0,
-                Blocks.air,
-                0,
-                false);
+        for (int z = 0; z <= 2; z += 2) {
+            fillWithMetadataBlocks(
+                    world,
+                    structureBoundingBox,
+                    0,
+                    2,
+                    z,
+                    0,
+                    7,
+                    z,
+                    TFBlocks.nagastonePillar,
+                    0,
+                    Blocks.air,
+                    0,
+                    false);
+        }
 
         // Spiral bricks
-        this.placeBlockAtCurrentPosition(
-                world,
-                TFBlocks.spiralStoneBricks,
-                rotatedStairs1,
-                0,
-                4,
-                0,
-                structureBoundingBox);
-        this.placeBlockAtCurrentPosition(
-                world,
-                TFBlocks.spiralStoneBricks,
-                rotatedStairs0,
-                0,
-                4,
-                2,
-                structureBoundingBox);
+        for (int z = 0; z <= 2; z += 2) {
+            placeBlockAtCurrentPosition(
+                    world,
+                    TFBlocks.spiralStoneBricks,
+                    z == 0 ? rotatedStairs1 : rotatedStairs0,
+                    0,
+                    4,
+                    z,
+                    structureBoundingBox);
+        }
 
         // Chiseled stone bricks
-        this.placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 5, 0, structureBoundingBox);
-        this.placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 5, 2, structureBoundingBox);
+        for (int z = 0; z <= 2; z += 2) {
+            placeBlockAtCurrentPosition(world, Blocks.stonebrick, 3, 0, 5, z, structureBoundingBox);
+        }
 
         // Stone brick stairs
-        this.placeBlockAtCurrentPosition(
-                world,
-                Blocks.stone_brick_stairs,
-                rotatedStairs5,
-                0,
-                1,
-                0,
-                structureBoundingBox);
-        this.placeBlockAtCurrentPosition(
-                world,
-                Blocks.stone_brick_stairs,
-                rotatedStairs4,
-                0,
-                1,
-                2,
-                structureBoundingBox);
+        for (int z = 0; z <= 2; z += 2) {
+            placeBlockAtCurrentPosition(
+                    world,
+                    Blocks.stone_brick_stairs,
+                    z == 0 ? rotatedStairs5 : rotatedStairs4,
+                    0,
+                    1,
+                    z,
+                    structureBoundingBox);
+        }
         return true;
     }
 }

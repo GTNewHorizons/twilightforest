@@ -12,6 +12,7 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
 
     static int RADIUS = 46;
     static int DIAMETER = 2 * RADIUS + 1;
+    private static final int PILLAR_HEIGHT = 8;
 
     public ComponentTFNagaCourtyard() {
         super();
@@ -31,7 +32,7 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
     /**
      * At the moment, this just draws the whole courtyard as a giant 93x93 block every time. We may break this up
      * properly later.
-     * 
+     *
      * TODO: what I just said
      */
     @Override
@@ -56,16 +57,11 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
 
         // fence! except not a fence, more of a wall
         for (int fx = 0; fx <= DIAMETER; fx++) {
-            randomBrick(world, rand, fx, 0, DIAMETER, sbb);
-            randomBrick(world, rand, fx, 0, 0, sbb);
-            randomBrick(world, rand, fx, 1, DIAMETER, sbb);
-            randomBrick(world, rand, fx, 1, 0, sbb);
-            randomBrick(world, rand, fx, 2, DIAMETER, sbb);
-            randomBrick(world, rand, fx, 2, 0, sbb);
-            randomBrick(world, rand, fx, 3, DIAMETER, sbb);
-            randomBrick(world, rand, fx, 3, 0, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 5, fx, 4, DIAMETER, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 5, fx, 4, 0, sbb);
+            for (int y = 0; y < 4; y++) {
+                randomBrick(world, rand, fx, y, DIAMETER, sbb);
+                randomBrick(world, rand, fx, y, 0, sbb);
+            }
+            placeOppositeZEdges(world, Blocks.stone_slab, 5, fx, 4, sbb);
 
             // make nagastone pattern!
             switch (fx % 23) {
@@ -74,56 +70,42 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
                 case 9:
                 case 13:
                 case 17:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 3, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 2, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 2, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 4, fx, 1, 0, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 4, fx, 3, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 4, fx, 2, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 4, fx, 1, sbb);
                     break;
                 case 3:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 8, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 8, fx, 3, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, 0, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneHead, 8, fx, 3, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 9, fx, 1, sbb);
                     break;
                 case 4:
                 case 8:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 1, 0, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 9, fx, 1, sbb);
                     break;
                 case 6:
                 case 10:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 9, fx, 3, 0, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 9, fx, 3, sbb);
                     break;
                 case 7:
                 case 11:
                 case 15:
                 case 19:
                 case 22:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 3, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 2, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 2, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 5, fx, 1, 0, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 5, fx, 3, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 5, fx, 2, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 5, fx, 1, sbb);
                     break;
                 case 14:
                 case 18:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 3, 0, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 8, fx, 3, sbb);
                     break;
                 case 16:
                 case 20:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, 0, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 8, fx, 1, sbb);
                     break;
                 case 21:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 9, fx, 3, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 9, fx, 3, 0, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, DIAMETER, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 8, fx, 1, 0, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneHead, 9, fx, 3, sbb);
+                    placeOppositeZEdges(world, TFBlocks.nagastoneBody, 8, fx, 1, sbb);
                     break;
             }
 
@@ -139,16 +121,11 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
         }
 
         for (int fz = 0; fz <= DIAMETER; fz++) {
-            randomBrick(world, rand, DIAMETER, 0, fz, sbb);
-            randomBrick(world, rand, 0, 0, fz, sbb);
-            randomBrick(world, rand, DIAMETER, 1, fz, sbb);
-            randomBrick(world, rand, 0, 1, fz, sbb);
-            randomBrick(world, rand, DIAMETER, 2, fz, sbb);
-            randomBrick(world, rand, 0, 2, fz, sbb);
-            randomBrick(world, rand, DIAMETER, 3, fz, sbb);
-            randomBrick(world, rand, 0, 3, fz, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 5, DIAMETER, 4, fz, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 5, 0, 4, fz, sbb);
+            for (int y = 0; y < 4; y++) {
+                randomBrick(world, rand, DIAMETER, y, fz, sbb);
+                randomBrick(world, rand, 0, y, fz, sbb);
+            }
+            placeOppositeXEdges(world, Blocks.stone_slab, 5, fz, 4, sbb);
 
             // make nagastone pattern!
             switch (fz % 23) {
@@ -157,12 +134,9 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
                 case 9:
                 case 13:
                 case 17:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 2, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 2, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 7, 0, 1, fz, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 7, fz, 3, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 7, fz, 2, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 7, fz, 1, sbb);
                     break;
                 case 3:
                     placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 11, DIAMETER, 3, fz, sbb);
@@ -172,41 +146,32 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
                     break;
                 case 4:
                 case 8:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, 0, 1, fz, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 10, fz, 1, sbb);
                     break;
                 case 6:
                 case 10:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 10, 0, 3, fz, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 10, fz, 3, sbb);
                     break;
                 case 7:
                 case 11:
                 case 15:
                 case 19:
                 case 22:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 2, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 2, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 6, 0, 1, fz, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 6, fz, 3, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 6, fz, 2, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 6, fz, 1, sbb);
                     break;
                 case 14:
                 case 18:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 3, fz, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 11, fz, 3, sbb);
                     break;
                 case 16:
                 case 20:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 1, fz, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 11, fz, 1, sbb);
                     break;
                 case 21:
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 10, DIAMETER, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneHead, 10, 0, 3, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, DIAMETER, 1, fz, sbb);
-                    placeBlockAtCurrentPosition(world, TFBlocks.nagastoneBody, 11, 0, 1, fz, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneHead, 10, fz, 3, sbb);
+                    placeOppositeXEdges(world, TFBlocks.nagastoneBody, 11, fz, 1, sbb);
                     break;
             }
 
@@ -243,20 +208,17 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
      * Make a pillar out of stone brick
      */
     public boolean makePillar(World world, Random rand, int x, int y, int z, StructureBoundingBox sbb) {
-        int height = 8;
-
         // make the base
-        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x - 1, y + 0, z - 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 0, y + 0, z - 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 1, y + 0, z - 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x - 1, y + 0, z + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 1, y + 0, z + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x - 1, y + 0, z + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 0, y + 0, z + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 1, y + 0, z + 1, sbb);
+        for (int dz = -1; dz <= 1; dz++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                if (dx != 0 || dz != 0) {
+                    placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + dx, y, z + dz, sbb);
+                }
+            }
+        }
 
         // make the pillar
-        for (int i = 0; i < height; i++) {
+        for (int i = 0; i < PILLAR_HEIGHT; i++) {
             randomBrick(world, rand, x, y + i, z, sbb);
             if (i > 0 && rand.nextInt(2) == 0) {
                 // vines?
@@ -294,20 +256,27 @@ public class ComponentTFNagaCourtyard extends StructureTFComponent {
         }
 
         // top?
-        if (height == 8) {
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x - 1, y + 8, z - 1, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 0, y + 8, z - 1, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 1, y + 8, z - 1, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x - 1, y + 8, z + 0, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 5, x + 0, y + 8, z + 0, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 1, y + 8, z + 0, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x - 1, y + 8, z + 1, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 0, y + 8, z + 1, sbb);
-            placeBlockAtCurrentPosition(world, Blocks.stone_slab, 0, x + 1, y + 8, z + 1, sbb);
-
+        for (int dz = -1; dz <= 1; dz++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                int meta = dx == 0 && dz == 0 ? 5 : 0;
+                placeBlockAtCurrentPosition(world, Blocks.stone_slab, meta, x + dx, y + PILLAR_HEIGHT, z + dz, sbb);
+            }
         }
 
         return true;
+    }
+
+    // keep far side placements first, chunk clipping and block update order depend on it
+    private void placeOppositeZEdges(World world, net.minecraft.block.Block block, int meta, int x, int y,
+            StructureBoundingBox sbb) {
+        placeBlockAtCurrentPosition(world, block, meta, x, y, DIAMETER, sbb);
+        placeBlockAtCurrentPosition(world, block, meta, x, y, 0, sbb);
+    }
+
+    private void placeOppositeXEdges(World world, net.minecraft.block.Block block, int meta, int z, int y,
+            StructureBoundingBox sbb) {
+        placeBlockAtCurrentPosition(world, block, meta, DIAMETER, y, z, sbb);
+        placeBlockAtCurrentPosition(world, block, meta, 0, y, z, sbb);
     }
 
     /**
