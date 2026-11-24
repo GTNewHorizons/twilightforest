@@ -13,7 +13,7 @@ import twilightforest.client.model.ModelTFSlimeBeetle;
 
 public class RenderTFSlimeBeetle extends RenderLiving {
 
-    ModelBase renderModel;
+    private final ModelBase renderModel;
     private static final ResourceLocation textureLoc = new ResourceLocation(
             TwilightForestMod.MODEL_DIR + "slimebeetle.png");
 
@@ -45,6 +45,7 @@ public class RenderTFSlimeBeetle extends RenderLiving {
         } else {
             if (par2 == 1) {
                 GL11.glDisable(GL11.GL_BLEND);
+                GL11.glDisable(GL11.GL_NORMALIZE);
                 GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             }
 
@@ -55,6 +56,7 @@ public class RenderTFSlimeBeetle extends RenderLiving {
     /**
      * Return our specific texture
      */
+    @Override
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         return textureLoc;
     }

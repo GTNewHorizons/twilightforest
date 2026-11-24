@@ -19,7 +19,7 @@ public class ModelTFMosquitoSwarm extends ModelBase {
     ModelRenderer node5;
     ModelRenderer node6;
 
-    Random rand = new Random();
+    private final Random rand = new Random();
 
     public ModelTFMosquitoSwarm() {
         core = new ModelRenderer(this, rand.nextInt(28), rand.nextInt(28));
@@ -75,7 +75,7 @@ public class ModelTFMosquitoSwarm extends ModelBase {
     /**
      * Add the proper number of mosquitoes to the nodes
      */
-    public void addBugsToNodes(ModelRenderer node) {
+    private void addBugsToNodes(ModelRenderer node) {
         int bugs = 16;
 
         for (int i = 0; i < bugs; i++) {

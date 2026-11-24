@@ -72,6 +72,7 @@ public class TileEntityTFTrophyRenderer extends TileEntitySpecialRenderer {
         TileEntityTFTrophy trophy = (TileEntityTFTrophy) tileentity;
 
         GL11.glPushMatrix();
+        boolean culling = GL11.glIsEnabled(GL11.GL_CULL_FACE);
         GL11.glDisable(GL11.GL_CULL_FACE);
 
         int meta = trophy.getBlockMetadata() & 7;
@@ -112,6 +113,9 @@ public class TileEntityTFTrophyRenderer extends TileEntitySpecialRenderer {
             case 8 -> renderQuestingRamHead(rotation, onGround);
         }
 
+        if (culling) {
+            GL11.glEnable(GL11.GL_CULL_FACE);
+        }
         GL11.glPopMatrix();
 
     }

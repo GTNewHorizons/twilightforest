@@ -28,7 +28,7 @@ public class RenderTFTinyFirefly extends Render {
 
     /**
      * Draw a cute firefly!
-     * 
+     *
      * @param firefly
      * @param x
      * @param y
@@ -102,6 +102,7 @@ public class RenderTFTinyFirefly extends Render {
     /**
      * Return our specific texture
      */
+    @Override
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         return textureLoc;
     }

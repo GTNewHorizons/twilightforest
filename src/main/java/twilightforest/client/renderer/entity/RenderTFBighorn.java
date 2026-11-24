@@ -19,6 +19,7 @@ public class RenderTFBighorn extends RenderSheep {
     /**
      * Return our specific texture
      */
+    @Override
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         return textureLoc;
     }

@@ -10,21 +10,22 @@ import twilightforest.entity.passive.EntityTFBunny;
 
 public class RenderTFBunny extends RenderLiving {
 
-    final ResourceLocation textureLocDutch;
-    final ResourceLocation textureLocWhite;
-    final ResourceLocation textureLocBrown;
+    private static final ResourceLocation textureLocDutch = new ResourceLocation(
+            TwilightForestMod.MODEL_DIR + "bunnydutch.png");
+    private static final ResourceLocation textureLocWhite = new ResourceLocation(
+            TwilightForestMod.MODEL_DIR + "bunnywhite.png");
+    private static final ResourceLocation textureLocBrown = new ResourceLocation(
+            TwilightForestMod.MODEL_DIR + "bunnybrown.png");
 
     public RenderTFBunny(ModelBase par1ModelBase, float par2) {
         super(par1ModelBase, par2);
 
-        textureLocDutch = new ResourceLocation(TwilightForestMod.MODEL_DIR + "bunnydutch.png");
-        textureLocWhite = new ResourceLocation(TwilightForestMod.MODEL_DIR + "bunnywhite.png");
-        textureLocBrown = new ResourceLocation(TwilightForestMod.MODEL_DIR + "bunnybrown.png");
     }
 
     /**
      * Return our specific texture
      */
+    @Override
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         if (par1Entity instanceof EntityTFBunny) {
             return switch (((EntityTFBunny) par1Entity).getBunnyType()) {

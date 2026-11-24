@@ -113,6 +113,7 @@ public final class TFWeatherColumns {
     private final Layer[] layers = new Layer[LAYER_COUNT];
     private final Random random = new Random();
 
+    private WorldClient builtWorld;
     private boolean built;
     private long builtTime;
     private int serial;
@@ -126,7 +127,7 @@ public final class TFWeatherColumns {
     private boolean keyFancy;
     private boolean keyCreative;
     private boolean keyEnforced;
-    private StructureBoundingBox keyBox;
+    private int[] keyBoxBounds;
 
     public TFWeatherColumns() {
         for (int i = 0; i < LAYER_COUNT; i++) {
@@ -162,31 +163,27 @@ public final class TFWeatherColumns {
         double offY = view.lastTickPosY + (view.posY - view.lastTickPosY) * (double) partialTicks;
         int floorY = MathHelper.floor_double(offY);
 
-        if (built && px == keyX
+        if (built && world == builtWorld
+                && px == keyX
                 && py == keyY
                 && pz == keyZ
                 && fancy == keyFancy
                 && creative == keyCreative
                 && enforced == keyEnforced
-                && (box == keyBox || box != null && keyBox != null
-                        && box.minX == keyBox.minX
-                        && box.minY == keyBox.minY
-                        && box.minZ == keyBox.minZ
-                        && box.maxX == keyBox.maxX
-                        && box.maxY == keyBox.maxY
-                        && box.maxZ == keyBox.maxZ)
+                && matchesBox(box)
                 && worldTime - builtTime >= 0
                 && worldTime - builtTime < REBUILD_TICKS) {
             return;
         }
 
+        builtWorld = world;
         keyX = px;
         keyY = py;
         keyZ = pz;
         keyFancy = fancy;
         keyCreative = creative;
         keyEnforced = enforced;
-        keyBox = box;
+        keyBoxBounds = box == null ? null : new int[] { box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ };
         builtTime = worldTime;
         built = true;
         serial++;
@@ -212,6 +209,17 @@ public final class TFWeatherColumns {
         if (nearLockedStructure) {
             buildStructure(box, px, py, pz, rainXCoords, rainYCoords);
         }
+    }
+
+    private boolean matchesBox(StructureBoundingBox box) {
+        if (box == null || keyBoxBounds == null) {
+            return box == null && keyBoxBounds == null;
+        }
+        return box.minX == keyBoxBounds[0] && box.minY == keyBoxBounds[1]
+                && box.minZ == keyBoxBounds[2]
+                && box.maxX == keyBoxBounds[3]
+                && box.maxY == keyBoxBounds[4]
+                && box.maxZ == keyBoxBounds[5];
     }
 
     private void scanLockedBiome(WorldClient world, EntityPlayer player, int px, int py, int pz, int floorY,
