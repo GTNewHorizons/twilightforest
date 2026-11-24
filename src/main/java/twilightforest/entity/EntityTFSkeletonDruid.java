@@ -26,6 +26,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemHoe;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
@@ -37,8 +38,8 @@ import twilightforest.item.TFItems;
 
 public class EntityTFSkeletonDruid extends EntityMob implements IRangedAttackMob {
 
-    private EntityAIArrowAttack aiArrowAttack = new EntityAIArrowAttack(this, 1.0D, 60, 10.0F);
-    private EntityAIAttackOnCollide aiAttackOnCollide = new EntityAIAttackOnCollide(
+    private final EntityAIArrowAttack aiArrowAttack = new EntityAIArrowAttack(this, 1.0D, 60, 10.0F);
+    private final EntityAIAttackOnCollide aiAttackOnCollide = new EntityAIAttackOnCollide(
             this,
             EntityPlayer.class,
             1.2D,
@@ -196,6 +197,9 @@ public class EntityTFSkeletonDruid extends EntityMob implements IRangedAttackMob
      * sets this entity's combat AI.
      */
     public void setCombatTask() {
+        if (worldObj.isRemote) {
+            return;
+        }
         this.tasks.removeTask(this.aiAttackOnCollide);
         this.tasks.removeTask(this.aiArrowAttack);
         ItemStack itemstack = this.getHeldItem();
@@ -207,18 +211,26 @@ public class EntityTFSkeletonDruid extends EntityMob implements IRangedAttackMob
         }
     }
 
+    @Override
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
+        // equipment is restored by the superclass
+        setCombatTask();
+    }
+
     /**
      * Attack the specified entity using a ranged attack.
      */
     @Override
     public void attackEntityWithRangedAttack(EntityLivingBase attackTarget, float extraDamage) {
+        if (worldObj.isRemote || attackTarget == null || !attackTarget.isEntityAlive()) {
+            return;
+        }
         EntityTFNatureBolt natureBolt = new EntityTFNatureBolt(this.worldObj, this);
         this.worldObj.playSoundAtEntity(this, "mob.ghast.fireball", 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 0.8F));
 
-        natureBolt.setTarget(attackTarget);
-
         double tx = attackTarget.posX - this.posX;
-        double ty = attackTarget.posY + attackTarget.getEyeHeight() - 2.699999988079071D - this.posY;
+        double ty = attackTarget.posY + attackTarget.getEyeHeight() - (this.posY + getEyeHeight());
         double tz = attackTarget.posZ - this.posZ;
         float heightOffset = MathHelper.sqrt_double(tx * tx + tz * tz) * 0.2F;
         natureBolt.setThrowableHeading(tx, ty + heightOffset, tz, 0.6F, 6.0F); // 0.6 speed, 6.0 inaccuracy
@@ -230,7 +242,7 @@ public class EntityTFSkeletonDruid extends EntityMob implements IRangedAttackMob
      * Checks to make sure the light is not too bright where the mob is spawning
      */
     protected boolean isValidLightLevel() {
-        boolean valid = false;
+        boolean valid;
         int dx = MathHelper.floor_double(this.posX);
         int dy = MathHelper.floor_double(this.boundingBox.minY);
         int dz = MathHelper.floor_double(this.posZ);

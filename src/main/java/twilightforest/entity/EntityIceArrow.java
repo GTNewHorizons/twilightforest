@@ -14,8 +14,4 @@ public class EntityIceArrow extends EntityArrow {
         super(world, player, velocity);
     }
 
-    // Called to update the entity's position/logic.
-    public void onUpdate() {
-        super.onUpdate();
-    }
 }

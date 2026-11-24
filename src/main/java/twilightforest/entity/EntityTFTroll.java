@@ -37,8 +37,8 @@ public class EntityTFTroll extends EntityMob implements IRangedAttackMob {
 
     private static final int ROCK_FLAG = 16;
 
-    private EntityAIArrowAttack aiArrowAttack = new EntityAIArrowAttack(this, 1.0D, 20, 60, 15.0F);
-    private EntityAITFCollideAttackFixed aiAttackOnCollide = new EntityAITFCollideAttackFixed(
+    private final EntityAIArrowAttack aiArrowAttack = new EntityAIArrowAttack(this, 1.0D, 20, 60, 15.0F);
+    private final EntityAITFCollideAttackFixed aiAttackOnCollide = new EntityAITFCollideAttackFixed(
             this,
             EntityPlayer.class,
             1.2D,
@@ -98,16 +98,13 @@ public class EntityTFTroll extends EntityMob implements IRangedAttackMob {
 
     // Sets whether this troll has a rock or not.
     public void setHasRock(boolean rock) {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(ROCK_FLAG);
-
-        if (rock) {
-            this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(40.0D);
-            this.dataWatcher.updateObject(ROCK_FLAG, (byte) (b0 | 2));
-        } else {
-            this.dataWatcher.updateObject(ROCK_FLAG, (byte) (b0 & -3));
+        if (hasRock() == rock) {
+            return;
         }
-
-        this.setCombatTask();
+        byte flags = this.dataWatcher.getWatchableObjectByte(ROCK_FLAG);
+        this.dataWatcher.updateObject(ROCK_FLAG, (byte) (rock ? flags | 2 : flags & ~2));
+        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(rock ? 40.0D : 16.0D);
+        setCombatTask();
     }
 
     // Swing!
@@ -133,6 +130,9 @@ public class EntityTFTroll extends EntityMob implements IRangedAttackMob {
 
     // sets this entity's combat AI.
     public void setCombatTask() {
+        if (worldObj.isRemote) {
+            return;
+        }
         this.tasks.removeTask(this.aiAttackOnCollide);
         this.tasks.removeTask(this.aiArrowAttack);
 
@@ -147,8 +147,9 @@ public class EntityTFTroll extends EntityMob implements IRangedAttackMob {
     protected void onDeathUpdate() {
         super.onDeathUpdate();
 
-        if (this.deathTime % 5 == 0) {
-            this.ripenTrollBerNearby(this.deathTime / 5);
+        if (!worldObj.isRemote && deathTime % 5 == 0
+                && worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            ripenTrollBerNearby(deathTime / 5);
         }
 
         // if (this.deathTime == 1) {
@@ -176,8 +177,9 @@ public class EntityTFTroll extends EntityMob implements IRangedAttackMob {
     }
 
     private void ripenBer(int offset, int cx, int cy, int cz) {
-        if (this.worldObj.getBlock(cx, cy, cz) == TFBlocks.unripeTrollBer && this.rand.nextBoolean()
-                && (Math.abs(cx + cy + cz) % 5 == offset)) {
+        // reject most positions before querying the world, this scans a 24^3 cube on death
+        if (Math.abs(cx + cy + cz) % 5 == offset && this.worldObj.getBlock(cx, cy, cz) == TFBlocks.unripeTrollBer
+                && this.rand.nextBoolean()) {
             this.worldObj.setBlock(cx, cy, cz, TFBlocks.trollBer);
             worldObj.playAuxSFX(2004, cx, cy, cz, 0);
         }
@@ -230,12 +232,11 @@ public class EntityTFTroll extends EntityMob implements IRangedAttackMob {
 
     // Attack the specified entity using a ranged attack.
     public void attackEntityWithRangedAttack(EntityLivingBase target, float par2) {
-        if (this.hasRock()) {
-
+        if (!worldObj.isRemote && this.hasRock() && target != null && target.isEntityAlive()) {
             EntityTFIceBomb ice = new EntityTFIceBomb(this.worldObj, this);
 
             double d0 = target.posX - this.posX;
-            double d1 = target.posY + (double) target.getEyeHeight() - 1.100000023841858D - target.posY;
+            double d1 = target.posY + target.getEyeHeight() - (this.posY + 1.1D);
             double d2 = target.posZ - this.posZ;
             float f1 = MathHelper.sqrt_double(d0 * d0 + d2 * d2) * 0.2F;
             ice.setThrowableHeading(d0, d1 + (double) f1, d2, 0.75F, 12.0F);

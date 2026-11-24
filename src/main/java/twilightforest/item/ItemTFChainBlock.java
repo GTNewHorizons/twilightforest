@@ -1,6 +1,8 @@
 package twilightforest.item;
 
-import java.util.HashMap;
+import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
@@ -23,8 +25,8 @@ import twilightforest.entity.EntityTFChainBlock;
 
 public class ItemTFChainBlock extends ItemTool {
 
-    // which items have launched which blocks?
-    private HashMap<ItemStack, Entity> launchedBlocksMap = new HashMap<>();
+    // weak keys and values avoid keeping discarded item stacks, projectiles, or their owners alive
+    private final Map<ItemStack, WeakReference<Entity>> launchedBlocksMap = new WeakHashMap<>();
 
     private IIcon ring;
 
@@ -42,15 +44,13 @@ public class ItemTFChainBlock extends ItemTool {
 
         if (!worldObj.isRemote && !this.hasLaunchedBlock(stack)) {
 
-            worldObj.playSoundAtEntity(player, "random.bow", 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F));
-
             EntityTFChainBlock launchedBlock = new EntityTFChainBlock(worldObj, player);
-            worldObj.spawnEntityInWorld(launchedBlock);
-            this.setLaunchedBlock(stack, launchedBlock);
-
-            setChainAsThrown(stack);
-
-            stack.damageItem(1, player);
+            if (worldObj.spawnEntityInWorld(launchedBlock)) {
+                this.setLaunchedBlock(stack, launchedBlock);
+                setChainAsThrown(stack);
+                stack.damageItem(1, player);
+                worldObj.playSoundAtEntity(player, "random.bow", 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F));
+            }
 
         }
         return stack;
@@ -58,7 +58,7 @@ public class ItemTFChainBlock extends ItemTool {
 
     /**
      * Set this item as having been thrown
-     * 
+     *
      * @param stack
      */
     public static void setChainAsThrown(ItemStack stack) {
@@ -71,7 +71,7 @@ public class ItemTFChainBlock extends ItemTool {
 
     /**
      * Set the spike block for this item as returned to the player
-     * 
+     *
      * @param stack
      */
     public static void setChainAsReturned(ItemStack stack) {
@@ -85,20 +85,16 @@ public class ItemTFChainBlock extends ItemTool {
     /**
      * Method for the client to determine if the block has been thrown or not. Not as accurate as server method due to
      * lag, etc.
-     * 
+     *
      * @param stack
      */
     public static boolean doesChainHaveBlock(ItemStack stack) {
-        if (stack.getTagCompound() == null) {
-            return true;
-        } else {
-            return !stack.getTagCompound().getBoolean("thrown");
-        }
+        return stack.getTagCompound() == null || !stack.getTagCompound().getBoolean("thrown");
     }
 
     /**
      * Set the spike block belonging to the player as returned
-     * 
+     *
      * @param player
      */
     public static void setChainAsReturned(EntityPlayer player) {
@@ -112,13 +108,21 @@ public class ItemTFChainBlock extends ItemTool {
      * Method on the server that determines definitively if the item has been thrown or not
      */
     public boolean hasLaunchedBlock(ItemStack stack) {
-        Entity cube = this.launchedBlocksMap.get(stack);
-
-        return cube != null && !cube.isDead;
+        WeakReference<Entity> reference = this.launchedBlocksMap.get(stack);
+        Entity projectile = reference == null ? null : reference.get();
+        if (projectile == null) {
+            this.launchedBlocksMap.remove(stack);
+            return false;
+        }
+        if (projectile.isDead) {
+            this.launchedBlocksMap.remove(stack);
+            return false;
+        }
+        return true;
     }
 
     public void setLaunchedBlock(ItemStack stack, EntityTFChainBlock launchedCube) {
-        this.launchedBlocksMap.put(stack, launchedCube);
+        this.launchedBlocksMap.put(stack, new WeakReference<>(launchedCube));
     }
 
     /**
@@ -182,11 +186,7 @@ public class ItemTFChainBlock extends ItemTool {
 
     @Override
     public int getHarvestLevel(ItemStack stack, String toolClass) {
-        if (toolClass != null && toolClass.equals("pickaxe")) {
-            return 2;
-        } else {
-            return -1;
-        }
+        return "pickaxe".equals(toolClass) ? 2 : -1;
     }
 
     /**
@@ -195,7 +195,6 @@ public class ItemTFChainBlock extends ItemTool {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with knightmetal ingots
-        return par2ItemStack.getItem() == TFItems.knightMetal ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return par2ItemStack.getItem() == TFItems.knightMetal || super.getIsRepairable(par1ItemStack, par2ItemStack);
     }
 }

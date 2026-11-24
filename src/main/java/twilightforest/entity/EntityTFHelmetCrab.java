@@ -78,6 +78,7 @@ public class EntityTFHelmetCrab extends EntityMob {
     /**
      * Returns the sound this mob makes when it is hurt.
      */
+    @Override
     protected String getHurtSound() {
         return "mob.spider.say";
     }
@@ -85,6 +86,7 @@ public class EntityTFHelmetCrab extends EntityMob {
     /**
      * Returns the sound this mob makes on death.
      */
+    @Override
     protected String getDeathSound() {
         return "mob.spider.death";
     }
@@ -99,6 +101,7 @@ public class EntityTFHelmetCrab extends EntityMob {
     /**
      * Returns the item ID for the item the mob drops on death.
      */
+    @Override
     protected Item getDropItem() {
         return TFItems.armorShard;
     }

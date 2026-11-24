@@ -1,6 +1,6 @@
 package twilightforest.entity;
 
-import java.util.List;
+import java.lang.ref.WeakReference;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -10,6 +10,7 @@ import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -18,6 +19,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import twilightforest.item.ItemTFChainBlock;
+import twilightforest.item.TFItems;
 
 public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiPart {
 
@@ -32,8 +34,8 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
     private double velZ;
 
     // for the client to show the chain
-    private boolean isAttached;
     private EntityLivingBase attachedTo;
+    private WeakReference<ItemStack> launchingStack;
 
     public EntityTFGoblinChain chain1;
     public EntityTFGoblinChain chain2;
@@ -47,22 +49,40 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
 
         this.setSize(0.6F, 0.6F);
 
-        this.partsArray = (new Entity[] { chain1 = new EntityTFGoblinChain(this),
-                chain2 = new EntityTFGoblinChain(this), chain3 = new EntityTFGoblinChain(this),
-                chain4 = new EntityTFGoblinChain(this), chain5 = new EntityTFGoblinChain(this) });
+        this.initializeChainParts();
     }
 
     public EntityTFChainBlock(World par1World, double par2, double par4, double par6) {
         super(par1World, par2, par4, par6);
-        // TODO Auto-generated constructor stub
+        this.setSize(0.6F, 0.6F);
+        this.initializeChainParts();
     }
 
     public EntityTFChainBlock(World par1World, EntityLivingBase par2EntityLiving) {
         super(par1World, par2EntityLiving);
 
         this.setSize(0.6F, 0.6F);
+        this.initializeChainParts();
 
         this.isReturning = false;
+        if (par2EntityLiving instanceof EntityPlayer player) {
+            ItemStack equipped = player.getCurrentEquippedItem();
+            if (equipped != null && equipped.getItem() == TFItems.chainBlock) {
+                this.launchingStack = new WeakReference<>(equipped);
+            }
+        }
+    }
+
+    private void initializeChainParts() {
+        this.partsArray = new Entity[] { chain1 = new EntityTFGoblinChain(this), chain2 = new EntityTFGoblinChain(this),
+                chain3 = new EntityTFGoblinChain(this), chain4 = new EntityTFGoblinChain(this),
+                chain5 = new EntityTFGoblinChain(this) };
+    }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataWatcher.addObject(16, 0);
     }
 
     /**
@@ -88,14 +108,17 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
     @Override
     protected void onImpact(MovingObjectPosition mop) {
         // only hit living things
-        if (mop.entityHit != null && mop.entityHit instanceof EntityLivingBase && mop.entityHit != this.getThrower()) {
-            if (mop.entityHit.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) this.getThrower()), 10)) {
+        if (!this.worldObj.isRemote && mop.entityHit instanceof EntityLivingBase
+                && mop.entityHit != this.getThrower()
+                && this.getThrower() != null) {
+            if (mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), 10.0F)) {
                 // age when we hit a monster so that we go back to the player faster
                 this.ticksExisted += 60;
             }
         }
 
-        if (!this.worldObj.isAirBlock(mop.blockX, mop.blockY, mop.blockZ)) {
+        if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK
+                && !this.worldObj.isAirBlock(mop.blockX, mop.blockY, mop.blockZ)) {
 
             // clang!
             if (!this.isReturning) {
@@ -155,7 +178,7 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
             }
 
             // if we have smashed enough, add to ticks so that we go back faster
-            if (this.blocksSmashed > MAX_SMASH && this.ticksExisted < 60) {
+            if (this.blocksSmashed >= MAX_SMASH && this.ticksExisted < 60) {
                 this.ticksExisted += 60;
             }
         }
@@ -164,7 +187,7 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
 
     /**
      * Do our ball and chain effect on blocks we hit. Harvest/destroy/whatevs
-     * 
+     *
      * @param entity
      */
     private boolean affectBlocksInAABB(AxisAlignedBB par1AxisAlignedBB, EntityLivingBase entity) {
@@ -179,27 +202,36 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
         boolean hitBlock = false;
         for (int dx = minX; dx <= maxX; ++dx) {
             for (int dy = minY; dy <= maxY; ++dy) {
-                for (int dz = minZ; dz <= maxZ; ++dz) {
+                for (int dz = minZ; dz <= maxZ && this.blocksSmashed < MAX_SMASH; ++dz) {
                     Block block = this.worldObj.getBlock(dx, dy, dz);
                     int currentMeta = this.worldObj.getBlockMetadata(dx, dy, dz);
 
                     if (block != Blocks.air && block.getExplosionResistance(this) < 7F
                             && block.getBlockHardness(worldObj, dx, dy, dz) >= 0) {
 
-                        if (entity != null && entity instanceof EntityPlayer player) {
-
-                            if (block.canHarvestBlock(player, currentMeta)) {
-                                block.harvestBlock(this.worldObj, player, dx, dy, dz, currentMeta);
-                            }
+                        if (!(entity instanceof EntityPlayer player) || !this.worldObj.canMineBlock(player, dx, dy, dz)
+                                || !player.canPlayerEdit(dx, dy, dz, 1, player.getCurrentEquippedItem())) {
+                            continue;
                         }
-
-                        this.worldObj.setBlockToAir(dx, dy, dz);
-
-                        // here, this effect will have to do
+                        net.minecraftforge.event.world.BlockEvent.BreakEvent event = new net.minecraftforge.event.world.BlockEvent.BreakEvent(
+                                dx,
+                                dy,
+                                dz,
+                                this.worldObj,
+                                block,
+                                currentMeta,
+                                player);
+                        if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)) {
+                            continue;
+                        }
+                        if (!this.worldObj.setBlockToAir(dx, dy, dz)) {
+                            continue;
+                        }
+                        if (block.canHarvestBlock(player, currentMeta)) {
+                            block.harvestBlock(this.worldObj, player, dx, dy, dz, currentMeta);
+                        }
                         worldObj.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(block) + (currentMeta << 12));
-
-                        this.blocksSmashed++;
-
+                        ++this.blocksSmashed;
                         hitBlock = true;
                     }
                 }
@@ -215,6 +247,15 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
     @Override
     public void onUpdate() {
         super.onUpdate();
+        if (this.isDead) {
+            return;
+        }
+        if (!this.worldObj.isRemote && this.getThrower() != null) {
+            int ownerId = this.getThrower().getEntityId();
+            if (this.dataWatcher.getWatchableObjectInt(16) != ownerId) {
+                this.dataWatcher.updateObject(16, ownerId);
+            }
+        }
 
         // chains are probably always null on the server
         if (this.chain1 != null) {
@@ -227,9 +268,10 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
 
         if (this.getThrower() == null && !this.worldObj.isRemote) {
             this.setDead();
+            return;
         }
 
-        if (this.getThrower() != null) {
+        if (!this.worldObj.isRemote && this.getThrower() != null) {
             float distToPlayer = this.getDistanceToEntity(this.getThrower());
             // return if far enough away
             if (!this.isReturning && distToPlayer > MAX_CHAIN) {
@@ -239,10 +281,14 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
             // despawn if close enough
             if (this.isReturning && distToPlayer < 1F) {
                 // System.out.println("we have returned after smashing " + this.blocksSmashed + " blocks");
-                if (this.getThrower() instanceof EntityPlayer) {
-                    ItemTFChainBlock.setChainAsReturned((EntityPlayer) this.getThrower());
+                ItemStack original = this.launchingStack == null ? null : this.launchingStack.get();
+                if (original != null && original.getItem() == TFItems.chainBlock) {
+                    ItemTFChainBlock.setChainAsReturned(original);
+                } else if (this.getThrower() instanceof EntityPlayer player) {
+                    ItemTFChainBlock.setChainAsReturned(player);
                 }
                 this.setDead();
+                return;
             }
         }
 
@@ -265,27 +311,14 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
 
         }
 
-        // on the client, if we are not attached, assume we have just spawned, and attach to the player
-        if (this.worldObj.isRemote && !this.isAttached) {
-            List<Entity> nearbyEntities = this.worldObj.getEntitiesWithinAABBExcludingEntity(
-                    this,
-                    this.boundingBox.addCoord(-this.motionX, -this.motionY, -this.motionZ).expand(2.0D, 2.0D, 2.0D));
-            for (Object nearbyEntity : nearbyEntities) {
-                Entity nearby = (Entity) nearbyEntity;
-
-                // attach? should we check for closest player?
-                if (nearby instanceof EntityPlayer) {
-                    this.attachedTo = (EntityPlayer) nearby;
-
-                    // System.out.println("Attached to player nearby");
-                }
-            }
-
-            this.isAttached = true;
+        // use the synced thrower ID, not an arbitrary nearby player in multiplayer
+        if (this.worldObj.isRemote && (this.attachedTo == null || this.attachedTo.isDead)) {
+            Entity owner = this.worldObj.getEntityByID(this.dataWatcher.getWatchableObjectInt(16));
+            this.attachedTo = owner instanceof EntityLivingBase ? (EntityLivingBase) owner : null;
         }
 
         // set chain positions, client only
-        if (this.attachedTo != null) {
+        if (this.worldObj.isRemote && this.attachedTo != null) {
             // interpolate chain position
             Vec3 handVec = this.attachedTo.getLookVec();
 

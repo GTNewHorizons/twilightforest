@@ -30,9 +30,12 @@ public class EntityTFMazeSlime extends EntitySlime {
     }
 
     @Override
-    public void setSlimeSize(int par1) {
-        super.setSlimeSize(par1);
-        this.experienceValue = par1 + 3;
+    public void setSlimeSize(int size) {
+        super.setSlimeSize(size);
+        // entitySlime resets maximum health when resizing, restore the multiplier
+        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(2.0D * size * size);
+        this.setHealth(this.getMaxHealth());
+        this.experienceValue = size + 3;
     }
 
     /**
@@ -82,7 +85,7 @@ public class EntityTFMazeSlime extends EntitySlime {
             slimeParticleString = "blockcrack_" + Block.getIdFromBlock(TFBlocks.mazestone) + "_1";
         }
 
-        return slimeParticleString;
+        return this.slimeParticleString;
     }
 
     /**
@@ -101,8 +104,11 @@ public class EntityTFMazeSlime extends EntitySlime {
             if (this.worldObj.isThundering()) {
                 int var5 = this.worldObj.skylightSubtracted;
                 this.worldObj.skylightSubtracted = 10;
-                var4 = this.worldObj.getBlockLightValue(var1, var2, var3);
-                this.worldObj.skylightSubtracted = var5;
+                try {
+                    var4 = this.worldObj.getBlockLightValue(var1, var2, var3);
+                } finally {
+                    this.worldObj.skylightSubtracted = var5;
+                }
             }
 
             return var4 <= this.rand.nextInt(8);

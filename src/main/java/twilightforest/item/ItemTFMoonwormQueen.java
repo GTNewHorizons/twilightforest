@@ -20,7 +20,7 @@ public class ItemTFMoonwormQueen extends ItemTF {
     private static final int FIRING_TIME = 12;
 
     private IIcon[] icons;
-    private String[] iconNames = new String[] { "moonwormQueen", "moonwormQueenAlt" };
+    private static final String[] ICON_NAMES = { "moonwormQueen", "moonwormQueenAlt" };
 
     protected ItemTFMoonwormQueen() {
         super();
@@ -54,7 +54,7 @@ public class ItemTFMoonwormQueen extends ItemTF {
         }
 
         // don't wear item out, leave it at 0 uses left so that it can be recharged
-        if (par1ItemStack != null && par1ItemStack.getItemDamage() == this.getMaxDamage()) {
+        if (par1ItemStack == null || par1ItemStack.getItemDamage() >= this.getMaxDamage()) {
             return false;
         }
 
@@ -88,34 +88,42 @@ public class ItemTFMoonwormQueen extends ItemTF {
                     }
                 }
 
-        // try to place firefly
-        if (world.canPlaceEntityOnSide(TFBlocks.moonworm, x, y, z, false, side, player, par1ItemStack)) {
-            int placementMeta = TFBlocks.moonworm.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, 0);
-            if (world.setBlock(x, y, z, TFBlocks.moonworm, placementMeta, 3)) {
-                if (world.getBlock(x, y, z) == TFBlocks.moonworm) {
-                    // ((BlockTFMoonworm) TFBlocks.moonworm).updateBlockMetadata(world, x, y, z, side, hitX, hitY,
-                    // hitZ);
-                    TFBlocks.moonworm.onBlockPlacedBy(world, x, y, z, player, par1ItemStack);
-                }
-
-                world.playSoundEffect(
-                        x + 0.5F,
-                        y + 0.5F,
-                        z + 0.5F,
-                        this.getSound(),
-                        TFBlocks.moonworm.stepSound.getVolume() / 2.0F,
-                        TFBlocks.moonworm.stepSound.getPitch() * 0.8F);
-
-                if (par1ItemStack != null) {
-                    par1ItemStack.damageItem(1, player);
-                    player.stopUsingItem();
-                }
-            }
-
-            return true;
-        } else {
+        // placement must be authorised and performed on the server only
+        if (!player.canPlayerEdit(x, y, z, side, par1ItemStack) || !world.canMineBlock(player, x, y, z)
+                || !world.canPlaceEntityOnSide(TFBlocks.moonworm, x, y, z, false, side, player, par1ItemStack)) {
             return false;
         }
+        if (world.isRemote) {
+            return true;
+        }
+
+        net.minecraftforge.common.util.BlockSnapshot snapshot = net.minecraftforge.common.util.BlockSnapshot
+                .getBlockSnapshot(world, x, y, z);
+        int placementMeta = TFBlocks.moonworm.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, 0);
+        if (!world.setBlock(x, y, z, TFBlocks.moonworm, placementMeta, 3)) {
+            return false;
+        }
+        if (net.minecraftforge.event.ForgeEventFactory.onPlayerBlockPlace(
+                player,
+                snapshot,
+                net.minecraftforge.common.util.ForgeDirection.getOrientation(side)).isCanceled()) {
+            snapshot.restore(true, false);
+            return false;
+        }
+        if (world.getBlock(x, y, z) != TFBlocks.moonworm) {
+            return false;
+        }
+        TFBlocks.moonworm.onBlockPlacedBy(world, x, y, z, player, par1ItemStack);
+        world.playSoundEffect(
+                x + 0.5F,
+                y + 0.5F,
+                z + 0.5F,
+                this.getSound(),
+                TFBlocks.moonworm.stepSound.getVolume() / 2.0F,
+                TFBlocks.moonworm.stepSound.getPitch() * 0.8F);
+        par1ItemStack.damageItem(1, player);
+        player.stopUsingItem();
+        return true;
     }
 
     public String getSound() {
@@ -129,7 +137,7 @@ public class ItemTFMoonwormQueen extends ItemTF {
     public void onPlayerStoppedUsing(ItemStack par1ItemStack, World world, EntityPlayer player, int useRemaining) {
         int useTime = this.getMaxItemUseDuration(par1ItemStack) - useRemaining;
 
-        if (!world.isRemote && useTime > FIRING_TIME && (par1ItemStack.getItemDamage() + 1) < this.getMaxDamage()) {
+        if (!world.isRemote && useTime > FIRING_TIME && (par1ItemStack.getItemDamage() + 2) <= this.getMaxDamage()) {
             boolean fired = world.spawnEntityInWorld(new EntityTFMoonwormShot(world, player));
 
             if (fired) {
@@ -143,7 +151,7 @@ public class ItemTFMoonwormQueen extends ItemTF {
 
     /**
      * Player, Render pass, and item usage sensitive version of getIconIndex.
-     * 
+     *
      * @param stack        The item stack to get the icon for. (Usually this, and usingItem will be the same if
      *                     usingItem is not null)
      * @param renderPass   The pass to get the icon for, 0 is default.
@@ -167,10 +175,10 @@ public class ItemTFMoonwormQueen extends ItemTF {
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister par1IconRegister) {
         super.registerIcons(par1IconRegister);
-        this.icons = new IIcon[iconNames.length];
+        this.icons = new IIcon[ICON_NAMES.length];
 
-        for (int i = 0; i < this.iconNames.length; ++i) {
-            this.icons[i] = par1IconRegister.registerIcon(TwilightForestMod.ID + ":" + iconNames[i]);
+        for (int i = 0; i < ICON_NAMES.length; ++i) {
+            this.icons[i] = par1IconRegister.registerIcon(TwilightForestMod.ID + ":" + ICON_NAMES[i]);
         }
     }
 

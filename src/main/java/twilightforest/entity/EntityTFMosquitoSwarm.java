@@ -15,7 +15,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
 import twilightforest.TFAchievementPage;
@@ -64,29 +63,24 @@ public class EntityTFMosquitoSwarm extends EntityMob {
     /**
      * Like cave spiders, but we add the hunger effect
      */
-    public boolean attackEntityAsMob(Entity par1Entity) {
-        if (super.attackEntityAsMob(par1Entity)) {
-            if (par1Entity instanceof EntityLivingBase) {
-                byte duration = 7;
-
-                if (this.worldObj.difficultySetting != EnumDifficulty.EASY) {
-                    if (this.worldObj.difficultySetting == EnumDifficulty.NORMAL) {
-                        duration = 15;
-                    } else if (this.worldObj.difficultySetting == EnumDifficulty.HARD) {
-                        duration = 30;
-                    }
-                }
-
-                if (duration > 0) {
-                    ((EntityLivingBase) par1Entity)
-                            .addPotionEffect(new PotionEffect(Potion.hunger.id, duration * 20, 0));
-                }
-            }
-
-            return true;
-        } else {
+    @Override
+    public boolean attackEntityAsMob(Entity target) {
+        if (!super.attackEntityAsMob(target)) {
             return false;
         }
+
+        if (!worldObj.isRemote && target instanceof EntityLivingBase living) {
+            int duration = switch (worldObj.difficultySetting) {
+                case PEACEFUL -> 0;
+                case EASY -> 7;
+                case NORMAL -> 15;
+                case HARD -> 30;
+            };
+            if (duration > 0) {
+                living.addPotionEffect(new PotionEffect(Potion.hunger.id, duration * 20, 0));
+            }
+        }
+        return true;
     }
 
     /**
@@ -99,7 +93,8 @@ public class EntityTFMosquitoSwarm extends EntityMob {
                 == TFBiomeBase.tfSwamp) {
             // don't check light level
             return worldObj.checkNoEntityCollision(boundingBox)
-                    && worldObj.getCollidingBoundingBoxes(this, boundingBox).size() == 0;
+                    && worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()
+                    && !worldObj.isAnyLiquid(boundingBox);
         } else {
             // normal EntityMob spawn check, checks light level
             return super.getCanSpawnHere();
@@ -121,7 +116,7 @@ public class EntityTFMosquitoSwarm extends EntityMob {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
+        if (!worldObj.isRemote && par1DamageSource.getEntity() instanceof EntityPlayer
                 && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
         }

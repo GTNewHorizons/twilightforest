@@ -1,6 +1,8 @@
 package twilightforest.item;
 
-import java.util.HashMap;
+import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
@@ -20,7 +22,7 @@ public class ItemTFCubeOfAnnihilation extends ItemTF {
 
     private IIcon annihilateIcon;
 
-    private HashMap<ItemStack, Entity> launchedCubesMap = new HashMap<>();
+    private final Map<ItemStack, WeakReference<Entity>> launchedCubesMap = new WeakHashMap<>();
 
     protected ItemTFCubeOfAnnihilation() {
         super();
@@ -46,10 +48,10 @@ public class ItemTFCubeOfAnnihilation extends ItemTF {
         if (!worldObj.isRemote && !this.hasLaunchedCube(stack)) {
             EntityTFCubeOfAnnihilation launchedCube = new EntityTFCubeOfAnnihilation(worldObj, player);
 
-            worldObj.spawnEntityInWorld(launchedCube);
-
-            this.setLaunchedCube(stack, launchedCube);
-            setCubeAsThrown(stack);
+            if (worldObj.spawnEntityInWorld(launchedCube)) {
+                this.setLaunchedCube(stack, launchedCube);
+                setCubeAsThrown(stack);
+            }
         }
 
         return stack;
@@ -57,7 +59,7 @@ public class ItemTFCubeOfAnnihilation extends ItemTF {
 
     /**
      * Set this item as having been thrown
-     * 
+     *
      * @param stack
      */
     public static void setCubeAsThrown(ItemStack stack) {
@@ -70,7 +72,7 @@ public class ItemTFCubeOfAnnihilation extends ItemTF {
 
     /**
      * Set the cube for this item as returned to the player
-     * 
+     *
      * @param stack
      */
     public static void setCubeAsReturned(ItemStack stack) {
@@ -84,20 +86,16 @@ public class ItemTFCubeOfAnnihilation extends ItemTF {
     /**
      * Method for the client to determine if the cube has been thrown or not. Not as accurate as server method due to
      * lag, etc.
-     * 
+     *
      * @param stack
      */
     public static boolean doesTalismanHaveCube(ItemStack stack) {
-        if (stack.getTagCompound() == null) {
-            return true;
-        } else {
-            return !stack.getTagCompound().getBoolean("thrown");
-        }
+        return stack != null && (stack.getTagCompound() == null || !stack.getTagCompound().getBoolean("thrown"));
     }
 
     /**
      * Set the cube belonging to the player as returned
-     * 
+     *
      * @param player
      */
     public static void setCubeAsReturned(EntityPlayer player) {
@@ -120,7 +118,7 @@ public class ItemTFCubeOfAnnihilation extends ItemTF {
      */
     public IIcon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
 
-        if (this.doesTalismanHaveCube(stack)) {
+        if (doesTalismanHaveCube(stack)) {
             return this.itemIcon;
         } else {
             return TFItems.cubeTalisman.getIconIndex(stack);
@@ -128,18 +126,24 @@ public class ItemTFCubeOfAnnihilation extends ItemTF {
     }
 
     public boolean hasLaunchedCube(ItemStack stack) {
-        Entity cube = this.launchedCubesMap.get(stack);
-
-        return cube != null && !cube.isDead;
+        WeakReference<Entity> reference = this.launchedCubesMap.get(stack);
+        Entity cube = reference == null ? null : reference.get();
+        if (cube == null || cube.isDead) {
+            this.launchedCubesMap.remove(stack);
+            return false;
+        }
+        return true;
     }
 
     public void setLaunchedCube(ItemStack stack, EntityTFCubeOfAnnihilation launchedCube) {
-        this.launchedCubesMap.put(stack, launchedCube);
+        if (stack != null && launchedCube != null) {
+            this.launchedCubesMap.put(stack, new WeakReference<>(launchedCube));
+        }
     }
 
     /**
      * Called each tick while using an item.
-     * 
+     *
      * @param stack  The Item being used
      * @param player The Player using the item
      * @param count  The amount of time in tick the item has been used for continuously
