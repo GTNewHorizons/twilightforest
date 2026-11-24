@@ -1,6 +1,7 @@
 package twilightforest.entity.boss;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -9,7 +10,7 @@ import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
@@ -17,9 +18,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.DerivedWorldInfo;
 import net.minecraft.world.storage.WorldInfo;
 
-import cpw.mods.fml.common.FMLLog;
 import twilightforest.TFAchievementPage;
 import twilightforest.TFFeature;
 import twilightforest.TFTreasure;
@@ -28,6 +29,8 @@ import twilightforest.block.BlockTFTowerDevice;
 import twilightforest.block.TFBlocks;
 import twilightforest.entity.EntityTFMiniGhast;
 import twilightforest.entity.EntityTFTowerGhast;
+import twilightforest.tileentity.TileEntityTFGhastTrapActive;
+import twilightforest.tileentity.TileEntityTFGhastTrapInactive;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.TFWorldChunkManager;
 import twilightforest.world.WorldProviderTwilightForest;
@@ -40,6 +43,18 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     // private static final int CRUISING_ALTITUDE = 235; // absolute cruising altitude
     private static final int HOVER_ALTITUDE = 20; // how far, relatively, do we hover over ghast traps?
 
+    private static final int TRAP_SCAN_XZ_RANGE = 48;
+    private static final int TRAP_SCAN_Y_RANGE = 32;
+    private static final int TRAP_SCAN_INTERVAL = 100;
+    private static final int MINIONS_PER_TRAP = 4;
+
+    private static final int FIREBALLS_PER_VOLLEY = 3;
+    private static final int FIREBALL_SPACING_TICKS = 2;
+    private static final int MINI_GHAST_ABSORB_INTERVAL = 3;
+    private static final int WAYPOINT_ATTEMPTS = 12;
+    private static final float INITIAL_PHASE_DAMAGE = 45.0F;
+    private static final float DAMAGE_PER_PHASE = 48.0F;
+
     public double courseX;
     public double courseY;
     public double courseZ;
@@ -49,14 +64,21 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
 
     int currentTravelCoordIndex;
 
-    int travelPathRepetitions;
-    int desiredRepetitions;
-
     int nextTantrumCry;
 
     float damageUntilNextPhase; // how much damage can we take before we toggle tantrum mode
 
-    boolean noTrapMode; // are there no traps nearby? just float around
+    private int trapScanCooldown;
+    private int trapScanOriginX;
+    private int trapScanOriginY;
+    private int trapScanOriginZ;
+    private boolean trapScanInitialized;
+
+    private int queuedFireballs;
+    private int fireballDelay;
+    private double volleyAimX;
+    private double volleyAimY;
+    private double volleyAimZ;
 
     public EntityTFUrGhast(World par1World) {
         super(par1World);
@@ -74,11 +96,9 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
 
         this.setInTantrum(false);
 
-        this.damageUntilNextPhase = 45;
+        this.damageUntilNextPhase = INITIAL_PHASE_DAMAGE;
 
         this.experienceValue = 317;
-
-        this.noTrapMode = false;
 
     }
 
@@ -114,7 +134,15 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     @Override
     public void onLivingUpdate() {
         despawnIfInvalid();
+        if (this.isDead) {
+            return;
+        }
         super.onLivingUpdate();
+
+        // boss tears are cosmetic and should never run on the dedicated server
+        if (worldObj.isRemote && this.isInTantrum()) {
+            shedTear();
+        }
     }
 
     /**
@@ -125,7 +153,7 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
         super.onUpdate();
 
         // extra death explosions
-        if (deathTime > 0) {
+        if (worldObj.isRemote && deathTime > 0) {
             for (int k = 0; k < 5; k++) {
                 double d = rand.nextGaussian() * 0.02D;
                 double d1 = rand.nextGaussian() * 0.02D;
@@ -151,13 +179,13 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
         }
     }
 
-    /**
-     * Despawn the minoshroom, and restore the boss spawner at our home location, if set
-     */
+    // restore the ur ghast spawner when switching to peaceful
     protected void despawnMe() {
         if (this.hasHome()) {
             ChunkCoordinates home = this.getHomePosition();
-            worldObj.setBlock(home.posX, home.posY, home.posZ, TFBlocks.bossSpawner, 3, 2);
+            if (worldObj.getBlock(home.posX, home.posY, home.posZ) != TFBlocks.bossSpawner) {
+                worldObj.setBlock(home.posX, home.posY, home.posZ, TFBlocks.bossSpawner, 3, 2);
+            }
         }
         setDead();
     }
@@ -165,48 +193,40 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     /**
      * Called when the entity is attacked.
      */
+    @Override
     public boolean attackEntityFrom(DamageSource source, float damage) {
         // ignore suffocation
         if (source == DamageSource.inWall) {
             return false;
         }
 
-        boolean attackSuccessful = false;
+        float healthBefore = this.getHealth();
 
         // in tantrum mode take only 1/4 damage
         if (this.isInTantrum()) {
-            damage /= 4;
+            damage /= 4.0F;
         }
 
+        boolean attackSuccessful;
         if ("fireball".equals(source.getDamageType()) && source.getEntity() instanceof EntityPlayer) {
             // 'hide' fireball attacks so that we don't take 1000 damage.
             attackSuccessful = super.attackEntityFrom(
-                    DamageSource.causeThrownDamage(source.getEntity(), source.getEntity()),
+                    DamageSource.causeThrownDamage(source.getSourceOfDamage(), source.getEntity()),
                     damage);
         } else {
             attackSuccessful = super.attackEntityFrom(source, damage);
         }
 
-        if (!worldObj.isRemote) {
-            if (this.hurtTime == this.maxHurtTime) {
-                this.damageUntilNextPhase -= this.getLastDamage();
-
-                FMLLog.info("[Urghast] Attack successful, %f damage until phase switch.", this.damageUntilNextPhase);
-
-                if (this.damageUntilNextPhase <= 0) {
+        if (!worldObj.isRemote && attackSuccessful) {
+            float healthLost = Math.max(0.0F, healthBefore - this.getHealth());
+            if (healthLost > 0.0F) {
+                this.damageUntilNextPhase -= healthLost;
+                if (this.damageUntilNextPhase <= 0.0F && this.isEntityAlive() && inTrapCounter <= 0) {
                     this.switchPhase();
                 }
-            } else {
-                FMLLog.info("[Urghast] Attack fail with %s type attack for %f damage", source.damageType, damage);
             }
         }
-
         return attackSuccessful;
-    }
-
-    private float getLastDamage() {
-
-        return this.prevHealth - this.getHealth();
     }
 
     /**
@@ -219,26 +239,31 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
             this.startTantrum();
         }
 
-        this.damageUntilNextPhase = 48;
+        this.damageUntilNextPhase = DAMAGE_PER_PHASE;
     }
 
     /**
      * Start throwing a tantrum
      */
     protected void startTantrum() {
+        if (worldObj.isRemote || isInTantrum() || inTrapCounter > 0) {
+            return;
+        }
         this.setInTantrum(true);
+        this.queuedFireballs = 0;
+        this.attackCounter = 0;
+        this.targetedEntity = null;
+        this.isAggressive = false;
 
-        // start raining
+        // start raining in the world the boss actually occupies
         int rainTime = 300 * 20;
-
-        WorldInfo worldInfo = MinecraftServer.getServer().worldServers[0].getWorldInfo();
-
-        // System.out.println("Starting rain and thunder. world = " + worldObj);
-
-        worldInfo.setRaining(true);
-        worldInfo.setThundering(true);
-        worldInfo.setRainTime(rainTime);
-        worldInfo.setThunderTime(rainTime);
+        WorldInfo worldInfo = worldObj.getWorldInfo();
+        if (!(worldInfo instanceof DerivedWorldInfo)) {
+            worldInfo.setRaining(true);
+            worldInfo.setThundering(true);
+            worldInfo.setRainTime(Math.max(worldInfo.getRainTime(), rainTime));
+            worldInfo.setThunderTime(Math.max(worldInfo.getThunderTime(), rainTime));
+        }
 
         spawnGhastsAtTraps();
     }
@@ -247,225 +272,234 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
      * Spawn ghasts at two of the traps
      */
     protected void spawnGhastsAtTraps() {
-        // spawn ghasts around two of the traps
-        ArrayList<ChunkCoordinates> ghastSpawns = new ArrayList<>(this.trapLocations);
+        if (worldObj.isRemote || this.trapLocations.isEmpty()) {
+            return;
+        }
 
-        int numSpawns = Math.min(2, ghastSpawns.size());
-
-        for (int i = 0; i < numSpawns; i++) {
-            int index = this.rand.nextInt(ghastSpawns.size());
-
-            ChunkCoordinates spawnCoord = ghastSpawns.get(index);
-            ghastSpawns.remove(index);
-
-            spawnMinionGhastsAt(spawnCoord.posX, spawnCoord.posY, spawnCoord.posZ);
+        List<ChunkCoordinates> candidates = new ArrayList<>(trapLocations);
+        Collections.shuffle(candidates, rand);
+        int refilled = 0;
+        for (ChunkCoordinates trap : candidates) {
+            if (!isTrapAt(trap.posX, trap.posY, trap.posZ)) {
+                continue;
+            }
+            TileEntity tile = worldObj.getTileEntity(trap.posX, trap.posY, trap.posZ);
+            if (!(tile instanceof TileEntityTFGhastTrapInactive inactive) || inactive.isCharged()) {
+                continue;
+            }
+            int living = countLivingGhastsAt(trap);
+            if (living >= MINIONS_PER_TRAP) {
+                continue;
+            }
+            spawnMinionGhastsAt(trap.posX, trap.posY, trap.posZ, 6 - living);
+            if (++refilled >= 2) {
+                break;
+            }
         }
     }
 
-    public void stopTantrum() {
-        this.setInTantrum(false);
+    @Override
+    public void setInTrap() {
+        super.setInTrap();
+        queuedFireballs = 0;
+    }
 
+    public void stopTantrum() {
+        if (!worldObj.isRemote && isInTantrum()) {
+            setInTantrum(false);
+            damageUntilNextPhase = DAMAGE_PER_PHASE;
+        }
     }
 
     /**
      * Spawn up to 6 minon ghasts around the indicated area
      */
-    private void spawnMinionGhastsAt(int x, int y, int z) {
+    private void spawnMinionGhastsAt(int x, int y, int z, int maxSpawns) {
+        if (worldObj.isRemote) {
+            return;
+        }
+
         int tries = 24;
         int spawns = 0;
-        int maxSpawns = 6;
-
         int rangeXZ = 4;
         int rangeY = 8;
-
-        // System.out.printf("Spawning minions near %d, %d, %d.\n", x, y, z);
 
         // lightning strike
         this.worldObj.addWeatherEffect(new EntityLightningBolt(worldObj, x, y + 4, z));
 
-        for (int i = 0; i < tries; i++) {
+        for (int i = 0; i < tries && spawns < maxSpawns; i++) {
             EntityTFMiniGhast minion = new EntityTFMiniGhast(worldObj);
-
             double sx = x + ((rand.nextDouble() - rand.nextDouble()) * rangeXZ);
             double sy = y + (rand.nextDouble() * rangeY);
             double sz = z + ((rand.nextDouble() - rand.nextDouble()) * rangeXZ);
 
             minion.setLocationAndAngles(sx, sy, sz, this.worldObj.rand.nextFloat() * 360.0F, 0.0F);
             minion.makeBossMinion();
-
-            if (minion.getCanSpawnHere()) {
-                // System.out.println("Spawned minion!");
-
-                this.worldObj.spawnEntityInWorld(minion);
+            if (minion.getCanSpawnHere() && this.worldObj.spawnEntityInWorld(minion)) {
                 minion.spawnExplosionParticle();
-            } else {
-                // System.out.println("Minion can't spawn!");
-            }
-
-            // limit the total number of successful spawns
-            if (++spawns >= maxSpawns) {
-                // System.out.println("Spawned maxiumum minions.");
-                break;
+                ++spawns;
             }
         }
-
     }
 
     /**
      * Altered Ghast AI
      */
+    @Override
     protected void updateEntityActionState() {
-        if (!this.worldObj.isRemote && this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
-            this.setDead();
+        if (worldObj.isRemote) {
+            return;
+        }
+        if (worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+            despawnMe();
+            return;
         }
 
         this.despawnEntity();
+        updateTrapScan();
 
-        // despawn mini ghasts that are in our AABB
-        List<EntityTFMiniGhast> nearbyGhasts = worldObj
-                .getEntitiesWithinAABB(EntityTFMiniGhast.class, this.boundingBox.expand(1, 1, 1));
-        for (EntityTFMiniGhast ghast : nearbyGhasts) {
-            ghast.setDead();
-            this.heal(2);
+        if (this.ticksExisted % MINI_GHAST_ABSORB_INTERVAL == 0) {
+            List<EntityTFMiniGhast> nearbyGhasts = worldObj
+                    .getEntitiesWithinAABB(EntityTFMiniGhast.class, this.boundingBox.expand(1, 1, 1));
+            for (EntityTFMiniGhast ghast : nearbyGhasts) {
+                if (ghast.isEntityAlive() && !ghast.isDead) {
+                    ghast.setDead();
+                    this.heal(2);
+                }
+            }
         }
 
-        // trap locations?
-        if (this.trapLocations.isEmpty() && !this.noTrapMode) {
-            // System.out.println("Tower boss scannning for traps.");
-
-            this.scanForTrapsTwice();
-
-            // System.out.println("Traps found: " + this.trapLocations.size());
-        }
-
-        // did we find any traps?
-        if (this.trapLocations.isEmpty() && !this.noTrapMode) {
-            FMLLog.info("[TwilightForest] Ur-ghast cannot find traps nearby, entering trap-less mode");
-            this.noTrapMode = true;
-        }
-
-        // check if in trap
         if (this.inTrapCounter > 0) {
             this.inTrapCounter--;
             this.targetedEntity = null;
-            return; // do nothing if in trap;
+            this.isAggressive = false;
+            this.aggroCounter = 0;
+            this.attackCounter = 0;
+            this.queuedFireballs = 0;
+            if (dataWatcher.getWatchableObjectByte(AGGRO_STATUS) != 0) {
+                dataWatcher.updateObject(AGGRO_STATUS, (byte) 0);
+            }
+            return;
         }
 
+        if (damageUntilNextPhase <= 0.0F) {
+            switchPhase();
+        }
         this.prevAttackCounter = this.attackCounter;
-
-        // target
-        if (this.targetedEntity != null && this.targetedEntity.isDead) {
+        if (!this.isInTantrum()) {
+            if (this.targetedEntity != null && (!this.targetedEntity.isEntityAlive()
+                    || this.targetedEntity instanceof EntityPlayer player && player.capabilities.disableDamage)) {
+                this.targetedEntity = null;
+                this.isAggressive = false;
+                this.aggroCounter = 0;
+            }
+            if (this.targetedEntity == null) {
+                if (this.ticksExisted % 10 == 0) {
+                    this.targetedEntity = findPlayerInRange();
+                }
+            } else if (!this.isAggressive && this.targetedEntity instanceof EntityPlayer) {
+                checkToIncreaseAggro((EntityPlayer) this.targetedEntity);
+            }
+            // finish a volley only while its target is still valid and visible
+            if (targetedEntity != null && targetedEntity.isEntityAlive()
+                    && getDistanceSqToEntity(targetedEntity) < aggroRange * aggroRange
+                    && canEntityBeSeen(targetedEntity)) {
+                updateFireballVolley();
+            } else {
+                queuedFireballs = 0;
+            }
+        } else {
             this.targetedEntity = null;
-        }
-
-        if (this.targetedEntity == null) {
-            this.targetedEntity = findPlayerInRange();
-        } else if (!this.isAggressive && this.targetedEntity instanceof EntityPlayer) {
-            checkToIncreaseAggro((EntityPlayer) this.targetedEntity);
-        }
-
-        // tantrum?
-        if (this.isInTantrum()) {
-            shedTear();
-
-            this.targetedEntity = null;
-
-            // cry?
+            this.isAggressive = false;
+            this.aggroCounter = 0;
+            this.attackCounter = 0;
+            this.queuedFireballs = 0;
             if (--this.nextTantrumCry <= 0) {
                 this.playSound(getHurtSound(), this.getSoundVolume(), this.getSoundPitch());
                 this.nextTantrumCry = 20 + rand.nextInt(30);
             }
-
             if (this.ticksExisted % 10 == 0) {
                 doTantrumDamageEffects();
             }
-
         }
 
-        // do this
         checkAndChangeCourse();
-
-        // check if we are at our waypoint target
         double offsetX = this.waypointX - this.posX;
         double offsetY = this.waypointY - this.posY;
         double offsetZ = this.waypointZ - this.posZ;
-        double distanceToWaypoint = offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ;
+        double distanceSq = offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ;
 
-        if (distanceToWaypoint < 1.0D || distanceToWaypoint > 3600.0D) {
+        if (distanceSq < 1.0D || distanceSq > 3600.0D) {
             makeNewWaypoint();
+            // always recalculate after choosing a new waypoint
+            offsetX = this.waypointX - this.posX;
+            offsetY = this.waypointY - this.posY;
+            offsetZ = this.waypointZ - this.posZ;
+            distanceSq = offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ;
         }
 
-        // move?
         if (this.courseChangeCooldown-- <= 0) {
-            this.courseChangeCooldown += this.rand.nextInt(5) + 0;
-            distanceToWaypoint = MathHelper.sqrt_double(distanceToWaypoint);
-
-            double speed = 0.05D;
-            this.motionX += offsetX / distanceToWaypoint * speed;
-            this.motionY += offsetY / distanceToWaypoint * speed;
-            this.motionZ += offsetZ / distanceToWaypoint * speed;
+            this.courseChangeCooldown = 2 + rand.nextInt(4);
+            if (distanceSq > 1.0E-8D) {
+                double factor = 0.05D / Math.sqrt(distanceSq);
+                this.motionX += offsetX * factor;
+                this.motionY += offsetY * factor;
+                this.motionZ += offsetZ * factor;
+            }
         }
 
-        // check if our target is still within range
-        double targetRange = (this.aggroCounter > 0 || this.isAggressive) ? aggroRange : stareRange;
-
-        if (this.targetedEntity != null && this.targetedEntity.getDistanceSqToEntity(this) < targetRange * targetRange
+        double targetRange = getCurrentTargetRange();
+        if (!this.isInTantrum() && this.targetedEntity != null
+                && this.targetedEntity.getDistanceSqToEntity(this) < targetRange * targetRange
                 && this.canEntityBeSeen(this.targetedEntity)) {
-            // turn towards target
             this.faceEntity(this.targetedEntity, 10F, this.getVerticalFaceSpeed());
-
-            // attack if aggressive
             if (this.isAggressive) {
                 if (this.attackCounter == 10) {
-                    // this.worldObj.playAuxSFXAtEntity((EntityPlayer)null, 1007, (int)this.posX, (int)this.posY,
-                    // (int)this.posZ, 0);
                     this.playSound("mob.ghast.charge", this.getSoundVolume(), this.getSoundPitch());
                 }
-
                 ++this.attackCounter;
-
                 if (this.attackCounter == 20) {
                     spitFireball();
                     this.attackCounter = -40;
                 }
             }
         } else {
-            // ignore player, move normally
             this.isAggressive = false;
             this.targetedEntity = null;
+            this.aggroCounter = 0;
             this.rotationYaw = -((float) Math.atan2(this.motionX, this.motionZ)) * 180.0F / (float) Math.PI;
-
-            // changing the pitch with movement looks goofy and un-ghast-like
-            // double dist = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
-            this.rotationPitch = 0;// (float) (-((Math.atan2(this.motionY, dist) * 180D) / Math.PI));;
-
+            this.rotationPitch = 0;
         }
 
         if (this.attackCounter > 0 && !this.isAggressive) {
             --this.attackCounter;
         }
-
-        // set aggro status
-        byte currentAggroStatus = this.dataWatcher.getWatchableObjectByte(16);
+        byte currentAggroStatus = this.dataWatcher.getWatchableObjectByte(AGGRO_STATUS);
         byte newAggroStatus = (byte) (this.attackCounter > 10 ? 2
                 : (this.aggroCounter > 0 || this.isAggressive) ? 1 : 0);
-
         if (currentAggroStatus != newAggroStatus) {
-            this.dataWatcher.updateObject(16, newAggroStatus);
+            this.dataWatcher.updateObject(AGGRO_STATUS, newAggroStatus);
         }
     }
 
     private void doTantrumDamageEffects() {
         // harm player below
-        AxisAlignedBB below = this.boundingBox.getOffsetBoundingBox(0, -16, 0).expand(0, 16, 0);
-
+        // only entities beneath the boss, not inside or above its body
+        AxisAlignedBB below = AxisAlignedBB.getBoundingBox(
+                boundingBox.minX,
+                boundingBox.minY - 32.0D,
+                boundingBox.minZ,
+                boundingBox.maxX,
+                boundingBox.minY,
+                boundingBox.maxZ);
         List<EntityPlayer> playersBelow = worldObj.getEntitiesWithinAABB(EntityPlayer.class, below);
-
         for (EntityPlayer player : playersBelow) {
+            if (!player.isEntityAlive() || player.capabilities.disableDamage) {
+                continue;
+            }
             int dx = MathHelper.floor_double(player.posX);
             int dy = MathHelper.floor_double(player.posY);
             int dz = MathHelper.floor_double(player.posZ);
-
             if (worldObj.canBlockSeeTheSky(dx, dy, dz)) {
                 player.attackEntityFrom(DamageSource.anvil, 3);
             }
@@ -473,9 +507,10 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
 
         // also suck up mini ghasts
         List<EntityTFMiniGhast> ghastsBelow = worldObj.getEntitiesWithinAABB(EntityTFMiniGhast.class, below);
-
         for (EntityTFMiniGhast ghast : ghastsBelow) {
-            ghast.motionY += 1;
+            if (ghast.isEntityAlive()) {
+                ghast.motionY += 1;
+            }
         }
     }
 
@@ -495,32 +530,30 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     }
 
     /**
-     * Waypoints should be closer to our course than we are now. Try 50 times and take the closest
+     * Choose a waypoint closer to the course than our current position.
      */
     protected void makeNewWaypoint() {
+        // A direct course waypoint guarantees progress if no candidate is closer than we are.
+        this.waypointX = this.courseX;
+        this.waypointY = this.courseY;
+        this.waypointZ = this.courseZ;
 
-        double closestDistance = this.getDistanceSq(this.courseX, this.courseY, this.courseZ);
-
-        for (int i = 0; i < 50; i++) {
-            double potentialX = this.posX + (double) ((this.rand.nextFloat() * 2.0F - 1.0F) * wanderFactor);
-            double potentialY = this.courseY + this.rand.nextFloat() * 8.0F - 4.0F;
-            double potentialZ = this.posZ + (double) ((this.rand.nextFloat() * 2.0F - 1.0F) * wanderFactor);
-
-            double offsetX = this.courseX - potentialX;
-            double offsetY = this.courseY - potentialY;
-            double offsetZ = this.courseZ - potentialZ;
-
-            double potentialDistanceToCourse = offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ;
-
-            if (potentialDistanceToCourse < closestDistance) {
+        double bestDistanceSq = this.getDistanceSq(this.courseX, this.courseY, this.courseZ);
+        for (int i = 0; i < WAYPOINT_ATTEMPTS; i++) {
+            double potentialX = this.posX + (rand.nextFloat() * 2.0F - 1.0F) * wanderFactor;
+            double potentialY = this.courseY + rand.nextFloat() * 8.0F - 4.0F;
+            double potentialZ = this.posZ + (rand.nextFloat() * 2.0F - 1.0F) * wanderFactor;
+            double dx = courseX - potentialX;
+            double dy = courseY - potentialY;
+            double dz = courseZ - potentialZ;
+            double candidateDistanceSq = dx * dx + dy * dy + dz * dz;
+            if (candidateDistanceSq < bestDistanceSq && getDistanceSq(potentialX, potentialY, potentialZ) >= 1.0D) {
                 this.waypointX = potentialX;
                 this.waypointY = potentialY;
                 this.waypointZ = potentialZ;
-
-                closestDistance = potentialDistanceToCourse;
+                bestDistanceSq = candidateDistanceSq;
             }
         }
-
     }
 
     protected void checkAndChangeCourse() {
@@ -553,12 +586,8 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
         if (!this.travelCoords.isEmpty()) {
             if (this.currentTravelCoordIndex >= travelCoords.size()) {
                 this.currentTravelCoordIndex = 0;
-                this.travelPathRepetitions++;
-
-                // System.out.println("Tower boss has repeated path " + travelPathRepetitions + " times.");
-
                 // when we're in tantrum mode, this is a good time to check if we need to spawn more ghasts
-                if (!checkGhastsAtTraps()) {
+                if (isInTantrum()) {
                     this.spawnGhastsAtTraps();
                 }
             }
@@ -568,46 +597,33 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
             this.courseZ = travelCoords.get(currentTravelCoordIndex).posZ;
 
             this.currentTravelCoordIndex++;
+            makeNewWaypoint();
         }
 
     }
 
-    /**
-     * Check if there are at least 4 ghasts near at least 2 traps. Return false if not.
-     */
-    private boolean checkGhastsAtTraps() {
-        int trapsWithEnoughGhasts = 0;
-
-        for (ChunkCoordinates trap : this.trapLocations) {
-            AxisAlignedBB aabb = AxisAlignedBB
-                    .getBoundingBox(trap.posX, trap.posY, trap.posZ, trap.posX + 1, trap.posY + 1, trap.posZ + 1)
-                    .expand(8D, 16D, 8D);
-
-            List<EntityTFMiniGhast> nearbyGhasts = worldObj.getEntitiesWithinAABB(EntityTFMiniGhast.class, aabb);
-
-            // System.out.println("Checking for ghasts. There are " + nearbyGhasts.size() + " ghasts near this
-            // trap.");
-
-            if (nearbyGhasts.size() >= 4) {
-                trapsWithEnoughGhasts++;
+    private int countLivingGhastsAt(ChunkCoordinates trap) {
+        AxisAlignedBB area = AxisAlignedBB
+                .getBoundingBox(trap.posX, trap.posY, trap.posZ, trap.posX + 1, trap.posY + 1, trap.posZ + 1)
+                .expand(8D, 16D, 8D);
+        List<EntityTFMiniGhast> ghasts = worldObj.getEntitiesWithinAABB(EntityTFMiniGhast.class, area);
+        int living = 0;
+        for (EntityTFMiniGhast ghast : ghasts) {
+            if (ghast.isEntityAlive()) {
+                ++living;
             }
         }
-
-        // System.out.println("Checking traps for ghasts. There are " + trapsWithEnoughGhasts + " traps with
-        // enough ghasts.");
-
-        return trapsWithEnoughGhasts >= 1;
-
+        return living;
     }
 
     private void makeTravelPath() {
         ArrayList<ChunkCoordinates> potentialPoints;
 
-        int px = MathHelper.floor_double(this.posX);
-        int py = MathHelper.floor_double(this.posY);
-        int pz = MathHelper.floor_double(this.posZ);
+        int px = trapScanOriginX;
+        int py = trapScanOriginY;
+        int pz = trapScanOriginZ;
 
-        if (!this.noTrapMode) {
+        if (!this.trapLocations.isEmpty()) {
             // make a copy of the trap locations list
             potentialPoints = new ArrayList<>(this.trapLocations);
         } else {
@@ -631,7 +647,7 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
             potentialPoints.remove(index);
         }
 
-        if (this.noTrapMode) {
+        if (this.trapLocations.isEmpty()) {
             // if in no trap mode, head back to the middle when we're done
             travelCoords.add(new ChunkCoordinates(px, py - HOVER_ALTITUDE, pz));
         }
@@ -640,99 +656,109 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     /**
      * Spit a fireball
      */
+    @Override
     protected void spitFireball() {
-        double offsetX = this.targetedEntity.posX - this.posX;
-        double offsetY = this.targetedEntity.boundingBox.minY + (double) (this.targetedEntity.height / 2.0F)
-                - (this.posY + (double) (this.height / 2.0F));
-        double offsetZ = this.targetedEntity.posZ - this.posZ;
+        if (worldObj.isRemote || this.targetedEntity == null || !this.targetedEntity.isEntityAlive()) {
+            return;
+        }
 
-        // fireball sound effect
+        // preserve the original 3 projectile spread but dont spawn all
+        // explosive entities in 1 tick
+        this.volleyAimX = this.targetedEntity.posX;
+        this.volleyAimY = this.targetedEntity.boundingBox.minY + this.targetedEntity.height * 0.5D;
+        this.volleyAimZ = this.targetedEntity.posZ;
+        this.queuedFireballs = FIREBALLS_PER_VOLLEY - 1;
+        this.fireballDelay = FIREBALL_SPACING_TICKS;
+
         this.worldObj.playAuxSFXAtEntity(null, 1008, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
+        spawnVolleyFireball(false);
+    }
 
-        EntityTFUrGhastFireball entityFireball = new EntityTFUrGhastFireball(
-                this.worldObj,
-                this,
-                offsetX,
-                offsetY,
-                offsetZ);
-        entityFireball.field_92057_e = 1;
-        double shotSpawnDistance = 8.5D;
+    private void updateFireballVolley() {
+        if (this.queuedFireballs <= 0 || --this.fireballDelay > 0) {
+            return;
+        }
+        spawnVolleyFireball(true);
+        --this.queuedFireballs;
+        this.fireballDelay = FIREBALL_SPACING_TICKS;
+    }
+
+    private void spawnVolleyFireball(boolean spread) {
+        double offsetX = this.volleyAimX - this.posX;
+        double offsetY = this.volleyAimY - (this.posY + this.height * 0.5D);
+        double offsetZ = this.volleyAimZ - this.posZ;
+        if (spread) {
+            offsetX += (rand.nextFloat() - rand.nextFloat()) * 8.0D;
+            offsetZ += (rand.nextFloat() - rand.nextFloat()) * 8.0D;
+        }
+
+        EntityTFUrGhastFireball fireball = new EntityTFUrGhastFireball(this.worldObj, this, offsetX, offsetY, offsetZ);
+        fireball.field_92057_e = 1;
         Vec3 lookVec = this.getLook(1.0F);
-        entityFireball.posX = this.posX + lookVec.xCoord * shotSpawnDistance;
-        entityFireball.posY = this.posY + (double) (this.height / 2.0F) + lookVec.yCoord * shotSpawnDistance;
-        entityFireball.posZ = this.posZ + lookVec.zCoord * shotSpawnDistance;
-        this.worldObj.spawnEntityInWorld(entityFireball);
-
-        for (int i = 0; i < 2; i++) {
-            entityFireball = new EntityTFUrGhastFireball(
-                    this.worldObj,
-                    this,
-                    offsetX + (rand.nextFloat() - rand.nextFloat()) * 8,
-                    offsetY,
-                    offsetZ + (rand.nextFloat() - rand.nextFloat()) * 8);
-            entityFireball.field_92057_e = 1;
-            entityFireball.posX = this.posX + lookVec.xCoord * shotSpawnDistance;
-            entityFireball.posY = this.posY + (double) (this.height / 2.0F) + lookVec.yCoord * shotSpawnDistance;
-            entityFireball.posZ = this.posZ + lookVec.zCoord * shotSpawnDistance;
-            this.worldObj.spawnEntityInWorld(entityFireball);
-        }
-
+        double shotSpawnDistance = 8.5D;
+        fireball.setPosition(
+                this.posX + lookVec.xCoord * shotSpawnDistance,
+                this.posY + this.height * 0.5D + lookVec.yCoord * shotSpawnDistance,
+                this.posZ + lookVec.zCoord * shotSpawnDistance);
+        this.worldObj.spawnEntityInWorld(fireball);
     }
 
-    /**
-     * Scan a few chunks around us for ghast trap blocks and if we find any, add them to our list
-     */
-    private void scanForTrapsTwice() {
-        int scanRangeXZ = 48;
-        int scanRangeY = 32;
-
-        int px = MathHelper.floor_double(this.posX);
-        int py = MathHelper.floor_double(this.posY);
-        int pz = MathHelper.floor_double(this.posZ);
-
-        scanForTraps(scanRangeXZ, scanRangeY, px, py, pz);
-
-        if (trapLocations.size() > 0) {
-            // average the location of the traps we've found, and scan again from there
-            int ax = 0, ay = 0, az = 0;
-
-            for (ChunkCoordinates trapCoords : trapLocations) {
-                ax += trapCoords.posX;
-                ay += trapCoords.posY;
-                az += trapCoords.posZ;
-            }
-
-            ax /= trapLocations.size();
-            ay /= trapLocations.size();
-            az /= trapLocations.size();
-
-            scanForTraps(scanRangeXZ, scanRangeY, ax, ay, az);
+    private void updateTrapScan() {
+        if (--trapScanCooldown > 0) {
+            return;
         }
-    }
+        trapScanCooldown = TRAP_SCAN_INTERVAL;
+        if (!trapScanInitialized) {
+            ChunkCoordinates origin = hasHome() ? getHomePosition()
+                    : new ChunkCoordinates(
+                            MathHelper.floor_double(posX),
+                            MathHelper.floor_double(posY),
+                            MathHelper.floor_double(posZ));
+            trapScanOriginX = origin.posX;
+            trapScanOriginY = origin.posY;
+            trapScanOriginZ = origin.posZ;
+            trapScanInitialized = true;
+        }
 
-    /**
-     * Scan in the specified range for traps
-     */
-    protected void scanForTraps(int scanRangeXZ, int scanRangeY, int px, int py, int pz) {
-        for (int sx = -scanRangeXZ; sx <= scanRangeXZ; sx++) {
-            for (int sz = -scanRangeXZ; sz <= scanRangeXZ; sz++) {
-                for (int sy = -scanRangeY; sy <= scanRangeY; sy++) {
-                    if (isTrapAt(px + sx, py + sy, pz + sz)) {
-                        // add to list
-                        ChunkCoordinates trapCoords = new ChunkCoordinates(px + sx, py + sy, pz + sz);
-                        if (!trapLocations.contains(trapCoords)) {
-                            trapLocations.add(trapCoords);
-                        }
-                    }
-                }
+        // an unloaded chunk isnt proof that a previously discovered trap was destroyed
+        boolean changed = trapLocations.removeIf(
+                trap -> worldObj.blockExists(trap.posX, trap.posY, trap.posZ)
+                        && !isTrapAt(trap.posX, trap.posY, trap.posZ));
+        for (Object entry : worldObj.loadedTileEntityList) {
+            if (!(entry instanceof TileEntity tile) || tile.isInvalid()
+                    || !(tile instanceof TileEntityTFGhastTrapInactive
+                            || tile instanceof TileEntityTFGhastTrapActive)) {
+                continue;
             }
+            int x = tile.xCoord, y = tile.yCoord, z = tile.zCoord;
+            if (Math.abs((long) x - trapScanOriginX) > TRAP_SCAN_XZ_RANGE
+                    || Math.abs((long) y - trapScanOriginY) > TRAP_SCAN_Y_RANGE
+                    || Math.abs((long) z - trapScanOriginZ) > TRAP_SCAN_XZ_RANGE
+                    || !isTrapAt(x, y, z)) {
+                continue;
+            }
+            if (!trapLocations.contains(new ChunkCoordinates(x, y, z))) {
+                trapLocations.add(new ChunkCoordinates(x, y, z));
+                changed = true;
+            }
+        }
+        if (changed) {
+            travelCoords.clear();
+            currentTravelCoordIndex = 0;
+            courseX = courseY = courseZ = 0.0D;
+        }
+        if (changed && !trapLocations.isEmpty() && isInTantrum()) {
+            spawnGhastsAtTraps();
         }
     }
 
     private boolean isTrapAt(int x, int y, int z) {
-        return worldObj.blockExists(x, y, z) && worldObj.getBlock(x, y, z) == TFBlocks.towerDevice
-                && (worldObj.getBlockMetadata(x, y, z) == BlockTFTowerDevice.META_GHASTTRAP_INACTIVE
-                        || worldObj.getBlockMetadata(x, y, z) == BlockTFTowerDevice.META_GHASTTRAP_ACTIVE);
+        if (!worldObj.blockExists(x, y, z) || worldObj.getBlock(x, y, z) != TFBlocks.towerDevice) {
+            return false;
+        }
+        int metadata = worldObj.getBlockMetadata(x, y, z);
+        return metadata == BlockTFTowerDevice.META_GHASTTRAP_INACTIVE
+                || metadata == BlockTFTowerDevice.META_GHASTTRAP_ACTIVE;
     }
 
     /**
@@ -762,11 +788,11 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     /**
      * Sets whether we are throwing a tantrum
      */
-    public void setInTantrum(boolean par1) {
-        this.dataWatcher.updateObject(DATA_TANTRUM, par1 ? (byte) -1 : (byte) 0);
-
-        // can we just reset this each time it is called?
-        this.damageUntilNextPhase = 48;
+    public void setInTantrum(boolean tantrum) {
+        byte state = (byte) (tantrum ? -1 : 0);
+        if (this.dataWatcher.getWatchableObjectByte(DATA_TANTRUM) != state) {
+            this.dataWatcher.updateObject(DATA_TANTRUM, state);
+        }
     }
 
     /**
@@ -800,11 +826,34 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
 
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+        super.writeEntityToNBT(nbttagcompound);
         nbttagcompound.setBoolean("inTantrum", this.isInTantrum());
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
-        super.writeEntityToNBT(nbttagcompound);
+        nbttagcompound.setInteger("TFHomeRadius", (int) getMaximumHomeDistance());
+
+        nbttagcompound.setFloat("UrGhastPhaseDamageLeft", this.damageUntilNextPhase);
+        nbttagcompound.setBoolean("UrGhastTrapsScanned", trapScanInitialized);
+        if (trapScanInitialized) {
+            nbttagcompound.setInteger("UrGhastTrapOriginX", trapScanOriginX);
+            nbttagcompound.setInteger("UrGhastTrapOriginY", trapScanOriginY);
+            nbttagcompound.setInteger("UrGhastTrapOriginZ", trapScanOriginZ);
+            NBTTagList traps = new NBTTagList();
+            for (ChunkCoordinates trap : this.trapLocations) {
+                NBTTagCompound entry = new NBTTagCompound();
+                entry.setInteger("X", trap.posX);
+                entry.setInteger("Y", trap.posY);
+                entry.setInteger("Z", trap.posZ);
+                traps.appendTag(entry);
+            }
+            nbttagcompound.setTag("UrGhastTrapLocations", traps);
+        }
+        nbttagcompound.setInteger("UrGhastQueuedFireballs", this.queuedFireballs);
+        nbttagcompound.setInteger("UrGhastFireballDelay", this.fireballDelay);
+        nbttagcompound.setDouble("UrGhastVolleyX", this.volleyAimX);
+        nbttagcompound.setDouble("UrGhastVolleyY", this.volleyAimY);
+        nbttagcompound.setDouble("UrGhastVolleyZ", this.volleyAimZ);
     }
 
     @Override
@@ -815,12 +864,51 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
             int hx = (int) nbttaglist.func_150309_d(0);
             int hy = (int) nbttaglist.func_150309_d(1);
             int hz = (int) nbttaglist.func_150309_d(2);
-            this.setHomeArea(hx, hy, hz, 20);
+            this.setHomeArea(
+                    hx,
+                    hy,
+                    hz,
+                    nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
         }
         if (!nbttagcompound.getBoolean("HasHome")) {
             this.detachHome();
         }
         this.setInTantrum(nbttagcompound.getBoolean("inTantrum"));
+        this.damageUntilNextPhase = nbttagcompound.hasKey("UrGhastPhaseDamageLeft", 99)
+                ? nbttagcompound.getFloat("UrGhastPhaseDamageLeft")
+                : INITIAL_PHASE_DAMAGE;
+
+        trapLocations.clear();
+        trapScanCooldown = 0;
+        trapScanInitialized = false;
+        if (nbttagcompound.getBoolean("UrGhastTrapsScanned")) {
+            NBTTagList traps = nbttagcompound.getTagList("UrGhastTrapLocations", 10);
+            for (int i = 0; i < traps.tagCount(); ++i) {
+                NBTTagCompound entry = traps.getCompoundTagAt(i);
+                trapLocations
+                        .add(new ChunkCoordinates(entry.getInteger("X"), entry.getInteger("Y"), entry.getInteger("Z")));
+            }
+            if (nbttagcompound.hasKey("UrGhastTrapOriginX", 99)) {
+                trapScanOriginX = nbttagcompound.getInteger("UrGhastTrapOriginX");
+                trapScanOriginY = nbttagcompound.getInteger("UrGhastTrapOriginY");
+                trapScanOriginZ = nbttagcompound.getInteger("UrGhastTrapOriginZ");
+                trapScanInitialized = true;
+            }
+        }
+        travelCoords.clear();
+        currentTravelCoordIndex = 0;
+        courseX = courseY = courseZ = 0.0D;
+        waypointX = waypointY = waypointZ = 0.0D;
+
+        this.queuedFireballs = Math
+                .max(0, Math.min(FIREBALLS_PER_VOLLEY - 1, nbttagcompound.getInteger("UrGhastQueuedFireballs")));
+        this.fireballDelay = Math.max(1, nbttagcompound.getInteger("UrGhastFireballDelay"));
+        this.volleyAimX = nbttagcompound.getDouble("UrGhastVolleyX");
+        this.volleyAimY = nbttagcompound.getDouble("UrGhastVolleyY");
+        this.volleyAimZ = nbttagcompound.getDouble("UrGhastVolleyZ");
+        if (isInTantrum()) {
+            this.queuedFireballs = 0;
+        }
     }
 
     /**
@@ -832,7 +920,8 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
         if (this.deathTime == 20 && !worldObj.isRemote) {
             // make chest
             ChunkCoordinates chestCoords = this.findChestCoords();
-            TFTreasure.darktower_boss.generate(worldObj, null, chestCoords.posX, chestCoords.posY, chestCoords.posZ);
+            TFTreasure.darktower_boss
+                    .generateBossReward(worldObj, chestCoords.posX, chestCoords.posY, chestCoords.posZ);
         }
     }
 
@@ -842,7 +931,7 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
+        if (!worldObj.isRemote && par1DamageSource.getEntity() instanceof EntityPlayer
                 && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightProgressUrghast);
@@ -851,10 +940,11 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
 
         // mark the tower as defeated
         if (!worldObj.isRemote && worldObj.provider instanceof WorldProviderTwilightForest) {
-            ChunkCoordinates chestCoords = this.findChestCoords();
-            int dx = chestCoords.posX;
-            int dy = chestCoords.posY;
-            int dz = chestCoords.posZ;
+            // the tower is the boss home, the loot location can be outside
+            ChunkCoordinates location = hasHome() ? getHomePosition() : findChestCoords();
+            int dx = location.posX;
+            int dy = location.posY;
+            int dz = location.posZ;
 
             ChunkProviderTwilightForest chunkProvider = ((WorldProviderTwilightForest) worldObj.provider)
                     .getChunkProvider();
@@ -869,8 +959,8 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
 
     private ChunkCoordinates findChestCoords() {
         if (trapLocations.size() > 0) {
-            // average the location of the traps we've found, and scan again from there
-            int ax = 0, ay = 0, az = 0;
+            // average the known trap positions to locate the centre of the arena
+            long ax = 0, ay = 0, az = 0;
 
             for (ChunkCoordinates trapCoords : trapLocations) {
                 ax += trapCoords.posX;
@@ -878,11 +968,19 @@ public class EntityTFUrGhast extends EntityTFTowerGhast implements IBossDisplayD
                 az += trapCoords.posZ;
             }
 
-            ax /= trapLocations.size();
-            ay /= trapLocations.size();
-            az /= trapLocations.size();
-
-            return new ChunkCoordinates(ax, ay + 2, az);
+            return new ChunkCoordinates(
+                    (int) Math.floorDiv(ax, trapLocations.size()),
+                    (int) Math.floorDiv(ay, trapLocations.size()) + 2,
+                    (int) Math.floorDiv(az, trapLocations.size()));
+        } else if (hasHome()) {
+            ChunkCoordinates home = getHomePosition();
+            for (int y = Math.min(home.posY, 255); y > Math.max(0, home.posY - 32); --y) {
+                if (worldObj.isAirBlock(home.posX, y, home.posZ)
+                        && World.doesBlockHaveSolidTopSurface(worldObj, home.posX, y - 1, home.posZ)) {
+                    return new ChunkCoordinates(home.posX, y, home.posZ);
+                }
+            }
+            return new ChunkCoordinates(home.posX, home.posY, home.posZ);
         } else {
             return new ChunkCoordinates(
                     MathHelper.floor_double(this.posX),

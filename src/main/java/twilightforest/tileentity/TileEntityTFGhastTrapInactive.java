@@ -1,10 +1,17 @@
 package twilightforest.tileentity;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 
@@ -15,14 +22,17 @@ import twilightforest.entity.EntityTFMiniGhast;
 
 public class TileEntityTFGhastTrapInactive extends TileEntity {
 
+    private static final int MAX_CHARGE = 3;
+
     int counter;
     Random rand = new Random();
 
-    ArrayList<EntityTFMiniGhast> dyingGhasts = new ArrayList<>();
+    private final Set<UUID> chargedGhasts = new HashSet<>();
+    private int chargeLevel;
 
     /**
      * Determines if this TileEntity requires update calls.
-     * 
+     *
      * @return True if you want updateEntity() to be called, false if not
      */
     @Override
@@ -36,6 +46,13 @@ public class TileEntityTFGhastTrapInactive extends TileEntity {
      */
     @Override
     public void updateEntity() {
+        if (!worldObj.isRemote && isCharged()) {
+            // a powered trap loaded from disk may not receive a fresh notification
+            if (worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord)) {
+                TFBlocks.towerDevice.onNeighborBlockChange(worldObj, xCoord, yCoord, zCoord, TFBlocks.towerDevice);
+            }
+            return;
+        }
         // check to see if there are any dying mini ghasts within our scan range
         AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(
                 this.xCoord,
@@ -47,18 +64,32 @@ public class TileEntityTFGhastTrapInactive extends TileEntity {
 
         List<EntityTFMiniGhast> nearbyGhasts = worldObj.getEntitiesWithinAABB(EntityTFMiniGhast.class, aabb);
 
-        for (EntityTFMiniGhast ghast : nearbyGhasts) {
-            if (ghast.deathTime > 0) {
-                this.makeParticlesTo(ghast);
-
-                if (!dyingGhasts.contains(ghast)) {
-                    dyingGhasts.add(ghast);
+        if (!worldObj.isRemote) {
+            int previousCharge = chargeLevel;
+            for (EntityTFMiniGhast ghast : nearbyGhasts) {
+                if (chargeLevel >= MAX_CHARGE) {
+                    break;
+                }
+                if (!chargedGhasts.contains(ghast.getUniqueID()) && ghast.consumeTrapCharge()) {
+                    chargedGhasts.add(ghast.getUniqueID());
+                    ++chargeLevel;
                 }
             }
+            if (chargeLevel != previousCharge) {
+                markDirty();
+                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                if (isCharged() && worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord)) {
+                    TFBlocks.towerDevice.onNeighborBlockChange(worldObj, xCoord, yCoord, zCoord, TFBlocks.towerDevice);
+                }
+            }
+            return;
         }
 
-        // display charge level, up to 3
-        int chargeLevel = Math.min(3, dyingGhasts.size());
+        for (EntityTFMiniGhast ghast : nearbyGhasts) {
+            if (ghast.deathTime > 0) {
+                makeParticlesTo(ghast);
+            }
+        }
 
         counter++;
 
@@ -144,7 +175,44 @@ public class TileEntityTFGhastTrapInactive extends TileEntity {
     }
 
     public boolean isCharged() {
-        return dyingGhasts.size() >= 3;
+        return chargeLevel >= MAX_CHARGE;
     }
 
+    @Override
+    public void writeToNBT(NBTTagCompound tag) {
+        super.writeToNBT(tag);
+        tag.setInteger("TrapCharge", chargeLevel);
+        NBTTagList ghasts = new NBTTagList();
+        for (UUID uuid : chargedGhasts) {
+            NBTTagCompound entry = new NBTTagCompound();
+            entry.setLong("Most", uuid.getMostSignificantBits());
+            entry.setLong("Least", uuid.getLeastSignificantBits());
+            ghasts.appendTag(entry);
+        }
+        tag.setTag("ChargedGhasts", ghasts);
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        chargeLevel = Math.max(0, Math.min(MAX_CHARGE, tag.getInteger("TrapCharge")));
+        chargedGhasts.clear();
+        NBTTagList ghasts = tag.getTagList("ChargedGhasts", 10);
+        for (int i = 0; i < ghasts.tagCount() && chargedGhasts.size() < MAX_CHARGE; i++) {
+            NBTTagCompound entry = ghasts.getCompoundTagAt(i);
+            chargedGhasts.add(new UUID(entry.getLong("Most"), entry.getLong("Least")));
+        }
+    }
+
+    @Override
+    public Packet getDescriptionPacket() {
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setInteger("TrapCharge", chargeLevel);
+        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 3, tag);
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager manager, S35PacketUpdateTileEntity packet) {
+        chargeLevel = Math.max(0, Math.min(MAX_CHARGE, packet.func_148857_g().getInteger("TrapCharge")));
+    }
 }

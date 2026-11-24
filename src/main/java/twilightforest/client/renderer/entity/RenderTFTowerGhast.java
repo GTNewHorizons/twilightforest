@@ -16,10 +16,10 @@ import twilightforest.entity.boss.EntityTFUrGhast;
  */
 public class RenderTFTowerGhast extends RenderTFMiniGhast {
 
-    private float ghastScale = 8.0F;
+    private final float ghastScale;
 
     public RenderTFTowerGhast(ModelTFGhast modelTFGhast, float f) {
-        super(modelTFGhast, f);
+        this(modelTFGhast, f, 8.0F);
     }
 
     public RenderTFTowerGhast(ModelTFGhast modelTFGhast, float f, float scale) {
