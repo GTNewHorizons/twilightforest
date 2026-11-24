@@ -9,7 +9,6 @@ public class ComponentTFTowerRoofAttachedSlab extends ComponentTFTowerRoofSlab {
 
     public ComponentTFTowerRoofAttachedSlab() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoofAttachedSlab(int i, ComponentTFTowerWing wing) {
@@ -21,7 +20,6 @@ public class ComponentTFTowerRoofAttachedSlab extends ComponentTFTowerRoofSlab {
      */
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        int slabMeta = 2;
-        return makeConnectedCap(world, slabMeta, sbb);
+        return makeConnectedCap(world, 2, sbb);
     }
 }

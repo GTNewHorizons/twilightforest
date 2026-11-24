@@ -4,20 +4,16 @@ public class ComponentTFTowerRoofPointyOverhang extends ComponentTFTowerRoofPoin
 
     public ComponentTFTowerRoofPointyOverhang() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoofPointyOverhang(int i, ComponentTFTowerWing wing) {
-        super(i, wing);
+        super(i, wing); // same facing but it doesn't matter
 
-        // same facing, but it doesn't matter
-        this.setCoordBaseMode(wing.getCoordBaseMode());
+        size = wing.size + 2; // assuming only square towers and roofs right now
+        height = size;
 
-        this.size = wing.size + 2; // assuming only square towers and roofs right now.
-        this.height = size;
-
-        // just hang out at the very top of the tower
+        // the highest corner slabs can extend one level above the final solid layer
         makeOverhangBB(wing);
-
+        boundingBox.maxY++;
     }
 }

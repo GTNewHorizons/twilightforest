@@ -15,75 +15,67 @@ public class ComponentTFTowerBeard extends StructureTFComponent {
 
     public ComponentTFTowerBeard() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerBeard(int i, ComponentTFTowerWing wing) {
         super(i);
 
-        this.setCoordBaseMode(wing.getCoordBaseMode());
-        this.size = wing.size - 2;
-        this.height = size / 2;
+        setCoordBaseMode(wing.getCoordBaseMode());
+        size = wing.size - 2;
+        height = size / 2;
 
         // just hang out at the very bottom of the tower
-        this.boundingBox = new StructureBoundingBox(
-                wing.getBoundingBox().minX + 1,
-                wing.getBoundingBox().minY - this.height - 1,
-                wing.getBoundingBox().minZ + 1,
-                wing.getBoundingBox().maxX - 1,
-                wing.getBoundingBox().minY - 1,
-                wing.getBoundingBox().maxZ - 1);
-
+        StructureBoundingBox wingBox = wing.getBoundingBox();
+        boundingBox = new StructureBoundingBox(
+                wingBox.minX + 1,
+                wingBox.minY - height - 1,
+                wingBox.minZ + 1,
+                wingBox.maxX - 1,
+                wingBox.minY - 1,
+                wingBox.maxZ - 1);
     }
 
-    /**
-     * Save to NBT
-     */
+    // save to nbt
     @Override
-    protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
-        super.func_143012_a(par1NBTTagCompound);
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
 
-        par1NBTTagCompound.setInteger("beardSize", this.size);
-        par1NBTTagCompound.setInteger("beardHeight", this.height);
+        nbt.setInteger("beardSize", size);
+        nbt.setInteger("beardHeight", height);
     }
 
-    /**
-     * Load from NBT
-     */
+    // load from nbt
     @Override
-    protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
-        super.func_143011_b(par1NBTTagCompound);
-        this.size = par1NBTTagCompound.getInteger("beardSize");
-        this.height = par1NBTTagCompound.getInteger("beardHeight");
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+
+        size = nbt.getInteger("beardSize");
+        height = nbt.getInteger("beardHeight");
     }
 
-    /**
-     * Makes a pyramid-shaped beard
-     */
+    // makes a pyramid-shaped beard
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        return makePyramidBeard(world, rand, sbb);
-    }
-
-    private boolean makePyramidBeard(World world, Random rand, StructureBoundingBox sbb) {
         for (int y = 0; y <= height; y++) {
             int min = y;
             int max = size - y - 1;
+            if (min > max) break;
+            int layerY = height - y;
 
             fillWithRandomizedBlocks(
                     world,
                     sbb,
                     min,
-                    height - y,
+                    layerY,
                     min,
                     max,
-                    height - y,
+                    layerY,
                     max,
                     false,
                     rand,
                     StructureTFComponent.getStrongholdStones());
         }
+
         return true;
     }
-
 }

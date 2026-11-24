@@ -31,101 +31,91 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         makeARoof(parent, list, rand);
 
         // sub towers
-        for (int i = 0; i < 4; i++) {
-            int[] dest = getValidOpening(rand, i);
-
-            // adjust height if we're too low at this point
-            if (dest[1] < height / 2) {
-                dest[1] += 20;
-            }
-
-            int childHeight = Math.min(21 + rand.nextInt(10), this.height - dest[1] - 3);
-
-            if (!makeTowerWing(list, rand, 1, dest[0], dest[1], dest[2], 9, childHeight, i)) {
-                makeTowerWing(list, rand, 1, dest[0], dest[1], dest[2], 7, childHeight, i);
-            }
-        }
+        // adjust height if we're too low at this point
+        addLargeTowerWings(list, rand, 20);
 
         // try one more time for large towers
-        for (int i = 0; i < 4; i++) {
-            int[] dest = getValidOpening(rand, i);
-
-            // adjust height if we're too low at this point
-            if (dest[1] < height / 2) {
-                dest[1] += 10;
-            }
-
-            int childHeight = Math.min(21 + rand.nextInt(10), this.height - dest[1] - 3);
-
-            if (!makeTowerWing(list, rand, 1, dest[0], dest[1], dest[2], 9, childHeight, i)) {
-                makeTowerWing(list, rand, 1, dest[0], dest[1], dest[2], 7, childHeight, i);
-            }
-        }
+        // adjust height if we're too low at this point
+        addLargeTowerWings(list, rand, 10);
 
         // another set, if possible
-        for (int i = 0; i < 4; i++) {
-            int[] dest = getValidOpening(rand, i);
-
-            int childHeight = Math.min(7 + rand.nextInt(6), this.height - dest[1] - 3);
-
-            if (!makeTowerWing(list, rand, 1, dest[0], dest[1], dest[2], 5, childHeight, i)) {
-                makeTowerWing(list, rand, 1, dest[0], dest[1], dest[2], 3, childHeight, i);
-            }
-        }
+        addSmallTowerWings(list, rand);
 
         // outbuildings
-        for (int i = 0; i < 4; i++) {
-            int[] dest = getOutbuildingOpening(rand, i);
-
-            int childHeight = 11 + rand.nextInt(10);
-            int childSize = 7 + (rand.nextInt(2) * 2);
-
-            makeTowerOutbuilding(list, rand, 1, dest[0], dest[1], dest[2], childSize, childHeight, i);
-        }
+        addOutbuildings(list, rand);
 
         // TINY TOWERS!
-        for (int i = 0; i < 16; i++) {
-            int[] dest = getValidOpening(rand, i % 4);
-            int childHeight = 6 + rand.nextInt(5);
-            if (rand.nextInt(3) == 0
-                    || !makeTowerWing(list, rand, 1, dest[0], dest[1], dest[2], 5, childHeight, i % 4)) {
-                makeTowerWing(list, rand, 1, dest[0], dest[1], dest[2], 3, childHeight, i % 4);
+        addTinyTowerWings(list, rand);
+    }
+
+    private void addLargeTowerWings(List<StructureComponent> list, Random rand, int heightAdjustment) {
+        for (int direction = 0; direction < 4; direction++) {
+            int[] opening = getValidOpening(rand, direction);
+            if (opening[1] < height / 2) {
+                opening[1] += heightAdjustment;
+            }
+
+            int childHeight = Math.min(21 + rand.nextInt(10), height - opening[1] - 3);
+            if (!makeTowerWing(list, rand, 1, opening[0], opening[1], opening[2], 9, childHeight, direction)) {
+                makeTowerWing(list, rand, 1, opening[0], opening[1], opening[2], 7, childHeight, direction);
             }
         }
+    }
 
+    private void addSmallTowerWings(List<StructureComponent> list, Random rand) {
+        for (int direction = 0; direction < 4; direction++) {
+            int[] opening = getValidOpening(rand, direction);
+            int childHeight = Math.min(7 + rand.nextInt(6), height - opening[1] - 3);
+            if (!makeTowerWing(list, rand, 1, opening[0], opening[1], opening[2], 5, childHeight, direction)) {
+                makeTowerWing(list, rand, 1, opening[0], opening[1], opening[2], 3, childHeight, direction);
+            }
+        }
+    }
+
+    private void addOutbuildings(List<StructureComponent> list, Random rand) {
+        for (int direction = 0; direction < 4; direction++) {
+            int[] opening = getOutbuildingOpening(rand, direction);
+            int childHeight = 11 + rand.nextInt(10);
+            int childSize = 7 + rand.nextInt(2) * 2;
+            makeTowerOutbuilding(list, rand, 1, opening[0], opening[1], opening[2], childSize, childHeight, direction);
+        }
+    }
+
+    private void addTinyTowerWings(List<StructureComponent> list, Random rand) {
+        for (int i = 0; i < 16; i++) {
+            int direction = i % 4;
+            int[] opening = getValidOpening(rand, direction);
+            int childHeight = 6 + rand.nextInt(5);
+            if (rand.nextInt(3) == 0
+                    || !makeTowerWing(list, rand, 1, opening[0], opening[1], opening[2], 5, childHeight, direction)) {
+                makeTowerWing(list, rand, 1, opening[0], opening[1], opening[2], 3, childHeight, direction);
+            }
+        }
     }
 
     /**
      * Gets a random position in the specified direction that we can make an outbuilding at
      */
     public int[] getOutbuildingOpening(Random rand, int rotation) {
-
-        int rx = 0;
-        int ry = 1;
-        int rz = 0;
-
         switch (rotation) {
             case 0 -> {
                 // for directions 0 or 2, the wall lies along the z axis
-                rx = size - 1;
-                rz = 6 + rand.nextInt(8);
+                return new int[] { size - 1, 1, 6 + rand.nextInt(8) };
             }
             case 1 -> {
                 // for directions 1 or 3, the wall lies along the x axis
-                rx = 1 + rand.nextInt(11);
-                rz = size - 1;
+                return new int[] { 1 + rand.nextInt(11), 1, size - 1 };
             }
             case 2 -> {
-                rx = 0;
-                rz = 1 + rand.nextInt(8);
+                return new int[] { 0, 1, 1 + rand.nextInt(8) };
             }
             case 3 -> {
-                rx = 3 + rand.nextInt(11);
-                rz = 0;
+                return new int[] { 3 + rand.nextInt(11), 1, 0 };
+            }
+            default -> {
+                return new int[] { 0, 1, 0 };
             }
         }
-
-        return new int[] { rx, ry, rz };
     }
 
     public boolean makeTowerOutbuilding(List<StructureComponent> list, Random rand, int index, int x, int y, int z,
@@ -147,9 +137,8 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
             outbuilding.buildComponent(this, list, rand);
             addOpening(x, y, z, rotation);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -174,16 +163,15 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         // stone to ground
         for (int x = 0; x < this.size; x++) {
             for (int z = 0; z < this.size; z++) {
-                this.func_151554_b(world, Blocks.cobblestone, 0, x, -1, z, sbb);
+                func_151554_b(world, Blocks.cobblestone, 0, x, -1, z, sbb);
             }
-
         }
 
         // nullify sky light
         nullifySkyLightForBoundingBox(world);
 
         // fix highestOpening parameter so we don't get a ginormous lich room
-        if ((height - highestOpening) > 15) {
+        if (height - highestOpening > 15) {
             highestOpening = height - 15;
         }
 
@@ -223,59 +211,60 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
     }
 
     protected void makeStairCrossing(World world, Random rand, int flight, StructureBoundingBox sbb) {
-        int temp = this.getCoordBaseMode();
+        int originalMode = getCoordBaseMode();
         if (flight % 2 == 0) {
             this.setCoordBaseMode((getCoordBaseMode() + 1) % 4);
         }
+        try {
+            int floorMeta = rand.nextInt(2) == 0 ? 0 : 2;
+            int floorLevel = flight * 5;
 
-        int floorMeta = rand.nextInt(2) == 0 ? 0 : 2;
-        int floorLevel = 0 + flight * 5;
-
-        // place platform
-        for (int dx = 6; dx <= 8; dx++) {
-            for (int dz = 4; dz <= 10; dz++) {
-                placeBlockAtCurrentPosition(world, Blocks.double_stone_slab, floorMeta, dx, floorLevel, dz, sbb);
+            // place platform
+            for (int dx = 6; dx <= 8; dx++) {
+                for (int dz = 4; dz <= 10; dz++) {
+                    placeBlockAtCurrentPosition(world, Blocks.double_stone_slab, floorMeta, dx, floorLevel, dz, sbb);
+                }
             }
+
+            // put fences
+            floorLevel++;
+            int dx = 6;
+            for (int dz = 3; dz <= 11; dz++) {
+                placeBlockAtCurrentPosition(world, Blocks.fence, 0, dx, floorLevel, dz, sbb);
+            }
+            dx++;
+            for (int dz = 3; dz <= 11; dz++) {
+                placeBlockAtCurrentPosition(world, Blocks.air, 0, dx, floorLevel, dz, sbb);
+            }
+            dx++;
+            for (int dz = 3; dz <= 11; dz++) {
+                placeBlockAtCurrentPosition(world, Blocks.fence, 0, dx, floorLevel, dz, sbb);
+            }
+
+            // we need 2 extra blocks and 2 extra fences to look good
+            placeBlockAtCurrentPosition(world, Blocks.double_stone_slab, floorMeta, 6, floorLevel - 1, 11, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.double_stone_slab, floorMeta, 8, floorLevel - 1, 3, sbb);
+
+            placeBlockAtCurrentPosition(world, Blocks.fence, 0, 5, floorLevel, 11, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.fence, 0, 9, floorLevel, 3, sbb);
+
+            // place spawner in the middle
+            String mobID = switch (rand.nextInt(4)) {
+                case 0, 1 -> "Skeleton";
+                case 2 -> "Zombie";
+                case 3 -> TFCreatures.getSpawnerNameFor("Swarm Spider");
+                default -> "Skeleton";
+            };
+            placeSpawnerAtCurrentPosition(world, rand, 7, floorLevel + 2, 7, mobID, sbb);
+
+            // make a fence arch support for the spawner
+            placeBlockAtCurrentPosition(world, Blocks.fence, 0, 6, floorLevel + 1, 7, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.fence, 0, 8, floorLevel + 1, 7, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.fence, 0, 6, floorLevel + 2, 7, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.fence, 0, 8, floorLevel + 2, 7, sbb);
+        } finally {
+            setCoordBaseMode(originalMode);
         }
-
-        // put fences
-        floorLevel++;
-        int dx = 6;
-        for (int dz = 3; dz <= 11; dz++) {
-            placeBlockAtCurrentPosition(world, Blocks.fence, 0, dx, floorLevel, dz, sbb);
-        }
-        dx++;
-        for (int dz = 3; dz <= 11; dz++) {
-            placeBlockAtCurrentPosition(world, Blocks.air, 0, dx, floorLevel, dz, sbb);
-        }
-        dx++;
-        for (int dz = 3; dz <= 11; dz++) {
-            placeBlockAtCurrentPosition(world, Blocks.fence, 0, dx, floorLevel, dz, sbb);
-        }
-
-        // we need 2 extra blocks and 2 extra fences to look good
-        placeBlockAtCurrentPosition(world, Blocks.double_stone_slab, floorMeta, 6, floorLevel - 1, 11, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.double_stone_slab, floorMeta, 8, floorLevel - 1, 3, sbb);
-
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, 5, floorLevel, 11, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, 9, floorLevel, 3, sbb);
-
-        // place spawner in the middle
-        String mobID = switch (rand.nextInt(4)) {
-            case 0, 1 -> "Skeleton";
-            case 2 -> "Zombie";
-            case 3 -> TFCreatures.getSpawnerNameFor("Swarm Spider");
-            default -> "Skeleton";
-        };
-        placeSpawnerAtCurrentPosition(world, rand, 7, floorLevel + 2, 7, mobID, sbb);
-
-        // make a fence arch support for the spawner
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, 6, floorLevel + 1, 7, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, 8, floorLevel + 1, 7, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, 6, floorLevel + 2, 7, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, 8, floorLevel + 2, 7, sbb);
-
-        this.setCoordBaseMode(temp);
     }
 
     /**
@@ -304,75 +293,74 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         int howMany = 10;
 
         // do wall 0.
-        generatePaintingsOnWall(world, rand, howMany, 0, 0, 48, sbb);
-        generatePaintingsOnWall(world, rand, howMany, 0, 0, 32, sbb);
-        generatePaintingsOnWall(world, rand, howMany, 0, 0, 0, sbb);
+        generateWallPaintings(world, rand, howMany, 0, 0, sbb);
         // do wall 1.
-        generatePaintingsOnWall(world, rand, howMany, 0, 1, 48, sbb);
-        generatePaintingsOnWall(world, rand, howMany, 0, 1, 32, sbb);
-        generatePaintingsOnWall(world, rand, howMany, 0, 1, 0, sbb);
+        generateWallPaintings(world, rand, howMany, 0, 1, sbb);
         // do wall 2.
-        generatePaintingsOnWall(world, rand, howMany, 0, 2, 48, sbb);
-        generatePaintingsOnWall(world, rand, howMany, 0, 2, 32, sbb);
-        generatePaintingsOnWall(world, rand, howMany, 0, 2, 0, sbb);
+        generateWallPaintings(world, rand, howMany, 0, 2, sbb);
         // do wall 3.
-        generatePaintingsOnWall(world, rand, howMany, 0, 3, 48, sbb);
-        generatePaintingsOnWall(world, rand, howMany, 0, 3, 32, sbb);
-        generatePaintingsOnWall(world, rand, howMany, 0, 3, 0, sbb);
+        generateWallPaintings(world, rand, howMany, 0, 3, sbb);
+    }
+
+    private void generateWallPaintings(World world, Random rand, int count, int floorLevel, int wall,
+            StructureBoundingBox sbb) {
+        generatePaintingsOnWall(world, rand, count, floorLevel, wall, 48, sbb);
+        generatePaintingsOnWall(world, rand, count, floorLevel, wall, 32, sbb);
+        generatePaintingsOnWall(world, rand, count, floorLevel, wall, 0, sbb);
     }
 
     /**
      * Make the floor for the liches room
      */
     protected void makeLichFloor(World world, int floorLevel, int rotation, StructureBoundingBox sbb) {
-        int temp = this.getCoordBaseMode();
+        int originalMode = getCoordBaseMode();
         this.setCoordBaseMode((this.getCoordBaseMode() + rotation) % 4);
-
-        // place a platform there
-        for (int fx = 1; fx < 14; fx++) {
-            for (int fz = 1; fz < 14; fz++) {
-                if ((fx == 1 || fx == 2) && (fz >= 6 && fz <= 12)) {
-                    // blank, leave room for stairs
-                    if (fz == 6) {
-                        // upside down plank slabs
-                        placeBlockAtCurrentPosition(world, Blocks.wooden_slab, 10, fx, floorLevel, fz, sbb);
-                    }
-                } else if ((fx == 12 || fx == 13) && (fz >= 3 && fz <= 8)) {
-                    // blank, leave room for stairs
-                    if (fz == 8) {
-                        // upside down plank slabs
-                        placeBlockAtCurrentPosition(world, Blocks.wooden_slab, 10, fx, floorLevel, fz, sbb);
-                    }
-                } else if ((fx >= 4 && fx <= 10) && (fz >= 4 && fz <= 10)) {
-                    // glass floor in center, aside from 2 corners
-                    if ((fx == 4 && fz == 4) || (fx == 10 && fz == 10)) {
-                        placeBlockAtCurrentPosition(world, Blocks.planks, 2, fx, floorLevel, fz, sbb);
-                    } else {
+        try {
+            // place a platform there
+            for (int fx = 1; fx < 14; fx++) {
+                for (int fz = 1; fz < 14; fz++) {
+                    if ((fx == 1 || fx == 2) && (fz >= 6 && fz <= 12)) {
+                        // blank, leave room for stairs
+                        if (fz == 6) {
+                            // upside down plank slabs
+                            placeBlockAtCurrentPosition(world, Blocks.wooden_slab, 10, fx, floorLevel, fz, sbb);
+                        }
+                    } else if ((fx == 12 || fx == 13) && (fz >= 3 && fz <= 8)) {
+                        // blank, leave room for stairs
+                        if (fz == 8) {
+                            // upside down plank slabs
+                            placeBlockAtCurrentPosition(world, Blocks.wooden_slab, 10, fx, floorLevel, fz, sbb);
+                        }
+                    } else if ((fx >= 4 && fx <= 10) && (fz >= 4 && fz <= 10)) {
+                        // glass floor in center, aside from 2 corners
+                        if ((fx == 4 && fz == 4) || (fx == 10 && fz == 10)) {
+                            placeBlockAtCurrentPosition(world, Blocks.planks, 2, fx, floorLevel, fz, sbb);
+                        } else {
+                            placeBlockAtCurrentPosition(world, Blocks.glass, 0, fx, floorLevel, fz, sbb);
+                        }
+                    } else if ((fx == 2 || fx == 3) && (fz == 2 || fz == 3)) {
+                        // glass blocks in the corners
                         placeBlockAtCurrentPosition(world, Blocks.glass, 0, fx, floorLevel, fz, sbb);
+                    } else if ((fx == 11 || fx == 12) && (fz == 11 || fz == 12)) {
+                        // glass blocks in the corners
+                        placeBlockAtCurrentPosition(world, Blocks.glass, 0, fx, floorLevel, fz, sbb);
+                    } else {
+                        placeBlockAtCurrentPosition(world, Blocks.planks, 2, fx, floorLevel, fz, sbb);
                     }
-                } else if ((fx == 2 || fx == 3) && (fz == 2 || fz == 3)) {
-                    // glass blocks in the corners
-                    placeBlockAtCurrentPosition(world, Blocks.glass, 0, fx, floorLevel, fz, sbb);
-                } else if ((fx == 11 || fx == 12) && (fz == 11 || fz == 12)) {
-                    // glass blocks in the corners
-                    placeBlockAtCurrentPosition(world, Blocks.glass, 0, fx, floorLevel, fz, sbb);
-                } else {
-                    placeBlockAtCurrentPosition(world, Blocks.planks, 2, fx, floorLevel, fz, sbb);
                 }
             }
+
+            // eliminate the railings
+            placeBlockAtCurrentPosition(world, Blocks.air, 0, 3, floorLevel + 1, 11, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.air, 0, 3, floorLevel + 1, 10, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.air, 0, 3, floorLevel + 2, 11, sbb);
+
+            placeBlockAtCurrentPosition(world, Blocks.air, 0, 11, floorLevel + 1, 3, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.air, 0, 11, floorLevel + 1, 4, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.air, 0, 11, floorLevel + 2, 3, sbb);
+        } finally {
+            setCoordBaseMode(originalMode);
         }
-
-        // eliminate the railings
-        placeBlockAtCurrentPosition(world, Blocks.air, 0, 3, floorLevel + 1, 11, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.air, 0, 3, floorLevel + 1, 10, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.air, 0, 3, floorLevel + 2, 11, sbb);
-
-        placeBlockAtCurrentPosition(world, Blocks.air, 0, 11, floorLevel + 1, 3, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.air, 0, 11, floorLevel + 1, 4, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.air, 0, 11, floorLevel + 2, 3, sbb);
-
-        this.setCoordBaseMode(temp);
-
     }
 
     /**
@@ -383,41 +371,41 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         int cy = floorLevel + 4;
         int cz = size / 2;
 
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 1, cy, cz + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 2, cy, cz + 0, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 1, cy, cz, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 2, cy, cz, sbb);
         placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 1, cy, cz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 0, cy, cz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 0, cy, cz + 2, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx, cy, cz + 1, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx, cy, cz + 2, sbb);
         placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx - 1, cy, cz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx - 1, cy, cz + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx - 2, cy, cz + 0, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx - 1, cy, cz, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx - 2, cy, cz, sbb);
         placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx - 1, cy, cz - 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 0, cy, cz - 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 0, cy, cz - 2, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx, cy, cz - 1, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx, cy, cz - 2, sbb);
         placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 1, cy, cz - 1, sbb);
 
         cy++;
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 1, cy, cz + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 2, cy, cz + 0, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 1, cy, cz, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 2, cy, cz, sbb);
         placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 1, cy, cz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 0, cy, cz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 0, cy, cz + 2, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx, cy, cz + 1, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx, cy, cz + 2, sbb);
         placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx - 1, cy, cz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx - 1, cy, cz + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx - 2, cy, cz + 0, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx - 1, cy, cz, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx - 2, cy, cz, sbb);
         placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx - 1, cy, cz - 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 0, cy, cz - 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 0, cy, cz - 2, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx, cy, cz - 1, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx, cy, cz - 2, sbb);
         placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 1, cy, cz - 1, sbb);
 
         cy++;
-        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 1, cy, cz + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 0, cy, cz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx - 1, cy, cz + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 0, cy, cz - 1, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx + 1, cy, cz, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx, cy, cz + 1, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx - 1, cy, cz, sbb);
+        placeBlockAtCurrentPosition(world, Blocks.torch, 0, cx, cy, cz - 1, sbb);
 
         for (int y = floorLevel + 5; y < height - 1; y++) {
-            placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx + 0, y, cz + 0, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.fence, 0, cx, y, cz, sbb);
         }
     }
 
@@ -428,32 +416,22 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         int howMany = 100;
 
         // do wall 0.
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 0, 48, sbb);
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 0, 32, sbb);
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 0, 0, sbb);
+        generateWallPaintings(world, rand, howMany, floorLevel, 0, sbb);
         // do wall 1.
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 1, 48, sbb);
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 1, 32, sbb);
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 1, 0, sbb);
+        generateWallPaintings(world, rand, howMany, floorLevel, 1, sbb);
         // do wall 2.
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 2, 48, sbb);
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 2, 32, sbb);
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 2, 0, sbb);
+        generateWallPaintings(world, rand, howMany, floorLevel, 2, sbb);
         // do wall 3.
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 3, 48, sbb);
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 3, 32, sbb);
-        generatePaintingsOnWall(world, rand, howMany, floorLevel, 3, 0, sbb);
-
+        generateWallPaintings(world, rand, howMany, floorLevel, 3, sbb);
     }
 
     /**
      * Put torches on each wall
      */
     protected void decorateTorches(World world, Random rand, int floorLevel, StructureBoundingBox sbb) {
-        generateTorchesOnWall(world, rand, floorLevel, 0, sbb);
-        generateTorchesOnWall(world, rand, floorLevel, 1, sbb);
-        generateTorchesOnWall(world, rand, floorLevel, 2, sbb);
-        generateTorchesOnWall(world, rand, floorLevel, 3, sbb);
+        for (int direction = 0; direction < 4; direction++) {
+            generateTorchesOnWall(world, rand, floorLevel, direction, sbb);
+        }
     }
 
     /**
@@ -465,6 +443,9 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
         for (int i = 0; i < 5; i++) {
             // get some random coordinates on the wall in the chunk
             ChunkCoordinates wCoords = getRandomWallSpot(rand, floorLevel, direction, sbb);
+            if (wCoords == null) {
+                continue;
+            }
 
             // offset to see where the fence should be
             ChunkCoordinates tCoords = new ChunkCoordinates(wCoords);
@@ -483,7 +464,10 @@ public class ComponentTFTowerMain extends ComponentTFTowerWing {
                     tCoords.posX + 1.0,
                     tCoords.posY + 2.0,
                     tCoords.posZ + 1.0);
-            if (world.getBlock(tCoords.posX, tCoords.posY, tCoords.posZ) == Blocks.air
+            // never place lighting into a neighbouring chunk during structure gen
+            if (sbb.isVecInside(tCoords.posX, tCoords.posY, tCoords.posZ)
+                    && sbb.isVecInside(tCoords.posX, tCoords.posY + 1, tCoords.posZ)
+                    && world.getBlock(tCoords.posX, tCoords.posY, tCoords.posZ) == Blocks.air
                     && world.getBlock(tCoords.posX, tCoords.posY + 1, tCoords.posZ) == Blocks.air
                     && world.getEntitiesWithinAABBExcludingEntity(null, torchBox).size() == 0) {
                 // if not, place a torch
