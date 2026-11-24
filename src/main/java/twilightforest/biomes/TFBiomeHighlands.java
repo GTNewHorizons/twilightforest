@@ -29,121 +29,142 @@ import twilightforest.world.TFGenTrollRoots;
 
 public class TFBiomeHighlands extends TFBiomeBase {
 
-    private static final WorldGenTaiga1 taigaGen1 = new WorldGenTaiga1();
-    private static final WorldGenTaiga2 taigaGen2 = new WorldGenTaiga2(false);
-    private static final WorldGenMegaPineTree megaPineGen1 = new WorldGenMegaPineTree(false, false);
-    private static final WorldGenMegaPineTree megaPineGen2 = new WorldGenMegaPineTree(false, true);
-    private static final WorldGenBlockBlob genBoulder = new WorldGenBlockBlob(Blocks.mossy_cobblestone, 0);
-    private static final TFGenTrollRoots genTrollRoots = new TFGenTrollRoots();
-    private static final WorldGenTallGrass worldGenMushgloom = new WorldGenTallGrass(
+    private static final int CHUNK_SIZE = 16;
+    private static final int DECORATION_OFFSET = 8;
+    private static final int FERN_ATTEMPTS = 7;
+    private static final int TROLL_ROOT_ATTEMPTS = 24;
+    private static final int TROLL_ROOT_HEIGHT = 64;
+    private static final int MUSHGLOOM_HEIGHT = 64;
+    private static final int TALL_FERN_METADATA = 3;
+
+    private static final WorldGenTaiga1 TAIGA_GEN_1 = new WorldGenTaiga1();
+    private static final WorldGenTaiga2 TAIGA_GEN_2 = new WorldGenTaiga2(false);
+    private static final WorldGenMegaPineTree MEGA_PINE_GEN_1 = new WorldGenMegaPineTree(false, false);
+    private static final WorldGenMegaPineTree MEGA_PINE_GEN_2 = new WorldGenMegaPineTree(false, true);
+    private static final WorldGenBlockBlob BOULDER_GEN = new WorldGenBlockBlob(Blocks.mossy_cobblestone, 0);
+    private static final TFGenTrollRoots TROLL_ROOT_GEN = new TFGenTrollRoots();
+    private static final WorldGenTallGrass MUSHGLOOM_GEN = new WorldGenTallGrass(
             TFBlocks.plant,
             BlockTFPlant.META_MUSHGLOOM);
 
     public TFBiomeHighlands(int i) {
         super(i);
 
-        this.temperature = 0.4F;
-        this.rainfall = 0.7F;
+        temperature = 0.4F;
+        rainfall = 0.7F;
 
-        this.getTFBiomeDecorator().canopyPerChunk = -999;
-
-        this.theBiomeDecorator.grassPerChunk = 7;
-        this.theBiomeDecorator.deadBushPerChunk = 1;
-        this.theBiomeDecorator.generateLakes = false; // actually underground water sources
-
-        // this.spawnableMonsterList.add(new SpawnListEntry(EntityTFTroll.class, 10, 4, 4));
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        // a negative canopy count disables canopy trees without changing the decorators rng calls
+        decorator.canopyPerChunk = -999;
+        decorator.setGrassPerChunk(7);
+        decorator.setDeadBushPerChunk(1);
+        decorator.generateLakes = false; // actually underground water sources
 
         undergroundMonsterList.clear();
         undergroundMonsterList.add(new SpawnListEntry(EntitySkeleton.class, 10, 4, 4));
         undergroundMonsterList.add(new SpawnListEntry(EntityCreeper.class, 1, 4, 4));
         undergroundMonsterList.add(new SpawnListEntry(EntitySlime.class, 10, 4, 4));
-
         undergroundMonsterList.add(new SpawnListEntry(EntityTFTroll.class, 10, 4, 4));
     }
 
-    // Birches and large trees only
+    // spruce, mega pine and birch trees
+    @Override
     public WorldGenAbstractTree func_150567_a(Random random) {
         if (random.nextInt(4) == 0) {
-            return taigaGen1;
-        } else if (random.nextInt(10) == 0) {
-            return taigaGen2;
-        } else if (random.nextInt(3) == 0) {
-            return megaPineGen1;
-        } else if (random.nextInt(13) == 0) {
-            return megaPineGen2;
-        } else {
-            return birchGen;
+            return TAIGA_GEN_1;
         }
+        if (random.nextInt(10) == 0) {
+            return TAIGA_GEN_2;
+        }
+        if (random.nextInt(3) == 0) {
+            return MEGA_PINE_GEN_1;
+        }
+        if (random.nextInt(13) == 0) {
+            return MEGA_PINE_GEN_2;
+        }
+        return birchGen;
     }
 
     // Gets a WorldGen appropriate for this biome.
+    @Override
     public WorldGenerator getRandomWorldGenForGrass(Random random) {
-        return random.nextInt(5) > 0 ? new WorldGenTallGrass(Blocks.tallgrass, 2)
-                : new WorldGenTallGrass(Blocks.tallgrass, 1);
+        return new WorldGenTallGrass(Blocks.tallgrass, random.nextInt(5) > 0 ? 2 : 1);
     }
 
+    @Override
     public void genTerrainBlocks(World world, Random rand, Block[] blockStorage, byte[] metaStorage, int x, int z,
             double noiseVal) {
-        this.topBlock = Blocks.grass;
-        this.field_150604_aj = 0;
-        this.fillerBlock = Blocks.dirt;
+        topBlock = Blocks.grass;
+        field_150604_aj = 0;
+        fillerBlock = Blocks.dirt;
+
         if (noiseVal > 1.75D) {
-            this.topBlock = Blocks.dirt;
-            this.field_150604_aj = 1;
+            topBlock = Blocks.dirt;
+            field_150604_aj = 1;
         } else if (noiseVal > -0.95D) {
-            this.topBlock = Blocks.dirt;
-            this.field_150604_aj = 2;
+            topBlock = Blocks.dirt;
+            field_150604_aj = 2;
         }
-        this.genTwilightBiomeTerrain(world, rand, blockStorage, metaStorage, x, z, noiseVal);
+
+        genTwilightBiomeTerrain(world, rand, blockStorage, metaStorage, x, z, noiseVal);
     }
 
     /**
      * Add extra decorations
      */
+    @Override
     public void decorate(World world, Random random, int mapX, int mapZ) {
-        int dx, dy, dz;
-
-        // boulders
-        int maxBoulders = random.nextInt(2);
-        for (int i = 0; i < maxBoulders; ++i) {
-            dx = mapX + random.nextInt(16) + 8;
-            dz = mapZ + random.nextInt(16) + 8;
-            dy = world.getHeightValue(dx, dz);
-            genBoulder.generate(world, random, dx, dy, dz);
-        }
-
-        // giant ferns
-        genTallFlowers.func_150548_a(3);
-        for (int i = 0; i < 7; ++i) {
-            dx = mapX + random.nextInt(16) + 8;
-            dz = mapZ + random.nextInt(16) + 8;
-            dy = random.nextInt(world.getHeightValue(dx, dz) + 32);
-            genTallFlowers.generate(world, random, dx, dy, dz);
-        }
-
-        // mushglooms
-        for (int i = 0; i < 1; ++i) {
-            int rx = mapX + random.nextInt(16) + 8;
-            int rz = mapZ + random.nextInt(16) + 8;
-            int ry = random.nextInt(64);
-            // mushglooms
-            worldGenMushgloom.generate(world, random, rx, ry, rz);
-        }
-
-        // generate roots
-        for (int i = 0; i < 24; ++i) {
-            int rx = mapX + random.nextInt(16) + 8;
-            byte ry = 64;
-            int rz = mapZ + random.nextInt(16) + 8;
-            genTrollRoots.generate(world, random, rx, ry, rz);
-        }
+        generateBoulders(world, random, mapX, mapZ);
+        generateTallFerns(world, random, mapX, mapZ);
+        generateMushgloom(world, random, mapX, mapZ);
+        generateTrollRoots(world, random, mapX, mapZ);
 
         super.decorate(world, random, mapX, mapZ);
+    }
+
+    private static void generateBoulders(World world, Random random, int mapX, int mapZ) {
+        // boulders
+        int maxBoulders = random.nextInt(2);
+        for (int i = 0; i < maxBoulders; i++) {
+            int x = mapX + random.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = mapZ + random.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int y = world.getHeightValue(x, z);
+            BOULDER_GEN.generate(world, random, x, y, z);
+        }
+    }
+
+    private void generateTallFerns(World world, Random random, int mapX, int mapZ) {
+        // giant ferns
+        genTallFlowers.func_150548_a(TALL_FERN_METADATA);
+        for (int i = 0; i < FERN_ATTEMPTS; i++) {
+            int x = mapX + random.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = mapZ + random.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int y = random.nextInt(world.getHeightValue(x, z) + 32);
+            genTallFlowers.generate(world, random, x, y, z);
+        }
+    }
+
+    private static void generateMushgloom(World world, Random random, int mapX, int mapZ) {
+        // mushglooms
+        int x = mapX + random.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+        int z = mapZ + random.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+        int y = random.nextInt(MUSHGLOOM_HEIGHT);
+        MUSHGLOOM_GEN.generate(world, random, x, y, z);
+    }
+
+    private static void generateTrollRoots(World world, Random random, int mapX, int mapZ) {
+        // generate roots
+        for (int i = 0; i < TROLL_ROOT_ATTEMPTS; i++) {
+            int x = mapX + random.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = mapZ + random.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            TROLL_ROOT_GEN.generate(world, random, x, TROLL_ROOT_HEIGHT, z);
+        }
     }
 
     /**
      * Flowers
      */
+    @Override
     public String func_150572_a(Random rand, int x, int y, int z) {
         return rand.nextBoolean() ? BlockFlower.field_149858_b[0] : BlockFlower.field_149859_a[8];
     }
@@ -151,6 +172,7 @@ public class TFBiomeHighlands extends TFBiomeBase {
     /**
      * If there is a required achievement to be here, return it, otherwise return null
      */
+    @Override
     protected Achievement getRequiredAchievement() {
         return TFAchievementPage.twilightProgressGlacier;
     }
@@ -158,11 +180,11 @@ public class TFBiomeHighlands extends TFBiomeBase {
     /**
      * Do something bad to a player in the wrong biome.
      */
+    @Override
     public void enforceProgession(EntityPlayer player, World world) {
         if (!world.isRemote && world.getWorldTime() % 5 == 0) {
             player.attackEntityFrom(DamageSource.magic, 0.5F);
             world.playSoundAtEntity(player, "random.fizz", 1.0F, 1.0F);
-            // player.playSound("random.fizz", 1.0F, 1.0F);
 
             // hint monster?
             if (world.rand.nextInt(4) == 0) {
@@ -170,5 +192,4 @@ public class TFBiomeHighlands extends TFBiomeBase {
             }
         }
     }
-
 }

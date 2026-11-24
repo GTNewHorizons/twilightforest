@@ -32,43 +32,47 @@ import twilightforest.entity.EntityTFSkeletonDruid;
 public class TFBiomeDarkForest extends TFBiomeBase {
 
     private static final int MONSTER_SPAWN_RATE = 20;
+    private static final int PROGRESSION_INTERVAL = 60;
+    private static final int DARK_FOREST_COLOR_TINT = 0x1E0E4E;
+
     Random monsterRNG;
     ArrayList<SpawnListEntry> emptyList = new ArrayList<>();
 
-    public TFBiomeDarkForest(int i) {
-        super(i);
+    public TFBiomeDarkForest(int biomeId) {
+        super(biomeId);
 
-        this.temperature = 0.7F;
-        this.rainfall = 0.8F;
+        temperature = 0.7F;
+        rainfall = 0.8F;
 
-        getTFBiomeDecorator().canopyPerChunk = 5.5F;
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        decorator.canopyPerChunk = 5.5F;
+        decorator.setTreesPerChunk(10);
+        decorator.setGrassPerChunk(-99);
+        decorator.setFlowersPerChunk(-99);
+        decorator.setMushroomsPerChunk(2);
+        decorator.setDeadBushPerChunk(10);
 
-        getTFBiomeDecorator().setTreesPerChunk(10);
-        getTFBiomeDecorator().setGrassPerChunk(-99);
-        getTFBiomeDecorator().setFlowersPerChunk(-99);
-        getTFBiomeDecorator().setMushroomsPerChunk(2);
-        getTFBiomeDecorator().setDeadBushPerChunk(10);
+        rootHeight = 0.05F;
+        heightVariation = 0.05F;
 
-        this.rootHeight = 0.05F;
-        this.heightVariation = 0.05F;
+        monsterRNG = new Random();
 
-        this.monsterRNG = new Random();
+        spawnableMonsterList.add(new SpawnListEntry(EntityEnderman.class, 1, 1, 4));
+        spawnableMonsterList.add(new SpawnListEntry(EntityZombie.class, 5, 1, 4));
+        spawnableMonsterList.add(new SpawnListEntry(EntitySkeleton.class, 5, 1, 4));
+        spawnableMonsterList.add(new SpawnListEntry(EntityTFMistWolf.class, 10, 1, 4));
+        spawnableMonsterList.add(new SpawnListEntry(EntityTFSkeletonDruid.class, 10, 1, 4));
+        spawnableMonsterList.add(new SpawnListEntry(EntityTFKingSpider.class, 10, 1, 4));
+        spawnableMonsterList.add(new SpawnListEntry(EntityTFKobold.class, 10, 4, 8));
+        spawnableMonsterList.add(new SpawnListEntry(EntityWitch.class, 1, 1, 1));
 
-        this.spawnableMonsterList.add(new SpawnListEntry(EntityEnderman.class, 1, 1, 4));
-        this.spawnableMonsterList.add(new SpawnListEntry(EntityZombie.class, 5, 1, 4));
-        this.spawnableMonsterList.add(new SpawnListEntry(EntitySkeleton.class, 5, 1, 4));
-        this.spawnableMonsterList.add(new SpawnListEntry(EntityTFMistWolf.class, 10, 1, 4));
-        this.spawnableMonsterList.add(new SpawnListEntry(EntityTFSkeletonDruid.class, 10, 1, 4));
-        this.spawnableMonsterList.add(new SpawnListEntry(EntityTFKingSpider.class, 10, 1, 4));
-        this.spawnableMonsterList.add(new SpawnListEntry(EntityTFKobold.class, 10, 4, 8));
-        this.spawnableMonsterList.add(new SpawnListEntry(EntityWitch.class, 1, 1, 1));
-
-        this.theBiomeDecorator.generateLakes = false;
+        decorator.generateLakes = false;
     }
 
     /**
      * We have our own decorator since we have strange generation
      */
+    @Override
     public BiomeDecorator createBiomeDecorator() {
         return new TFDarkForestBiomeDecorator();
     }
@@ -76,15 +80,15 @@ public class TFBiomeDarkForest extends TFBiomeBase {
     /**
      * Occasional shrub, no big trees
      */
+    @Override
     public WorldGenAbstractTree func_150567_a(Random random) {
         if (random.nextInt(5) == 0) {
             return new WorldGenShrub(3, 0);
         }
         if (random.nextInt(8) == 0) {
-            return this.birchGen;
-        } else {
-            return worldGeneratorTrees;
+            return birchGen;
         }
+        return worldGeneratorTrees;
     }
 
     /**
@@ -92,11 +96,9 @@ public class TFBiomeDarkForest extends TFBiomeBase {
      */
     @Override
     public int getBiomeGrassColor(int x, int y, int z) {
-        double var1 = MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
-        double var3 = MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
-        return ((ColorizerGrass.getGrassColor(var1, var3) & 0xFEFEFE) + 0x1E0E4E) / 2;
-
-        // return 0x554114;
+        double temperature = MathHelper.clamp_float(getFloatTemperature(x, y, z), 0.0F, 1.0F);
+        double rainfall = MathHelper.clamp_float(getFloatRainfall(), 0.0F, 1.0F);
+        return tintColor(ColorizerGrass.getGrassColor(temperature, rainfall));
     }
 
     /**
@@ -104,25 +106,34 @@ public class TFBiomeDarkForest extends TFBiomeBase {
      */
     @Override
     public int getBiomeFoliageColor(int x, int y, int z) {
-        double var1 = MathHelper.clamp_float(this.getFloatTemperature(x, y, z), 0.0F, 1.0F);
-        double var3 = MathHelper.clamp_float(this.getFloatRainfall(), 0.0F, 1.0F);
-        return ((ColorizerFoliage.getFoliageColor(var1, var3) & 0xFEFEFE) + 0x1E0E4E) / 2;
+        double temperature = MathHelper.clamp_float(getFloatTemperature(x, y, z), 0.0F, 1.0F);
+        double rainfall = MathHelper.clamp_float(getFloatRainfall(), 0.0F, 1.0F);
+        return tintColor(ColorizerFoliage.getFoliageColor(temperature, rainfall));
+    }
+
+    private static int tintColor(int color) {
+        return ((color & 0xFEFEFE) + DARK_FOREST_COLOR_TINT) / 2;
     }
 
     /**
      * Returns the correspondent list of the EnumCreatureType informed.
      */
     @Override
-    public List<BiomeGenBase.SpawnListEntry> getSpawnableList(EnumCreatureType par1EnumCreatureType) {
+    public List<BiomeGenBase.SpawnListEntry> getSpawnableList(EnumCreatureType creatureType) {
         // if is is monster, then only give it the real list 1/MONSTER_SPAWN_RATE of the time
-        if (par1EnumCreatureType == EnumCreatureType.monster) {
-            return monsterRNG.nextInt(MONSTER_SPAWN_RATE) == 0 ? this.spawnableMonsterList : emptyList;
-        } else {
-            return par1EnumCreatureType == EnumCreatureType.creature ? this.spawnableCreatureList
-                    : (par1EnumCreatureType == EnumCreatureType.waterCreature ? this.spawnableWaterCreatureList
-                            : (par1EnumCreatureType == EnumCreatureType.ambient ? this.spawnableCaveCreatureList
-                                    : null));
+        if (creatureType == EnumCreatureType.monster) {
+            return monsterRNG.nextInt(MONSTER_SPAWN_RATE) == 0 ? spawnableMonsterList : emptyList;
         }
+        if (creatureType == EnumCreatureType.creature) {
+            return spawnableCreatureList;
+        }
+        if (creatureType == EnumCreatureType.waterCreature) {
+            return spawnableWaterCreatureList;
+        }
+        if (creatureType == EnumCreatureType.ambient) {
+            return spawnableCaveCreatureList;
+        }
+        return null;
     }
 
     /**
@@ -136,6 +147,7 @@ public class TFBiomeDarkForest extends TFBiomeBase {
     /**
      * If there is a required achievement to be here, return it, otherwise return null
      */
+    @Override
     protected Achievement getRequiredAchievement() {
         return TFAchievementPage.twilightProgressHydra;
     }
@@ -143,14 +155,17 @@ public class TFBiomeDarkForest extends TFBiomeBase {
     /**
      * Do something bad to a player in the wrong biome.
      */
+    @Override
     public void enforceProgession(EntityPlayer player, World world) {
-        if (!world.isRemote && world.getWorldTime() % 60 == 0) {
-            player.addPotionEffect(new PotionEffect(Potion.blindness.id, 100, 0));
+        if (world.isRemote || world.getWorldTime() % PROGRESSION_INTERVAL != 0) {
+            return;
+        }
 
-            // hint monster?
-            if (world.rand.nextInt(4) == 0) {
-                TFFeature.tfStronghold.trySpawnHintMonster(world, player);
-            }
+        player.addPotionEffect(new PotionEffect(Potion.blindness.id, 100, 0));
+
+        // hint monster?
+        if (world.rand.nextInt(4) == 0) {
+            TFFeature.tfStronghold.trySpawnHintMonster(world, player);
         }
     }
 }
