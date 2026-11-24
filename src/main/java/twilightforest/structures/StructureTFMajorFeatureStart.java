@@ -1,11 +1,11 @@
 package twilightforest.structures;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.gen.structure.MapGenStructureIO;
@@ -16,7 +16,6 @@ import net.minecraft.world.gen.structure.StructureStrongholdPieces;
 
 import twilightforest.TFFeature;
 import twilightforest.biomes.TFBiomeBase;
-import twilightforest.block.TFBlocks;
 import twilightforest.integration.structures.TFMajorFeatureProviders;
 import twilightforest.structures.courtyard.ComponentTFNagaCourtyardMain;
 import twilightforest.structures.courtyard.TFNagaCourtyardPieces;
@@ -43,13 +42,23 @@ import twilightforest.world.TFWorldChunkManager;
 
 public class StructureTFMajorFeatureStart extends StructureStart {
 
-    public static int NUM_LOCKS = 4;
+    private static final int CHUNK_SHIFT = 4;
+    private static final int CHUNK_CENTER_OFFSET = 8;
+    private static final int BIOME_HEIGHT_MULTIPLIER = 8;
+    private static final int STRONGHOLD_Y_OFFSET = -33;
+    private static final int DARK_FOREST_TOWER_Y_OFFSET = 4;
+    private static final String CONQUERED_NBT_KEY = "Conquered";
+    private static final String FEATURE_ID_NBT_KEY = "FeatureID";
+    private static final String LOCKS_NBT_KEY = "Locks";
+
+    public static final int NUM_LOCKS = 4;
 
     public TFFeature feature;
     public boolean isConquered;
     public byte[] lockBytes = new byte[NUM_LOCKS];
 
     static {
+        // do not rename, it will break!!
         MapGenStructureIO.registerStructure(StructureTFMajorFeatureStart.class, "TFFeature");
         MapGenStructureIO.registerStructure(StructureTFHollowTreeStart.class, "TFHollowTree");
 
@@ -64,7 +73,6 @@ public class StructureTFMajorFeatureStart extends StructureStart {
         TFTrollCavePieces.registerPieces();
         TFFinalCastlePieces.registerFinalCastlePieces();
 
-        // register one-off pieces here
         MapGenStructureIO.func_143031_a(ComponentTFHedgeMaze.class, "TFHedge");
         MapGenStructureIO.func_143031_a(ComponentTFHillMaze.class, "TFHillMaze");
         MapGenStructureIO.func_143031_a(ComponentTFHollowHill.class, "TFHill");
@@ -73,306 +81,188 @@ public class StructureTFMajorFeatureStart extends StructureStart {
         MapGenStructureIO.func_143031_a(ComponentTFYetiCave.class, "TFYeti");
     }
 
+    // used when loading structures from nbt
     public StructureTFMajorFeatureStart() {}
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public StructureTFMajorFeatureStart(World world, Random rand, int chunkX, int chunkZ) {
+    public StructureTFMajorFeatureStart(World world, Random random, int chunkX, int chunkZ) {
+        super(chunkX, chunkZ);
+
+        // preserve the original initilisation and call order for worldgen compatibility
         StructureStrongholdPieces.prepareStructurePieces();
-        // TFStrongholdPieces.prepareStructurePieces();
 
-        int x = (chunkX << 4) + 8;
-        int z = (chunkZ << 4) + 8;
-        int y = TFWorld.SEALEVEL + 1; // TODO: maybe a biome-specific altitude for some of them?
+        int x = (chunkX << CHUNK_SHIFT) + CHUNK_CENTER_OFFSET;
+        int z = (chunkZ << CHUNK_SHIFT) + CHUNK_CENTER_OFFSET;
+        int y = TFWorld.SEALEVEL + 1;
 
-        this.feature = TFFeature.getFeatureDirectlyAt(chunkX, chunkZ, world);
-        this.isConquered = false;
-
-        StructureComponent firstComponent = makeFirstComponent(world, rand, feature, x, y, z);
-        if (firstComponent != null) {
-            components.add(firstComponent);
-            firstComponent.buildComponent(firstComponent, components, rand);
+        feature = TFFeature.getFeatureDirectlyAt(chunkX, chunkZ, world);
+        StructureComponent root = makeFirstComponent(world, random, feature, x, y, z);
+        if (root == null) {
+            // mapGenStructure serialises even when they have no components
+            boundingBox = new StructureBoundingBox(x, y, z, x, y, z);
+            return;
         }
 
+        components.add(root);
+        root.buildComponent(root, components, random);
         updateBoundingBox();
 
-        if (firstComponent instanceof StructureStrongholdPieces.Stairs2) {
-            List var6 = ((StructureStrongholdPieces.Stairs2) firstComponent).field_75026_c;
-
-            while (!var6.isEmpty()) {
-                int var7 = rand.nextInt(var6.size());
-                StructureComponent var8 = (StructureComponent) var6.remove(var7);
-                var8.buildComponent(firstComponent, this.components, rand);
-            }
-
-            updateBoundingBox();
-
-            int offY = -33;
-
-            boundingBox.offset(0, offY, 0);
-
-            for (StructureComponent com : (LinkedList<StructureComponent>) getComponents()) {
-                com.getBoundingBox().offset(0, offY, 0);
-            }
-
-            // System.out.println("Making stronghold!");
-
+        if (root instanceof StructureStrongholdPieces.Stairs2) {
+            completeStronghold((StructureStrongholdPieces.Stairs2) root, random);
         }
 
-        if (firstComponent instanceof ComponentTFTowerMain || firstComponent instanceof ComponentTFDarkTowerMain) {
+        if (root instanceof ComponentTFTowerMain || root instanceof ComponentTFDarkTowerMain) {
             moveToAvgGroundLevel(world, x, z);
         }
     }
 
-    /**
-     * 
-     * @return The first component we should add to our structure
-     */
-    public StructureComponent makeFirstComponent(World world, Random rand, TFFeature feature, int x, int y, int z) {
+    private void completeStronghold(StructureStrongholdPieces.Stairs2 entrance, Random random) {
+        List<?> pendingPieces = entrance.field_75026_c;
 
-        StructureComponent componentOverride = TFMajorFeatureProviders.getTFMajorFeature(world, rand, feature, x, y, z);
-        if (componentOverride != null) {
-            return componentOverride;
+        while (pendingPieces != null && !pendingPieces.isEmpty()) {
+            int index = random.nextInt(pendingPieces.size());
+            StructureComponent piece = (StructureComponent) pendingPieces.remove(index);
+            piece.buildComponent(entrance, components, random);
+        }
+
+        updateBoundingBox();
+        offsetStructure(STRONGHOLD_Y_OFFSET);
+    }
+
+    public StructureComponent makeFirstComponent(World world, Random random, TFFeature feature, int x, int y, int z) {
+        StructureComponent override = TFMajorFeatureProviders.getTFMajorFeature(world, random, feature, x, y, z);
+        if (override != null) {
+            return override;
         }
 
         if (feature == TFFeature.nagaCourtyard) {
-            // return new ComponentTFNagaCourtyard(world, rand, 0, x, y, z);
-            return new ComponentTFNagaCourtyardMain(world, rand, 0, x, y, z);
+            return new ComponentTFNagaCourtyardMain(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.hedgeMaze) {
-            return new ComponentTFHedgeMaze(world, rand, 0, x, y, z);
+            return new ComponentTFHedgeMaze(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.hill1) {
-            return new ComponentTFHollowHill(world, rand, 0, 1, x, y, z);
+            return new ComponentTFHollowHill(world, random, 0, 1, x, y, z);
         }
         if (feature == TFFeature.hill2) {
-            return new ComponentTFHollowHill(world, rand, 0, 2, x, y, z);
+            return new ComponentTFHollowHill(world, random, 0, 2, x, y, z);
         }
         if (feature == TFFeature.hill3) {
-            return new ComponentTFHollowHill(world, rand, 0, 3, x, y, z);
+            return new ComponentTFHollowHill(world, random, 0, 3, x, y, z);
         }
         if (feature == TFFeature.lichTower) {
-            return new ComponentTFTowerMain(world, rand, 0, x, y, z);
+            return new ComponentTFTowerMain(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.questGrove) {
-            return new ComponentTFQuestGrove(world, rand, 0, x, y, z);
+            return new ComponentTFQuestGrove(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.hydraLair) {
-            return new ComponentTFHydraLair(world, rand, 0, x, y, z);
+            return new ComponentTFHydraLair(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.labyrinth) {
-            return new ComponentTFMazeRuins(world, rand, 0, x, y, z);
+            return new ComponentTFMazeRuins(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.darkTower) {
-            return new ComponentTFDarkTowerMain(world, rand, 0, x, y - 1, z);
+            return new ComponentTFDarkTowerMain(world, random, 0, x, y - 1, z);
         }
         if (feature == TFFeature.tfStronghold) {
-            return new ComponentTFStrongholdEntrance(world, rand, 0, x, y, z);
+            return new ComponentTFStrongholdEntrance(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.iceTower) {
-            return new ComponentTFIceTowerMain(world, rand, 0, x, y, z);
+            return new ComponentTFIceTowerMain(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.mushroomTower) {
-            return new ComponentTFMushroomTowerMain(world, rand, 0, x, y, z);
+            return new ComponentTFMushroomTowerMain(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.yetiCave) {
-            return new ComponentTFYetiCave(world, rand, 0, x, y, z);
+            return new ComponentTFYetiCave(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.trollCave) {
-            return new ComponentTFTrollCaveMain(world, rand, 0, x, y, z);
+            return new ComponentTFTrollCaveMain(world, random, 0, x, y, z);
         }
         if (feature == TFFeature.finalCastle) {
-            return new ComponentTFFinalCastleMain(world, rand, 0, x, y, z);
+            return new ComponentTFFinalCastleMain(world, random, 0, x, y, z);
         }
 
         return null;
     }
 
-    /**
-     * currently only defined for Villages, returns true if Village has more than 2 non-road components
-     */
+    @Override
     public boolean isSizeableStructure() {
-        return feature.isStructureEnabled;
+        return feature != null && feature.isStructureEnabled && !components.isEmpty();
     }
 
-    /**
-     * Move the whole structure up or down
-     */
-    @SuppressWarnings("unchecked")
+    // apply the biome height used by litch and dark towers
     protected void moveToAvgGroundLevel(World world, int x, int z) {
-        if (world.getWorldChunkManager() instanceof TFWorldChunkManager) {
-            // determine the biome at the origin
-            BiomeGenBase biomeAt = world.getBiomeGenForCoords(x, z);
+        if (!(world.getWorldChunkManager() instanceof TFWorldChunkManager)) {
+            return;
+        }
 
-            int offY = (int) ((biomeAt.rootHeight + biomeAt.heightVariation) * 8);
+        BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
+        if (biome == null) {
+            return;
+        }
 
-            // dark forest doesn't seem to get the right value. Why is my calculation so bad?
-            if (biomeAt == TFBiomeBase.darkForest) {
-                offY += 4;
-            }
+        int offsetY = (int) ((biome.rootHeight + biome.heightVariation) * BIOME_HEIGHT_MULTIPLIER);
+        if (biome == TFBiomeBase.darkForest) {
+            offsetY += DARK_FOREST_TOWER_Y_OFFSET;
+        }
 
-            if (offY > 0) {
-                // System.out.println("Moving tower, offset is " + offY + " for biome " + biomeAt.biomeName);
-
-                boundingBox.offset(0, offY, 0);
-
-                for (StructureComponent com : (LinkedList<StructureComponent>) getComponents()) {
-                    com.getBoundingBox().offset(0, offY, 0);
-                }
-            }
+        if (offsetY > 0) {
+            offsetStructure(offsetY);
         }
     }
 
-    // /**
-    // * Keeps iterating Structure Pieces and spawning them until the checks tell it to stop
-    // */
-    // public void generateStructure(World par1World, Random par2Random, StructureBoundingBox par3StructureBoundingBox)
-    // {
-    // if (this.getComponents().getFirst() instanceof ComponentTFStrongholdEntrance)
-    // {
-    // //System.out.println("We're generating a stronghold!");
-    //
-    // for (StructureComponent component : (LinkedList<StructureComponent>) getComponents())
-    // {
-    //
-    // // TODO: we need to test the shield bounding box here, otherwise we lose shield facings across chunk boundires
-    //
-    // if (isShieldable(component) ? isIntersectingLarger(par3StructureBoundingBox, component) :
-    // isIntersectingLarger(par3StructureBoundingBox, component))
-    // {
-    // if (isShieldable(component))
-    // {
-    // addShieldFor(par1World, component, (LinkedList<StructureComponent>) getComponents(), par3StructureBoundingBox);
-    // }
-    // component.addComponentParts(par1World, par2Random, par3StructureBoundingBox);
-    // }
-    // }
-    // }
-    // else
-    // {
-    // super.generateStructure(par1World, par2Random, par3StructureBoundingBox);
-    // }
-    // }
-
-    /**
-     * Check if the component is within the chunk bounding box, but check as if it was one larger
-     */
-    @SuppressWarnings("unused")
-    private boolean isIntersectingLarger(StructureBoundingBox chunkBB, StructureComponent component) {
-        StructureBoundingBox compBB = component.getBoundingBox();
-
-        // don't bother checking Y
-        return (compBB.maxX + 1) >= chunkBB.minX && (compBB.minX - 1) <= chunkBB.maxX
-                && (compBB.maxZ + 1) >= chunkBB.minZ
-                && (compBB.minZ - 1) <= chunkBB.maxZ;
-
-    }
-
-    @SuppressWarnings("unused")
-    private boolean isShieldable(StructureComponent component) {
-        return component.getBoundingBox().maxY <= 32;
-    }
-
-    /**
-     * Make the stronghold shield around a component's bounding box
-     */
-    @SuppressWarnings("unused")
-    private void addShieldFor(World world, StructureComponent component, List<StructureComponent> otherComponents,
-            StructureBoundingBox chunkBox) {
-        StructureBoundingBox shieldBox = new StructureBoundingBox(component.getBoundingBox());
-
-        shieldBox.minX--;
-        shieldBox.minY--;
-        shieldBox.minZ--;
-
-        shieldBox.maxX++;
-        shieldBox.maxY++;
-        shieldBox.maxZ++;
-
-        ArrayList<StructureComponent> intersecting = new ArrayList<StructureComponent>();
-
-        for (StructureComponent other : otherComponents) {
-            if (other != component && shieldBox.intersectsWith(other.getBoundingBox())) {
-                intersecting.add(other);
-            }
+    // move the bounding box and component by the same amount
+    private void offsetStructure(int offsetY) {
+        if (boundingBox != null) {
+            boundingBox.offset(0, offsetY, 0);
         }
 
-        // trace outline
-        for (int x = shieldBox.minX; x <= shieldBox.maxX; x++) {
-            for (int y = shieldBox.minY; y <= shieldBox.maxY; y++) {
-                for (int z = shieldBox.minZ; z <= shieldBox.maxZ; z++) {
-                    if (x == shieldBox.minX || x == shieldBox.maxX
-                            || y == shieldBox.minY
-                            || y == shieldBox.maxY
-                            || z == shieldBox.minZ
-                            || z == shieldBox.maxZ) {
-                        if (chunkBox.isVecInside(x, y, z)) {
-                            // test other boxes
-                            boolean notIntersecting = true;
-
-                            for (StructureComponent other : intersecting) {
-                                if (other.getBoundingBox().isVecInside(x, y, z)) {
-                                    notIntersecting = false;
-                                }
-                            }
-
-                            if (notIntersecting) {
-                                world.setBlock(x, y, z, TFBlocks.shield, calculateShieldMeta(shieldBox, x, y, z), 2);
-                            }
-
-                        }
-                    }
-                }
+        for (Object entry : components) {
+            StructureComponent component = (StructureComponent) entry;
+            if (component != null && component.getBoundingBox() != null) {
+                component.getBoundingBox().offset(0, offsetY, 0);
             }
         }
     }
 
-    private int calculateShieldMeta(StructureBoundingBox shieldBox, int x, int y, int z) {
-        int shieldMeta = 0;
-        if (x == shieldBox.minX) {
-            shieldMeta = 5;
-        }
-        if (x == shieldBox.maxX) {
-            shieldMeta = 4;
-        }
-        if (z == shieldBox.minZ) {
-            shieldMeta = 3;
-        }
-        if (z == shieldBox.maxZ) {
-            shieldMeta = 2;
-        }
-        if (y == shieldBox.minY) {
-            shieldMeta = 1;
-        }
-        if (y == shieldBox.maxY) {
-            shieldMeta = 0;
-        }
-        return shieldMeta;
+    @Override
+    public void func_143022_a(NBTTagCompound nbt) {
+        super.func_143022_a(nbt);
+        nbt.setBoolean(CONQUERED_NBT_KEY, isConquered);
+        nbt.setInteger(FEATURE_ID_NBT_KEY, feature != null ? feature.featureID : TFFeature.nothing.featureID);
+        nbt.setByteArray(LOCKS_NBT_KEY, lockBytes != null ? lockBytes : new byte[NUM_LOCKS]);
     }
 
-    public void func_143022_a(NBTTagCompound par1NBTTagCompound) {
-        super.func_143022_a(par1NBTTagCompound);
-        par1NBTTagCompound.setBoolean("Conquered", this.isConquered);
-        par1NBTTagCompound.setInteger("FeatureID", this.feature.featureID);
-        par1NBTTagCompound.setByteArray("Locks", this.lockBytes);
-
-        // System.out.println("Saved structure for feature " + feature.name);
+    @Override
+    public void func_143020_a(World world, NBTTagCompound nbt) {
+        NBTTagList children = nbt.getTagList("Children", 10);
+        for (int i = 0; i < children.tagCount(); i++) {
+            NBTTagCompound child = children.getCompoundTagAt(i);
+            // old balconies shared the boss room ID but only balconies saved enterBottom
+            if ("TFSBR".equals(child.getString("id")) && child.hasKey("enterBottom", 1)) {
+                child.setString("id", "TFSBal");
+            }
+        }
+        super.func_143020_a(world, nbt);
     }
 
-    public void func_143017_b(NBTTagCompound nbttagcompound) {
-        super.func_143017_b(nbttagcompound);
-        this.isConquered = nbttagcompound.getBoolean("Conquered");
-        this.feature = TFFeature.featureList[nbttagcompound.getInteger("FeatureID")];
-        this.lockBytes = nbttagcompound.getByteArray("Locks");
+    @Override
+    public void func_143017_b(NBTTagCompound nbt) {
+        super.func_143017_b(nbt);
+        isConquered = nbt.getBoolean(CONQUERED_NBT_KEY);
 
-        // System.out.println("Loaded structure");
+        int featureID = nbt.getInteger(FEATURE_ID_NBT_KEY);
+        feature = featureID >= 0 && featureID < TFFeature.featureList.length ? TFFeature.featureList[featureID] : null;
+        if (feature == null) {
+            feature = TFFeature.nothing;
+        }
+
+        byte[] savedLocks = nbt.getByteArray(LOCKS_NBT_KEY);
+        lockBytes = savedLocks.length >= NUM_LOCKS ? savedLocks : Arrays.copyOf(savedLocks, NUM_LOCKS);
     }
 
     public boolean isLocked(int lockIndex) {
-        if (lockIndex < this.lockBytes.length) {
-            return this.lockBytes[lockIndex] != 0;
-        } else {
-            return false;
-        }
+        return lockBytes != null && lockIndex >= 0 && lockIndex < lockBytes.length && lockBytes[lockIndex] != 0;
     }
-
 }
