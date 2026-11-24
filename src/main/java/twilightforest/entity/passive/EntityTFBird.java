@@ -35,7 +35,7 @@ public abstract class EntityTFBird extends EntityAnimal {
         super.onLivingUpdate();
         this.lastFlapLength = this.flapLength;
         this.lastFlapIntensity = this.flapIntensity;
-        this.flapIntensity = (float) (this.flapIntensity + (this.onGround ? -1 : 4) * 0.3D);
+        this.flapIntensity += (this.onGround ? -1.0F : 4.0F) * 0.3F;
 
         if (this.flapIntensity < 0.0F) {
             this.flapIntensity = 0.0F;
@@ -49,7 +49,7 @@ public abstract class EntityTFBird extends EntityAnimal {
             this.flapSpeed = 1.0F;
         }
 
-        this.flapSpeed = (float) (this.flapSpeed * 0.9D);
+        this.flapSpeed *= 0.9F;
 
         // don't fall as fast
         if (!this.onGround && this.motionY < 0.0D) {

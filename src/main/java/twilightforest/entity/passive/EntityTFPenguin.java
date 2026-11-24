@@ -25,7 +25,6 @@ public class EntityTFPenguin extends EntityTFBird {
 
     public EntityTFPenguin(World world) {
         super(world);
-        // texture = TwilightForestMod.MODEL_DIR + "penguin.png";
 
         this.setSize(0.5F, 0.9F);
 
@@ -37,9 +36,7 @@ public class EntityTFPenguin extends EntityTFBird {
         tasks.addTask(4, new EntityAIFollowParent(this, 1.15F));
         tasks.addTask(5, new EntityAIWander(this, 1.0F));
         tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6F));
-        tasks.addTask(
-                7,
-                new EntityAIWatchClosest2(this, twilightforest.entity.passive.EntityTFPenguin.class, 5F, 0.02F));
+        tasks.addTask(7, new EntityAIWatchClosest2(this, EntityTFPenguin.class, 5F, 0.02F));
         tasks.addTask(8, new EntityAILookIdle(this));
 
     }
@@ -75,9 +72,9 @@ public class EntityTFPenguin extends EntityTFBird {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        if (par1DamageSource.getEntity() instanceof EntityPlayer player
+                && player.dimension == TwilightForestMod.dimensionID) {
+            player.triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 
