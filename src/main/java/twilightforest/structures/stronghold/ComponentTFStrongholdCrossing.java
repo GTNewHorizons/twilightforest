@@ -10,10 +10,7 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 public class ComponentTFStrongholdCrossing extends StructureTFStrongholdComponent {
 
-    public ComponentTFStrongholdCrossing() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdCrossing() {}
 
     public ComponentTFStrongholdCrossing(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);

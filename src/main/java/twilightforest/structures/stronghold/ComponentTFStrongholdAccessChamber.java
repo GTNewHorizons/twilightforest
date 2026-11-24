@@ -12,10 +12,7 @@ import twilightforest.block.TFBlocks;
 
 public class ComponentTFStrongholdAccessChamber extends StructureTFStrongholdComponent {
 
-    public ComponentTFStrongholdAccessChamber() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdAccessChamber() {}
 
     public ComponentTFStrongholdAccessChamber(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -132,6 +129,7 @@ public class ComponentTFStrongholdAccessChamber extends StructureTFStrongholdCom
     /**
      * Does this component fall under block protection when progression is turned on, normally true
      */
+    @Override
     public boolean isComponentProtected() {
         return false;
     }

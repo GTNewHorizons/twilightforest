@@ -12,10 +12,9 @@ import twilightforest.block.TFBlocks;
 
 public class ComponentTFStrongholdBossRoom extends StructureTFStrongholdComponent {
 
-    public ComponentTFStrongholdBossRoom() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    private static final int EAST_WALL_X = 26;
+
+    public ComponentTFStrongholdBossRoom() {}
 
     public ComponentTFStrongholdBossRoom(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -94,12 +93,6 @@ public class ComponentTFStrongholdBossRoom extends StructureTFStrongholdComponen
         this.fillWithAir(world, sbb, 12, 1, 1, 14, 4, 2);
         this.fillWithBlocks(world, sbb, 12, 1, 3, 14, 4, 3, Blocks.iron_bars, Blocks.iron_bars, false);
 
-        int var8 = this.getXWithOffset(0, 0);
-        int var9 = this.getYWithOffset(0);
-        int var10 = this.getZWithOffset(0, 0);
-
-        // System.out.println("Drawing stronghold boss room at " + var8 + ", " + var9 + ", " + var10);
-
         // spawner
         placeBlockAtCurrentPosition(world, TFBlocks.bossSpawner, 4, 13, 2, 13, sbb);
 
@@ -121,26 +114,10 @@ public class ComponentTFStrongholdBossRoom extends StructureTFStrongholdComponen
 
         // make either torches or fence posts
 
-        if (world.rand.nextInt(7) == 0) {
-            this.placeBlockRotated(world, Blocks.torch, 0, x + 1, y + 1, z + 0, rotation, sbb);
-        } else {
-            this.placeBlockRotated(world, deco.fenceID, deco.fenceMeta, x + 1, y + 1, z + 0, rotation, sbb);
-        }
-        if (world.rand.nextInt(7) == 0) {
-            this.placeBlockRotated(world, Blocks.torch, 0, x - 1, y + 1, z + 0, rotation, sbb);
-        } else {
-            this.placeBlockRotated(world, deco.fenceID, deco.fenceMeta, x - 1, y + 1, z + 0, rotation, sbb);
-        }
-        if (world.rand.nextInt(7) == 0) {
-            this.placeBlockRotated(world, Blocks.torch, 0, x + 1, y + 1, z + 3, rotation, sbb);
-        } else {
-            this.placeBlockRotated(world, deco.fenceID, deco.fenceMeta, x + 1, y + 1, z + 3, rotation, sbb);
-        }
-        if (world.rand.nextInt(7) == 0) {
-            this.placeBlockRotated(world, Blocks.torch, 0, x - 1, y + 1, z + 3, rotation, sbb);
-        } else {
-            this.placeBlockRotated(world, deco.fenceID, deco.fenceMeta, x - 1, y + 1, z + 3, rotation, sbb);
-        }
+        placeSarcophagusPost(world, sbb, x + 1, y + 1, z, rotation);
+        placeSarcophagusPost(world, sbb, x - 1, y + 1, z, rotation);
+        placeSarcophagusPost(world, sbb, x + 1, y + 1, z + 3, rotation);
+        placeSarcophagusPost(world, sbb, x - 1, y + 1, z + 3, rotation);
 
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(1 + rotation), x + 0, y, z + 0, rotation, sbb);
         this.placeBlockRotated(world, deco.stairID, this.getStairMeta(3 + rotation), x + 0, y, z + 3, rotation, sbb);
@@ -153,6 +130,14 @@ public class ComponentTFStrongholdBossRoom extends StructureTFStrongholdComponen
         this.placeBlockRotated(world, Blocks.stone_slab, 0, x + 0, y + 1, z + 1, rotation, sbb);
         this.placeBlockRotated(world, Blocks.stone_slab, 0, x + 0, y + 1, z + 2, rotation, sbb);
 
+    }
+
+    private void placeSarcophagusPost(World world, StructureBoundingBox sbb, int x, int y, int z, int rotation) {
+        if (world.rand.nextInt(7) == 0) {
+            placeBlockRotated(world, Blocks.torch, 0, x, y, z, rotation, sbb);
+        } else {
+            placeBlockRotated(world, deco.fenceID, deco.fenceMeta, x, y, z, rotation, sbb);
+        }
     }
 
     protected void placePillarDecorations(World world, StructureBoundingBox sbb, int rotation) {
@@ -171,8 +156,9 @@ public class ComponentTFStrongholdBossRoom extends StructureTFStrongholdComponen
     /**
      * Make a doorway - this is the iron fence door
      */
+    // use local coordinates, a rotated rectangular room does not share the world bounding box X size
     protected void placeDoorwayAt(World world, Random rand, int x, int y, int z, StructureBoundingBox sbb) {
-        if (x == 0 || x == getXSize()) {
+        if (x == 0 || x == EAST_WALL_X) {
             this.fillWithMetadataBlocks(
                     world,
                     sbb,

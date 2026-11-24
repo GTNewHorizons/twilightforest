@@ -13,9 +13,7 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
 
     public TFStrongholdPieces lowerPieces;
 
-    public ComponentTFStrongholdEntrance() {
-        super();
-    }
+    public ComponentTFStrongholdEntrance() {}
 
     public ComponentTFStrongholdEntrance(World world, Random rand, int i, int x, int y, int z) {
         super(i, 0, x, y - 10, z);
@@ -53,47 +51,6 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
         if (!listContainsBossRoom(pieceList)) {
             FMLLog.fine("[TwilightForest]  Did not find boss room from exit 3 - EPIC FAIL");
         }
-        StructureBoundingBox shieldBox = new StructureBoundingBox(this.boundingBox);
-
-        int tStairs = 0;
-        int tCorridors = 0;
-        int deadEnd = 0;
-        int tRooms = 0;
-        int bossRooms = 0;
-
-        // compute and generate MEGASHIELD
-        for (StructureComponent component : pieceList) {
-            shieldBox.expandTo(component.getBoundingBox());
-
-            if (component instanceof ComponentTFStrongholdSmallStairs
-                    && ((ComponentTFStrongholdSmallStairs) component).hasTreasure) {
-                tStairs++;
-            }
-            if (component instanceof ComponentTFStrongholdTreasureCorridor) {
-                tCorridors++;
-            }
-            if (component instanceof ComponentTFStrongholdDeadEnd) {
-                deadEnd++;
-            }
-            if (component instanceof ComponentTFStrongholdTreasureRoom) {
-                tRooms++;
-            }
-            if (component instanceof ComponentTFStrongholdBossRoom) {
-                bossRooms++;
-            }
-        }
-
-        // FMLLog.fine("MEGASHIELD computed! %d, %d, %d to %d, %d, %d.\n", shieldBox.minX, shieldBox.minY,
-        // shieldBox.minZ, shieldBox.maxX, shieldBox.maxY, shieldBox.maxZ);
-        // FMLLog.fine("Stronghold at this point contains %d elements.\n", pieceList.size());
-        //
-        // FMLLog.fine("Room count! TStairs = %d, TCorr = %d, Dead End = %d, TRoom = %d, Boss = %d \n", tStairs,
-        // tCorridors, deadEnd, tRooms, bossRooms);
-
-        // StructureTFStrongholdShield shield = new StructureTFStrongholdShield(shieldBox.minX - 1, shieldBox.minY,
-        // shieldBox.minZ - 1, shieldBox.maxX, shieldBox.maxY, shieldBox.maxZ);
-        // list.add(shield);
-
         // add the upper stronghold
         StructureTFStrongholdComponent accessChamber = new ComponentTFStrongholdAccessChamber(
                 2,
@@ -106,8 +63,8 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
 
     }
 
-    private boolean listContainsBossRoom(List list) {
-        for (StructureTFStrongholdComponent component : (List<StructureTFStrongholdComponent>) list) {
+    private static boolean listContainsBossRoom(List<? extends StructureComponent> list) {
+        for (StructureComponent component : list) {
             if (component instanceof ComponentTFStrongholdBossRoom) {
                 return true;
             }
@@ -129,12 +86,6 @@ public class ComponentTFStrongholdEntrance extends StructureTFStrongholdComponen
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
         placeStrongholdWalls(world, sbb, 0, 0, 0, 17, 6, 17, rand, deco.randomBlocks);
-
-        int var8 = this.getXWithOffset(0, 0);
-        int var9 = this.getYWithOffset(0);
-        int var10 = this.getZWithOffset(0, 0);
-
-        // FMLLog.fine("Drawing STRONGHOLD entrance at " + var8 + ", " + var9 + ", " + var10);
 
         // statues
         placeCornerStatue(world, 5, 1, 5, 0, sbb);
