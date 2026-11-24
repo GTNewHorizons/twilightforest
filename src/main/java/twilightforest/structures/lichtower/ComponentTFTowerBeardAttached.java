@@ -11,50 +11,45 @@ public class ComponentTFTowerBeardAttached extends ComponentTFTowerBeard {
 
     public ComponentTFTowerBeardAttached() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerBeardAttached(int i, ComponentTFTowerWing wing) {
         super(i, wing);
 
         // just hang out at the very bottom of the tower
-        this.boundingBox = new StructureBoundingBox(
-                wing.getBoundingBox().minX,
-                wing.getBoundingBox().minY - this.height - 1,
-                wing.getBoundingBox().minZ,
-                wing.getBoundingBox().maxX,
-                wing.getBoundingBox().minY - 1,
-                wing.getBoundingBox().maxZ);
-
+        StructureBoundingBox wingBox = wing.getBoundingBox();
+        boundingBox = new StructureBoundingBox(
+                wingBox.minX,
+                wingBox.minY - height - 1,
+                wingBox.minZ,
+                wingBox.maxX,
+                wingBox.minY - 1,
+                wingBox.maxZ);
     }
 
-    /**
-     * Makes a pyramid-shaped beard
-     */
+    // makes a pyramid shaped beard
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        return makeAttachedBeard(world, rand, sbb);
-    }
-
-    private boolean makeAttachedBeard(World world, Random rand, StructureBoundingBox sbb) {
         for (int y = 0; y <= height; y++) {
             int min = y + 1;
             int max = size - y;
+            if (min > max) break;
+            int layerY = height - y;
 
             fillWithRandomizedBlocks(
                     world,
                     sbb,
                     0,
-                    height - y,
+                    layerY,
                     min,
                     max,
-                    height - y,
+                    layerY,
                     max,
                     false,
                     rand,
                     StructureTFComponent.getStrongholdStones());
         }
+
         return true;
     }
-
 }

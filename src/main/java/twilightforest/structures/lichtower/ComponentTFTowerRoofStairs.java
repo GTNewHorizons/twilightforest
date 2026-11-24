@@ -10,45 +10,40 @@ public class ComponentTFTowerRoofStairs extends ComponentTFTowerRoof {
 
     public ComponentTFTowerRoofStairs() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoofStairs(int i, ComponentTFTowerWing wing) {
         super(i, wing);
 
-        // always facing = 0. This roof cannot rotate, due to stair facing issues.
-        this.setCoordBaseMode(0);
+        // always facing = 0. this roof cant rotate, due to stair facing issues
+        setCoordBaseMode(0);
 
-        this.size = wing.size; // assuming only square towers and roofs right now.
-        this.height = size / 2;
+        size = wing.size; // assuming only square towers and roofs right now
+        height = size / 2;
 
         // just hang out at the very top of the tower
         makeCapBB(wing);
-
     }
 
-    /**
-     * Makes a pyramid-shaped roof out of stairs
-     */
+    // makes a pyramid shaped roof out of stairs
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
         for (int y = 0; y <= height; y++) {
             int min = y;
             int max = size - y - 1;
+            if (min > max) break;
+
             for (int x = min; x <= max; x++) {
                 for (int z = min; z <= max; z++) {
-                    if (x == min) {
-                        if (z == min || z == max) {
-                            placeBlockAtCurrentPosition(world, Blocks.wooden_slab, 2, x, y, z, sbb);
-                        } else {
-                            placeBlockAtCurrentPosition(world, Blocks.birch_stairs, 0, x, y, z, sbb);
-                        }
+                    boolean xEdge = x == min || x == max;
+                    boolean zEdge = z == min || z == max;
+
+                    if (xEdge && zEdge) {
+                        placeBlockAtCurrentPosition(world, Blocks.wooden_slab, 2, x, y, z, sbb);
+                    } else if (x == min) {
+                        placeBlockAtCurrentPosition(world, Blocks.birch_stairs, 0, x, y, z, sbb);
                     } else if (x == max) {
-                        if (z == min || z == max) {
-                            placeBlockAtCurrentPosition(world, Blocks.wooden_slab, 2, x, y, z, sbb);
-                        } else {
-                            placeBlockAtCurrentPosition(world, Blocks.birch_stairs, 1, x, y, z, sbb);
-                        }
+                        placeBlockAtCurrentPosition(world, Blocks.birch_stairs, 1, x, y, z, sbb);
                     } else if (z == max) {
                         placeBlockAtCurrentPosition(world, Blocks.birch_stairs, 3, x, y, z, sbb);
                     } else if (z == min) {
@@ -59,7 +54,7 @@ public class ComponentTFTowerRoofStairs extends ComponentTFTowerRoof {
                 }
             }
         }
+
         return true;
     }
-
 }

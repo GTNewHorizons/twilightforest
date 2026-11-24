@@ -17,13 +17,12 @@ public abstract class ComponentTFTowerRoof extends StructureTFComponent {
 
     public ComponentTFTowerRoof() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFTowerRoof(int i, ComponentTFTowerWing wing) {
         super(i);
 
-        this.spawnListIndex = -1;
+        spawnListIndex = -1;
 
         // inheritors need to add a bounding box or die~!
     }
@@ -32,90 +31,72 @@ public abstract class ComponentTFTowerRoof extends StructureTFComponent {
      * Save to NBT
      */
     @Override
-    protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
-        super.func_143012_a(par1NBTTagCompound);
-
-        par1NBTTagCompound.setInteger("roofSize", this.size);
-        par1NBTTagCompound.setInteger("roofHeight", this.height);
+    protected void func_143012_a(NBTTagCompound tag) {
+        super.func_143012_a(tag);
+        tag.setInteger("roofSize", size);
+        tag.setInteger("roofHeight", height);
     }
 
     /**
      * Load from NBT
      */
     @Override
-    protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
-        super.func_143011_b(par1NBTTagCompound);
-        this.size = par1NBTTagCompound.getInteger("roofSize");
-        this.height = par1NBTTagCompound.getInteger("roofHeight");
+    protected void func_143011_b(NBTTagCompound tag) {
+        super.func_143011_b(tag);
+        size = tag.getInteger("roofSize");
+        height = tag.getInteger("roofHeight");
     }
 
     /**
      * Makes a bounding box that hangs forwards off of the tower wing we are on. This is for attached roofs.
-     * 
+     *
      * @param wing
      */
     protected void makeAttachedOverhangBB(ComponentTFTowerWing wing) {
         // just hang out at the very top of the tower
-        switch (getCoordBaseMode()) {
-            case 0 -> this.boundingBox = new StructureBoundingBox(
-                    wing.getBoundingBox().minX,
-                    wing.getBoundingBox().maxY,
-                    wing.getBoundingBox().minZ - 1,
-                    wing.getBoundingBox().maxX + 1,
-                    wing.getBoundingBox().maxY + this.height - 1,
-                    wing.getBoundingBox().maxZ + 1);
-            case 1 -> this.boundingBox = new StructureBoundingBox(
-                    wing.getBoundingBox().minX - 1,
-                    wing.getBoundingBox().maxY,
-                    wing.getBoundingBox().minZ,
-                    wing.getBoundingBox().maxX + 1,
-                    wing.getBoundingBox().maxY + this.height - 1,
-                    wing.getBoundingBox().maxZ + 1);
-            case 2 -> this.boundingBox = new StructureBoundingBox(
-                    wing.getBoundingBox().minX - 1,
-                    wing.getBoundingBox().maxY,
-                    wing.getBoundingBox().minZ - 1,
-                    wing.getBoundingBox().maxX,
-                    wing.getBoundingBox().maxY + this.height - 1,
-                    wing.getBoundingBox().maxZ + 1);
-            case 3 -> this.boundingBox = new StructureBoundingBox(
-                    wing.getBoundingBox().minX - 1,
-                    wing.getBoundingBox().maxY,
-                    wing.getBoundingBox().minZ - 1,
-                    wing.getBoundingBox().maxX + 1,
-                    wing.getBoundingBox().maxY + this.height - 1,
-                    wing.getBoundingBox().maxZ);
+        int direction = getCoordBaseMode();
+        if (direction < 0 || direction > 3) {
+            return;
         }
+
+        // keep the edge facing the parent tower and extend the other three sides
+        setRoofBoundingBox(
+                wing,
+                direction == 0 ? 0 : -1,
+                direction == 1 ? 0 : -1,
+                direction == 2 ? 0 : 1,
+                direction == 3 ? 0 : 1,
+                height - 1);
     }
 
     /**
      * Makes a bounding box that sits at the top of the tower. Works for attached or freestanding roofs.
-     * 
+     *
      * @param wing
      */
     protected void makeCapBB(ComponentTFTowerWing wing) {
-        this.boundingBox = new StructureBoundingBox(
-                wing.getBoundingBox().minX,
-                wing.getBoundingBox().maxY,
-                wing.getBoundingBox().minZ,
-                wing.getBoundingBox().maxX,
-                wing.getBoundingBox().maxY + this.height,
-                wing.getBoundingBox().maxZ);
+        setRoofBoundingBox(wing, 0, 0, 0, 0, height);
     }
 
     /**
      * Make a bounding box that hangs over the sides of the tower 1 block. Freestanding towers only.
-     * 
+     *
      * @param wing
      */
     protected void makeOverhangBB(ComponentTFTowerWing wing) {
-        this.boundingBox = new StructureBoundingBox(
-                wing.getBoundingBox().minX - 1,
-                wing.getBoundingBox().maxY,
-                wing.getBoundingBox().minZ - 1,
-                wing.getBoundingBox().maxX + 1,
-                wing.getBoundingBox().maxY + this.height - 1,
-                wing.getBoundingBox().maxZ + 1);
+        setRoofBoundingBox(wing, -1, -1, 1, 1, height - 1);
+    }
+
+    private void setRoofBoundingBox(ComponentTFTowerWing wing, int minXOffset, int minZOffset, int maxXOffset,
+            int maxZOffset, int topOffset) {
+        StructureBoundingBox wingBox = wing.getBoundingBox();
+        boundingBox = new StructureBoundingBox(
+                wingBox.minX + minXOffset,
+                wingBox.maxY,
+                wingBox.minZ + minZOffset,
+                wingBox.maxX + maxXOffset,
+                wingBox.maxY + topOffset,
+                wingBox.maxZ + maxZOffset);
     }
 
     @Override
@@ -127,7 +108,6 @@ public abstract class ComponentTFTowerRoof extends StructureTFComponent {
      * Does this roof intersect anything except the parent tower?
      */
     public boolean fits(ComponentTFTowerWing parent, List<StructureComponent> list, Random rand) {
-        return StructureComponent.findIntersecting(list, this.boundingBox) == parent;
+        return StructureComponent.findIntersecting(list, boundingBox) == parent;
     }
-
 }
