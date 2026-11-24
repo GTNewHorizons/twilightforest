@@ -24,7 +24,7 @@ public abstract class TFGenerator extends WorldGenerator {
 
     /**
      * Moves distance along the vector.
-     * 
+     *
      * This goofy function takes a float between 0 and 1 for the angle, where 0 is 0 degrees, .5 is 180 degrees and 1
      * and 360 degrees. For the tilt, it takes a float between 0 and 1 where 0 is straight up, 0.5 is straight out and 1
      * is straight down.
@@ -44,7 +44,7 @@ public abstract class TFGenerator extends WorldGenerator {
 
     /**
      * Moves distance along the vector.
-     * 
+     *
      * This goofy function takes a float between 0 and 1 for the angle, where 0 is 0 degrees, .5 is 180 degrees and 1
      * and 360 degrees. For the tilt, it takes a float between 0 and 1 where 0 is straight up, 0.5 is straight out and 1
      * is straight down.
@@ -67,10 +67,14 @@ public abstract class TFGenerator extends WorldGenerator {
      */
     protected void drawBresehnam(World world, int x1, int y1, int z1, int x2, int y2, int z2, Block blockValue,
             int metaValue) {
-        ChunkCoordinates[] lineArray = getBresehnamArrayCoords(x1, y1, z1, x2, y2, z2);
-        for (ChunkCoordinates pixel : lineArray) {
-            setBlockAndMetadata(world, pixel.posX, pixel.posY, pixel.posZ, blockValue, metaValue);
-        }
+        visitBresenham(
+                x1,
+                y1,
+                z1,
+                x2,
+                y2,
+                z2,
+                (px, py, pz) -> setBlockAndMetadata(world, px, py, pz, blockValue, metaValue));
     }
 
     /**
@@ -84,82 +88,90 @@ public abstract class TFGenerator extends WorldGenerator {
      * Get an array of values that represent a line from point A to point B
      */
     public static ChunkCoordinates[] getBresehnamArrayCoords(int x1, int y1, int z1, int x2, int y2, int z2) {
-        int i, dx, dy, dz, l, m, n, x_inc, y_inc, z_inc, err_1, err_2, dx2, dy2, dz2;
+        int length = Math.max(Math.abs(x2 - x1), Math.max(Math.abs(y2 - y1), Math.abs(z2 - z1)));
+        ChunkCoordinates[] line = new ChunkCoordinates[length + 1];
+        final int[] index = { 0 };
+        visitBresenham(x1, y1, z1, x2, y2, z2, (px, py, pz) -> line[index[0]++] = new ChunkCoordinates(px, py, pz));
+        return line;
+    }
 
-        ChunkCoordinates pixel = new ChunkCoordinates(x1, y1, z1);
-        ChunkCoordinates[] lineArray;
+    @FunctionalInterface
+    private interface CoordinateVisitor {
 
-        dx = x2 - x1;
-        dy = y2 - y1;
-        dz = z2 - z1;
-        x_inc = (dx < 0) ? -1 : 1;
-        l = Math.abs(dx);
-        y_inc = (dy < 0) ? -1 : 1;
-        m = Math.abs(dy);
-        z_inc = (dz < 0) ? -1 : 1;
-        n = Math.abs(dz);
-        dx2 = l << 1;
-        dy2 = m << 1;
-        dz2 = n << 1;
+        void accept(int x, int y, int z);
+    }
 
-        if ((l >= m) && (l >= n)) {
-            err_1 = dy2 - l;
-            err_2 = dz2 - l;
-            lineArray = new ChunkCoordinates[l + 1];
-            for (i = 0; i < l; i++) {
-                lineArray[i] = new ChunkCoordinates(pixel);
-                if (err_1 > 0) {
-                    pixel.posY += y_inc;
-                    err_1 -= dx2;
+    // preserve the original major axis tie breaking and error accumulator rules
+    private static void visitBresenham(int x1, int y1, int z1, int x2, int y2, int z2, CoordinateVisitor visitor) {
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+        int dz = z2 - z1;
+        int xStep = dx < 0 ? -1 : 1;
+        int yStep = dy < 0 ? -1 : 1;
+        int zStep = dz < 0 ? -1 : 1;
+        int lengthX = Math.abs(dx);
+        int lengthY = Math.abs(dy);
+        int lengthZ = Math.abs(dz);
+        int dx2 = lengthX << 1;
+        int dy2 = lengthY << 1;
+        int dz2 = lengthZ << 1;
+        int x = x1;
+        int y = y1;
+        int z = z1;
+
+        if (lengthX >= lengthY && lengthX >= lengthZ) {
+            int errorY = dy2 - lengthX;
+            int errorZ = dz2 - lengthX;
+            for (int i = 0; i < lengthX; i++) {
+                visitor.accept(x, y, z);
+                if (errorY > 0) {
+                    y += yStep;
+                    errorY -= dx2;
                 }
-                if (err_2 > 0) {
-                    pixel.posZ += z_inc;
-                    err_2 -= dx2;
+                if (errorZ > 0) {
+                    z += zStep;
+                    errorZ -= dx2;
                 }
-                err_1 += dy2;
-                err_2 += dz2;
-                pixel.posX += x_inc;
+                errorY += dy2;
+                errorZ += dz2;
+                x += xStep;
             }
-        } else if ((m >= l) && (m >= n)) {
-            err_1 = dx2 - m;
-            err_2 = dz2 - m;
-            lineArray = new ChunkCoordinates[m + 1];
-            for (i = 0; i < m; i++) {
-                lineArray[i] = new ChunkCoordinates(pixel);
-                if (err_1 > 0) {
-                    pixel.posX += x_inc;
-                    err_1 -= dy2;
+        } else if (lengthY >= lengthX && lengthY >= lengthZ) {
+            int errorX = dx2 - lengthY;
+            int errorZ = dz2 - lengthY;
+            for (int i = 0; i < lengthY; i++) {
+                visitor.accept(x, y, z);
+                if (errorX > 0) {
+                    x += xStep;
+                    errorX -= dy2;
                 }
-                if (err_2 > 0) {
-                    pixel.posZ += z_inc;
-                    err_2 -= dy2;
+                if (errorZ > 0) {
+                    z += zStep;
+                    errorZ -= dy2;
                 }
-                err_1 += dx2;
-                err_2 += dz2;
-                pixel.posY += y_inc;
+                errorX += dx2;
+                errorZ += dz2;
+                y += yStep;
             }
         } else {
-            err_1 = dy2 - n;
-            err_2 = dx2 - n;
-            lineArray = new ChunkCoordinates[n + 1];
-            for (i = 0; i < n; i++) {
-                lineArray[i] = new ChunkCoordinates(pixel);
-                if (err_1 > 0) {
-                    pixel.posY += y_inc;
-                    err_1 -= dz2;
+            int errorY = dy2 - lengthZ;
+            int errorX = dx2 - lengthZ;
+            for (int i = 0; i < lengthZ; i++) {
+                visitor.accept(x, y, z);
+                if (errorY > 0) {
+                    y += yStep;
+                    errorY -= dz2;
                 }
-                if (err_2 > 0) {
-                    pixel.posX += x_inc;
-                    err_2 -= dz2;
+                if (errorX > 0) {
+                    x += xStep;
+                    errorX -= dz2;
                 }
-                err_1 += dy2;
-                err_2 += dx2;
-                pixel.posZ += z_inc;
+                errorY += dy2;
+                errorX += dx2;
+                z += zStep;
             }
         }
-        lineArray[lineArray.length - 1] = new ChunkCoordinates(pixel);
-
-        return lineArray;
+        visitor.accept(x, y, z);
     }
 
     /**
@@ -175,8 +187,8 @@ public abstract class TFGenerator extends WorldGenerator {
     public void makeLeafCircle(World world, int sx, int sy, int sz, int rad, Block blockValue, int metaValue,
             boolean useHack) {
         // trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dz = 0; dz <= rad; dz++) {
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dz = 0; dz <= rad; dz++) {
                 int dist = Math.max(dx, dz) + (Math.min(dx, dz) >> 1);
 
                 // hack! I keep getting failing leaves at a certain position.
@@ -202,8 +214,8 @@ public abstract class TFGenerator extends WorldGenerator {
     public void makeLeafCircle2(World world, int sx, int sy, int sz, int rad, Block blockValue, int metaValue,
             boolean useHack) {
         // trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dz = 0; dz <= rad; dz++) {
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dz = 0; dz <= rad; dz++) {
                 // int dist = Math.max(dx, dz) + (int)(Math.min(dx, dz) * 0.6F);
                 //
                 // //hack! I keep getting failing leaves at a certain position.
@@ -227,9 +239,7 @@ public abstract class TFGenerator extends WorldGenerator {
      * Put a leaf only in spots where leaves can go!
      */
     public void putLeafBlock(World world, int x, int y, int z, Block blockValue, int metaValue) {
-        Block whatsThere = world.getBlock(x, y, z);
-        Block block = whatsThere;
-
+        Block block = world.getBlock(x, y, z);
         if (block == null || block.canBeReplacedByLeaves(world, x, y, z)) {
             this.setBlockAndMetadata(world, x, y, z, blockValue, metaValue);
         }
@@ -237,7 +247,7 @@ public abstract class TFGenerator extends WorldGenerator {
 
     /**
      * Gets either cobblestone or mossy cobblestone, randomly. Used for ruins.
-     * 
+     *
      * @param rand
      * @return
      */
@@ -247,11 +257,9 @@ public abstract class TFGenerator extends WorldGenerator {
 
     /**
      * Checks an area to see if it consists of flat natural ground below and air above
-     * 
+     *
      */
     protected boolean isAreaSuitable(World world, Random rand, int x, int y, int z, int width, int height, int depth) {
-        boolean flag = true;
-
         // check if there's anything within the diameter
         for (int cx = 0; cx < width; cx++) {
             for (int cz = 0; cz < depth; cz++) {
@@ -260,23 +268,23 @@ public abstract class TFGenerator extends WorldGenerator {
                     // is there grass, dirt or stone below?
                     Material m = world.getBlock(x + cx, y - 1, z + cz).getMaterial();
                     if (m != Material.ground && m != Material.grass && m != Material.rock) {
-                        flag = false;
+                        return false;
                     }
 
                     for (int cy = 0; cy < height; cy++) {
                         // blank space above?
                         if (!world.isAirBlock(x + cx, y + cy, z + cz)) {
-                            flag = false;
+                            return false;
                         }
                     }
                 } else {
-                    flag = false;
+                    return false;
                 }
             }
         }
 
         // Okie dokie
-        return flag;
+        return true;
 
     }
 
@@ -285,9 +293,9 @@ public abstract class TFGenerator extends WorldGenerator {
      */
     public void drawBlob(World world, int sx, int sy, int sz, int rad, Block blockValue, int metaValue) {
         // then trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dy = 0; dy <= rad; dy++) {
-                for (byte dz = 0; dz <= rad; dz++) {
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dy = 0; dy <= rad; dy++) {
+                for (int dz = 0; dz <= rad; dz++) {
                     // determine how far we are from the center.
                     int dist = 0;
                     if (dx >= dy && dx >= dz) {
@@ -320,9 +328,9 @@ public abstract class TFGenerator extends WorldGenerator {
      */
     public void drawLeafBlob(World world, int sx, int sy, int sz, int rad, Block blockValue, int metaValue) {
         // then trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dy = 0; dy <= rad; dy++) {
-                for (byte dz = 0; dz <= rad; dz++) {
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dy = 0; dy <= rad; dy++) {
+                for (int dz = 0; dz <= rad; dz++) {
                     // determine how far we are from the center.
                     int dist = 0;
                     if (dx >= dy && dx >= dz) {
