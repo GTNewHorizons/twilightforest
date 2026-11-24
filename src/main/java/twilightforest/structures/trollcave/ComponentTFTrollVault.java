@@ -14,6 +14,8 @@ import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFTrollVault extends StructureTFComponent {
 
+    private static final int GIANT_BLOCK_SHIFT = 2;
+
     public ComponentTFTrollVault() {}
 
     public ComponentTFTrollVault(int index, int x, int y, int z) {
@@ -21,9 +23,10 @@ public class ComponentTFTrollVault extends StructureTFComponent {
         this.setCoordBaseMode(0);
 
         // adjust x, y, z
-        x = (x >> 2) << 2;
-        y = (y / 4) * 4;
-        z = (z >> 2) << 2;
+        x = (x >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
+        // arithmetic shifting also aligns negative Y coordinates correctly
+        y = (y >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
+        z = (z >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
 
         // spawn list!
         this.spawnListIndex = -1;
