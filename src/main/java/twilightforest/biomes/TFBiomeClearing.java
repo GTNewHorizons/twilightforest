@@ -8,24 +8,22 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 
 public class TFBiomeClearing extends TFBiomeBase {
 
-    public TFBiomeClearing(int i) {
-        super(i);
+    public TFBiomeClearing(int biomeId) {
+        super(biomeId);
 
         this.temperature = 0.8F;
         this.rainfall = 0.4F;
 
-        // this.rootHeight = 0.01F;
-        // this.heightVariation = 0F;
-
-        getTFBiomeDecorator().canopyPerChunk = -999;
-        getTFBiomeDecorator().setTreesPerChunk(-999);
-
-        getTFBiomeDecorator().setFlowersPerChunk(4);
-        getTFBiomeDecorator().setGrassPerChunk(10);
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        decorator.canopyPerChunk = -999;
+        decorator.setTreesPerChunk(-999);
+        decorator.setFlowersPerChunk(4);
+        decorator.setGrassPerChunk(10);
     }
 
     // No ferns
-    public WorldGenerator getRandomWorldGenForGrass(Random par1Random) {
+    @Override
+    public WorldGenerator getRandomWorldGenForGrass(Random random) {
         return new WorldGenTallGrass(Blocks.tallgrass, 1);
     }
 }
