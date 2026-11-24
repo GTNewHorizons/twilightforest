@@ -14,16 +14,17 @@ public class ComponentTFFinalCastleDungeonSteps extends StructureTFComponent {
     public ComponentTFFinalCastleDungeonSteps() {}
 
     public ComponentTFFinalCastleDungeonSteps(Random rand, int i, int x, int y, int z, int rotation) {
+        super(i);
         this.spawnListIndex = 2; // dungeon monsters
 
         this.setCoordBaseMode(rotation);
         this.boundingBox = StructureTFComponent
-                .getComponentToAddBoundingBox2(x, y, z, -2, -15, -3, 5, 15, 20, rotation);
+                .getComponentToAddBoundingBox2(x, y, z, -2, -15, -3, 5, 20, 20, rotation);
     }
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
     }
@@ -31,8 +32,8 @@ public class ComponentTFFinalCastleDungeonSteps extends StructureTFComponent {
     /**
      * build more steps towards the specified direction
      */
-    public ComponentTFFinalCastleDungeonSteps buildMoreStepsTowards(StructureComponent parent, List list, Random rand,
-            int rotation) {
+    public ComponentTFFinalCastleDungeonSteps buildMoreStepsTowards(StructureComponent parent,
+            List<StructureComponent> list, Random rand, int rotation) {
 
         int direction = (rotation + this.coordBaseMode) % 4;
 
@@ -69,8 +70,8 @@ public class ComponentTFFinalCastleDungeonSteps extends StructureTFComponent {
     /**
      * build a new level under the exit
      */
-    public ComponentTFFinalCastleDungeonEntrance buildLevelUnder(StructureComponent parent, List list, Random rand,
-            int level) {
+    public ComponentTFFinalCastleDungeonEntrance buildLevelUnder(StructureComponent parent,
+            List<StructureComponent> list, Random rand, int level) {
         // find center of landing
         int dx = this.getXWithOffset(2, 19);
         int dy = this.getYWithOffset(-7);
@@ -94,8 +95,8 @@ public class ComponentTFFinalCastleDungeonSteps extends StructureTFComponent {
     /**
      * build the boss room
      */
-    public ComponentTFFinalCastleDungeonForgeRoom buildBossRoomUnder(StructureComponent parent, List list,
-            Random rand) {
+    public ComponentTFFinalCastleDungeonForgeRoom buildBossRoomUnder(StructureComponent parent,
+            List<StructureComponent> list, Random rand) {
         // find center of landing
         int dx = this.getXWithOffset(2, 19);
         int dy = this.getYWithOffset(-31);

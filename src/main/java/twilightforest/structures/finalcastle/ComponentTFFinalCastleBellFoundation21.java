@@ -7,6 +7,7 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 
 import twilightforest.structures.StructureTFComponent;
 
+// i sure hope this castle has a final boss!
 // A larger foundation that comes all the way from the top of a tower
 public class ComponentTFFinalCastleBellFoundation21 extends ComponentTFFinalCastleFoundation13 {
 
@@ -26,16 +27,10 @@ public class ComponentTFFinalCastleBellFoundation21 extends ComponentTFFinalCast
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        // find ground level
-        if (this.groundLevel < 0) {
-            this.groundLevel = this.getDeadrockLevel(world, sbb);
-        }
-
-        // how tall are we?
-        int height = this.boundingBox.maxY - this.groundLevel;
-
-        int mid = 16;
-        int low = 32;
+        // these supports descend until they meet terrain, was unnecessary and could choose different levels on
+        // different chunks
+        final int mid = 16;
+        final int low = 32;
 
         // assume square
         int size = this.boundingBox.maxX - this.boundingBox.minX;

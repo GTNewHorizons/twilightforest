@@ -20,7 +20,7 @@ public class ComponentTFFinalCastleEntranceTower extends ComponentTFFinalCastleM
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 
@@ -49,9 +49,7 @@ public class ComponentTFFinalCastleEntranceTower extends ComponentTFFinalCastleM
             direction = 3;
             if (!this.buildSideTower(list, rand, middleFloors + 1, direction, howFar)) {
                 direction = 0;
-                if (!this.buildSideTower(list, rand, middleFloors + 1, direction, howFar)) {
-                    // side tower no worky
-                }
+                buildSideTower(list, rand, middleFloors + 1, direction, howFar);
             }
         }
 
@@ -85,11 +83,12 @@ public class ComponentTFFinalCastleEntranceTower extends ComponentTFFinalCastleM
         bridge.buildComponent(this, list, rand);
     }
 
-    private boolean buildSideTower(List list, Random rand, int middleFloors, int direction, int howFar) {
+    private boolean buildSideTower(List<StructureComponent> list, Random rand, int middleFloors, int direction,
+            int howFar) {
         ChunkCoordinates opening = this.getValidOpeningCC(rand, direction);
 
-        direction += this.coordBaseMode;
-        direction %= 4;
+        int localRotation = direction;
+        direction = (direction + this.coordBaseMode) % 4;
 
         // build towards
         ChunkCoordinates tc = this.offsetTowerCCoords(opening.posX, opening.posY, opening.posZ, howFar, direction);
@@ -133,7 +132,8 @@ public class ComponentTFFinalCastleEntranceTower extends ComponentTFFinalCastleM
             bridge.buildComponent(this, list, rand);
 
             // opening
-            addOpening(opening.posX, opening.posY + 1, opening.posZ, direction);
+            // addOpening uses the parent towers local side, not the rotated direction
+            addOpening(opening.posX, opening.posY + 1, opening.posZ, localRotation);
 
             return true;
         } else {
