@@ -26,9 +26,8 @@ public class ItemTFFierySword extends ItemSword {
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList) {
+    public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
         ItemStack istack = new ItemStack(item, 1, 0);
         // istack.addEnchantment(Enchantment.fireAspect, 1);
         itemList.add(istack);
@@ -36,7 +35,7 @@ public class ItemTFFierySword extends ItemSword {
 
     /**
      * Return an item rarity from EnumRarity
-     * 
+     *
      * This is automatically rare
      */
     @Override
@@ -50,8 +49,8 @@ public class ItemTFFierySword extends ItemSword {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with fiery ingots
-        return par2ItemStack.getItem() == TFItems.fieryIngot ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return par2ItemStack != null && (par2ItemStack.getItem() == TFItems.fieryIngot
+                || super.getIsRepairable(par1ItemStack, par2ItemStack));
     }
 
     /**

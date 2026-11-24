@@ -36,9 +36,9 @@ public class ItemTFPhantomArmor extends ItemArmor {
     /**
      * Called by RenderBiped and RenderPlayer to determine the armor texture that should be use for the currently
      * equiped item. This will only be called on instances of ItemArmor.
-     * 
+     *
      * Returning null from this function will use the default value.
-     * 
+     *
      * @param stack  ItemStack for the equpt armor
      * @param entity The entity wearing the armor
      * @param slot   The slot the armor is in
@@ -66,8 +66,8 @@ public class ItemTFPhantomArmor extends ItemArmor {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with knightmetal ingots
-        return par2ItemStack.getItem() == TFItems.knightMetal ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return (par2ItemStack != null && par2ItemStack.getItem() == TFItems.knightMetal)
+                || super.getIsRepairable(par1ItemStack, par2ItemStack);
     }
 
     /**
@@ -93,11 +93,11 @@ public class ItemTFPhantomArmor extends ItemArmor {
 
     /**
      * Override this method to have an item handle its own armor rendering.
-     * 
+     *
      * @param entityLiving The entity wearing the armor
      * @param itemStack    The itemStack to render the model of
      * @param armorSlot    0=head, 1=torso, 2=legs, 3=feet
-     * 
+     *
      * @return A ModelBiped to render instead of the default
      */
     @SideOnly(Side.CLIENT)

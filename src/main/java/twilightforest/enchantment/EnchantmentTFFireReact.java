@@ -1,13 +1,11 @@
 package twilightforest.enchantment;
 
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnumEnchantmentType;
 
-public class EnchantmentTFFireReact extends Enchantment {
+public class EnchantmentTFFireReact extends TFEnchantment {
 
-    public EnchantmentTFFireReact(int par1, int par2) {
-        super(par1, par2, EnumEnchantmentType.armor);
-        this.setName("tfFireReact");
-
+    public EnchantmentTFFireReact(int id, int weight) {
+        super(id, weight, EnumEnchantmentType.armor);
+        setName("tfFireReact");
     }
 }

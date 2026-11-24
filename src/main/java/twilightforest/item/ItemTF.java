@@ -26,7 +26,7 @@ public class ItemTF extends Item {
 
     /**
      * Return an item rarity from EnumRarity
-     * 
+     *
      * This is automatically uncommon
      */
     @Override
@@ -60,13 +60,8 @@ public class ItemTF extends Item {
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer player, List<String> list, boolean par4) {
         if (Mods.ticon.isLoaded() && (this == TFItems.fieryBlood || this == TFItems.fieryTears)) {
-            String tooltip = "";
-            if (this == TFItems.fieryBlood) {
-                tooltip = StatCollector.translateToLocal("item.fieryBlood.tooltip");
-            } else if (this == TFItems.fieryTears) {
-                tooltip = StatCollector.translateToLocal("item.fieryTears.tooltip");
-            }
-            list.add(EnumChatFormatting.GRAY + tooltip);
+            String key = this == TFItems.fieryBlood ? "item.fieryBlood.tooltip" : "item.fieryTears.tooltip";
+            list.add(EnumChatFormatting.GRAY + StatCollector.translateToLocal(key));
         }
     }
 }

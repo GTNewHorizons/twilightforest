@@ -29,24 +29,15 @@ public class ItemTFIronwoodArmor extends ItemArmor {
     }
 
     @Override
-    public String getArmorTexture(ItemStack itemstack, Entity entity, int slot, String layer) {
-
-        if (itemstack.getItem() == TFItems.ironwoodPlate || itemstack.getItem() == TFItems.ironwoodHelm
-                || itemstack.getItem() == TFItems.ironwoodBoots) {
-            return TwilightForestMod.ARMOR_DIR + "ironwood_1.png";
-        }
-        if (itemstack.getItem() == TFItems.ironwoodLegs) {
-            return TwilightForestMod.ARMOR_DIR + "ironwood_2.png";
-        }
-        return TwilightForestMod.ARMOR_DIR + "ironwood_1.png";
+    public String getArmorTexture(ItemStack stack, Entity entity, int slot, String layer) {
+        return TwilightForestMod.ARMOR_DIR + (slot == 2 ? "ironwood_2.png" : "ironwood_1.png");
     }
 
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList) {
+    public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List<ItemStack> itemList) {
         ItemStack istack = new ItemStack(item, 1, 0);
         switch (this.armorType) {
             case 0 -> istack.addEnchantment(Enchantment.aquaAffinity, 1);
@@ -60,8 +51,8 @@ public class ItemTFIronwoodArmor extends ItemArmor {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with ironwood ingots
-        return par2ItemStack.getItem() == TFItems.ironwoodIngot ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return par2ItemStack != null && (par2ItemStack.getItem() == TFItems.ironwoodIngot
+                || super.getIsRepairable(par1ItemStack, par2ItemStack));
     }
 
     @Override
