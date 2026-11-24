@@ -15,9 +15,9 @@ import twilightforest.item.TFItems;
 
 /**
  * Deer are like quiet, non-milkable cows!
- * 
+ *
  * Also they look like deer
- * 
+ *
  * @author Ben
  *
  */
@@ -25,7 +25,6 @@ public class EntityTFDeer extends EntityCow {
 
     public EntityTFDeer(World world) {
         super(world);
-        // texture = TwilightForestMod.MODEL_DIR + "wilddeer.png";
         setSize(0.7F, 2.3F);
 
         // this.tasks.taskEntries.clear();
@@ -70,9 +69,8 @@ public class EntityTFDeer extends EntityCow {
         if (itemstack != null && itemstack.getItem() == Items.bucket) {
             // specifically do not respond to this
             return false;
-        } else {
-            return super.interact(entityplayer);
         }
+        return super.interact(entityplayer);
     }
 
     /**
@@ -80,21 +78,14 @@ public class EntityTFDeer extends EntityCow {
      */
     @Override
     protected void dropFewItems(boolean par1, int par2) {
-        int var3 = this.rand.nextInt(3) + this.rand.nextInt(1 + par2);
-        int var4;
-
-        for (var4 = 0; var4 < var3; ++var4) {
+        int leatherCount = this.rand.nextInt(3) + this.rand.nextInt(1 + par2);
+        for (int i = 0; i < leatherCount; i++) {
             this.dropItem(Items.leather, 1);
         }
 
-        var3 = this.rand.nextInt(3) + 1 + this.rand.nextInt(1 + par2);
-
-        for (var4 = 0; var4 < var3; ++var4) {
-            if (this.isBurning()) {
-                this.dropItem(TFItems.venisonCooked, 1);
-            } else {
-                this.dropItem(TFItems.venisonRaw, 1);
-            }
+        int venisonCount = this.rand.nextInt(3) + 1 + this.rand.nextInt(1 + par2);
+        for (int i = 0; i < venisonCount; i++) {
+            this.dropItem(this.isBurning() ? TFItems.venisonCooked : TFItems.venisonRaw, 1);
         }
     }
 
@@ -112,9 +103,9 @@ public class EntityTFDeer extends EntityCow {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        if (par1DamageSource.getEntity() instanceof EntityPlayer player
+                && player.dimension == TwilightForestMod.dimensionID) {
+            player.triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 

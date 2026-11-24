@@ -1,21 +1,18 @@
 package twilightforest.entity.ai;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITarget;
 
-import cpw.mods.fml.common.FMLLog;
-
 public class EntityAITFFlockTarget extends EntityAITarget {
 
-    EntityLivingBase flockCreature;
-    EntityLivingBase flockTarget;
+    private final EntityCreature flockCreature;
+    private EntityLivingBase flockTarget;
 
     public EntityAITFFlockTarget(EntityCreature par1EntityLiving, boolean b) {
-        super(par1EntityLiving, false);
+        super(par1EntityLiving, b);
         this.flockCreature = par1EntityLiving;
         this.setMutexBits(1);
     }
@@ -25,28 +22,32 @@ public class EntityAITFFlockTarget extends EntityAITarget {
      */
     @Override
     public boolean shouldExecute() {
-        List<? extends EntityLivingBase> flockList = this.flockCreature.worldObj.getEntitiesWithinAABB(
-                this.flockCreature.getClass(),
-                this.flockCreature.boundingBox.expand(16.0D, 4.0D, 16.0D));
-        List<EntityLivingBase> targetList = new ArrayList<>();
-
-        for (EntityLivingBase flocker : flockList) {
-            if (flocker.getAITarget() != null) {
-                targetList.add(flocker.getAITarget());
+        if (flockCreature.getAttackTarget() != null || flockCreature.getRNG().nextInt(10) != 0) {
+            return false;
+        }
+        List<? extends EntityLivingBase> nearby = flockCreature.worldObj
+                .getEntitiesWithinAABB(flockCreature.getClass(), flockCreature.boundingBox.expand(16.0D, 4.0D, 16.0D));
+        flockTarget = null;
+        double nearest = Double.MAX_VALUE;
+        for (EntityLivingBase member : nearby) {
+            if (member == flockCreature || !member.isEntityAlive()) {
+                continue;
+            }
+            // an allys current target is more useful than an old revenge target
+            EntityLivingBase candidate = member instanceof EntityCreature ? ((EntityCreature) member).getAttackTarget()
+                    : null;
+            if (candidate == null) {
+                candidate = member.getAITarget();
+            }
+            if (candidate != null && candidate.isEntityAlive() && isSuitableTarget(candidate, true)) {
+                double distance = flockCreature.getDistanceSqToEntity(candidate);
+                if (distance < nearest) {
+                    nearest = distance;
+                    flockTarget = candidate;
+                }
             }
         }
-
-        if (targetList.isEmpty()) {
-            return false;
-        } else {
-            // hmm, just pick a random target?
-            EntityLivingBase randomTarget = targetList.get(this.flockCreature.worldObj.rand.nextInt(targetList.size()));
-
-            FMLLog.fine("[TwilightForest] randomTarget = " + randomTarget);
-
-            this.flockTarget = randomTarget;
-            return this.isSuitableTarget(this.flockTarget, true);
-        }
+        return flockTarget != null;
     }
 
     /**
@@ -54,7 +55,9 @@ public class EntityAITFFlockTarget extends EntityAITarget {
      */
     @Override
     public void startExecuting() {
-        this.taskOwner.setAttackTarget(this.flockTarget);
-        super.startExecuting();
+        if (flockTarget != null && flockTarget.isEntityAlive()) {
+            taskOwner.setAttackTarget(flockTarget);
+            super.startExecuting();
+        }
     }
 }

@@ -2,7 +2,6 @@ package twilightforest.entity.ai;
 
 import java.util.List;
 
-import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
@@ -12,14 +11,15 @@ import twilightforest.entity.passive.EntityTFQuestRam;
 public class EntityAITFFindLoose extends EntityAIBase {
 
     /** The entity using this AI that is tempted by the player. */
-    private EntityCreature temptedEntity;
+    private final EntityTFQuestRam temptedEntity;
 
-    private Item temptID;
-    private float pursueSpeed;
+    private final Item temptID;
+    private final float pursueSpeed;
 
     private int delayTemptCounter;
 
     private EntityItem temptingItem;
+    private int pathCooldown;
 
     public EntityAITFFindLoose(EntityTFQuestRam entityTFQuestRam, float speed, Item blockID) {
         this.temptedEntity = entityTFQuestRam;
@@ -33,28 +33,24 @@ public class EntityAITFFindLoose extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        if (this.delayTemptCounter > 0) {
-            --this.delayTemptCounter;
+        if (delayTemptCounter > 0) {
+            --delayTemptCounter;
             return false;
-        } else {
-            this.temptingItem = null;
-
-            List<EntityItem> nearbyItems = this.temptedEntity.worldObj
-                    .getEntitiesWithinAABB(EntityItem.class, this.temptedEntity.boundingBox.expand(16.0D, 4.0D, 16.0D));
-
-            for (EntityItem itemNearby : nearbyItems) {
-                if (itemNearby.getEntityItem().getItem() == temptID && itemNearby.isEntityAlive()) {
-                    this.temptingItem = itemNearby;
-                    break;
+        }
+        List<EntityItem> nearby = temptedEntity.worldObj
+                .getEntitiesWithinAABB(EntityItem.class, temptedEntity.boundingBox.expand(16.0D, 4.0D, 16.0D));
+        temptingItem = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (EntityItem item : nearby) {
+            if (isWanted(item)) {
+                double distance = temptedEntity.getDistanceSqToEntity(item);
+                if (distance < nearestDistance) {
+                    temptingItem = item;
+                    nearestDistance = distance;
                 }
             }
-
-            if (this.temptingItem == null) {
-                return false;
-            } else {
-                return true;
-            }
         }
+        return temptingItem != null;
     }
 
     /**
@@ -62,23 +58,25 @@ public class EntityAITFFindLoose extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        return this.shouldExecute();
+        return isWanted(temptingItem) && temptedEntity.getDistanceSqToEntity(temptingItem) > 6.25D;
     }
 
     /**
      * Execute a one shot task or start executing a continuous task
      */
     @Override
-    public void startExecuting() {}
+    public void startExecuting() {
+        pathCooldown = 0;
+    }
 
     /**
      * Resets the task
      */
     @Override
     public void resetTask() {
-        this.temptingItem = null;
-        this.temptedEntity.getNavigator().clearPathEntity();
-        this.delayTemptCounter = 100;
+        temptingItem = null;
+        temptedEntity.getNavigator().clearPathEntity();
+        delayTemptCounter = 20;
     }
 
     /**
@@ -86,14 +84,23 @@ public class EntityAITFFindLoose extends EntityAIBase {
      */
     @Override
     public void updateTask() {
-        this.temptedEntity.getLookHelper()
-                .setLookPositionWithEntity(this.temptingItem, 30.0F, this.temptedEntity.getVerticalFaceSpeed());
-
-        if (this.temptedEntity.getDistanceSqToEntity(this.temptingItem) < 6.25D) {
-            this.temptedEntity.getNavigator().clearPathEntity();
-        } else {
-            this.temptedEntity.getNavigator()
-                    .tryMoveToXYZ(temptingItem.posX, temptingItem.posY, temptingItem.posZ, this.pursueSpeed);
+        if (!isWanted(temptingItem)) {
+            return;
         }
+        temptedEntity.getLookHelper()
+                .setLookPositionWithEntity(temptingItem, 30.0F, temptedEntity.getVerticalFaceSpeed());
+        if (--pathCooldown <= 0) {
+            pathCooldown = 10;
+            temptedEntity.getNavigator()
+                    .tryMoveToXYZ(temptingItem.posX, temptingItem.posY, temptingItem.posZ, pursueSpeed);
+        }
+    }
+
+    private boolean isWanted(EntityItem item) {
+        return item != null && item.isEntityAlive()
+                && item.getEntityItem() != null
+                && item.getEntityItem().stackSize > 0
+                && item.getEntityItem().getItem() == temptID
+                && !temptedEntity.isColorPresent(item.getEntityItem().getItemDamage());
     }
 }

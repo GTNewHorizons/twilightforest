@@ -22,6 +22,8 @@ import twilightforest.TwilightForestMod;
 
 public class EntityTFBunny extends EntityCreature implements IAnimals {
 
+    private static final int DATA_BUNNY_TYPE = 16;
+
     public EntityTFBunny(World par1World) {
         super(par1World);
         // texture = TwilightForestMod.MODEL_DIR + "bunnydutch.png";
@@ -29,7 +31,7 @@ public class EntityTFBunny extends EntityCreature implements IAnimals {
         this.setSize(0.3F, 0.7F);
 
         // maybe this will help them move cuter?
-        this.stepHeight = 1;
+        this.stepHeight = 1.0F;
 
         // squirrel AI
         this.getNavigator().setAvoidsWater(true);
@@ -38,7 +40,7 @@ public class EntityTFBunny extends EntityCreature implements IAnimals {
         this.tasks.addTask(2, new EntityAITempt(this, 1.0F, Items.wheat_seeds, true));
         this.tasks.addTask(3, new EntityAIAvoidEntity(this, EntityPlayer.class, 2.0F, 0.8F, 1.33F));
         this.tasks.addTask(5, new EntityAIWander(this, 0.8F));
-        this.tasks.addTask(6, new EntityAIWander(this, 1.0F));
+
         this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6F));
         this.tasks.addTask(8, new EntityAILookIdle(this));
 
@@ -60,7 +62,7 @@ public class EntityTFBunny extends EntityCreature implements IAnimals {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataWatcher.addObject(16, (byte) 0);
+        this.dataWatcher.addObject(DATA_BUNNY_TYPE, (byte) 0);
     }
 
     /**
@@ -115,11 +117,11 @@ public class EntityTFBunny extends EntityCreature implements IAnimals {
     }
 
     public int getBunnyType() {
-        return this.dataWatcher.getWatchableObjectByte(16);
+        return this.dataWatcher.getWatchableObjectByte(DATA_BUNNY_TYPE);
     }
 
     public void setBunnyType(int par1) {
-        this.dataWatcher.updateObject(16, (byte) par1);
+        this.dataWatcher.updateObject(DATA_BUNNY_TYPE, (byte) par1);
     }
 
     /**
@@ -146,10 +148,7 @@ public class EntityTFBunny extends EntityCreature implements IAnimals {
     public float getBlockPathWeight(int par1, int par2, int par3) {
         // avoid leaves & wood
         Material underMaterial = this.worldObj.getBlock(par1, par2 - 1, par3).getMaterial();
-        if (underMaterial == Material.leaves) {
-            return -1.0F;
-        }
-        if (underMaterial == Material.wood) {
+        if (underMaterial == Material.leaves || underMaterial == Material.wood) {
             return -1.0F;
         }
         if (underMaterial == Material.grass) {
@@ -165,9 +164,9 @@ public class EntityTFBunny extends EntityCreature implements IAnimals {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        if (par1DamageSource.getEntity() instanceof EntityPlayer player
+                && player.dimension == TwilightForestMod.dimensionID) {
+            player.triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 }

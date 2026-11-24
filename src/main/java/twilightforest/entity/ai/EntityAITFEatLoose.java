@@ -10,16 +10,16 @@ import twilightforest.entity.passive.EntityTFQuestRam;
 
 /**
  * This is an AI task for the quest ram. When one of the items it wants comes within a close distance, i
- * 
+ *
  * @author Ben
  *
  */
 public class EntityAITFEatLoose extends EntityAIBase {
 
     /** The entity using this AI that is tempted by the player. */
-    private EntityTFQuestRam temptedQuestRam;
+    private final EntityTFQuestRam temptedQuestRam;
 
-    private Item temptID;
+    private final Item temptID;
 
     private int delayTemptCounter;
 
@@ -36,31 +36,24 @@ public class EntityAITFEatLoose extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        if (this.delayTemptCounter > 0) {
-            --this.delayTemptCounter;
+        if (delayTemptCounter > 0) {
+            --delayTemptCounter;
             return false;
-        } else {
-            this.temptingItem = null;
-
-            List<EntityItem> nearbyItems = this.temptedQuestRam.worldObj
-                    .getEntitiesWithinAABB(EntityItem.class, this.temptedQuestRam.boundingBox.expand(2.0D, 2.0D, 2.0D));
-
-            for (EntityItem itemNearby : nearbyItems) {
-                if (itemNearby.getEntityItem().getItem() == temptID
-                        && !temptedQuestRam.isColorPresent(itemNearby.getEntityItem().getItemDamage())
-                        && itemNearby.isEntityAlive()) { // is a wool block
-                                                         // really "alive"?
-                    this.temptingItem = itemNearby;
-                    break;
+        }
+        List<EntityItem> nearby = temptedQuestRam.worldObj
+                .getEntitiesWithinAABB(EntityItem.class, temptedQuestRam.boundingBox.expand(2.0D, 2.0D, 2.0D));
+        temptingItem = null;
+        double bestDistance = Double.MAX_VALUE;
+        for (EntityItem item : nearby) {
+            if (isWanted(item)) {
+                double distance = temptedQuestRam.getDistanceSqToEntity(item);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    temptingItem = item;
                 }
             }
-
-            if (this.temptingItem == null) {
-                return false;
-            } else {
-                return true;
-            }
         }
+        return temptingItem != null;
     }
 
     /**
@@ -68,7 +61,7 @@ public class EntityAITFEatLoose extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        return this.shouldExecute();
+        return isWanted(temptingItem) && temptedQuestRam.getDistanceSqToEntity(temptingItem) <= 6.25D;
     }
 
     /**
@@ -82,9 +75,8 @@ public class EntityAITFEatLoose extends EntityAIBase {
      */
     @Override
     public void resetTask() {
-        this.temptingItem = null;
-        this.temptedQuestRam.getNavigator().clearPathEntity();
-        this.delayTemptCounter = 100;
+        temptingItem = null;
+        delayTemptCounter = 20;
     }
 
     /**
@@ -92,25 +84,33 @@ public class EntityAITFEatLoose extends EntityAIBase {
      */
     @Override
     public void updateTask() {
-        this.temptedQuestRam.getLookHelper()
-                .setLookPositionWithEntity(this.temptingItem, 30.0F, this.temptedQuestRam.getVerticalFaceSpeed());
-
-        if (this.temptedQuestRam.getDistanceSqToEntity(this.temptingItem) < 6.25D) {
-            if (!temptedQuestRam.isColorPresent(temptingItem.getEntityItem().getItemDamage())) { // we did technically
-                                                                                                 // already check this,
-                                                                                                 // but why not check
-                                                                                                 // again
-                // EAT IT!
-                this.temptingItem.setDead();
-                this.temptedQuestRam.playLivingSound();
-                this.temptedQuestRam.setColorPresent(temptingItem.getEntityItem().getItemDamage());
-                this.temptedQuestRam.animateAddColor(temptingItem.getEntityItem().getItemDamage(), 50); // TODO: find a
-                                                                                                        // better place
-                                                                                                        // for this?
-                                                                                                        // refactor?
-                // System.out.println("yum");
-            }
+        if (!isWanted(temptingItem)) {
+            return;
         }
+        temptedQuestRam.getLookHelper()
+                .setLookPositionWithEntity(temptingItem, 30.0F, temptedQuestRam.getVerticalFaceSpeed());
+        if (temptedQuestRam.getDistanceSqToEntity(temptingItem) <= 6.25D) {
+            int color = temptingItem.getEntityItem().getItemDamage();
+            // consume one block, not the entire dropped stack
+            if (--temptingItem.getEntityItem().stackSize <= 0) {
+                temptingItem.setDead();
+            } else {
+                // mark the modified stack as watched so clients see the reduced count
+                temptingItem.setEntityItemStack(temptingItem.getEntityItem());
+            }
+            temptedQuestRam.playLivingSound();
+            temptedQuestRam.setColorPresent(color);
+            temptedQuestRam.animateAddColor(color, 50);
+            temptingItem = null;
+        }
+    }
+
+    private boolean isWanted(EntityItem item) {
+        return item != null && item.isEntityAlive()
+                && item.getEntityItem() != null
+                && item.getEntityItem().stackSize > 0
+                && item.getEntityItem().getItem() == temptID
+                && !temptedQuestRam.isColorPresent(item.getEntityItem().getItemDamage());
     }
 
 }

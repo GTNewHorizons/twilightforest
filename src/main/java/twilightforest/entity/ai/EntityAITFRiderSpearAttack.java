@@ -7,36 +7,30 @@ import twilightforest.entity.EntityTFGoblinKnightUpper;
 
 public class EntityAITFRiderSpearAttack extends EntityAIBase {
 
-    private EntityTFGoblinKnightLower entity;
+    private final EntityTFGoblinKnightLower entity;
 
-    public EntityAITFRiderSpearAttack(EntityTFGoblinKnightLower par1EntityCreature) {
-        this.entity = par1EntityCreature;
+    public EntityAITFRiderSpearAttack(EntityTFGoblinKnightLower knight) {
+        this.entity = knight;
         this.setMutexBits(7);
     }
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
     @Override
     public boolean shouldExecute() {
-        return isRiderDoingSpearAttack();
+        return this.isRiderDoingSpearAttack();
+    }
+
+    @Override
+    public boolean continueExecuting() {
+        return this.isRiderDoingSpearAttack();
     }
 
     public boolean isRiderDoingSpearAttack() {
-        if (this.entity.riddenByEntity != null && this.entity.riddenByEntity instanceof EntityTFGoblinKnightUpper) {
-            int timer = ((EntityTFGoblinKnightUpper) this.entity.riddenByEntity).heavySpearTimer;
-            return timer > 0 && timer < 50;
-        } else {
+        if (!this.entity.isEntityAlive() || !(this.entity.riddenByEntity instanceof EntityTFGoblinKnightUpper rider)
+                || !rider.isEntityAlive()) {
             return false;
         }
-    }
 
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
-    @Override
-    public boolean continueExecuting() {
-        return isRiderDoingSpearAttack();
+        // the riders telegraph must also suspend the mounts regular attacks
+        return rider.heavySpearTimer > 0 && rider.heavySpearTimer < 50;
     }
-
 }
