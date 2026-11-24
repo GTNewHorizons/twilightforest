@@ -12,10 +12,12 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenWoodRoots extends TFGenerator {
 
-    private Block rootBlock = TFBlocks.root;
-    private int rootMeta = BlockTFRoots.ROOT_META;
-    private Block oreBlock = TFBlocks.root;
-    private int oreMeta = BlockTFRoots.OREROOT_META;
+    private static final int MAX_HORIZONTAL_SPREAD = 6;
+
+    private final Block rootBlock = TFBlocks.root;
+    private final int rootMeta = BlockTFRoots.ROOT_META;
+    private final Block oreBlock = TFBlocks.root;
+    private final int oreMeta = BlockTFRoots.OREROOT_META;
 
     @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
@@ -37,28 +39,17 @@ public class TFGenWoodRoots extends TFGenerator {
 
     private boolean drawRoot(World world, Random rand, int x, int y, int z, float length, float angle, float tilt) {
         // put origin at where we start
-        return this.drawRoot(world, rand, x, y, z, x, y, z, length, angle, tilt);
+        return drawRoot(world, rand, x, z, x, y, z, length, angle, tilt);
     }
 
-    private boolean drawRoot(World world, Random rand, int ox, int oy, int oz, int x, int y, int z, float length,
+    private boolean drawRoot(World world, Random rand, int originX, int originZ, int x, int y, int z, float length,
             float angle, float tilt) {
         // generate a direction and a length
         int[] dest = translate(x, y, z, length, angle, tilt);
 
-        // restrict x and z to within 7
-        int limit = 6;
-        if (ox + limit < dest[0]) {
-            dest[0] = ox + limit;
-        }
-        if (ox - limit > dest[0]) {
-            dest[0] = ox - limit;
-        }
-        if (oz + limit < dest[2]) {
-            dest[2] = oz + limit;
-        }
-        if (oz - limit > dest[2]) {
-            dest[2] = oz - limit;
-        }
+        // restrict both horizontal coordinates to 6 blocks from the original root
+        dest[0] = Math.max(originX - MAX_HORIZONTAL_SPREAD, Math.min(originX + MAX_HORIZONTAL_SPREAD, dest[0]));
+        dest[2] = Math.max(originZ - MAX_HORIZONTAL_SPREAD, Math.min(originZ + MAX_HORIZONTAL_SPREAD, dest[2]));
 
         // end must be in stone
         if (world.getBlock(dest[0], dest[1], dest[2]) != Blocks.stone) {
@@ -72,42 +63,37 @@ public class TFGenWoodRoots extends TFGenerator {
         }
 
         // if we are long enough, make either another root or an oreball
-        if (length > 8) {
-            if (rand.nextInt(3) > 0) {
-                // length > 8, usually split off into another root half as long
-                int[] nextSrc = translate(x, y, z, length / 2, angle, tilt);
-                float nextAngle = (angle + 0.25F + (rand.nextFloat() * 0.5F)) % 1.0F;
-                float nextTilt = 0.6F + rand.nextFloat() * 0.3F;
-                drawRoot(
-                        world,
-                        rand,
-                        ox,
-                        oy,
-                        oz,
-                        nextSrc[0],
-                        nextSrc[1],
-                        nextSrc[2],
-                        length / 2.0F,
-                        nextAngle,
-                        nextTilt);
-            }
+        if (length > 8 && rand.nextInt(3) > 0) {
+            // length > 8, usually split off into another root half as long
+            int[] nextSrc = translate(x, y, z, length / 2, angle, tilt);
+            float nextAngle = (angle + 0.25F + (rand.nextFloat() * 0.5F)) % 1.0F;
+            float nextTilt = 0.6F + rand.nextFloat() * 0.3F;
+            drawRoot(
+                    world,
+                    rand,
+                    originX,
+                    originZ,
+                    nextSrc[0],
+                    nextSrc[1],
+                    nextSrc[2],
+                    length / 2.0F,
+                    nextAngle,
+                    nextTilt);
         }
 
-        if (length > 6) {
-            if (rand.nextInt(4) == 0) {
-                // length > 6, potentially make oreball
-                int[] ballSrc = translate(x, y, z, length / 2, angle, tilt);
-                int[] ballDest = translate(ballSrc[0], ballSrc[1], ballSrc[2], 1.5, (angle + 0.5F) % 1.0F, 0.75);
+        if (length > 6 && rand.nextInt(4) == 0) {
+            // length > 6, potentially make oreball
+            int[] ballSrc = translate(x, y, z, length / 2, angle, tilt);
+            int[] ballDest = translate(ballSrc[0], ballSrc[1], ballSrc[2], 1.5, (angle + 0.5F) % 1.0F, 0.75);
 
-                this.placeRootBlock(world, ballSrc[0], ballSrc[1], ballSrc[2], oreBlock, oreMeta);
-                this.placeRootBlock(world, ballSrc[0], ballSrc[1], ballDest[2], oreBlock, oreMeta);
-                this.placeRootBlock(world, ballDest[0], ballSrc[1], ballSrc[2], oreBlock, oreMeta);
-                this.placeRootBlock(world, ballDest[0], ballSrc[1], ballDest[2], oreBlock, oreMeta);
-                this.placeRootBlock(world, ballSrc[0], ballDest[1], ballSrc[2], oreBlock, oreMeta);
-                this.placeRootBlock(world, ballSrc[0], ballDest[1], ballDest[2], oreBlock, oreMeta);
-                this.placeRootBlock(world, ballDest[0], ballDest[1], ballSrc[2], oreBlock, oreMeta);
-                this.placeRootBlock(world, ballDest[0], ballDest[1], ballDest[2], oreBlock, oreMeta);
-            }
+            placeRootBlock(world, ballSrc[0], ballSrc[1], ballSrc[2], oreBlock, oreMeta);
+            placeRootBlock(world, ballSrc[0], ballSrc[1], ballDest[2], oreBlock, oreMeta);
+            placeRootBlock(world, ballDest[0], ballSrc[1], ballSrc[2], oreBlock, oreMeta);
+            placeRootBlock(world, ballDest[0], ballSrc[1], ballDest[2], oreBlock, oreMeta);
+            placeRootBlock(world, ballSrc[0], ballDest[1], ballSrc[2], oreBlock, oreMeta);
+            placeRootBlock(world, ballSrc[0], ballDest[1], ballDest[2], oreBlock, oreMeta);
+            placeRootBlock(world, ballDest[0], ballDest[1], ballSrc[2], oreBlock, oreMeta);
+            placeRootBlock(world, ballDest[0], ballDest[1], ballDest[2], oreBlock, oreMeta);
         }
         return true;
     }

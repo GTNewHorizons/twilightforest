@@ -10,8 +10,10 @@ public class TFGenStoneCircle extends TFGenerator {
     /**
      * We make a stone circle, generally 3 squares in diameter
      */
+    @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
-        if (!isAreaSuitable(world, rand, x - 3, y, z - 3, 6, 4, 6)) {
+        // both +-3 edges must be included in the clearance check
+        if (y < 1 || y + 4 > world.getHeight() || !isAreaSuitable(world, rand, x - 3, y, z - 3, 7, 4, 7)) {
             return false;
         }
 

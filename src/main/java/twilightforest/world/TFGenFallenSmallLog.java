@@ -11,110 +11,76 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenFallenSmallLog extends TFGenerator {
 
+    private static final int MIN_LENGTH = 3;
+    private static final int LENGTH_VARIATION = 4;
+    private static final int CROSS_SECTION_WIDTH = 3;
+    private static final int CLEARANCE_HEIGHT = 2;
+
+    private static final int LOG_X_META = 4;
+    private static final int LOG_Z_META = 8;
+
     @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
-
         // determine direction
         boolean goingX = rand.nextBoolean();
 
         // length
-        int length = rand.nextInt(4) + 3;
+        int length = rand.nextInt(LENGTH_VARIATION) + MIN_LENGTH;
 
         // check area clear
-        if (goingX) {
-            if (!isAreaSuitable(world, rand, x, y, z, length, 3, 2)) {
-                return false;
-            }
-        } else {
-            if (!isAreaSuitable(world, rand, x, y, z, 3, length, 2)) {
-                return false;
-            }
+        // include the side branch on either side of the log, as well as its moss
+        int width = goingX ? length : CROSS_SECTION_WIDTH;
+        int depth = goingX ? CROSS_SECTION_WIDTH : length;
+        if (y < 1 || y + CLEARANCE_HEIGHT > world.getHeight()
+                || !isAreaSuitable(world, rand, x, y, z, width, CLEARANCE_HEIGHT, depth)) {
+            return false;
         }
 
         // determine wood type
-        Block logID;
-        int logMeta;
-        int logMetaBranch;
-
-        switch (rand.nextInt(7)) {
-            default -> {
-                logID = TFBlocks.log;
-                logMeta = 0;
-            }
-            case 1 -> {
-                logID = TFBlocks.log;
-                logMeta = 1;
-            }
-            case 2 -> {
-                logID = TFBlocks.log;
-                logMeta = 2;
-            }
-            case 3 -> {
-                logID = Blocks.log;
-                logMeta = 0;
-            }
-            case 4 -> {
-                logID = Blocks.log;
-                logMeta = 1;
-            }
-            case 5 -> {
-                logID = Blocks.log;
-                logMeta = 2;
-            }
-            case 6 -> {
-                logID = Blocks.log;
-                logMeta = 3;
-            }
-        }
-        logMetaBranch = logMeta;
+        int woodVariant = rand.nextInt(7);
+        Block logBlock = woodVariant < 3 ? TFBlocks.log : Blocks.log;
+        int woodMeta = woodVariant < 3 ? woodVariant : woodVariant - 3;
+        int logMeta = woodMeta | (goingX ? LOG_X_META : LOG_Z_META);
+        int branchMeta = woodMeta | (goingX ? LOG_Z_META : LOG_X_META);
 
         // check biome
 
         // make log
-        if (goingX) {
-            logMeta |= 4;
-            logMetaBranch |= 8;
-
-            for (int lx = 0; lx < length; lx++) {
-                this.setBlockAndMetadata(world, x + lx, y + 0, z + 1, logID, logMeta);
-                if (rand.nextInt(3) > 0) {
-                    this.setBlockAndMetadata(world, x + lx, y + 1, z + 1, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-                }
-            }
-        } else {
-            logMeta |= 8;
-            logMetaBranch |= 4;
-
-            for (int lz = 0; lz < length; lz++) {
-                this.setBlockAndMetadata(world, x + 1, y + 0, z + lz, logID, logMeta);
-                if (rand.nextInt(3) > 0) {
-                    this.setBlockAndMetadata(world, x + 1, y + 1, z + lz, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-                }
+        for (int along = 0; along < length; along++) {
+            int logX = x + (goingX ? along : 1);
+            int logZ = z + (goingX ? 1 : along);
+            setBlockAndMetadata(world, logX, y, logZ, logBlock, logMeta);
+            if (rand.nextInt(3) > 0) {
+                setBlockAndMetadata(world, logX, y + 1, logZ, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
             }
         }
 
         // possibly make branch
         if (rand.nextInt(3) > 0) {
-            if (goingX) {
-                int bx = rand.nextInt(length);
-                int bz = rand.nextBoolean() ? 2 : 0;
-
-                this.setBlockAndMetadata(world, x + bx, y + 0, z + bz, logID, logMetaBranch);
-                if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(world, x + bx, y + 1, z + bz, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-                }
-            } else {
-                int bx = rand.nextBoolean() ? 2 : 0;
-                int bz = rand.nextInt(length);
-
-                this.setBlockAndMetadata(world, x + bx, y + 0, z + bz, logID, logMetaBranch);
-                if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(world, x + bx, y + 1, z + bz, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-                }
-            }
+            makeSideBranch(world, rand, x, y, z, length, goingX, logBlock, branchMeta);
         }
 
         return true;
     }
 
+    private void makeSideBranch(World world, Random rand, int x, int y, int z, int length, boolean goingX,
+            Block logBlock, int branchMeta) {
+        int along;
+        int across;
+        if (goingX) {
+            along = rand.nextInt(length);
+            across = rand.nextBoolean() ? 2 : 0;
+        } else {
+            // preserve the original draw order for Z oriented side branches
+            across = rand.nextBoolean() ? 2 : 0;
+            along = rand.nextInt(length);
+        }
+
+        int branchX = x + (goingX ? along : across);
+        int branchZ = z + (goingX ? across : along);
+        setBlockAndMetadata(world, branchX, y, branchZ, logBlock, branchMeta);
+        if (rand.nextBoolean()) {
+            setBlockAndMetadata(world, branchX, y + 1, branchZ, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
+        }
+    }
 }

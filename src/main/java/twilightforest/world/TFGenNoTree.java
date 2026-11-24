@@ -16,7 +16,7 @@ public class TFGenNoTree extends TFTreeGenerator {
     }
 
     @Override
-    public boolean generate(World world, Random random, int i, int j, int k) {
+    public boolean generate(World world, Random random, int x, int y, int z) {
         return false;
     }
 }
