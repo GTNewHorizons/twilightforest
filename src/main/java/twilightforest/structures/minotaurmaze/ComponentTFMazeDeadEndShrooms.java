@@ -11,7 +11,6 @@ public class ComponentTFMazeDeadEndShrooms extends ComponentTFMazeDeadEndRoots {
 
     public ComponentTFMazeDeadEndShrooms() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeDeadEndShrooms(int i, int x, int y, int z, int rotation) {
@@ -41,65 +40,36 @@ public class ComponentTFMazeDeadEndShrooms extends ComponentTFMazeDeadEndRoots {
             }
         }
 
-        // brackets?
-        Block mushType = rand.nextBoolean() ? Blocks.red_mushroom_block : Blocks.brown_mushroom_block;
-        int mushY = rand.nextInt(4) + 1;
-        int mushZ = rand.nextInt(3) + 1;
-        this.placeBlockAtCurrentPosition(world, mushType, 15, 1, mushY - 1, mushZ, sbb);
-        this.fillWithMetadataBlocks(world, sbb, 1, 1, mushZ, 1, mushY, mushZ, mushType, 10, Blocks.air, 0, false);
-        this.fillWithMetadataBlocks(
+        // grow wall brackets above head height to keep the route through the room open
+        Block first = rand.nextBoolean() ? Blocks.red_mushroom_block : Blocks.brown_mushroom_block;
+        placeWallBracket(world, sbb, first, 1, rand.nextInt(2) + 3, rand.nextInt(3) + 1);
+        Block second = first == Blocks.red_mushroom_block ? Blocks.brown_mushroom_block : Blocks.red_mushroom_block;
+        placeWallBracket(world, sbb, second, 4, rand.nextInt(2) + 3, rand.nextInt(3) + 1);
+        placeBackBracket(
                 world,
                 sbb,
-                1,
-                mushY,
-                mushZ - 1,
-                2,
-                mushY,
-                mushZ + 1,
-                mushType,
-                14,
-                Blocks.air,
-                0,
-                false);
-
-        mushType = mushType == Blocks.brown_mushroom_block ? Blocks.red_mushroom_block : Blocks.brown_mushroom_block;
-        mushY = rand.nextInt(4) + 1;
-        mushZ = rand.nextInt(3) + 1;
-        this.fillWithMetadataBlocks(world, sbb, 4, 1, mushZ, 4, mushY, mushZ, mushType, 10, Blocks.air, 0, false);
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                3,
-                mushY,
-                mushZ - 1,
-                4,
-                mushY,
-                mushZ + 1,
-                mushType,
-                14,
-                Blocks.air,
-                0,
-                false);
-
-        mushType = rand.nextBoolean() ? Blocks.red_mushroom_block : Blocks.brown_mushroom_block;
-        mushY = rand.nextInt(4) + 1;
-        int mushX = rand.nextInt(3) + 2;
-        this.fillWithMetadataBlocks(world, sbb, mushX, 1, 4, mushX, mushY, 4, mushType, 10, Blocks.air, 0, false);
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                mushX - 1,
-                mushY,
-                3,
-                mushX + 1,
-                mushY,
-                4,
-                mushType,
-                14,
-                Blocks.air,
-                0,
-                false);
+                rand.nextBoolean() ? Blocks.red_mushroom_block : Blocks.brown_mushroom_block,
+                rand.nextInt(3) + 2,
+                rand.nextInt(2) + 3);
 
         return true;
+    }
+
+    private void placeWallBracket(World world, StructureBoundingBox sbb, Block mushroom, int x, int height, int z) {
+        this.fillWithMetadataBlocks(world, sbb, x, 1, z, x, height, z, mushroom, 10, Blocks.air, 0, false);
+        int innerX = x == 1 ? 2 : 3;
+        this.placeBlockAtCurrentPosition(world, mushroom, 14, innerX, height, z, sbb);
+        this.placeBlockAtCurrentPosition(world, mushroom, 14, x, height, z - 1, sbb);
+        this.placeBlockAtCurrentPosition(world, mushroom, 14, x, height, z + 1, sbb);
+        if (x == 1) {
+            this.placeBlockAtCurrentPosition(world, mushroom, 15, x, height - 1, z, sbb);
+        }
+    }
+
+    private void placeBackBracket(World world, StructureBoundingBox sbb, Block mushroom, int x, int height) {
+        this.fillWithMetadataBlocks(world, sbb, x, 1, 4, x, height, 4, mushroom, 10, Blocks.air, 0, false);
+        this.placeBlockAtCurrentPosition(world, mushroom, 14, x - 1, height, 4, sbb);
+        this.placeBlockAtCurrentPosition(world, mushroom, 14, x + 1, height, 4, sbb);
+        this.placeBlockAtCurrentPosition(world, mushroom, 14, x, height, 3, sbb);
     }
 }

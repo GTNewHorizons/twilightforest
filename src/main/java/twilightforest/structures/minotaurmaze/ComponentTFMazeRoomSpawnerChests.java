@@ -14,7 +14,6 @@ public class ComponentTFMazeRoomSpawnerChests extends ComponentTFMazeRoom {
 
     public ComponentTFMazeRoomSpawnerChests() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeRoomSpawnerChests(int i, Random rand, int x, int y, int z) {
@@ -70,14 +69,12 @@ public class ComponentTFMazeRoomSpawnerChests extends ComponentTFMazeRoom {
         placeBlockAtCurrentPosition(world, Blocks.oak_stairs, getStairMeta(2) + 4, dx + 2, 4, dz + 1, sbb);
         placeBlockAtCurrentPosition(world, Blocks.oak_stairs, getStairMeta(3) + 4, dx + 1, 4, dz + 2, sbb);
 
-        placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 1, 2, dz + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 0, 2, dz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 2, 2, dz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 1, 2, dz + 2, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 1, 3, dz + 0, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 0, 3, dz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 2, 3, dz + 1, sbb);
-        placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 1, 3, dz + 2, sbb);
+        for (int y = 2; y <= 3; y++) {
+            placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 1, y, dz, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx, y, dz + 1, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 2, y, dz + 1, sbb);
+            placeBlockAtCurrentPosition(world, Blocks.iron_bars, 0, dx + 1, y, dz + 2, sbb);
+        }
 
     }
 

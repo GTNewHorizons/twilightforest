@@ -1,5 +1,6 @@
 package twilightforest.structures.minotaurmaze;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -15,7 +16,8 @@ import twilightforest.structures.TFMaze;
 
 public class ComponentTFMinotaurMaze extends StructureTFComponent {
 
-    private static final int FLOOR_LEVEL = 1;
+    private static final int ROOM_COUNT = 7;
+    private boolean legacyRoomGeneration;
     TFMaze maze;
     int[] rcoords;
     private int level;
@@ -47,10 +49,9 @@ public class ComponentTFMinotaurMaze extends StructureTFComponent {
         setFixedMazeSeed();
 
         // rooms
-        int nrooms = 7;
-        rcoords = new int[nrooms * 2];
+        rcoords = new int[ROOM_COUNT * 2];
 
-        addRoomsToMaze(entranceX, entranceZ, nrooms);
+        addRoomsToMaze(entranceX, entranceZ, ROOM_COUNT);
 
         // make actual maze
         maze.generateRecursiveBacktracker(0, 0);
@@ -60,23 +61,73 @@ public class ComponentTFMinotaurMaze extends StructureTFComponent {
         // make one entrance room always
         rcoords[0] = entranceX;
         rcoords[1] = entranceZ;
-        maze.carveRoom1(entranceX, entranceZ);
+        carveRoom(entranceX, entranceZ);
 
         // add room coordinates, trying to keep them separate from existing rooms
         for (int i = 1; i < nrooms; i++) {
             int rx, rz;
+            int attempts = 0;
             do {
                 rx = maze.rand.nextInt(getMazeSize() - 2) + 1;
                 rz = maze.rand.nextInt(getMazeSize() - 2) + 1;
-            } while (isNearRoom(rx, rz, rcoords, i == 1 ? 7 : 4));
+            } while (isNearRoom(rx, rz, rcoords, i == 1 ? 7 : 4) && ++attempts < 4096);
 
-            maze.carveRoom1(rx, rz);
+            if (isNearRoom(rx, rz, rcoords, i == 1 ? 7 : 4)) {
+                // deterministic fallback avoids freezing chunk generation on a bad seed
+                boolean found = false;
+                for (int x = 1; x < getMazeSize() - 1 && !found; x++) {
+                    for (int z = 1; z < getMazeSize() - 1; z++) {
+                        if (!isNearRoom(x, z, rcoords, i == 1 ? 7 : 4)) {
+                            rx = x;
+                            rz = z;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    throw new IllegalStateException("Not enough space to place Minotaur Maze rooms");
+                }
+            }
 
-            // System.out.println("Initially carving room " + rx + ", " + rz);
+            carveRoom(rx, rz);
 
             rcoords[i * 2] = rx;
             rcoords[i * 2 + 1] = rz;
         }
+    }
+
+    private void carveRoom(int x, int z) {
+        if (legacyRoomGeneration) {
+            // preserve the original algorithm for structures saved before this fix
+            maze.carveRoom1(x, z);
+        } else {
+            carveConnectedRoom(x, z);
+        }
+    }
+
+    // carve directly in raw coords
+    // addresses the four room exits using cell coordinates, leaving doors disconnected
+    private void carveConnectedRoom(int x, int z) {
+        int rawX = x * 2 + 1;
+        int rawZ = z * 2 + 1;
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                maze.putRaw(rawX + dx, rawZ + dz, TFMaze.ROOM);
+            }
+        }
+
+        // leave the adjacent cells unvisited so the backtracker joins the room to the maze
+        maze.putRaw(rawX, rawZ - 2, 0);
+        maze.putRaw(rawX, rawZ + 2, 0);
+        maze.putRaw(rawX - 2, rawZ, 0);
+        maze.putRaw(rawX + 2, rawZ, 0);
+
+        int rawLimit = getMazeSize() * 2;
+        if (rawZ >= 4) maze.putRaw(rawX, rawZ - 3, TFMaze.ROOM);
+        if (rawZ + 4 <= rawLimit) maze.putRaw(rawX, rawZ + 3, TFMaze.ROOM);
+        if (rawX >= 4) maze.putRaw(rawX - 3, rawZ, TFMaze.ROOM);
+        if (rawX + 4 <= rawLimit) maze.putRaw(rawX + 3, rawZ, TFMaze.ROOM);
     }
 
     private void setFixedMazeSeed() {
@@ -96,6 +147,7 @@ public class ComponentTFMinotaurMaze extends StructureTFComponent {
 
         par1NBTTagCompound.setInteger("mazeLevel", this.level);
         par1NBTTagCompound.setIntArray("roomCoords", this.rcoords);
+        par1NBTTagCompound.setBoolean("tfMazeFixedRooms", !legacyRoomGeneration);
     }
 
     /**
@@ -105,22 +157,38 @@ public class ComponentTFMinotaurMaze extends StructureTFComponent {
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
         this.level = par1NBTTagCompound.getInteger("mazeLevel");
-        this.rcoords = par1NBTTagCompound.getIntArray("roomCoords");
-
-        // recreate maze object
-        maze = new TFMaze(getMazeSize(), getMazeSize());
-        setFixedMazeSeed();
-
-        // blank out rcoords above 1 so that the room generation works properly
-        // TODO: re-do this. :)
-        for (int i = 2; i < rcoords.length; i++) {
-            this.rcoords[i] = 0;
+        legacyRoomGeneration = !par1NBTTagCompound.getBoolean("tfMazeFixedRooms");
+        int[] storedRoomCoords = par1NBTTagCompound.getIntArray("roomCoords");
+        boolean validStoredRooms = storedRoomCoords.length == ROOM_COUNT * 2;
+        if (validStoredRooms) {
+            for (int coordinate : storedRoomCoords) {
+                if (coordinate < 1 || coordinate >= getMazeSize() - 1) {
+                    validStoredRooms = false;
+                    break;
+                }
+            }
         }
 
-        // recreate rooms
-        this.addRoomsToMaze(this.rcoords[0], this.rcoords[1], (this.rcoords.length + 1) / 2);
+        // replay room selection to preserve the original rng state used by the maze layout
+        maze = new TFMaze(getMazeSize(), getMazeSize());
+        setFixedMazeSeed();
+        rcoords = new int[ROOM_COUNT * 2];
+        int entranceX = validStoredRooms ? storedRoomCoords[0] : getMazeSize() / 2;
+        int entranceZ = validStoredRooms ? storedRoomCoords[1] : getMazeSize() / 2;
+        addRoomsToMaze(entranceX, entranceZ, ROOM_COUNT);
 
-        // regenerate maze
+        if (validStoredRooms && !Arrays.equals(rcoords, storedRoomCoords)) {
+            for (int x = 0; x < getMazeSize() * 2 + 1; x++) {
+                for (int z = 0; z < getMazeSize() * 2 + 1; z++) {
+                    maze.putRaw(x, z, 0);
+                }
+            }
+            rcoords = storedRoomCoords;
+            for (int i = 0; i < ROOM_COUNT; i++) {
+                carveRoom(rcoords[i * 2], rcoords[i * 2 + 1]);
+            }
+        }
+
         maze.generateRecursiveBacktracker(0, 0);
     }
 
@@ -168,7 +236,7 @@ public class ComponentTFMinotaurMaze extends StructureTFComponent {
 
     /**
      * Find dead ends and put something there
-     * 
+     *
      * @param random
      * @param list
      */

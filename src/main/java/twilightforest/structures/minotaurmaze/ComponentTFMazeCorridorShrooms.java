@@ -9,77 +9,55 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 
 public class ComponentTFMazeCorridorShrooms extends ComponentTFMazeCorridor {
 
-    public ComponentTFMazeCorridorShrooms() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFMazeCorridorShrooms() {}
 
-    public ComponentTFMazeCorridorShrooms(int i, int x, int y, int z, int rotation) {
-        super(i, x, y, z, rotation);
+    public ComponentTFMazeCorridorShrooms(int componentType, int x, int y, int z, int rotation) {
+        super(componentType, x, y, z, rotation);
     }
 
     @Override
-    public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-
-        // mycelium & mushrooms
-        for (int x = 1; x < 5; x++) {
-            for (int z = 0; z < 5; z++) {
-                if (rand.nextInt(2) > 0) {
-                    this.placeBlockAtCurrentPosition(world, Blocks.mycelium, 0, x, 0, z, sbb);
+    public boolean addComponentParts(World world, Random random, StructureBoundingBox bounds) {
+        // mycelium and small mushrooms are passable decorations
+        for (int x = 1; x <= 4; x++) {
+            for (int z = 0; z <= 4; z++) {
+                if (random.nextBoolean()) {
+                    placeBlockAtCurrentPosition(world, Blocks.mycelium, 0, x, 0, z, bounds);
                 }
-                if (rand.nextInt(2) > 0) {
-                    this.placeBlockAtCurrentPosition(
-                            world,
-                            rand.nextBoolean() ? Blocks.red_mushroom : Blocks.brown_mushroom,
-                            0,
-                            x,
-                            1,
-                            z,
-                            sbb);
+                if (random.nextBoolean()) {
+                    Block mushroom = random.nextBoolean() ? Blocks.red_mushroom : Blocks.brown_mushroom;
+                    placeBlockAtCurrentPosition(world, mushroom, 0, x, 1, z, bounds);
                 }
             }
         }
 
-        // brackets?
-        Block mushType = rand.nextBoolean() ? Blocks.red_mushroom_block : Blocks.brown_mushroom_block;
-        int mushY = rand.nextInt(4) + 1;
-        int mushZ = rand.nextInt(4) + 1;
-        this.placeBlockAtCurrentPosition(world, mushType, 15, 1, mushY - 1, mushZ, sbb);
-        this.fillWithMetadataBlocks(world, sbb, 1, 1, mushZ, 1, mushY, mushZ, mushType, 10, Blocks.air, 0, false);
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                1,
-                mushY,
-                mushZ - 1,
-                2,
-                mushY,
-                mushZ + 1,
-                mushType,
-                14,
-                Blocks.air,
-                0,
-                false);
-
-        mushType = mushType == Blocks.brown_mushroom_block ? Blocks.red_mushroom_block : Blocks.brown_mushroom_block;
-        mushY = rand.nextInt(4) + 1;
-        mushZ = rand.nextInt(4) + 1;
-        this.fillWithMetadataBlocks(world, sbb, 4, 1, mushZ, 4, mushY, mushZ, mushType, 10, Blocks.air, 0, false);
-        this.fillWithMetadataBlocks(
-                world,
-                sbb,
-                3,
-                mushY,
-                mushZ - 1,
-                4,
-                mushY,
-                mushZ + 1,
-                mushType,
-                14,
-                Blocks.air,
-                0,
-                false);
-
+        Block firstMushroom = random.nextBoolean() ? Blocks.red_mushroom_block : Blocks.brown_mushroom_block;
+        placeBracket(world, random, bounds, firstMushroom, 1, 2);
+        Block secondMushroom = firstMushroom == Blocks.brown_mushroom_block ? Blocks.red_mushroom_block
+                : Blocks.brown_mushroom_block;
+        placeBracket(world, random, bounds, secondMushroom, 4, 3);
         return true;
+    }
+
+    private void placeBracket(World world, Random random, StructureBoundingBox bounds, Block mushroom, int wallX,
+            int innerX) {
+        // low mushroom caps used to seal the whole corridor when both sides overlapped
+        // keep the cap above player head height and the stem against its side wall, stops clog
+        int capY = random.nextInt(2) + 3;
+        int z = random.nextInt(4) + 1;
+        fillWithMetadataBlocks(world, bounds, wallX, 1, z, wallX, capY, z, mushroom, 10, Blocks.air, 0, false);
+        fillWithMetadataBlocks(
+                world,
+                bounds,
+                Math.min(wallX, innerX),
+                capY,
+                z - 1,
+                Math.max(wallX, innerX),
+                capY,
+                z + 1,
+                mushroom,
+                14,
+                Blocks.air,
+                0,
+                false);
     }
 }
