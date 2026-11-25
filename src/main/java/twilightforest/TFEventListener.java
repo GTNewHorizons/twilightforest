@@ -701,7 +701,7 @@ public class TFEventListener {
             TFBaublesIntegration.restoreBaubles(player, baublesInventory);
 
             // spawn effect thingers
-            if (keepInventory.getItemStack() != null) {
+            if (keepInventory != null && keepInventory.getItemStack() != null) {
                 EntityTFCharmEffect effect = new EntityTFCharmEffect(
                         player.worldObj,
                         player,
@@ -729,8 +729,8 @@ public class TFEventListener {
     @SubscribeEvent
     public void onPlayerLogout(PlayerLoggedOutEvent event) {
         EntityPlayer player = event.player;
-        if (playerKeepsMap.containsKey(player.getCommandSenderName()))
-            playerKeepsMap.remove(player.getCommandSenderName());
+        playerKeepsMap.remove(player.getCommandSenderName());
+        playerBaublesMap.remove(player.getCommandSenderName());
     }
 
     /**
