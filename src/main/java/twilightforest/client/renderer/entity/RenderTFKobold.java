@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -17,11 +18,16 @@ public class RenderTFKobold extends RenderTFBiped {
         super(modelBiped, scale, textureName);
     }
 
+    @Override
+    protected int shouldRenderPass(EntityLivingBase entity, int pass, float partialTick) {
+        // kobolds have no armour model
+        return -1;
+    }
+
     protected void renderEquippedItems(EntityLiving p_77029_1_, float p_77029_2_) {
         GL11.glColor3f(1.0F, 1.0F, 1.0F);
         // super.renderEquippedItems(p_77029_1_, p_77029_2_);
         ItemStack itemstack = p_77029_1_.getHeldItem();
-        ItemStack itemstack1 = p_77029_1_.func_130225_q(3);
         Item item;
         float f1;
 

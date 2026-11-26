@@ -24,6 +24,7 @@ public class RenderTFBiped extends RenderBiped {
     /**
      * Return our specific texture
      */
+    @Override
     protected ResourceLocation getEntityTexture(Entity par1Entity) {
         return textureLoc;
     }

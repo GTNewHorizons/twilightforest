@@ -27,10 +27,10 @@ public class TileEntityTFChestRenderer extends TileEntitySpecialRenderer {
             "sort" };
     private static final ResourceLocation[] doubleTextures = new ResourceLocation[names.length];
     private static final ResourceLocation[] textures = new ResourceLocation[names.length];
-    private ModelChest modelChest = new ModelTFChest();
-    private ModelChest modelLargeChest = new ModelTFLargeChest();
+    private final ModelChest modelChest = new ModelTFChest();
+    private final ModelChest modelLargeChest = new ModelTFLargeChest();
 
-    public TileEntityTFChestRenderer() {
+    static {
         for (int i = 0; i < names.length; i++) {
             doubleTextures[i] = new ResourceLocation(TwilightForestMod.MODEL_DIR + "chest/" + names[i] + "_double.png");
             textures[i] = new ResourceLocation(TwilightForestMod.MODEL_DIR + "chest/" + names[i] + ".png");
@@ -69,9 +69,11 @@ public class TileEntityTFChestRenderer extends TileEntitySpecialRenderer {
         WoodType type = WoodType.CANOPY;
         if (tileEntity instanceof TileEntityTFChest) {
             if (((TileEntityTFChest) tileEntity).cachedMaterial == WoodType.NULL) {
-                Block block = tileEntity.getWorldObj()
-                        .getBlock(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
-                if (block instanceof BlockTFChest) type = ((BlockTFChest) block).getWoodType();
+                if (tileEntity.hasWorldObj()) {
+                    Block block = tileEntity.getWorldObj()
+                            .getBlock(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
+                    if (block instanceof BlockTFChest) type = ((BlockTFChest) block).getWoodType();
+                }
             } else type = ((TileEntityTFChest) tileEntity).cachedMaterial;
         }
 

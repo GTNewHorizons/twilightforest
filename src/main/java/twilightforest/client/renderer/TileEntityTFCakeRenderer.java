@@ -11,7 +11,14 @@ import twilightforest.tileentity.TileEntityTFCake;
 
 public class TileEntityTFCakeRenderer extends TileEntitySpecialRenderer {
 
-    private static final String textureLoc = TwilightForestMod.ID + ":textures/blocks/experiment115/";
+    private static final String TEXTURE_DIR = TwilightForestMod.ID + ":textures/blocks/experiment115/";
+    private static final ResourceLocation textureSide = new ResourceLocation(TEXTURE_DIR + "experiment115_side.png");
+    private static final ResourceLocation textureInner = new ResourceLocation(TEXTURE_DIR + "experiment115_inner.png");
+    private static final ResourceLocation textureBottom = new ResourceLocation(
+            TEXTURE_DIR + "experiment115_bottom.png");
+    private static final ResourceLocation textureTop = new ResourceLocation(TEXTURE_DIR + "experiment115_top.png");
+    private static final ResourceLocation textureSpinkle = new ResourceLocation(
+            TEXTURE_DIR + "experiment115_sprinkle.png");
 
     public TileEntityTFCakeRenderer() {
 
@@ -30,12 +37,6 @@ public class TileEntityTFCakeRenderer extends TileEntitySpecialRenderer {
         float f = 0.0625F;
         float f1 = (l + 1) / 9.0f;
         final Tessellator tessellator = Tessellator.instance;
-
-        ResourceLocation textureSide = new ResourceLocation(textureLoc + "experiment115_side.png");
-        ResourceLocation textureInner = new ResourceLocation(textureLoc + "experiment115_inner.png");
-        ResourceLocation textureBottom = new ResourceLocation(textureLoc + "experiment115_bottom.png");
-        ResourceLocation textureTop = new ResourceLocation(textureLoc + "experiment115_top.png");
-        ResourceLocation textureSpinkle = new ResourceLocation(textureLoc + "experiment115_sprinkle.png");
 
         Minecraft.getMinecraft().getTextureManager().bindTexture(textureSide);
         tessellator.startDrawingQuads();
