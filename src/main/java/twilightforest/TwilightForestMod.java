@@ -9,6 +9,7 @@ import net.minecraftforge.common.AchievementPage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 
 import baubles.api.BaubleType;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -80,6 +81,9 @@ public class TwilightForestMod {
     public static final String ENVRIO_DIR = "twilightforest:textures/environment/";
     public static final String ARMOR_DIR = "twilightforest:textures/armor/";
     public static final String ENFORCED_PROGRESSION_RULE = "tfEnforcedProgression";
+
+    private static final String DIMENSION_CONFIG_CATEGORY = "dimension";
+    private static final String PERFORMANCE_CONFIG_CATEGORY = "Performance";
 
     public static final int GUI_ID_UNCRAFTING = 1;
     public static final int GUI_ID_FURNACE = 2;
@@ -176,7 +180,7 @@ public class TwilightForestMod {
     public static int idMobRovingCube;
 
     public static int idVehicleSpawnNatureBolt = 1; // non-configurable, since there's no way for them to conflict with
-                                                    // anything
+    // anything
     public static int idVehicleSpawnLichBolt = 2;
     public static int idVehicleSpawnTwilightWandBolt = 3;
     public static int idVehicleSpawnTomeBolt = 4;
@@ -194,6 +198,7 @@ public class TwilightForestMod {
     public static int idVehicleSpawnChainBlock = 18;
     public static int idVehicleSpawnCubeOfAnnihilation = 19;
     public static int idVehicleSpawnSlideBlock = 20;
+    public static final int idVehicleSpawnUrGhastFireball = 21;
 
     public static int idBiomeLake;
     public static int idBiomeTwilightForest;
@@ -304,21 +309,7 @@ public class TwilightForestMod {
         FMLCommonHandler.instance().bus().register(eventListener); // we're getting events off this bus too
 
         // set up portal item
-        Item portalItem;
-        if (Item.itemRegistry.containsKey(portalCreationItemString)) {
-            portalItem = (Item) Item.itemRegistry.getObject(portalCreationItemString);
-            if (portalItem != Items.diamond) {
-                FMLLog.info("Set Twilight Forest portal item to %s", portalItem.getUnlocalizedName());
-            }
-        } else if (Block.blockRegistry.containsKey(portalCreationItemString)) {
-            portalItem = Item.getItemFromBlock((Block) Block.blockRegistry.getObject(portalCreationItemString));
-            FMLLog.info("Set Twilight Forest portal item to %s", portalItem.getUnlocalizedName());
-        } else {
-            FMLLog.info(
-                    "Twilight Forest config lists portal item as '%s'.  Not found, defaulting to diamond.",
-                    portalCreationItemString);
-            portalItem = Items.diamond;
-        }
+        Item portalItem = resolvePortalItem();
         // tick listener
         final TFTickHandler tfTickHandler = new TFTickHandler(portalItem);
         MinecraftForge.EVENT_BUS.register(tfTickHandler);
@@ -342,6 +333,25 @@ public class TwilightForestMod {
 
         // enter biomes into dictionary
         TFBiomeBase.registerWithBiomeDictionary();
+    }
+
+    private static Item resolvePortalItem() {
+        if (Item.itemRegistry.containsKey(portalCreationItemString)) {
+            Item item = (Item) Item.itemRegistry.getObject(portalCreationItemString);
+            if (item != Items.diamond) {
+                FMLLog.info("Set Twilight Forest portal item to %s", item.getUnlocalizedName());
+            }
+            return item;
+        }
+        if (Block.blockRegistry.containsKey(portalCreationItemString)) {
+            Item item = Item.getItemFromBlock((Block) Block.blockRegistry.getObject(portalCreationItemString));
+            FMLLog.info("Set Twilight Forest portal item to %s", item.getUnlocalizedName());
+            return item;
+        }
+        FMLLog.info(
+                "Twilight Forest config lists portal item as '%s'.  Not found, defaulting to diamond.",
+                portalCreationItemString);
+        return Items.diamond;
     }
 
     /**
@@ -422,7 +432,7 @@ public class TwilightForestMod {
     @EventHandler
     public void missingMappings(FMLMissingMappingsEvent event) {
         for (FMLMissingMappingsEvent.MissingMapping mapping : event.get()) {
-            if (mapping.name.equals("TwilightForest:tile.TFPlanks")) {
+            if ("TwilightForest:tile.TFPlanks".equals(mapping.name)) {
                 if (mapping.type == GameRegistry.Type.BLOCK) {
                     mapping.remap(TFBlocks.planks);
                 } else if (mapping.type == GameRegistry.Type.ITEM) {
@@ -765,6 +775,18 @@ public class TwilightForestMod {
                 0x0a0000,
                 0x00009b);
 
+        registerProjectiles();
+    }
+
+    private void registerProjectiles() {
+        EntityRegistry.registerModEntity(
+                twilightforest.entity.boss.EntityTFUrGhastFireball.class,
+                "tfurghastfireball",
+                idVehicleSpawnUrGhastFireball,
+                this,
+                150,
+                1,
+                true);
         EntityRegistry.registerModEntity(
                 twilightforest.entity.boss.EntityTFHydraHead.class,
                 "HydraHead",
@@ -955,127 +977,192 @@ public class TwilightForestMod {
         BlockDispenser.dispenseBehaviorRegistry.putObject(TFItems.spawnEgg, new BehaviorTFMobEggDispense());
     }
 
+    private static Property configProperty(Configuration config, String category, String name, boolean defaultValue,
+            String comment) {
+        Property property = config.get(category, name, defaultValue);
+        property.comment = comment;
+        return property;
+    }
+
+    private static boolean readBooleanConfig(Configuration config, String category, String name, boolean defaultValue,
+            String comment) {
+        return configProperty(config, category, name, defaultValue, comment).getBoolean(defaultValue);
+    }
+
+    private static int readIntConfig(Configuration config, String category, String name, int defaultValue,
+            String comment) {
+        Property property = config.get(category, name, defaultValue);
+        property.comment = comment;
+        return property.getInt(defaultValue);
+    }
+
+    private static double readDoubleConfig(Configuration config, String category, String name, double defaultValue,
+            String comment) {
+        Property property = config.get(category, name, defaultValue);
+        property.comment = comment;
+        return property.getDouble(defaultValue);
+    }
+
+    private static String readStringConfig(Configuration config, String category, String name, String defaultValue,
+            String comment) {
+        Property property = config.get(category, name, defaultValue);
+        property.comment = comment;
+        return property.getString();
+    }
+
+    private static String[] readStringListConfig(Configuration config, String category, String name,
+            String[] defaultValue, String comment) {
+        Property property = config.get(category, name, defaultValue);
+        property.comment = comment;
+        return property.getStringList();
+    }
+
     /**
      * Load our config file and set default values
      */
     private void loadConfiguration(Configuration configFile) {
         configFile.load();
 
-        dimensionID = configFile.get("dimension", "dimensionID", 7).getInt();
-        configFile.get(
-                "dimension",
+        dimensionID = readIntConfig(
+                configFile,
+                DIMENSION_CONFIG_CATEGORY,
                 "dimensionID",
-                7).comment = "What ID number to assign to the Twilight Forest dimension.  Change if you are having conflicts with another mod.";
-
-        dimensionProviderID = configFile.get("dimension", "dimensionProviderID", -777).getInt();
-        configFile.get(
-                "dimension",
+                7,
+                "What ID number to assign to the Twilight Forest dimension.  Change if you are having conflicts with another mod.");
+        dimensionProviderID = readIntConfig(
+                configFile,
+                DIMENSION_CONFIG_CATEGORY,
                 "dimensionProviderID",
-                7).comment = "Dimension provider ID.  Does not normally need to be changed, but the option is provided to work around a bug in MCPC+";
+                -777,
+                "Dimension provider ID.  Does not normally need to be changed, but the option is provided to work around a bug in MCPC+");
 
-        // other misc otions
-        silentCicadas = configFile.get(Configuration.CATEGORY_GENERAL, "SilentCicadas", false).getBoolean(false);
-        configFile.get(
+        // other misc options
+        silentCicadas = readBooleanConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "SilentCicadas",
-                false).comment = "Make cicadas silent  for those having sound library problems, or otherwise finding them annoying";
-        allowPortalsInOtherDimensions = configFile
-                .get(Configuration.CATEGORY_GENERAL, "AllowPortalsInOtherDimensions", false).getBoolean(false);
-        configFile.get(
+                false,
+                "Make cicadas silent  for those having sound library problems, or otherwise finding them annoying");
+        allowPortalsInOtherDimensions = readBooleanConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "AllowPortalsInOtherDimensions",
-                false).comment = "Allow portals to the Twilight Forest to be made outside of dimension 0.  May be considered an exploit.";
-        adminOnlyPortals = configFile.get(Configuration.CATEGORY_GENERAL, "AdminOnlyPortals", false).getBoolean(false);
-        configFile.get(
+                false,
+                "Allow portals to the Twilight Forest to be made outside of dimension 0.  May be considered an exploit.");
+        adminOnlyPortals = readBooleanConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "AdminOnlyPortals",
-                false).comment = "Allow portals only for admins (ops).  This severly reduces the range in which the mod usually scans for valid portal conditions, and it scans near ops only.";
-        twilightForestSeed = configFile.get(Configuration.CATEGORY_GENERAL, "TwilightForestSeed", "").getString();
-        configFile.get(
+                false,
+                "Allow portals only for admins (ops).  This severly reduces the range in which the mod usually scans for valid portal conditions, and it scans near ops only.");
+        twilightForestSeed = readStringConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "TwilightForestSeed",
-                "").comment = "If set, this will override the normal world seed when generating parts of the Twilight Forest Dimension.";
-        disablePortalCreation = configFile.get(Configuration.CATEGORY_GENERAL, "DisablePortalCreation", false)
-                .getBoolean(false);
-        configFile.get(
+                "",
+                "If set, this will override the normal world seed when generating parts of the Twilight Forest Dimension.");
+        disablePortalCreation = readBooleanConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "DisablePortalCreation",
-                false).comment = "Disable Twilight Forest portal creation entirely.  Provided for server operators looking to restrict action to the dimension.";
-        disableUncrafting = configFile.get(Configuration.CATEGORY_GENERAL, "DisableUncrafting", false)
-                .getBoolean(false);
-        configFile.get(
+                false,
+                "Disable Twilight Forest portal creation entirely.  Provided for server operators looking to restrict action to the dimension.");
+        disableUncrafting = readBooleanConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "DisableUncrafting",
-                false).comment = "Disable the uncrafting function of the uncrafting table.  Provided as an option when interaction with other mods produces exploitable recipes.";
-        oldMapGen = configFile.get(Configuration.CATEGORY_GENERAL, "OldMapGen", false).getBoolean(false);
-        configFile.get(
+                false,
+                "Disable the uncrafting function of the uncrafting table.  Provided as an option when interaction with other mods produces exploitable recipes.");
+        oldMapGen = readBooleanConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "OldMapGen",
-                false).comment = "Use old (pre Minecraft 1.7) map gen.  May not be fully supported.";
-        portalCreationItemString = configFile.get(Configuration.CATEGORY_GENERAL, "PortalCreationItem", "diamond")
-                .getString();
-        configFile.get(
+                false,
+                "Use old (pre Minecraft 1.7) map gen.  May not be fully supported.");
+        portalCreationItemString = readStringConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "PortalCreationItem",
-                "diamond").comment = "Item to create the Twilight Forest Portal.  Defaults to 'diamond'";
-        portalMaxSize = configFile.get(Configuration.CATEGORY_GENERAL, "portalMaxSize", 15).getInt();
-        configFile.get(
+                "diamond",
+                "Item to create the Twilight Forest Portal.  Defaults to 'diamond'");
+        portalMaxSize = readIntConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "portalMaxSize",
-                15).comment = "Maximal size of water pool that can be turned into a portal. NxN square.";
+                15,
+                "Maximal size of water pool that can be turned into a portal. NxN square.");
 
         String[] timeCoreExcludedDefault = { "minecraft:portal" };
-        String[] timeCoreExcludedNames = configFile
-                .get(Configuration.CATEGORY_GENERAL, "TimeCoreExcludedBlocks", timeCoreExcludedDefault).getStringList();
-        configFile.get(
+        String[] timeCoreExcludedNames = readStringListConfig(
+                configFile,
                 Configuration.CATEGORY_GENERAL,
                 "TimeCoreExcludedBlocks",
-                timeCoreExcludedDefault).comment = "Registry names of blocks the Tree of Time will NOT give extra random ticks to (e.g. 'minecraft:portal'). Format: 'modid:blockname'.";
+                timeCoreExcludedDefault,
+                "Registry names of blocks the Tree of Time will NOT give extra random ticks to (e.g. 'minecraft:portal'). Format: 'modid:blockname'.");
         timeCoreExcludedBlocks = new java.util.HashSet<>(java.util.Arrays.asList(timeCoreExcludedNames));
 
-        canopyCoverage = (float) (configFile.get("Performance", "CanopyCoverage", 1.7).getDouble(1.7));
-        configFile.get(
-                "performance",
+        canopyCoverage = (float) readDoubleConfig(
+                configFile,
+                PERFORMANCE_CONFIG_CATEGORY,
                 "CanopyCoverage",
-                1.7).comment = "Amount of canopy coverage, from 0.0 on up.  Lower numbers improve chunk generation speed at the cost of a thinner forest.";
-        twilightOakChance = configFile.get("Performance", "TwilightOakChance", 48).getInt(48);
-        configFile.get(
-                "Performance",
+                1.7,
+                "Amount of canopy coverage, from 0.0 on up.  Lower numbers improve chunk generation speed at the cost of a thinner forest.");
+        twilightOakChance = readIntConfig(
+                configFile,
+                PERFORMANCE_CONFIG_CATEGORY,
                 "TwilightOakChance",
-                48).comment = "Chance that a chunk in the Twilight Forest will contain a twilight oak tree.  Higher numbers reduce the number of trees, increasing performance.";
-        enableTiCIntegration = configFile.get("Tinker Integration", "EnableTiConstructIntegration", true)
-                .getBoolean(true);
-        configFile.get(
+                48,
+                "Chance that a chunk in the Twilight Forest will contain a twilight oak tree.  Higher numbers reduce the number of trees, increasing performance.");
+
+        enableTiCIntegration = readBooleanConfig(
+                configFile,
                 "Tinker Integration",
                 "EnableTiConstructIntegration",
-                true).comment = "Enable backport of 1.12.2 TiC integration including materials and modifiers.";
-        FieryMetal_ID = configFile.get("Tinker Integration", "FieryMetal_ID", 42).getInt(42);
-        configFile.get("Tinker Integration", "FieryMetal_ID", 42).comment = "Tinker Material ID for FieryMetal.";
-        Knightmetal_ID = configFile.get("Tinker Integration", "KnightMetal_ID", 43).getInt(43);
-        configFile.get("Tinker Integration", "KnightMetal_ID", 43).comment = "Tinker Material ID for KnightMetal.";
-        NagaScale_ID = configFile.get("Tinker Integration", "NagaScale_ID", 44).getInt(44);
-        configFile.get("Tinker Integration", "NagaScale_ID", 44).comment = "Tinker Material ID for NagaScale.";
-        Steeleaf_ID = configFile.get("Tinker Integration", "Steeleaf_ID", 45).getInt(45);
-        configFile.get("Tinker Integration", "Steeleaf_ID", 45).comment = "Tinker Material ID for Steeleaf.";
+                true,
+                "Enable backport of 1.12.2 TiC integration including materials and modifiers.");
+        FieryMetal_ID = readIntConfig(
+                configFile,
+                "Tinker Integration",
+                "FieryMetal_ID",
+                42,
+                "Tinker Material ID for FieryMetal.");
+        Knightmetal_ID = readIntConfig(
+                configFile,
+                "Tinker Integration",
+                "KnightMetal_ID",
+                43,
+                "Tinker Material ID for KnightMetal.");
+        NagaScale_ID = readIntConfig(
+                configFile,
+                "Tinker Integration",
+                "NagaScale_ID",
+                44,
+                "Tinker Material ID for NagaScale.");
+        Steeleaf_ID = readIntConfig(
+                configFile,
+                "Tinker Integration",
+                "Steeleaf_ID",
+                45,
+                "Tinker Material ID for Steeleaf.");
 
-        enableEfRIntegration = configFile.get("Et Futurum Requiem Integration", "EnableEfRIntegration", true)
-                .getBoolean(true);
-        configFile.get(
+        enableEfRIntegration = readBooleanConfig(
+                configFile,
                 "Et Futurum Requiem Integration",
                 "EnableEfRIntegration",
-                true).comment = "Enable Integration with Et Futurum Requiem";
-        shulkerSpawnInLichTower = configFile.get("Et Futurum Requiem Integration", "ShulkerSpawnInLichTower", true)
-                .getBoolean(true);
-        configFile.get(
+                true,
+                "Enable Integration with Et Futurum Requiem");
+        shulkerSpawnInLichTower = readBooleanConfig(
+                configFile,
                 "Et Futurum Requiem Integration",
                 "ShulkerSpawnInLichTower",
-                true).comment = "Should Shulkers spawn in Lich Towers";
-        shulkerSpawnInUrGhastTower = configFile
-                .get("Et Futurum Requiem Integration", "ShulkerSpawnInUrGhastTower", true).getBoolean(true);
-        configFile.get(
+                true,
+                "Should Shulkers spawn in Lich Towers");
+        shulkerSpawnInUrGhastTower = readBooleanConfig(
+                configFile,
                 "Et Futurum Requiem Integration",
                 "ShulkerSpawnInUrGhastTower",
-                true).comment = "Should Shulkers spawn in Ur Ghast Towers";
+                true,
+                "Should Shulkers spawn in Ur Ghast Towers");
 
         // fixed values, don't even read the config
         idMobWildBoar = 177;

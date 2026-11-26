@@ -3,51 +3,40 @@ package twilightforest.entity;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.ChatComponentTranslation;
 
-/**
- * Very similar to EntityEggInfo, but registers the stat info differently
- */
+// similar to vanilla EntityEggInfo but registers Twilight Forests kill stats
 public class TFEntityEggInfo {
 
-    /**
-     * The entityID of the spawned mob
-     */
     public final int spawnedID;
-    /**
-     * Base color of the egg
-     */
     public final int primaryColor;
-    /**
-     * Color of the egg spots
-     */
     public final int secondaryColor;
     public final StatBase killedStat;
     public final StatBase killedByStat;
 
-    public TFEntityEggInfo(int par1, int par2, int par3) {
-        this.spawnedID = par1;
-        this.primaryColor = par2;
-        this.secondaryColor = par3;
-        this.killedStat = TFEntityEggInfo.makeEntityKillStat(this);
-        this.killedByStat = TFEntityEggInfo.makeEntityKilledByStat(this);
+    public TFEntityEggInfo(int entityID, int backgroundColor, int spotColor) {
+        this.spawnedID = entityID;
+        this.primaryColor = backgroundColor;
+        this.secondaryColor = spotColor;
+        this.killedStat = makeEntityKillStat(this);
+        this.killedByStat = makeEntityKilledByStat(this);
     }
 
     public static StatBase makeEntityKillStat(TFEntityEggInfo eggInfo) {
-        String s = TFCreatures.getStringFromID(eggInfo.spawnedID);
-        return s == null ? null
-                : (new StatBase(
-                        "stat.killEntity." + s,
-                        new ChatComponentTranslation(
-                                "stat.entityKill",
-                                new ChatComponentTranslation("entity." + s + ".name")))).registerStat();
+        return registerStat(eggInfo.spawnedID, "stat.killEntity.", "stat.entityKill");
     }
 
-    public static StatBase makeEntityKilledByStat(TFEntityEggInfo p_151176_0_) {
-        String s = TFCreatures.getStringFromID(p_151176_0_.spawnedID);
-        return s == null ? null
-                : (new StatBase(
-                        "stat.entityKilledBy." + s,
-                        new ChatComponentTranslation(
-                                "stat.entityKilledBy",
-                                new ChatComponentTranslation("entity." + s + ".name")))).registerStat();
+    public static StatBase makeEntityKilledByStat(TFEntityEggInfo eggInfo) {
+        return registerStat(eggInfo.spawnedID, "stat.entityKilledBy.", "stat.entityKilledBy");
+    }
+
+    private static StatBase registerStat(int entityID, String statPrefix, String translationKey) {
+        String entityName = TFCreatures.getStringFromID(entityID);
+        if (entityName == null) {
+            return null;
+        }
+        return new StatBase(
+                statPrefix + entityName,
+                new ChatComponentTranslation(
+                        translationKey,
+                        new ChatComponentTranslation("entity." + entityName + ".name"))).registerStat();
     }
 }

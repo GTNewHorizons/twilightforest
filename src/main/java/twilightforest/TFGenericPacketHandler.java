@@ -38,31 +38,39 @@ public class TFGenericPacketHandler {
     @SubscribeEvent
     public void incomingPacket(ClientCustomPacketEvent event) {
         ByteBuf buf = event.packet.payload();
+        if (buf == null || !buf.isReadable() || Minecraft.getMinecraft().theWorld == null) {
+            return;
+        }
 
         // read first byte to see what kind of packet
-        int discriminatorByte = buf.readByte();
+        int discriminator = buf.readUnsignedByte();
+        int requiredBytes = requiredPayloadBytes(discriminator);
+        if (requiredBytes < 0 || buf.readableBytes() < requiredBytes) {
+            // ignore unrecognised and truncated packets instead of reading past the payload
+            return;
+        }
 
-        if (discriminatorByte == TRANSFORM_BIOME) {
-            processTransformBiomeData(buf);
+        switch (discriminator) {
+            case TRANSFORM_BIOME -> processTransformBiomeData(buf);
+            case THROW_PLAYER -> processThrowPlayerData(buf);
+            case AREA_PROTECTION -> processAreaProtectionData(buf);
+            case STRUCTURE_PROTECTION -> processStructureProtectionData(buf);
+            case STRUCTURE_PROTECTION_CLEAR -> processStructureProtectionClearData(buf);
+            case ENFORCED_PROGRESSION_STATUS -> processEnforcedProgressionStatusData(buf);
+            case ANNIHILATE_BLOCK -> processAnnihilateBlock(buf);
+            default -> {}
         }
-        if (discriminatorByte == THROW_PLAYER) {
-            processThrowPlayerData(buf);
-        }
-        if (discriminatorByte == AREA_PROTECTION) {
-            processAreaProtectionData(buf);
-        }
-        if (discriminatorByte == STRUCTURE_PROTECTION) {
-            processStructureProtectionData(buf);
-        }
-        if (discriminatorByte == STRUCTURE_PROTECTION_CLEAR) {
-            processStructureProtectionClearData(buf);
-        }
-        if (discriminatorByte == ENFORCED_PROGRESSION_STATUS) {
-            processEnforcedProgressionStatusData(buf);
-        }
-        if (discriminatorByte == ANNIHILATE_BLOCK) {
-            processAnnihilateBlock(buf);
-        }
+    }
+
+    private static int requiredPayloadBytes(int discriminator) {
+        return switch (discriminator) {
+            case TRANSFORM_BIOME, THROW_PLAYER, ANNIHILATE_BLOCK -> 12;
+            case AREA_PROTECTION -> 36;
+            case STRUCTURE_PROTECTION -> 24;
+            case STRUCTURE_PROTECTION_CLEAR -> 0;
+            case ENFORCED_PROGRESSION_STATUS -> 1;
+            default -> -1;
+        };
     }
 
     @SideOnly(Side.CLIENT)
@@ -84,10 +92,12 @@ public class TFGenericPacketHandler {
         Chunk chunkAt = worldObj.getChunkFromBlockCoords(x, z);
         int biomeIndex = (z & 15) << 4 | (x & 15);
 
-        if (Mods.endlessids.isLoaded()) {
-            ((ChunkBiomeHook) chunkAt).getBiomeShortArray()[biomeIndex] = (short) biomeID;
-        } else {
+        if (Mods.endlessids.isLoaded() && chunkAt instanceof ChunkBiomeHook biomeHook) {
+            biomeHook.getBiomeShortArray()[biomeIndex] = (short) biomeID;
+        } else if (biomeID >= 0 && biomeID <= 255) {
             chunkAt.getBiomeArray()[biomeIndex] = (byte) biomeID;
+        } else {
+            return;
         }
 
         worldObj.markBlockRangeForRenderUpdate(x, 0, z, x, 255, z);
@@ -101,7 +111,9 @@ public class TFGenericPacketHandler {
         float motionZ = buf.readFloat();
 
         // add it to the player
-        Minecraft.getMinecraft().thePlayer.addVelocity(motionX, motionY, motionZ);
+        if (Minecraft.getMinecraft().thePlayer != null) {
+            Minecraft.getMinecraft().thePlayer.addVelocity(motionX, motionY, motionZ);
+        }
     }
 
     @SideOnly(Side.CLIENT)
@@ -157,9 +169,8 @@ public class TFGenericPacketHandler {
         // System.out.println("Getting a new structure box " + sbb);
 
         // add weather box if needed
-        if (worldObj.provider instanceof WorldProviderTwilightForest) {
-            TFWeatherRenderer weatherRenderer = (TFWeatherRenderer) worldObj.provider.getWeatherRenderer();
-
+        if (worldObj.provider instanceof WorldProviderTwilightForest
+                && worldObj.provider.getWeatherRenderer() instanceof TFWeatherRenderer weatherRenderer) {
             weatherRenderer.setProtectedBox(sbb);
         }
     }
@@ -172,9 +183,8 @@ public class TFGenericPacketHandler {
         World worldObj = Minecraft.getMinecraft().theWorld;
 
         // add weather box if needed
-        if (worldObj.provider instanceof WorldProviderTwilightForest) {
-            TFWeatherRenderer weatherRenderer = (TFWeatherRenderer) worldObj.provider.getWeatherRenderer();
-
+        if (worldObj.provider instanceof WorldProviderTwilightForest
+                && worldObj.provider.getWeatherRenderer() instanceof TFWeatherRenderer weatherRenderer) {
             weatherRenderer.setProtectedBox(null);
         }
     }
@@ -185,9 +195,8 @@ public class TFGenericPacketHandler {
 
         boolean isEnforced = buf.readBoolean();
 
-        worldObj.getGameRules().setOrCreateGameRule(
-                TwilightForestMod.ENFORCED_PROGRESSION_RULE,
-                Boolean.valueOf(isEnforced).toString());
+        worldObj.getGameRules()
+                .setOrCreateGameRule(TwilightForestMod.ENFORCED_PROGRESSION_RULE, Boolean.toString(isEnforced));
     }
 
     @SideOnly(Side.CLIENT)
@@ -201,36 +210,38 @@ public class TFGenericPacketHandler {
         TwilightForestMod.proxy.doBlockAnnihilateEffect(worldObj, blockX, blockY, blockZ);
     }
 
+    private static PacketBuffer newPayload(byte discriminator) {
+        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
+        payload.writeByte(discriminator);
+        return payload;
+    }
+
+    private static FMLProxyPacket wrapPacket(PacketBuffer payload) {
+        return new FMLProxyPacket(payload, TwilightForestMod.ID);
+    }
+
     /**
      * Make a FMLProxyPacket that contains the data we need to change a biome in the world.
      */
     public static FMLProxyPacket makeBiomeChangePacket(int x, int z, int biomeID) {
-        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
-
-        payload.writeByte(TRANSFORM_BIOME); // discriminator byte
+        PacketBuffer payload = newPayload(TRANSFORM_BIOME);
         payload.writeInt(x);
         payload.writeInt(z);
         payload.writeInt(biomeID);
 
-        FMLProxyPacket pkt = new FMLProxyPacket(payload, TwilightForestMod.ID);
-
-        return pkt;
+        return wrapPacket(payload);
     }
 
     /**
      * Make a FMLProxyPacket that contains the data we need to add a velocity to the player
      */
     public static FMLProxyPacket makeThrowPlayerPacket(float motionX, float motionY, float motionZ) {
-        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
-
-        payload.writeByte(THROW_PLAYER); // discriminator byte
+        PacketBuffer payload = newPayload(THROW_PLAYER);
         payload.writeFloat(motionX);
         payload.writeFloat(motionY);
         payload.writeFloat(motionZ);
 
-        FMLProxyPacket pkt = new FMLProxyPacket(payload, TwilightForestMod.ID);
-
-        return pkt;
+        return wrapPacket(payload);
     }
 
     /**
@@ -238,9 +249,7 @@ public class TFGenericPacketHandler {
      */
     public static FMLProxyPacket makeAreaProtectionPacket(StructureBoundingBox sbb, int blockX, int blockY,
             int blockZ) {
-        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
-
-        payload.writeByte(AREA_PROTECTION); // discriminator byte
+        PacketBuffer payload = newPayload(AREA_PROTECTION);
 
         payload.writeInt(sbb.minX);
         payload.writeInt(sbb.minY);
@@ -253,18 +262,14 @@ public class TFGenericPacketHandler {
         payload.writeInt(blockY);
         payload.writeInt(blockZ);
 
-        FMLProxyPacket pkt = new FMLProxyPacket(payload, TwilightForestMod.ID);
-
-        return pkt;
+        return wrapPacket(payload);
     }
 
     /**
      * Make a FMLProxyPacket that contains the data we need to display structure protection data
      */
     public static FMLProxyPacket makeStructureProtectionPacket(StructureBoundingBox sbb) {
-        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
-
-        payload.writeByte(STRUCTURE_PROTECTION); // discriminator byte
+        PacketBuffer payload = newPayload(STRUCTURE_PROTECTION);
 
         payload.writeInt(sbb.minX);
         payload.writeInt(sbb.minY);
@@ -273,9 +278,7 @@ public class TFGenericPacketHandler {
         payload.writeInt(sbb.maxY);
         payload.writeInt(sbb.maxZ);
 
-        FMLProxyPacket pkt = new FMLProxyPacket(payload, TwilightForestMod.ID);
-
-        return pkt;
+        return wrapPacket(payload);
     }
 
     /**
@@ -283,44 +286,32 @@ public class TFGenericPacketHandler {
      */
     public static FMLProxyPacket makeStructureProtectionClearPacket() {
 
-        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
+        PacketBuffer payload = newPayload(STRUCTURE_PROTECTION_CLEAR);
 
-        payload.writeByte(STRUCTURE_PROTECTION_CLEAR); // discriminator byte
-
-        FMLProxyPacket pkt = new FMLProxyPacket(payload, TwilightForestMod.ID);
-
-        return pkt;
+        return wrapPacket(payload);
     }
 
     /**
      * Make a FMLProxyPacket that sets progression enforcement on the client
      */
     public static FMLProxyPacket makeEnforcedProgressionStatusPacket(boolean isEnforced) {
-        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
-
-        payload.writeByte(ENFORCED_PROGRESSION_STATUS); // discriminator byte
+        PacketBuffer payload = newPayload(ENFORCED_PROGRESSION_STATUS);
 
         payload.writeBoolean(isEnforced);
 
-        FMLProxyPacket pkt = new FMLProxyPacket(payload, TwilightForestMod.ID);
-
-        return pkt;
+        return wrapPacket(payload);
     }
 
     /**
      * Make a FMLProxyPacket that contains a block to display annihilation effects for
      */
     public static FMLProxyPacket makeAnnihilateBlockPacket(int blockX, int blockY, int blockZ) {
-        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
-
-        payload.writeByte(ANNIHILATE_BLOCK); // discriminator byte
+        PacketBuffer payload = newPayload(ANNIHILATE_BLOCK);
 
         payload.writeInt(blockX);
         payload.writeInt(blockY);
         payload.writeInt(blockZ);
 
-        FMLProxyPacket pkt = new FMLProxyPacket(payload, TwilightForestMod.ID);
-
-        return pkt;
+        return wrapPacket(payload);
     }
 }

@@ -18,7 +18,7 @@ import twilightforest.world.WorldProviderTwilightForest;
 
 public class ItemTFEmptyMazeMap extends ItemMapBase {
 
-    boolean mapOres;
+    final boolean mapOres;
 
     protected ItemTFEmptyMazeMap(boolean mapOres) {
         super();
@@ -31,16 +31,17 @@ public class ItemTFEmptyMazeMap extends ItemMapBase {
      */
     @Override
     public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player) {
-        if (world.provider.dimensionId != TwilightForestMod.dimensionID) {
+        // the server owns map IDs, map storage, item consumption and achievements
+        if (world.isRemote || world.provider.dimensionId != TwilightForestMod.dimensionID) {
             return itemStack;
         }
         ItemStack mapItem = new ItemStack(
                 mapOres ? TFItems.oreMap : TFItems.mazeMap,
                 1,
                 world.getUniqueDataId(ItemTFMazeMap.STR_ID));
-        String var5 = "mazemap_" + mapItem.getItemDamage();
-        TFMazeMapData mapData = new TFMazeMapData(var5);
-        world.setItemData(var5, mapData);
+        String mapName = "mazemap_" + mapItem.getItemDamage();
+        TFMazeMapData mapData = new TFMazeMapData(mapName);
+        world.setItemData(mapName, mapData);
         mapData.scale = 0;
         int step = 128 * (1 << mapData.scale);
         // need to fix center for feature offset
@@ -62,7 +63,9 @@ public class ItemTFEmptyMazeMap extends ItemMapBase {
         }
         mapData.dimension = world.provider.dimensionId;
         mapData.markDirty();
-        --itemStack.stackSize;
+        if (!player.capabilities.isCreativeMode) {
+            --itemStack.stackSize;
+        }
 
         // cheevos
         if (mapItem.getItem() == TFItems.mazeMap) {
@@ -72,7 +75,7 @@ public class ItemTFEmptyMazeMap extends ItemMapBase {
             player.triggerAchievement(TFAchievementPage.twilightOreMap);
         }
 
-        if (itemStack.stackSize <= 0) {
+        if (!player.capabilities.isCreativeMode && itemStack.stackSize <= 0) {
             return mapItem;
         } else {
             if (!player.inventory.addItemStackToInventory(mapItem.copy())) {
