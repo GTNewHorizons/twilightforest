@@ -105,7 +105,7 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
     }
 
     private void setStairs(int stair0, int stair1, int stair2, int stair3, int stair4, int stair5, int stair6,
-                           int stair7) {
+            int stair7) {
         rotatedStairs0 = stair0;
         rotatedStairs1 = stair1;
         rotatedStairs2 = stair2;
@@ -117,7 +117,7 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
     }
 
     private void setEtchedDirections(ForgeDirection north, ForgeDirection south, ForgeDirection west,
-                                     ForgeDirection east) {
+            ForgeDirection east) {
         EtchedNagastoneNorth = north;
         EtchedNagastoneSouth = south;
         EtchedNagastoneWest = west;
@@ -165,8 +165,7 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
                 int localZ = z + sampleZ;
                 int worldX = getXWithOffset(x, localZ);
                 int worldZ = getZWithOffset(x, localZ);
-                if (!world.blockExists(worldX, groundY, worldZ)
-                        || !world.blockExists(worldX, undergroundY, worldZ)) {
+                if (!world.blockExists(worldX, groundY, worldZ) || !world.blockExists(worldX, undergroundY, worldZ)) {
                     groundHeightChecked = true;
                     return;
                 }
