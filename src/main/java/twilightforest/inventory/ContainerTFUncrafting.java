@@ -198,16 +198,17 @@ public class ContainerTFUncrafting extends Container {
     private void rebuildCraftingResult() {
         tinkerResult.setInventorySlotContents(0, null);
         uncraftingMatrix.recraftingCost = 0;
+        uncraftingMatrix.recraftingResult = false;
         uncraftingMatrix.uncraftingCost = calculateUncraftingCost();
 
-        ItemStack input = tinkerInput.getStackInSlot(0);
-        if (input == null) {
-            tinkerResult.setInventorySlotContents(
-                    0,
-                    CraftingManager.getInstance().findMatchingRecipe(assemblyMatrix, worldObj));
+        ItemStack assemblyResult = CraftingManager.getInstance().findMatchingRecipe(assemblyMatrix, worldObj);
+        if (assemblyResult != null) {
+            tinkerResult.setInventorySlotContents(0, assemblyResult);
             return;
         }
-        if (isMatrixEmpty(assemblyMatrix) || uncraftingMatrix.numberOfInputItems <= 0) {
+
+        ItemStack input = tinkerInput.getStackInSlot(0);
+        if (input == null || isMatrixEmpty(assemblyMatrix) || uncraftingMatrix.numberOfInputItems <= 0) {
             return;
         }
 
@@ -227,6 +228,7 @@ public class ContainerTFUncrafting extends Container {
         mergeRecraftingEnchantments(input, result);
         tinkerResult.setInventorySlotContents(0, result);
         uncraftingMatrix.uncraftingCost = 0;
+        uncraftingMatrix.recraftingResult = true;
         uncraftingMatrix.recraftingCost = calculateRecraftingCost();
         if (uncraftingMatrix.recraftingCost > 0 && !result.hasDisplayName()) {
             result.setRepairCost(input.getRepairCost() + 2);
@@ -313,7 +315,7 @@ public class ContainerTFUncrafting extends Container {
     public int calculateRecraftingCost() {
         ItemStack input = tinkerInput.getStackInSlot(0);
         ItemStack result = tinkerResult.getStackInSlot(0);
-        if (input == null || !input.isItemEnchanted() || result == null) {
+        if (!uncraftingMatrix.recraftingResult || input == null || !input.isItemEnchanted() || result == null) {
             return 0;
         }
         int cost = input.getRepairCost() + countTotalEnchantmentCost(input);

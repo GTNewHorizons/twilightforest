@@ -29,18 +29,19 @@ public class SlotTFGoblinCraftResult extends SlotCrafting {
         if (!super.canTakeStack(player) || !getHasStack()) {
             return false;
         }
-        ItemStack input = inputSlot.getStackInSlot(0);
-        if (input == null) {
+        if (!uncraftingMatrix.recraftingResult) {
             return true;
         }
-        return uncraftingMatrix.numberOfInputItems > 0 && input.stackSize >= uncraftingMatrix.numberOfInputItems
+        ItemStack input = inputSlot.getStackInSlot(0);
+        return input != null && uncraftingMatrix.numberOfInputItems > 0
+                && input.stackSize >= uncraftingMatrix.numberOfInputItems
                 && (player.capabilities.isCreativeMode || player.experienceLevel >= uncraftingMatrix.recraftingCost);
     }
 
     @Override
     public void onPickupFromSlot(EntityPlayer player, ItemStack output) {
         ItemStack input = inputSlot.getStackInSlot(0);
-        if (input != null) {
+        if (uncraftingMatrix.recraftingResult && input != null) {
             // 1 combined craft consumes one batch, not one batch for each of the 9 ghost slots
             int required = uncraftingMatrix.numberOfInputItems;
             int cost = uncraftingMatrix.recraftingCost;

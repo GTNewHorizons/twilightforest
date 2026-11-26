@@ -12,6 +12,7 @@ public class InventoryTFGoblinUncrafting implements IInventory {
     public int numberOfInputItems;
     public int uncraftingCost;
     public int recraftingCost;
+    boolean recraftingResult;
 
     public InventoryTFGoblinUncrafting(ContainerTFUncrafting container) {}
 
