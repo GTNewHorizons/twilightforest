@@ -532,7 +532,6 @@ public class TFEventListener {
             } else {
                 FMLLog.info("[TwilightForest] Player died with charm of keeping I!  Keep armor and current item!");
                 int currentItem = player.inventory.currentItem;
-                // Fixed crash when holding a M&B Battlegear item.
                 if (currentItem >= 0 && currentItem < 9 && player.inventory.getCurrentItem() != null) {
                     keepInventory.mainInventory[currentItem] = ItemStack
                             .copyItemStack(player.inventory.mainInventory[currentItem]);
@@ -734,7 +733,6 @@ public class TFEventListener {
     public void onPlayerLogout(PlayerLoggedOutEvent event) {
         EntityPlayer player = event.player;
         playerKeepsMap.remove(player.getCommandSenderName());
-        playerBaublesMap.remove(player.getCommandSenderName());
     }
 
     /**
