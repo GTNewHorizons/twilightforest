@@ -442,7 +442,7 @@ public class EntityTFYetiAlpha extends EntityMob implements IRangedAttackMob {
             return;
         }
         int metadata = this.worldObj.getBlockMetadata(bx, by, bz);
-        if (!this.worldObj.setBlock(bx, by, bz, Blocks.packed_ice)) {
+        if (block != Blocks.packed_ice && !this.worldObj.setBlock(bx, by, bz, Blocks.packed_ice)) {
             return;
         }
         this.worldObj.playAuxSFX(2001, bx, by, bz, Block.getIdFromBlock(block) + (metadata << 12));
@@ -600,7 +600,7 @@ public class EntityTFYetiAlpha extends EntityMob implements IRangedAttackMob {
             nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         }
         nbttagcompound.setBoolean("HasHome", this.hasHome());
-        nbttagcompound.setInteger("TFHomeRadius", (int) func_110174_bM());
+        nbttagcompound.setInteger("TFHomeRadius", (int) this.func_110174_bM());
         nbttagcompound.setBoolean("CanRampage", this.canRampage);
         nbttagcompound.setBoolean("Rampaging", this.isRampaging());
         nbttagcompound.setBoolean("Tired", this.isTired());

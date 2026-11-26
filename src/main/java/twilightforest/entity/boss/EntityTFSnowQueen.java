@@ -211,9 +211,9 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
                 TwilightForestMod.proxy.spawnParticle(
                         this.worldObj,
                         "snowwarning",
-                        entity.lastTickPosX + px,
-                        entity.lastTickPosY + py,
-                        entity.lastTickPosZ + pz,
+                        entity.posX + px,
+                        entity.posY + py,
+                        entity.posZ + pz,
                         0,
                         0,
                         0);
@@ -293,7 +293,7 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
-        nbttagcompound.setInteger("TFHomeRadius", (int) func_110174_bM());
+        nbttagcompound.setInteger("TFHomeRadius", (int) this.func_110174_bM());
     }
 
     @Override
