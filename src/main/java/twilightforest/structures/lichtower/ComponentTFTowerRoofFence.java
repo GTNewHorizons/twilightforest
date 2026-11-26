@@ -30,7 +30,7 @@ public class ComponentTFTowerRoofFence extends ComponentTFTowerRoof {
     // a fence around the roof
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
-        int y = height;
+        int y = 1;
         int last = size - 1;
 
         for (int x = 0; x < size; x++) {
