@@ -10,6 +10,12 @@ import twilightforest.entity.passive.EntityTFQuestRam;
 
 public class EntityAITFFindLoose extends EntityAIBase {
 
+    private static final double SEARCH_HORIZONTAL = 16.0D;
+    private static final double SEARCH_VERTICAL = 4.0D;
+    private static final double EAT_DISTANCE_SQ = 6.25D;
+    private static final int MAX_PURSUIT_TICKS = 200;
+    private static final int FAILED_ITEM_RETRY_TICKS = 100;
+
     /** The entity using this AI that is tempted by the player. */
     private final EntityTFQuestRam temptedEntity;
 
@@ -20,6 +26,9 @@ public class EntityAITFFindLoose extends EntityAIBase {
 
     private EntityItem temptingItem;
     private int pathCooldown;
+    private int pursuitTicks;
+    private EntityItem failedItem;
+    private long retryFailedItemAt;
 
     public EntityAITFFindLoose(EntityTFQuestRam entityTFQuestRam, float speed, Item blockID) {
         this.temptedEntity = entityTFQuestRam;
@@ -37,14 +46,18 @@ public class EntityAITFFindLoose extends EntityAIBase {
             --delayTemptCounter;
             return false;
         }
-        List<EntityItem> nearby = temptedEntity.worldObj
-                .getEntitiesWithinAABB(EntityItem.class, temptedEntity.boundingBox.expand(16.0D, 4.0D, 16.0D));
+        List<EntityItem> nearby = temptedEntity.worldObj.getEntitiesWithinAABB(
+                EntityItem.class,
+                temptedEntity.boundingBox.expand(SEARCH_HORIZONTAL, SEARCH_VERTICAL, SEARCH_HORIZONTAL));
         temptingItem = null;
         double nearestDistance = Double.MAX_VALUE;
+        if (temptedEntity.worldObj.getTotalWorldTime() >= retryFailedItemAt) {
+            failedItem = null;
+        }
         for (EntityItem item : nearby) {
-            if (isWanted(item)) {
+            if (item != failedItem && isWanted(item)) {
                 double distance = temptedEntity.getDistanceSqToEntity(item);
-                if (distance < nearestDistance) {
+                if (distance > EAT_DISTANCE_SQ && distance < nearestDistance) {
                     temptingItem = item;
                     nearestDistance = distance;
                 }
@@ -58,7 +71,16 @@ public class EntityAITFFindLoose extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        return isWanted(temptingItem) && temptedEntity.getDistanceSqToEntity(temptingItem) > 6.25D;
+        if (!isWanted(temptingItem) || temptedEntity.getDistanceSqToEntity(temptingItem) <= EAT_DISTANCE_SQ
+                || !temptedEntity.boundingBox.expand(SEARCH_HORIZONTAL, SEARCH_VERTICAL, SEARCH_HORIZONTAL)
+                        .intersectsWith(temptingItem.boundingBox)) {
+            return false;
+        }
+        if (pursuitTicks >= MAX_PURSUIT_TICKS || (pursuitTicks > 0 && temptedEntity.getNavigator().noPath())) {
+            abandonItem();
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -67,6 +89,7 @@ public class EntityAITFFindLoose extends EntityAIBase {
     @Override
     public void startExecuting() {
         pathCooldown = 0;
+        pursuitTicks = 0;
     }
 
     /**
@@ -87,13 +110,24 @@ public class EntityAITFFindLoose extends EntityAIBase {
         if (!isWanted(temptingItem)) {
             return;
         }
+        ++pursuitTicks;
         temptedEntity.getLookHelper()
                 .setLookPositionWithEntity(temptingItem, 30.0F, temptedEntity.getVerticalFaceSpeed());
         if (--pathCooldown <= 0) {
             pathCooldown = 10;
-            temptedEntity.getNavigator()
-                    .tryMoveToXYZ(temptingItem.posX, temptingItem.posY, temptingItem.posZ, pursueSpeed);
+            if (!temptedEntity.getNavigator()
+                    .tryMoveToXYZ(temptingItem.posX, temptingItem.posY, temptingItem.posZ, pursueSpeed)) {
+                abandonItem();
+            }
         }
+    }
+
+    private void abandonItem() {
+        // let wandering or another wool target take priority after a failed pursuit
+        failedItem = temptingItem;
+        retryFailedItemAt = temptedEntity.worldObj.getTotalWorldTime() + FAILED_ITEM_RETRY_TICKS;
+        temptingItem = null;
+        temptedEntity.getNavigator().clearPathEntity();
     }
 
     private boolean isWanted(EntityItem item) {
@@ -101,6 +135,6 @@ public class EntityAITFFindLoose extends EntityAIBase {
                 && item.getEntityItem() != null
                 && item.getEntityItem().stackSize > 0
                 && item.getEntityItem().getItem() == temptID
-                && !temptedEntity.isColorPresent(item.getEntityItem().getItemDamage());
+                && temptedEntity.wantsColor(item.getEntityItem().getItemDamage());
     }
 }

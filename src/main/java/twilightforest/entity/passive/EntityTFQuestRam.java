@@ -167,8 +167,7 @@ public class EntityTFQuestRam extends EntityAnimal {
         ItemStack currentItem = par1EntityPlayer.inventory.getCurrentItem();
 
         if (currentItem != null && currentItem.getItem() == Item.getItemFromBlock(Blocks.wool)
-                && isValidColor(currentItem.getItemDamage())
-                && !isColorPresent(currentItem.getItemDamage())) {
+                && wantsColor(currentItem.getItemDamage())) {
             // par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, new
             // ItemStack(Items.bucketMilk));
             if (this.worldObj.isRemote) {
@@ -265,6 +264,10 @@ public class EntityTFQuestRam extends EntityAnimal {
 
     public boolean isColorPresent(int color) {
         return isValidColor(color) && (getColorFlags() & (1 << color)) != 0;
+    }
+
+    public boolean wantsColor(int color) {
+        return isValidColor(color) && !isColorPresent(color);
     }
 
     public void setColorPresent(int color) {

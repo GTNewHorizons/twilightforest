@@ -15,6 +15,8 @@ import twilightforest.entity.IBreathAttacker;
 
 public class EntityAITFBreathAttack extends EntityAIBase {
 
+    private static final double BREATH_ORIGIN_HEIGHT = 0.25D;
+
     private final EntityLiving entityHost;
     private EntityLivingBase attackTarget;
 
@@ -117,8 +119,7 @@ public class EntityAITFBreathAttack extends EntityAIBase {
      */
     private Entity getHeadLookTarget() {
         // an entity in the actual breath range must be in front of the host unobstructed
-        Vec3 origin = Vec3
-                .createVectorHelper(entityHost.posX, entityHost.posY + entityHost.getEyeHeight(), entityHost.posZ);
+        Vec3 origin = Vec3.createVectorHelper(entityHost.posX, entityHost.posY + BREATH_ORIGIN_HEIGHT, entityHost.posZ);
         Vec3 direction = entityHost.getLook(1.0F);
         Vec3 end = origin.addVector(
                 direction.xCoord * breathRange,
@@ -163,7 +164,7 @@ public class EntityAITFBreathAttack extends EntityAIBase {
     public void faceVec(double xCoord, double yCoord, double zCoord, float yawConstraint, float pitchConstraint) {
         double xOffset = xCoord - entityHost.posX;
         double zOffset = zCoord - entityHost.posZ;
-        double yOffset = (entityHost.posY + 0.25) - yCoord;
+        double yOffset = (entityHost.posY + BREATH_ORIGIN_HEIGHT) - yCoord;
 
         double distance = MathHelper.sqrt_double(xOffset * xOffset + zOffset * zOffset);
         float xyAngle = (float) ((Math.atan2(zOffset, xOffset) * 180D) / Math.PI) - 90F;

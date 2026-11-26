@@ -110,7 +110,7 @@ public class EntityAITFEatLoose extends EntityAIBase {
                 && item.getEntityItem() != null
                 && item.getEntityItem().stackSize > 0
                 && item.getEntityItem().getItem() == temptID
-                && !temptedQuestRam.isColorPresent(item.getEntityItem().getItemDamage());
+                && temptedQuestRam.wantsColor(item.getEntityItem().getItemDamage());
     }
 
 }
