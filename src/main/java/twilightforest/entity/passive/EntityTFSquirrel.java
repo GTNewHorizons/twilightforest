@@ -27,7 +27,7 @@ public class EntityTFSquirrel extends EntityCreature implements IAnimals {
         this.setSize(0.3F, 0.7F);
 
         // maybe this will help them move cuter?
-        this.stepHeight = 1;
+        this.stepHeight = 1.0F;
 
         // squirrel AI
         this.getNavigator().setAvoidsWater(true);
@@ -36,7 +36,7 @@ public class EntityTFSquirrel extends EntityCreature implements IAnimals {
         this.tasks.addTask(2, new EntityAITempt(this, 1.0F, Items.wheat_seeds, true));
         this.tasks.addTask(3, new EntityAIAvoidEntity(this, EntityPlayer.class, 2.0F, 0.8F, 1.4F));
         this.tasks.addTask(5, new EntityAIWander(this, 1.0F));
-        this.tasks.addTask(6, new EntityAIWander(this, 1.25F));
+
         this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6F));
         this.tasks.addTask(8, new EntityAILookIdle(this));
 
@@ -110,9 +110,9 @@ public class EntityTFSquirrel extends EntityCreature implements IAnimals {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        if (par1DamageSource.getEntity() instanceof EntityPlayer player
+                && player.dimension == TwilightForestMod.dimensionID) {
+            player.triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 }

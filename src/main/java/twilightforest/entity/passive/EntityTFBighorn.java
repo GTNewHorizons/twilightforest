@@ -16,7 +16,6 @@ public class EntityTFBighorn extends EntitySheep {
 
     public EntityTFBighorn(World world) {
         super(world);
-        // texture = TwilightForestMod.MODEL_DIR + "bighorn.png";
         setSize(0.9F, 1.3F);
     }
 
@@ -27,7 +26,7 @@ public class EntityTFBighorn extends EntitySheep {
 
     /**
      * 50% brown, 50% any other color
-     * 
+     *
      * @param random
      * @return
      */
@@ -66,9 +65,9 @@ public class EntityTFBighorn extends EntitySheep {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        if (par1DamageSource.getEntity() instanceof EntityPlayer player
+                && player.dimension == TwilightForestMod.dimensionID) {
+            player.triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 

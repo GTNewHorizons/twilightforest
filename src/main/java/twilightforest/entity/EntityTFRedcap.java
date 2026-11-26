@@ -33,8 +33,6 @@ public class EntityTFRedcap extends EntityMob {
     public static ItemStack heldTNT = new ItemStack(Blocks.tnt, 1);
     public static ItemStack heldFlint = new ItemStack(Items.flint_and_steel, 1);
 
-    private boolean shy;
-
     private int tntLeft = 0;
 
     private int villagerProfession = -1;
@@ -44,8 +42,6 @@ public class EntityTFRedcap extends EntityMob {
         // texture = TwilightForestMod.MODEL_DIR + "redcap.png";
         // moveSpeed = 0.28F;
         setSize(0.9F, 1.4F);
-
-        shy = true;
 
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityTNTPrimed.class, 2.0F, 1.0F, 2.0F));
@@ -58,7 +54,8 @@ public class EntityTFRedcap extends EntityMob {
         this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
         this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
 
-        this.setCurrentItemOrArmor(0, heldPick);
+        // never share a mutable ItemStack instance between different redcaps
+        this.setCurrentItemOrArmor(0, heldPick.copy());
         this.setCurrentItemOrArmor(1, new ItemStack(Items.iron_boots));
 
         this.equipmentDropChances[0] = 0.2F;
@@ -110,7 +107,7 @@ public class EntityTFRedcap extends EntityMob {
     }
 
     public boolean isShy() {
-        return shy && this.recentlyHit <= 0;
+        return this.recentlyHit <= 0;
     }
 
     public int getTntLeft() {
@@ -118,11 +115,11 @@ public class EntityTFRedcap extends EntityMob {
     }
 
     public void setTntLeft(int tntLeft) {
-        this.tntLeft = tntLeft;
+        this.tntLeft = Math.max(0, tntLeft);
     }
 
     public ItemStack getPick() {
-        return heldPick;
+        return heldPick.copy();
     }
 
     public int getVillagerProfession() {
@@ -159,16 +156,15 @@ public class EntityTFRedcap extends EntityMob {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getSourceOfDamage() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getSourceOfDamage()).triggerAchievement(TFAchievementPage.twilightHunter);
+        if (!worldObj.isRemote && par1DamageSource.getEntity() instanceof EntityPlayer killer
+                && killer.dimension == TwilightForestMod.dimensionID) {
+            killer.triggerAchievement(TFAchievementPage.twilightHunter);
             // are we in a level 1 hill?
             int chunkX = MathHelper.floor_double(posX) >> 4;
             int chunkZ = MathHelper.floor_double(posZ) >> 4;
             if (TFFeature.getNearestFeature(chunkX, chunkZ, worldObj) == TFFeature.hill1) {
                 // award level 1 hill cheevo
-                ((EntityPlayer) par1DamageSource.getSourceOfDamage())
-                        .triggerAchievement(TFAchievementPage.twilightHill1);
+                killer.triggerAchievement(TFAchievementPage.twilightHill1);
             }
 
         }

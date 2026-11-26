@@ -62,15 +62,15 @@ public class EntityTFRedcapSapper extends EntityTFRedcap {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        // entityTFRedcap already grants twilightHunter, only grant the sapper hill achievement here
+        if (!worldObj.isRemote && par1DamageSource.getEntity() instanceof EntityPlayer killer
+                && killer.dimension == TwilightForestMod.dimensionID) {
             // are we in a level 2 hill?
             int chunkX = MathHelper.floor_double(posX) >> 4;
             int chunkZ = MathHelper.floor_double(posZ) >> 4;
             if (TFFeature.getNearestFeature(chunkX, chunkZ, worldObj) == TFFeature.hill2) {
                 // award level 2 hill cheevo
-                ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHill2);
+                killer.triggerAchievement(TFAchievementPage.twilightHill2);
             }
 
         }

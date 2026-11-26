@@ -27,7 +27,8 @@ public class EntityTFTinyBird extends EntityTFBird {
 
     private static final int DATA_BIRDTYPE = 16;
     private static final int DATA_BIRDFLAGS = 17;
-    private static final long MIN_MS_BETWEEN_SPOOKED_DROPS = 20_000;
+    private static final long MIN_MS_BETWEEN_SPOOKED_DROPS = 20_000L;
+    private static final String NBT_LAST_SPOOKED_TIME = "LastSpookedTime";
 
     /**
      * randomly selected ChunkCoordinates in a 7x6x7 box around the bat (y offset -2 to 4) towards which it will fly.
@@ -75,7 +76,7 @@ public class EntityTFTinyBird extends EntityTFBird {
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(1.0D); // max health
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.20000001192092896D);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.2D);
     }
 
     // /**
@@ -110,6 +111,7 @@ public class EntityTFTinyBird extends EntityTFBird {
     public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
         super.writeEntityToNBT(par1NBTTagCompound);
         par1NBTTagCompound.setInteger("BirdType", this.getBirdType());
+        par1NBTTagCompound.setLong(NBT_LAST_SPOOKED_TIME, this.lastSpookedTime);
     }
 
     /**
@@ -119,10 +121,13 @@ public class EntityTFTinyBird extends EntityTFBird {
     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
         super.readEntityFromNBT(par1NBTTagCompound);
         this.setBirdType(par1NBTTagCompound.getInteger("BirdType"));
+        if (par1NBTTagCompound.hasKey(NBT_LAST_SPOOKED_TIME)) {
+            this.lastSpookedTime = par1NBTTagCompound.getLong(NBT_LAST_SPOOKED_TIME);
+        }
     }
 
     public int getBirdType() {
-        return this.dataWatcher.getWatchableObjectByte(16);
+        return this.dataWatcher.getWatchableObjectByte(DATA_BIRDTYPE);
     }
 
     public void setBirdType(int par1) {
@@ -196,25 +201,27 @@ public class EntityTFTinyBird extends EntityTFBird {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
-                && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
-            ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
+        if (par1DamageSource.getEntity() instanceof EntityPlayer player
+                && player.dimension == TwilightForestMod.dimensionID) {
+            player.triggerAchievement(TFAchievementPage.twilightHunter);
         }
     }
 
     /**
      * Called to update the entity's position/logic.
      */
+    @Override
     public void onUpdate() {
         super.onUpdate();
 
         // while we are flying, try to level out somewhat
         if (!this.isBirdLanded()) {
-            this.motionY *= 0.6000000238418579D;
+            this.motionY *= 0.6D;
         }
 
     }
 
+    @Override
     protected void updateAITasks() {
         super.updateAITasks();
 
@@ -236,7 +243,7 @@ public class EntityTFTinyBird extends EntityTFBird {
                     this.worldObj.playAuxSFXAtEntity(null, 1015, (int) this.posX, (int) this.posY, (int) this.posZ, 0);
                     // FMLLog.info("bird taking off because it was spooked");
                     final long now = System.currentTimeMillis();
-                    if (now - lastSpookedTime > MIN_MS_BETWEEN_SPOOKED_DROPS) {
+                    if (now - lastSpookedTime >= MIN_MS_BETWEEN_SPOOKED_DROPS) {
                         lastSpookedTime = now;
                         final ItemStack spookDrop = getSpookedDrop();
                         if (spookDrop != null) {
@@ -269,9 +276,9 @@ public class EntityTFTinyBird extends EntityTFBird {
             double d0 = (double) this.currentFlightTarget.posX + 0.5D - this.posX;
             double d1 = (double) this.currentFlightTarget.posY + 0.1D - this.posY;
             double d2 = (double) this.currentFlightTarget.posZ + 0.5D - this.posZ;
-            this.motionX += (Math.signum(d0) * 0.5D - this.motionX) * 0.10000000149011612D;
-            this.motionY += (Math.signum(d1) * 0.699999988079071D - this.motionY) * 0.10000000149011612D;
-            this.motionZ += (Math.signum(d2) * 0.5D - this.motionZ) * 0.10000000149011612D;
+            this.motionX += (Math.signum(d0) * 0.5D - this.motionX) * 0.1D;
+            this.motionY += (Math.signum(d1) * 0.7D - this.motionY) * 0.1D;
+            this.motionZ += (Math.signum(d2) * 0.5D - this.motionZ) * 0.1D;
             float f = (float) (Math.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
             float f1 = MathHelper.wrapAngleTo180_float(f - this.rotationYaw);
             this.moveForward = 0.5F;
@@ -308,11 +315,8 @@ public class EntityTFTinyBird extends EntityTFBird {
     public boolean isLandableBlock(int x, int y, int z) {
         Block block = this.worldObj.getBlock(x, y, z);
 
-        if (block == Blocks.air) {
-            return false;
-        } else {
-            return block.isLeaves(worldObj, x, y, z) || block.isSideSolid(worldObj, x, y, z, ForgeDirection.UP);
-        }
+        return block != Blocks.air
+                && (block.isLeaves(worldObj, x, y, z) || block.isSideSolid(worldObj, x, y, z, ForgeDirection.UP));
     }
 
     public boolean isBirdLanded() {
@@ -325,13 +329,14 @@ public class EntityTFTinyBird extends EntityTFBird {
         if (par1) {
             this.dataWatcher.updateObject(DATA_BIRDFLAGS, (byte) (b0 | 1));
         } else {
-            this.dataWatcher.updateObject(DATA_BIRDFLAGS, (byte) (b0 & -2));
+            this.dataWatcher.updateObject(DATA_BIRDFLAGS, (byte) (b0 & ~1));
         }
     }
 
     /**
      * Returns true if this entity should push and be pushed by other entities when colliding.
      */
+    @Override
     public boolean canBePushed() {
         return false;
     }

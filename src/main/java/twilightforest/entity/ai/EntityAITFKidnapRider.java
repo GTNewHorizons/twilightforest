@@ -7,8 +7,8 @@ import net.minecraft.util.Vec3;
 
 public class EntityAITFKidnapRider extends EntityAIBase {
 
-    private EntityCreature theEntityCreature;
-    private float speed;
+    private final EntityCreature theEntityCreature;
+    private final float speed;
     private double randPosX;
     private double randPosY;
     private double randPosZ;
@@ -24,20 +24,18 @@ public class EntityAITFKidnapRider extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        if (this.theEntityCreature.riddenByEntity == null || this.theEntityCreature.getRNG().nextInt(5) > 0) {
+        if (theEntityCreature.riddenByEntity == null || !theEntityCreature.riddenByEntity.isEntityAlive()
+                || theEntityCreature.getRNG().nextInt(5) != 0) {
             return false;
-        } else {
-            Vec3 var1 = RandomPositionGenerator.findRandomTarget(this.theEntityCreature, 5, 4);
-
-            if (var1 == null) {
-                return false;
-            } else {
-                this.randPosX = var1.xCoord;
-                this.randPosY = var1.yCoord;
-                this.randPosZ = var1.zCoord;
-                return true;
-            }
         }
+        Vec3 next = RandomPositionGenerator.findRandomTarget(theEntityCreature, 8, 4);
+        if (next == null) {
+            return false;
+        }
+        randPosX = next.xCoord;
+        randPosY = next.yCoord;
+        randPosZ = next.zCoord;
+        return true;
     }
 
     /**
@@ -53,6 +51,7 @@ public class EntityAITFKidnapRider extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        return !this.theEntityCreature.getNavigator().noPath();
+        return theEntityCreature.riddenByEntity != null && theEntityCreature.riddenByEntity.isEntityAlive()
+                && !theEntityCreature.getNavigator().noPath();
     }
 }

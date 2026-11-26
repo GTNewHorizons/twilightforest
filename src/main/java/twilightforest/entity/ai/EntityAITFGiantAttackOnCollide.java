@@ -6,17 +6,15 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
 
 /**
  * This is a copy of EntityAIAttackOnCollide modified to change a few hardcoded behaviors
- * 
+ *
  * @author Mostly Mojang
  *
  */
 public class EntityAITFGiantAttackOnCollide extends EntityAIBase {
 
-    World worldObj;
     EntityCreature attacker;
     /**
      * An amount of decrementing ticks that allows the entity to attack once the tick reaches 0.
@@ -45,7 +43,6 @@ public class EntityAITFGiantAttackOnCollide extends EntityAIBase {
 
     public EntityAITFGiantAttackOnCollide(EntityCreature par1EntityCreature, double par2, boolean par4) {
         this.attacker = par1EntityCreature;
-        this.worldObj = par1EntityCreature.worldObj;
         this.speedTowardsTarget = par2;
         this.longMemory = par4;
         this.setMutexBits(3);
@@ -55,23 +52,16 @@ public class EntityAITFGiantAttackOnCollide extends EntityAIBase {
      * Returns whether the EntityAIBase should begin execution.
      */
     public boolean shouldExecute() {
-        EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
-
-        if (entitylivingbase == null) {
+        EntityLivingBase target = attacker.getAttackTarget();
+        if (target == null || !target.isEntityAlive() || classTarget != null && !classTarget.isInstance(target)) {
             return false;
-        } else if (!entitylivingbase.isEntityAlive()) {
-            return false;
-        } else if (this.classTarget != null && !this.classTarget.isAssignableFrom(entitylivingbase.getClass())) {
-            return false;
-        } else {
-            if (--this.delayTicks <= 0) {
-                this.entityPathEntity = this.attacker.getNavigator().getPathToEntityLiving(entitylivingbase);
-                this.delayTicks = 4 + this.attacker.getRNG().nextInt(7);
-                return this.entityPathEntity != null;
-            } else {
-                return true;
-            }
         }
+        if (--delayTicks > 0) {
+            return entityPathEntity != null || attacker.getDistanceSqToEntity(target) < 16.0D;
+        }
+        delayTicks = 4 + attacker.getRNG().nextInt(7);
+        entityPathEntity = attacker.getNavigator().getPathToEntityLiving(target);
+        return entityPathEntity != null || attacker.getDistanceSqToEntity(target) < 16.0D;
     }
 
     /**
@@ -92,15 +82,19 @@ public class EntityAITFGiantAttackOnCollide extends EntityAIBase {
      * Execute a one shot task or start executing a continuous task
      */
     public void startExecuting() {
-        this.attacker.getNavigator().setPath(this.entityPathEntity, this.speedTowardsTarget);
-        this.delayTicks = 0;
+        if (entityPathEntity != null) {
+            attacker.getNavigator().setPath(entityPathEntity, speedTowardsTarget);
+        }
+        delayTicks = 0;
     }
 
     /**
      * Resets the task
      */
     public void resetTask() {
-        this.attacker.getNavigator().clearPathEntity();
+        attacker.getNavigator().clearPathEntity();
+        entityPathEntity = null;
+        failedPathFindingPenalty = 0;
     }
 
     /**
@@ -108,6 +102,9 @@ public class EntityAITFGiantAttackOnCollide extends EntityAIBase {
      */
     public void updateTask() {
         EntityLivingBase entitylivingbase = this.attacker.getAttackTarget();
+        if (entitylivingbase == null || !entitylivingbase.isEntityAlive()) {
+            return;
+        }
         this.attacker.getLookHelper().setLookPositionWithEntity(entitylivingbase, 30.0F, 30.0F);
 
         double distanceToAttacker = this.attacker
@@ -126,26 +123,24 @@ public class EntityAITFGiantAttackOnCollide extends EntityAIBase {
             this.pathZ = entitylivingbase.posZ;
             this.delayTicks = failedPathFindingPenalty + 4 + this.attacker.getRNG().nextInt(7);
 
-            if (this.attacker.getNavigator().getPath() != null) {
-                PathPoint finalPathPoint = this.attacker.getNavigator().getPath().getFinalPathPoint();
-                if (finalPathPoint != null && entitylivingbase
-                        .getDistanceSq(finalPathPoint.xCoord, finalPathPoint.yCoord, finalPathPoint.zCoord) < 1) {
-                    failedPathFindingPenalty = 0;
-                } else {
-                    failedPathFindingPenalty += 10;
-                }
-            } else {
-                failedPathFindingPenalty += 10;
-            }
-
             if (distanceToAttacker > 1024.0D) {
-                this.delayTicks += 10;
+                delayTicks += 10;
             } else if (distanceToAttacker > 256.0D) {
-                this.delayTicks += 5;
+                delayTicks += 5;
             }
 
-            if (!this.attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, this.speedTowardsTarget)) {
-                this.delayTicks += 15;
+            boolean foundPath = attacker.getNavigator().tryMoveToEntityLiving(entitylivingbase, speedTowardsTarget);
+            PathEntity path = attacker.getNavigator().getPath();
+            PathPoint endpoint = path == null ? null : path.getFinalPathPoint();
+            if (foundPath && endpoint != null
+                    && entitylivingbase.getDistanceSq(endpoint.xCoord, endpoint.yCoord, endpoint.zCoord) < 1.0D) {
+                failedPathFindingPenalty = 0;
+            } else {
+                // a bounded penalty prevents permanently stalled mobs from waiting minutes between retries
+                failedPathFindingPenalty = Math.min(80, failedPathFindingPenalty + 10);
+                if (!foundPath) {
+                    delayTicks += 15;
+                }
             }
         }
 

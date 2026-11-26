@@ -6,7 +6,7 @@ import twilightforest.entity.EntityTFGoblinKnightUpper;
 
 public class EntityAITFHeavySpearAttack extends EntityAIBase {
 
-    private EntityTFGoblinKnightUpper entity;
+    private final EntityTFGoblinKnightUpper entity;
 
     public EntityAITFHeavySpearAttack(EntityTFGoblinKnightUpper par1EntityCreature) {
         this.entity = par1EntityCreature;
@@ -18,7 +18,7 @@ public class EntityAITFHeavySpearAttack extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        return entity.heavySpearTimer > 0 && entity.heavySpearTimer < 50;
+        return entity.isEntityAlive() && entity.heavySpearTimer > 0 && entity.heavySpearTimer < 50;
     }
 
     /**
@@ -26,7 +26,7 @@ public class EntityAITFHeavySpearAttack extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        return entity.heavySpearTimer > 0 && entity.heavySpearTimer < 50;
+        return entity.isEntityAlive() && entity.heavySpearTimer > 0 && entity.heavySpearTimer < 50;
     }
 
 }
