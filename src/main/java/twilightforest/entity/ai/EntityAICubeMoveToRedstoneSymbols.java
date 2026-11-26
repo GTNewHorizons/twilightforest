@@ -9,105 +9,112 @@ import twilightforest.entity.EntityTFRovingCube;
 
 public class EntityAICubeMoveToRedstoneSymbols extends EntityAIBase {
 
-    private EntityTFRovingCube myCube;
+    private final EntityTFRovingCube myCube;
     private double xPosition;
     private double yPosition;
     private double zPosition;
-    private double speed;
+    private final double speed;
+    private int searchCooldown;
 
     public EntityAICubeMoveToRedstoneSymbols(EntityTFRovingCube entityTFRovingCube, double d) {
         this.myCube = entityTFRovingCube;
         this.speed = d;
+        this.setMutexBits(1);
     }
 
     @Override
     public boolean shouldExecute() {
-        if (this.myCube.getRNG().nextInt(20) != 0) {
+        if (!myCube.getNavigator().noPath() || --searchCooldown > 0) {
             return false;
-        } else {
-            // System.out.println("Cube scanning for symbol");
-
-            Vec3 vec3 = this.searchForRedstoneSymbol(this.myCube, 16, 5);
-
-            if (vec3 == null) {
-                return false;
-            } else {
-                this.xPosition = vec3.xCoord;
-                this.yPosition = vec3.yCoord;
-                this.zPosition = vec3.zCoord;
-                return true;
-            }
         }
+        // existing symbols should be revisited
+        if (myCube.hasFoundSymbol && isRedstoneSymbol(myCube.symbolX, myCube.symbolY, myCube.symbolZ)) {
+            double distance = myCube.getDistanceSq(myCube.symbolX + 0.5D, myCube.symbolY, myCube.symbolZ + 0.5D);
+            if (distance <= 1.0D) {
+                searchCooldown = 60;
+                return false;
+            }
+            xPosition = myCube.symbolX;
+            yPosition = myCube.symbolY;
+            zPosition = myCube.symbolZ;
+            searchCooldown = 40;
+            return true;
+        }
+        myCube.hasFoundSymbol = false;
+        searchCooldown = 60 + myCube.getRNG().nextInt(20);
+        Vec3 symbol = searchForRedstoneSymbol(myCube, 16, 5);
+        if (symbol == null) {
+            return false;
+        }
+        xPosition = symbol.xCoord;
+        yPosition = symbol.yCoord;
+        zPosition = symbol.zCoord;
+        myCube.hasFoundSymbol = true;
+        myCube.symbolX = (int) xPosition;
+        myCube.symbolY = (int) yPosition;
+        myCube.symbolZ = (int) zPosition;
+        return true;
     }
 
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
     public boolean continueExecuting() {
-        return !this.myCube.getNavigator().noPath();
+        return myCube.hasFoundSymbol && !myCube.getNavigator().noPath()
+                && isRedstoneSymbol(myCube.symbolX, myCube.symbolY, myCube.symbolZ);
     }
 
     /**
      * Execute a one shot task or start executing a continuous task
      */
     public void startExecuting() {
-        this.myCube.getNavigator().tryMoveToXYZ(this.xPosition, this.yPosition, this.zPosition, this.speed);
+        myCube.getNavigator().tryMoveToXYZ(xPosition + 0.5D, yPosition, zPosition + 0.5D, speed);
     }
 
     /**
      * Search the area for a redstone circle (8 redstone dust around a blank square)
      */
-    private Vec3 searchForRedstoneSymbol(EntityTFRovingCube myCube2, int xzRange, int yRange) {
-
-        int curX = MathHelper.floor_double(myCube2.posX);
-        int curY = MathHelper.floor_double(myCube2.posY);
-        int curZ = MathHelper.floor_double(myCube2.posZ);
-
-        boolean foundSymbol = false;
-
-        for (int x = curX - xzRange; x < curX + xzRange; x++) {
-            for (int z = curZ - xzRange; z < curZ + xzRange; z++) {
-                for (int y = curY - yRange; y < curY + yRange; y++) {
-                    if (this.isRedstoneSymbol(x, y, z)) {
-
-                        // System.out.println("Cube found symbol at " + x + ", " + y + ", " + z);
-
-                        this.myCube.hasFoundSymbol = true;
-                        this.myCube.symbolX = x;
-                        this.myCube.symbolY = y;
-                        this.myCube.symbolZ = z;
-
-                        return Vec3.createVectorHelper(x, y, z);
+    private Vec3 searchForRedstoneSymbol(EntityTFRovingCube cube, int xzRange, int yRange) {
+        int cx = MathHelper.floor_double(cube.posX);
+        int cy = MathHelper.floor_double(cube.posY);
+        int cz = MathHelper.floor_double(cube.posZ);
+        // search nearby cells first so the cube chooses a useful reachable symbol
+        for (int radius = 0; radius <= xzRange; radius++) {
+            for (int x = cx - radius; x <= cx + radius; x++) {
+                for (int z = cz - radius; z <= cz + radius; z++) {
+                    if (Math.max(Math.abs(x - cx), Math.abs(z - cz)) != radius) {
+                        continue;
+                    }
+                    for (int yOffset = 0; yOffset <= yRange; yOffset++) {
+                        if (isRedstoneSymbol(x, cy + yOffset, z)) {
+                            return Vec3.createVectorHelper(x, cy + yOffset, z);
+                        }
+                        if (yOffset != 0 && isRedstoneSymbol(x, cy - yOffset, z)) {
+                            return Vec3.createVectorHelper(x, cy - yOffset, z);
+                        }
                     }
                 }
             }
         }
-
         return null;
     }
 
     private boolean isRedstoneSymbol(int x, int y, int z) {
-
-        // System.out.println("Cube checking area at " + x + ", " + y + ", " + z);
-
-        if (!this.myCube.worldObj.blockExists(x, y, z) || !this.myCube.worldObj.isAirBlock(x, y, z)) {
+        // check the complete 3x3 is loaded before reading the wire blocks
+        if (!myCube.worldObj.blockExists(x - 1, y, z - 1) || !myCube.worldObj.blockExists(x - 1, y, z + 1)
+                || !myCube.worldObj.blockExists(x + 1, y, z - 1)
+                || !myCube.worldObj.blockExists(x + 1, y, z + 1)
+                || !myCube.worldObj.isAirBlock(x, y, z)) {
             return false;
-        } else {
-            // we found an air block, is it surrounded by redstone?
-            if (this.myCube.worldObj.getBlock(x + 1, y, z) == Blocks.redstone_wire
-                    && this.myCube.worldObj.getBlock(x - 1, y, z) == Blocks.redstone_wire
-                    && this.myCube.worldObj.getBlock(x, y, z + 1) == Blocks.redstone_wire
-                    && this.myCube.worldObj.getBlock(x, y, z - 1) == Blocks.redstone_wire
-                    && this.myCube.worldObj.getBlock(x + 1, y, z + 1) == Blocks.redstone_wire
-                    && this.myCube.worldObj.getBlock(x - 1, y, z + 1) == Blocks.redstone_wire
-                    && this.myCube.worldObj.getBlock(x + 1, y, z - 1) == Blocks.redstone_wire
-                    && this.myCube.worldObj.getBlock(x - 1, y, z - 1) == Blocks.redstone_wire) {
-
-                return true;
-            } else {
-                return false;
+        }
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if ((dx != 0 || dz != 0) && myCube.worldObj.getBlock(x + dx, y, z + dz) != Blocks.redstone_wire) {
+                    return false;
+                }
             }
         }
+        return true;
     }
 
 }

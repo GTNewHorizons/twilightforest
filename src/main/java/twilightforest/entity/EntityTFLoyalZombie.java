@@ -21,6 +21,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
@@ -48,8 +49,19 @@ public class EntityTFLoyalZombie extends EntityTameable {
     }
 
     @Override
-    public EntityAnimal createChild(EntityAgeable entityanimal) {
+    public EntityAnimal createChild(EntityAgeable mate) {
+        // Summoned zombies are temporary combat allies, not breedable animals.
         return null;
+    }
+
+    @Override
+    public boolean isBreedingItem(ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean canMateWith(EntityAnimal other) {
+        return false;
     }
 
     /**
@@ -65,13 +77,17 @@ public class EntityTFLoyalZombie extends EntityTameable {
     /**
      * Rawr!
      */
-    public boolean attackEntityAsMob(Entity par1Entity) {
-        int attackpower = 7;
-        boolean success = par1Entity.attackEntityFrom(DamageSource.causeMobDamage(this), attackpower);
+    @Override
+    public boolean attackEntityAsMob(Entity target) {
+        if (this.worldObj.isRemote || target == this || target == this.getOwner()) {
+            return false;
+        }
+        boolean success = target.attackEntityFrom(DamageSource.causeMobDamage(this), 7);
 
         // throw some enemies around!
         if (success) {
-            par1Entity.motionY += 0.2000000059604645D;
+            target.motionY += 0.2000000059604645D;
+            target.velocityChanged = true;
         }
 
         return success;
@@ -153,7 +169,7 @@ public class EntityTFLoyalZombie extends EntityTameable {
      */
     @Override
     protected Item getDropItem() {
-        return Item.getItemById(0);
+        return null;
     }
 
     /**

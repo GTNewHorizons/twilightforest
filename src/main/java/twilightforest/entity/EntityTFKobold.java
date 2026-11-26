@@ -23,15 +23,11 @@ import twilightforest.entity.ai.EntityAITFPanicOnFlockDeath;
 
 public class EntityTFKobold extends EntityMob {
 
-    private boolean shy;
-
     public EntityTFKobold(World world) {
         super(world);
         // texture = TwilightForestMod.MODEL_DIR + "kobold.png";
         // moveSpeed = 0.28F;
         setSize(0.8F, 1.1F);
-
-        shy = true;
 
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new EntityAITFPanicOnFlockDeath(this, 2.0F));
@@ -106,18 +102,16 @@ public class EntityTFKobold extends EntityMob {
     }
 
     public boolean isShy() {
-        return shy && this.recentlyHit <= 0;
+        return this.recentlyHit <= 0;
     }
 
     public boolean isPanicked() {
         return dataWatcher.getWatchableObjectByte(17) != 0;
     }
 
-    public void setPanicked(boolean flag) {
-        if (flag) {
-            dataWatcher.updateObject(17, (byte) 127);
-        } else {
-            dataWatcher.updateObject(17, (byte) 0);
+    public void setPanicked(boolean panicked) {
+        if (this.isPanicked() != panicked) {
+            this.dataWatcher.updateObject(17, (byte) (panicked ? 127 : 0));
         }
     }
 
@@ -130,7 +124,7 @@ public class EntityTFKobold extends EntityMob {
         super.onLivingUpdate();
 
         // when panicked, spawn tears/sweat
-        if (isPanicked()) {
+        if (this.worldObj.isRemote && isPanicked()) {
             for (int i = 0; i < 2; i++) {
                 this.worldObj.spawnParticle(
                         "splash",

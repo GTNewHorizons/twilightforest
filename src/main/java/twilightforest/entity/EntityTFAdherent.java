@@ -70,11 +70,10 @@ public class EntityTFAdherent extends EntityMob implements IRangedAttackMob, ITF
     @Override
     protected void dropFewItems(boolean hitByPlayer, int looting) {
         if (hitByPlayer) {
-            ItemStack item = new ItemStack(TFItems.metaItem, 1 + looting, 0);
             int dropCount = this.rand.nextInt(3);
 
             for (int i = 0; i < dropCount; ++i) {
-                this.entityDropItem(item, 1f);
+                this.entityDropItem(new ItemStack(TFItems.metaItem, 1 + looting, 0), 1.0F);
             }
         }
     }
@@ -97,7 +96,6 @@ public class EntityTFAdherent extends EntityMob implements IRangedAttackMob, ITF
     @Override
     public void attackEntityWithRangedAttack(EntityLivingBase attackTarget, float extraDamage) {
         EntityTFNatureBolt natureBolt = new EntityTFNatureBolt(this.worldObj, this);
-        this.worldObj.playSoundAtEntity(this, "mob.ghast.fireball", 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 0.8F));
 
         natureBolt.setTarget(attackTarget);
 
@@ -106,18 +104,22 @@ public class EntityTFAdherent extends EntityMob implements IRangedAttackMob, ITF
         double tz = attackTarget.posZ - this.posZ;
         float heightOffset = MathHelper.sqrt_double(tx * tx + tz * tz) * 0.2F;
         natureBolt.setThrowableHeading(tx, ty + heightOffset, tz, 0.6F, 6.0F); // 0.6 speed, 6.0 inaccuracy
-        this.worldObj.spawnEntityInWorld(natureBolt);
+        if (!this.worldObj.isRemote && this.worldObj.spawnEntityInWorld(natureBolt)) {
+            this.worldObj.playSoundAtEntity(this, "mob.ghast.fireball", 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 0.8F));
+        }
     }
 
     /**
      * In this case we're not charging like a bull, but charging up a ranged attack
-     * 
+     *
      * @return
      */
+    @Override
     public boolean isCharging() {
         return dataWatcher.getWatchableObjectByte(CHARGE_FLAG) != 0;
     }
 
+    @Override
     public void setCharging(boolean flag) {
         if (flag) {
             dataWatcher.updateObject(CHARGE_FLAG, (byte) 127);

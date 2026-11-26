@@ -13,13 +13,14 @@ public class EntityTFArmoredGiant extends EntityTFGiantMiner {
         super(par1World);
 
         this.setCurrentItemOrArmor(0, new ItemStack(Items.stone_sword));
-        this.setCurrentItemOrArmor(1, new ItemStack(Items.iron_helmet));
-        this.setCurrentItemOrArmor(2, new ItemStack(Items.iron_chestplate));
-        this.setCurrentItemOrArmor(3, new ItemStack(Items.iron_leggings));
-        this.setCurrentItemOrArmor(4, new ItemStack(Items.iron_boots));
+        this.setCurrentItemOrArmor(1, new ItemStack(Items.iron_boots));
+        this.setCurrentItemOrArmor(2, new ItemStack(Items.iron_leggings));
+        this.setCurrentItemOrArmor(3, new ItemStack(Items.iron_chestplate));
+        this.setCurrentItemOrArmor(4, new ItemStack(Items.iron_helmet));
 
     }
 
+    @Override
     protected Item getDropItem() {
         return TFItems.giantSword;
     }

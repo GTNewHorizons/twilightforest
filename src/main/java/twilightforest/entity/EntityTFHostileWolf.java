@@ -94,9 +94,12 @@ public class EntityTFHostileWolf extends EntityWolf implements IMob {
 
             if (this.worldObj.isThundering()) {
                 int var5 = this.worldObj.skylightSubtracted;
-                this.worldObj.skylightSubtracted = 10;
-                var4 = this.worldObj.getBlockLightValue(var1, var2, var3);
-                this.worldObj.skylightSubtracted = var5;
+                try {
+                    this.worldObj.skylightSubtracted = 10;
+                    var4 = this.worldObj.getBlockLightValue(var1, var2, var3);
+                } finally {
+                    this.worldObj.skylightSubtracted = var5;
+                }
             }
 
             return var4 <= this.rand.nextInt(8);

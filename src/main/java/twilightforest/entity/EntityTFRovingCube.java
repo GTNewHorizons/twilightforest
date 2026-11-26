@@ -31,16 +31,18 @@ public class EntityTFRovingCube extends EntityMob {
 
     }
 
+    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23000000417232513D);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23D);
         this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(5.0D);
     }
 
     /**
      * Returns true if the newer Entity AI code should be run
      */
+    @Override
     protected boolean isAIEnabled() {
         return true;
     }
@@ -49,8 +51,12 @@ public class EntityTFRovingCube extends EntityMob {
      * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
      * use this to react to sunlight and start to burn.
      */
+    @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
+        if (!worldObj.isRemote) {
+            return;
+        }
         // make annihilation particles
         for (int i = 0; i < 3; i++) {
             float px = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.75F;

@@ -6,7 +6,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
 public class EntityTFMistWolf extends EntityTFHostileWolf {
@@ -34,6 +33,7 @@ public class EntityTFMistWolf extends EntityTFHostileWolf {
         return 6;
     }
 
+    @Override
     public boolean attackEntityAsMob(Entity par1Entity) {
         int damage = this.getAttackStrength(par1Entity);
         if (par1Entity.attackEntityFrom(DamageSource.causeMobDamage(this), damage)) {
@@ -42,19 +42,14 @@ public class EntityTFMistWolf extends EntityTFHostileWolf {
             // System.out.println("Biting and brightness is " + myBrightness);
 
             if (par1Entity instanceof EntityLivingBase && myBrightness < 0.10F) {
-                byte effectDuration = 0;
-
-                if (this.worldObj.difficultySetting != EnumDifficulty.EASY) {
-                    if (this.worldObj.difficultySetting == EnumDifficulty.NORMAL) {
-                        effectDuration = 7;
-                    } else if (this.worldObj.difficultySetting == EnumDifficulty.HARD) {
-                        effectDuration = 15;
-                    }
-                }
-
-                if (effectDuration > 0) {
+                int durationSeconds = switch (this.worldObj.difficultySetting) {
+                    case NORMAL -> 7;
+                    case HARD -> 15;
+                    default -> 0;
+                };
+                if (durationSeconds > 0) {
                     ((EntityLivingBase) par1Entity)
-                            .addPotionEffect(new PotionEffect(Potion.blindness.id, effectDuration * 20, 0));
+                            .addPotionEffect(new PotionEffect(Potion.blindness.id, durationSeconds * 20, 0));
                 }
             }
 
@@ -67,6 +62,7 @@ public class EntityTFMistWolf extends EntityTFHostileWolf {
     /**
      * Gets the pitch of living sounds in living entities.
      */
+    @Override
     protected float getSoundPitch() {
         return (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 0.6F;
     }

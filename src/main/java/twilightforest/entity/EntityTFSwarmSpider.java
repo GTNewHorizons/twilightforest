@@ -66,18 +66,15 @@ public class EntityTFSwarmSpider extends EntitySpider {
      */
     @Override
     public void onUpdate() {
-        if (shouldSpawnMore()) {
-            // don't spawn if we're connected in multiplayer
-            if (!worldObj.isRemote) {
-                int more = 1 + rand.nextInt(2);
-                for (int i = 0; i < more; i++) {
-                    // try twice to spawn
-                    if (!spawnAnother()) {
-                        spawnAnother();
-                    }
+        if (shouldSpawnMore() && !worldObj.isRemote) {
+            setSpawnMore(false);
+            int more = 1 + rand.nextInt(2);
+            for (int i = 0; i < more; i++) {
+                // try twice to find a valid adjacent spawn point
+                if (!spawnAnother()) {
+                    spawnAnother();
                 }
             }
-            setSpawnMore(false);
         }
 
         super.onUpdate();
@@ -86,13 +83,15 @@ public class EntityTFSwarmSpider extends EntitySpider {
     /**
      * Only have the spider do damage a fraction of the time
      */
-    protected void attackEntity(Entity entity, float f) {
-        if (this.attackTime <= 0 && (!this.isAirBorne || rand.nextInt(4) != 0)) {
-            this.attackTime = 20;
-        } else {
-            super.attackEntity(entity, f);
+    protected void attackEntity(Entity entity, float distance) {
+        if (attackTime <= 0 && distance < 2.0F) {
+            // small spiders attack less often, grounded or jumping
+            if (rand.nextInt(4) != 0) {
+                attackTime = 20;
+                return;
+            }
         }
-
+        super.attackEntity(entity, distance);
     }
 
     /**
@@ -108,23 +107,22 @@ public class EntityTFSwarmSpider extends EntitySpider {
 
     /**
      * Spawn another spider!
-     * 
+     *
      * @return
      */
     protected boolean spawnAnother() {
-        EntityTFSwarmSpider another = new EntityTFSwarmSpider(worldObj, false);
+        return spawnAnotherSpider(new EntityTFSwarmSpider(worldObj, false));
+    }
 
-        double sx = posX + (rand.nextBoolean() ? 0.9 : -0.9);
-        double sy = posY;
-        double sz = posZ + (rand.nextBoolean() ? 0.9 : -0.9);
-        another.setLocationAndAngles(sx, sy, sz, rand.nextFloat() * 360F, 0.0F);
+    protected final boolean spawnAnotherSpider(EntityTFSwarmSpider another) {
+        double sx = posX + (rand.nextBoolean() ? 0.9D : -0.9D);
+        double sz = posZ + (rand.nextBoolean() ? 0.9D : -0.9D);
+        another.setLocationAndAngles(sx, posY, sz, rand.nextFloat() * 360F, 0.0F);
         if (!another.getCanSpawnHere()) {
             another.setDead();
             return false;
         }
-        worldObj.spawnEntityInWorld(another);
-
-        return true;
+        return worldObj.spawnEntityInWorld(another);
     }
 
     /**
@@ -168,7 +166,7 @@ public class EntityTFSwarmSpider extends EntitySpider {
     @Override
     public void onDeath(DamageSource par1DamageSource) {
         super.onDeath(par1DamageSource);
-        if (par1DamageSource.getEntity() instanceof EntityPlayer
+        if (!worldObj.isRemote && par1DamageSource.getEntity() instanceof EntityPlayer
                 && ((EntityPlayer) par1DamageSource.getEntity()).dimension == TwilightForestMod.dimensionID) {
             ((EntityPlayer) par1DamageSource.getEntity()).triggerAchievement(TFAchievementPage.twilightHunter);
             // are we in a hedge maze?

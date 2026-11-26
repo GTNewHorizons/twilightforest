@@ -10,73 +10,77 @@ import net.minecraft.world.World;
 
 public class EntityTFTwilightWandBolt extends EntityThrowable {
 
-    public EntityTFTwilightWandBolt(World par1World) {
-        super(par1World);
+    private static final int TRAIL_PARTICLES = 5;
+    private static final int IMPACT_PARTICLES = 8;
+    private static final float MAGIC_DAMAGE = 6.0F;
+
+    private boolean impacted;
+
+    public EntityTFTwilightWandBolt(World world) {
+        super(world);
     }
 
-    public EntityTFTwilightWandBolt(World par1World, double par2, double par4, double par6) {
-        super(par1World, par2, par4, par6);
-        // TODO Auto-generated constructor stub
+    public EntityTFTwilightWandBolt(World world, double x, double y, double z) {
+        super(world, x, y, z);
     }
 
-    public EntityTFTwilightWandBolt(World par1World, EntityLivingBase par2EntityLiving) {
-        super(par1World, par2EntityLiving);
-        // TODO Auto-generated constructor stub
+    public EntityTFTwilightWandBolt(World world, EntityLivingBase thrower) {
+        super(world, thrower);
     }
 
     @Override
     public void onUpdate() {
         super.onUpdate();
-
-        makeTrail();
-    }
-
-    public void makeTrail() {
-        for (int i = 0; i < 5; i++) {
-            double dx = posX + 0.5 * (rand.nextDouble() - rand.nextDouble());
-            double dy = posY + 0.5 * (rand.nextDouble() - rand.nextDouble());
-            double dz = posZ + 0.5 * (rand.nextDouble() - rand.nextDouble());
-
-            double s1 = ((rand.nextFloat() * 0.5F) + 0.5F) * 0.17F; // color
-            double s2 = ((rand.nextFloat() * 0.5F) + 0.5F) * 0.80F; // color
-            double s3 = ((rand.nextFloat() * 0.5F) + 0.5F) * 0.69F; // color
-
-            worldObj.spawnParticle("mobSpell", dx, dy, dz, s1, s2, s3);
+        if (this.worldObj.isRemote && !this.isDead) {
+            this.makeTrail();
         }
     }
 
-    /**
-     * How much this entity falls each tick
-     */
+    public void makeTrail() {
+        if (!this.worldObj.isRemote) {
+            return;
+        }
+        for (int i = 0; i < TRAIL_PARTICLES; ++i) {
+            double x = this.posX + 0.5D * (this.rand.nextDouble() - this.rand.nextDouble());
+            double y = this.posY + 0.5D * (this.rand.nextDouble() - this.rand.nextDouble());
+            double z = this.posZ + 0.5D * (this.rand.nextDouble() - this.rand.nextDouble());
+            double red = (this.rand.nextFloat() * 0.5F + 0.5F) * 0.17D;
+            double green = (this.rand.nextFloat() * 0.5F + 0.5F) * 0.80D;
+            double blue = (this.rand.nextFloat() * 0.5F + 0.5F) * 0.69D;
+            this.worldObj.spawnParticle("mobSpell", x, y, z, red, green, blue);
+        }
+    }
+
     @Override
     protected float getGravityVelocity() {
         return 0.003F;
     }
 
     @Override
-    protected void onImpact(MovingObjectPosition par1MovingObjectPosition) {
-        // only hit living things
-        if (par1MovingObjectPosition.entityHit != null
-                && par1MovingObjectPosition.entityHit instanceof EntityLivingBase) {
-            if (par1MovingObjectPosition.entityHit
-                    .attackEntityFrom(DamageSource.causeIndirectMagicDamage(this, this.getThrower()), 6)) {}
+    protected void onImpact(MovingObjectPosition hit) {
+        if (this.impacted || hit == null) {
+            return;
         }
+        this.impacted = true;
 
-        for (int i = 0; i < 8; ++i) {
-            this.worldObj.spawnParticle(
-                    "iconcrack_" + Item.getIdFromItem(Items.ender_pearl),
-                    this.posX,
-                    this.posY,
-                    this.posZ,
-                    rand.nextGaussian() * 0.05D,
-                    rand.nextDouble() * 0.2D,
-                    rand.nextGaussian() * 0.05D);
-        }
-
-        if (!this.worldObj.isRemote) {
+        if (this.worldObj.isRemote) {
+            for (int i = 0; i < IMPACT_PARTICLES; ++i) {
+                this.worldObj.spawnParticle(
+                        "iconcrack_" + Item.getIdFromItem(Items.ender_pearl),
+                        this.posX,
+                        this.posY,
+                        this.posZ,
+                        this.rand.nextGaussian() * 0.05D,
+                        this.rand.nextDouble() * 0.2D,
+                        this.rand.nextGaussian() * 0.05D);
+            }
+        } else {
+            // damage applied once and only by the server
+            if (hit.entityHit instanceof EntityLivingBase) {
+                hit.entityHit
+                        .attackEntityFrom(DamageSource.causeIndirectMagicDamage(this, this.getThrower()), MAGIC_DAMAGE);
+            }
             this.setDead();
         }
-
     }
-
 }

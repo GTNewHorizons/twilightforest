@@ -8,31 +8,29 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
 public class EntityTFTomeBolt extends EntityThrowable {
 
     public EntityTFTomeBolt(World par1World, double par2, double par4, double par6) {
         super(par1World, par2, par4, par6);
-        // TODO Auto-generated constructor stub
     }
 
     public EntityTFTomeBolt(World par1World, EntityLivingBase par2EntityLiving) {
         super(par1World, par2EntityLiving);
-        // TODO Auto-generated constructor stub
     }
 
     public EntityTFTomeBolt(World par1World) {
         super(par1World);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     public void onUpdate() {
         super.onUpdate();
 
-        makeTrail();
+        if (worldObj.isRemote) {
+            makeTrail();
+        }
     }
 
     /**
@@ -59,38 +57,35 @@ public class EntityTFTomeBolt extends EntityThrowable {
      * What happens when we hit something?
      */
     @Override
-    protected void onImpact(MovingObjectPosition par1MovingObjectPosition) {
-        // only damage living things
-        if (par1MovingObjectPosition.entityHit != null
-                && par1MovingObjectPosition.entityHit instanceof EntityLivingBase) {
-            if (par1MovingObjectPosition.entityHit
-                    .attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), 6)) {
-                // inflict move slowdown
-                byte potionStrength = (byte) (worldObj.difficultySetting == EnumDifficulty.PEACEFUL ? 3
-                        : worldObj.difficultySetting == EnumDifficulty.NORMAL ? 7 : 9);
-                if (potionStrength > 0) {
-                    ((EntityLivingBase) par1MovingObjectPosition.entityHit)
-                            .addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, potionStrength * 20, 1));
-                }
-
+    protected void onImpact(MovingObjectPosition hit) {
+        if (worldObj.isRemote) {
+            for (int i = 0; i < 8; i++) {
+                worldObj.spawnParticle(
+                        "iconcrack_" + Item.getIdFromItem(Items.fire_charge),
+                        posX,
+                        posY,
+                        posZ,
+                        rand.nextGaussian() * 0.05D,
+                        rand.nextDouble() * 0.2D,
+                        rand.nextGaussian() * 0.05D);
+            }
+            return;
+        }
+        if (isDead || hit == null) {
+            return;
+        }
+        setDead();
+        if (hit.entityHit instanceof EntityLivingBase living
+                && living.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), 6.0F)) {
+            int duration = switch (worldObj.difficultySetting) {
+                case PEACEFUL -> 0;
+                case EASY -> 3;
+                case NORMAL -> 7;
+                case HARD -> 9;
+            };
+            if (duration > 0) {
+                living.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, duration * 20, 1));
             }
         }
-
-        for (int i = 0; i < 8; ++i) {
-            this.worldObj.spawnParticle(
-                    "iconcrack_" + Item.getIdFromItem(Items.fire_charge),
-                    this.posX,
-                    this.posY,
-                    this.posZ,
-                    rand.nextGaussian() * 0.05D,
-                    rand.nextDouble() * 0.2D,
-                    rand.nextGaussian() * 0.05D);
-        }
-
-        if (!this.worldObj.isRemote) {
-            this.setDead();
-        }
-
     }
-
 }

@@ -105,17 +105,15 @@ public class EntityTFTowerTermite extends EntityMob {
     /**
      * Called when the entity is attacked.
      */
-    public boolean attackEntityFrom(DamageSource par1DamageSource, int par2) {
-        if (this.isEntityInvulnerable()) {
-            return false;
-        } else {
-            if (this.allySummonCooldown <= 0
-                    && (par1DamageSource instanceof EntityDamageSource || par1DamageSource == DamageSource.magic)) {
-                this.allySummonCooldown = 20;
-            }
-
-            return super.attackEntityFrom(par1DamageSource, par2);
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        boolean damaged = super.attackEntityFrom(source, amount);
+        if (damaged && !worldObj.isRemote
+                && allySummonCooldown <= 0
+                && (source instanceof EntityDamageSource || source == DamageSource.magic)) {
+            allySummonCooldown = 20;
         }
+        return damaged;
     }
 
     protected void updateAITasks() {
@@ -131,7 +129,9 @@ public class EntityTFTowerTermite extends EntityMob {
         }
 
         // if we have no target, burrow
-        if (this.getAttackTarget() == null && this.getNavigator().noPath()) {
+        if (ticksExisted % 10 == 0 && this.getAttackTarget() == null
+                && this.getNavigator().noPath()
+                && worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
             tryToBurrow();
         }
 
@@ -141,6 +141,9 @@ public class EntityTFTowerTermite extends EntityMob {
      * Check nearby blocks. If they are infested blocks, pop them!
      */
     protected void tryToSummonAllies() {
+        if (worldObj.isRemote || !worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            return;
+        }
         int sx = MathHelper.floor_double(this.posX);
         int sy = MathHelper.floor_double(this.posY);
         int sz = MathHelper.floor_double(this.posZ);
@@ -150,9 +153,9 @@ public class EntityTFTowerTermite extends EntityMob {
             for (int dx = 0; !stopSummoning && dx <= 10 && dx >= -10; dx = dx <= 0 ? 1 - dx : 0 - dx) {
                 for (int dz = 0; !stopSummoning && dz <= 10 && dz >= -10; dz = dz <= 0 ? 1 - dz : 0 - dz) {
                     Block blockID = this.worldObj.getBlock(sx + dx, sy + dy, sz + dz);
-                    int blockMeta = this.worldObj.getBlockMetadata(sx + dx, sy + dy, sz + dz);
-
-                    if (blockID == TFBlocks.towerWood && blockMeta == BlockTFTowerWood.META_INFESTED) {
+                    if (blockID == TFBlocks.towerWood && this.worldObj.getBlockMetadata(sx + dx, sy + dy, sz + dz)
+                            == BlockTFTowerWood.META_INFESTED) {
+                        int blockMeta = BlockTFTowerWood.META_INFESTED;
                         this.worldObj.playAuxSFX(
                                 2001,
                                 sx + dx,
@@ -193,8 +196,8 @@ public class EntityTFTowerTermite extends EntityMob {
         Block blockIDNearby = this.worldObj.getBlock(x, y, z);
         int blockMetaNearby = this.worldObj.getBlockMetadata(x, y, z);
 
-        if (canBurrowIn(blockIDNearby, blockMetaNearby)) {
-            this.worldObj.setBlock(x, y, z, TFBlocks.towerWood, BlockTFTowerWood.META_INFESTED, 3);
+        if (canBurrowIn(blockIDNearby, blockMetaNearby)
+                && worldObj.setBlock(x, y, z, TFBlocks.towerWood, BlockTFTowerWood.META_INFESTED, 3)) {
             this.spawnExplosionParticle();
             this.setDead();
         }

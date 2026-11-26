@@ -23,6 +23,9 @@ import twilightforest.TwilightForestMod;
 
 public class EntityTFIceShooter extends EntityMob implements IRangedAttackMob {
 
+    private static final float PROJECTILE_SPEED = 0.6F;
+    private static final float PROJECTILE_INACCURACY = 12.0F;
+
     public EntityTFIceShooter(World world) {
         super(world);
 
@@ -36,19 +39,22 @@ public class EntityTFIceShooter extends EntityMob implements IRangedAttackMob {
         this.setSize(0.8F, 1.8F);
     }
 
+    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23000000417232513D);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23F);
         this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(3.0D);
     }
 
     /**
      * Returns true if the newer Entity AI code should be run
      */
+    @Override
     protected boolean isAIEnabled() {
         return true;
     }
 
+    @Override
     public float getEyeHeight() {
         return this.height * 0.6F;
     }
@@ -56,6 +62,7 @@ public class EntityTFIceShooter extends EntityMob implements IRangedAttackMob {
     /**
      * Returns the item ID for the item the mob drops on death.
      */
+    @Override
     protected Item getDropItem() {
         return Items.snowball;
     }
@@ -64,8 +71,12 @@ public class EntityTFIceShooter extends EntityMob implements IRangedAttackMob {
      * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
      * use this to react to sunlight and start to burn.
      */
+    @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
+        if (!this.worldObj.isRemote) {
+            return;
+        }
         // make snow particles
         for (int i = 0; i < 3; i++) {
             float px = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.3F;
@@ -92,6 +103,7 @@ public class EntityTFIceShooter extends EntityMob implements IRangedAttackMob {
     /**
      * Returns the sound this mob makes when it is hurt.
      */
+    @Override
     protected String getHurtSound() {
         return TwilightForestMod.ID + ":mob.ice.hurt";
     }
@@ -99,6 +111,7 @@ public class EntityTFIceShooter extends EntityMob implements IRangedAttackMob {
     /**
      * Returns the sound this mob makes on death.
      */
+    @Override
     protected String getDeathSound() {
         return TwilightForestMod.ID + ":mob.ice.death";
     }
@@ -127,16 +140,20 @@ public class EntityTFIceShooter extends EntityMob implements IRangedAttackMob {
      * Attack the specified entity using a ranged attack.
      */
     @Override
-    public void attackEntityWithRangedAttack(EntityLivingBase par1EntityLivingBase, float par2) {
-        EntityTFIceSnowball entitysnowball = new EntityTFIceSnowball(this.worldObj, this);
-        double d0 = par1EntityLivingBase.posX - this.posX;
-        double d1 = par1EntityLivingBase.posY + (double) par1EntityLivingBase.getEyeHeight()
-                - 1.100000023841858D
-                - entitysnowball.posY;
-        double d2 = par1EntityLivingBase.posZ - this.posZ;
-        float f1 = MathHelper.sqrt_double(d0 * d0 + d2 * d2) * 0.2F;
-        entitysnowball.setThrowableHeading(d0, d1 + (double) f1, d2, 0.6F, 12.0F);
-        this.playSound("random.bow", 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-        this.worldObj.spawnEntityInWorld(entitysnowball);
+    public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
+        if (this.worldObj.isRemote || target == null || !target.isEntityAlive()) {
+            return;
+        }
+
+        EntityTFIceSnowball snowball = new EntityTFIceSnowball(this.worldObj, this);
+        double dx = target.posX - this.posX;
+        double dy = target.posY + target.getEyeHeight() - 1.100000023841858D - snowball.posY;
+        double dz = target.posZ - this.posZ;
+        double arc = MathHelper.sqrt_double(dx * dx + dz * dz) * 0.2F;
+        snowball.setThrowableHeading(dx, dy + arc, dz, PROJECTILE_SPEED, PROJECTILE_INACCURACY);
+
+        if (this.worldObj.spawnEntityInWorld(snowball)) {
+            this.playSound("random.bow", 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+        }
     }
 }

@@ -122,6 +122,7 @@ public class EntityTFIceExploder extends EntityMob {
     /**
      * handles entity death timer, experience orb and particle creation
      */
+    @Override
     protected void onDeathUpdate() {
         ++this.deathTime;
 
@@ -129,11 +130,17 @@ public class EntityTFIceExploder extends EntityMob {
             int i;
 
             boolean flag = this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing");
-            this.worldObj
-                    .createExplosion(this, this.posX, this.posY, this.posZ, EntityTFIceExploder.EXPLOSION_RADIUS, flag);
-
-            if (flag) {
-                this.detonate();
+            if (!this.worldObj.isRemote) {
+                this.worldObj.createExplosion(
+                        this,
+                        this.posX,
+                        this.posY,
+                        this.posZ,
+                        EntityTFIceExploder.EXPLOSION_RADIUS,
+                        flag);
+                if (flag) {
+                    this.detonate();
+                }
             }
 
             if (!this.worldObj.isRemote && (this.recentlyHit > 0 || this.isPlayer())
@@ -151,18 +158,20 @@ public class EntityTFIceExploder extends EntityMob {
 
             this.setDead();
 
-            for (i = 0; i < 20; ++i) {
-                double d2 = this.rand.nextGaussian() * 0.02D;
-                double d0 = this.rand.nextGaussian() * 0.02D;
-                double d1 = this.rand.nextGaussian() * 0.02D;
-                this.worldObj.spawnParticle(
-                        "explode",
-                        this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width,
-                        this.posY + (double) (this.rand.nextFloat() * this.height),
-                        this.posZ + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width,
-                        d2,
-                        d0,
-                        d1);
+            if (this.worldObj.isRemote) {
+                for (i = 0; i < 20; ++i) {
+                    double d2 = this.rand.nextGaussian() * 0.02D;
+                    double d0 = this.rand.nextGaussian() * 0.02D;
+                    double d1 = this.rand.nextGaussian() * 0.02D;
+                    this.worldObj.spawnParticle(
+                            "explode",
+                            this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width,
+                            this.posY + (double) (this.rand.nextFloat() * this.height),
+                            this.posZ + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width,
+                            d2,
+                            d0,
+                            d1);
+                }
             }
         }
     }
@@ -247,7 +256,7 @@ public class EntityTFIceExploder extends EntityMob {
         int bestColor = 0;
         int bestDifference = 1024;
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 16; i++) {
             int iColor = Blocks.wool.getMapColor(i).colorValue;
 
             int iRed = (iColor >> 16) & 255;
