@@ -66,6 +66,9 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
     public static final int MAX_ACTIVE_MINIONS = 3;
     public static final int INITIAL_MINIONS_TO_SUMMON = 9;
     public static final int MAX_HEALTH = 100;
+    private static final int MAX_MINION_SPAWN_ATTEMPTS = 3;
+
+    private int failedMinionSpawnAttempts;
 
     /**
      * Make a new master lich.
@@ -740,10 +743,15 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
 
     protected void spawnMinionAt(EntityLivingBase targetedEntity) {
 
+        if (worldObj.isRemote || getMinionsToSummon() <= 0) {
+            return;
+        }
+
         // find a good spot
         Vec3 minionSpot = findVecInLOSOf(targetedEntity);
 
-        if (minionSpot == null || this.worldObj.isRemote) {
+        if (minionSpot == null) {
+            recordFailedMinionSpawn();
             return;
         }
         // put a minion there
@@ -751,8 +759,10 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         minion.setPosition(minionSpot.xCoord, minionSpot.yCoord, minionSpot.zCoord);
         // minion.initCreature();
         if (!worldObj.spawnEntityInWorld(minion)) {
+            recordFailedMinionSpawn();
             return;
         }
+        failedMinionSpawnAttempts = 0;
         this.setMinionsToSummon(this.getMinionsToSummon() - 1);
         minion.setAttackTarget(targetedEntity);
 
@@ -771,6 +781,14 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
                 minionSpot.xCoord,
                 minionSpot.yCoord + minion.height / 2.0,
                 minionSpot.zCoord);
+    }
+
+    private void recordFailedMinionSpawn() {
+        // skip this after many failures so the boss can still reach its melee phase
+        if (++failedMinionSpawnAttempts >= MAX_MINION_SPAWN_ATTEMPTS) {
+            failedMinionSpawnAttempts = 0;
+            setMinionsToSummon(getMinionsToSummon() - 1);
+        }
     }
 
     public boolean wantsNewMinion(EntityTFLichMinion minion) {
@@ -1076,11 +1094,12 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
-        nbttagcompound.setInteger("TFHomeRadius", (int) func_110174_bM());
+        nbttagcompound.setInteger("TFHomeRadius", (int) this.func_110174_bM());
         nbttagcompound.setBoolean("ShadowClone", isShadowClone());
         writeMasterId(nbttagcompound);
         nbttagcompound.setByte("ShieldStrength", getShieldStrength());
         nbttagcompound.setByte("MinionsToSummon", getMinionsToSummon());
+        nbttagcompound.setInteger("FailedMinionSpawnAttempts", failedMinionSpawnAttempts);
     }
 
     @Override
@@ -1104,6 +1123,9 @@ public class EntityTFLich extends EntityMob implements IBossDisplayData, IMobInf
         readMasterId(nbttagcompound);
         setShieldStrength(nbttagcompound.getByte("ShieldStrength"));
         setMinionsToSummon(nbttagcompound.getByte("MinionsToSummon"));
+        failedMinionSpawnAttempts = getMinionsToSummon() > 0 ? MathHelper
+                .clamp_int(nbttagcompound.getInteger("FailedMinionSpawnAttempts"), 0, MAX_MINION_SPAWN_ATTEMPTS - 1)
+                : 0;
     }
 
     /**
