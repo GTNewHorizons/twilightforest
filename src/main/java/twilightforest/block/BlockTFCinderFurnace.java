@@ -13,7 +13,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
@@ -72,9 +71,7 @@ public class BlockTFCinderFurnace extends BlockContainer {
         if (world.isRemote) {
             return true;
         } else {
-            TileEntityTFCinderFurnace tileentityfurnace = (TileEntityTFCinderFurnace) world.getTileEntity(x, y, z);
-
-            if (tileentityfurnace != null) {
+            if (world.getTileEntity(x, y, z) instanceof TileEntityTFCinderFurnace) {
                 player.openGui(TwilightForestMod.instance, TwilightForestMod.GUI_ID_FURNACE, world, x, y, z);
                 return true;
             }
@@ -88,8 +85,9 @@ public class BlockTFCinderFurnace extends BlockContainer {
      */
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase p_149689_5_, ItemStack itemStack) {
 
-        if (itemStack.hasDisplayName()) {
-            ((TileEntityFurnace) world.getTileEntity(x, y, z)).func_145951_a(itemStack.getDisplayName());
+        if (!world.isRemote && itemStack.hasDisplayName()
+                && world.getTileEntity(x, y, z) instanceof TileEntityTFCinderFurnace furnace) {
+            furnace.setCustomName(itemStack.getDisplayName());
         }
     }
 
@@ -150,9 +148,7 @@ public class BlockTFCinderFurnace extends BlockContainer {
      */
     public void breakBlock(World world, int x, int y, int z, Block block, int p_149749_6_) {
         if (!isUpdating) {
-            TileEntityTFCinderFurnace tileEntity = (TileEntityTFCinderFurnace) world.getTileEntity(x, y, z);
-
-            if (tileEntity != null) {
+            if (world.getTileEntity(x, y, z) instanceof TileEntityTFCinderFurnace tileEntity) {
                 for (int i = 0; i < tileEntity.getSizeInventory(); ++i) {
                     ItemStack itemstack = tileEntity.getStackInSlot(i);
 

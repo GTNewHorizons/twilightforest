@@ -4,6 +4,9 @@ import twilightforest.entity.passive.EntityTFTinyFirefly;
 
 public class TileEntityTFFirefly extends TileEntityTFCritter {
 
+    private static final int ROTATION_DELAY = 200;
+    private static final double PLAYER_RANGE = 16D;
+
     public int yawDelay;
     public int currentYaw;
     public int desiredYaw;
@@ -34,7 +37,7 @@ public class TileEntityTFFirefly extends TileEntityTFCritter {
         } else {
             if (currentYaw == 0 && desiredYaw == 0) {
                 // make it rotate!
-                yawDelay = 200 + worldObj.rand.nextInt(200);
+                yawDelay = ROTATION_DELAY + worldObj.rand.nextInt(ROTATION_DELAY);
                 desiredYaw = worldObj.rand.nextInt(15) - worldObj.rand.nextInt(15);
             }
 
@@ -69,7 +72,7 @@ public class TileEntityTFFirefly extends TileEntityTFCritter {
     }
 
     public boolean anyPlayerInRange() {
-        return worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 16D) != null;
+        return worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, PLAYER_RANGE) != null;
     }
 
     // /**

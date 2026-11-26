@@ -89,8 +89,8 @@ public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess par1IBlockAccess, int x, int y, int z) {
         int meta = par1IBlockAccess.getBlockMetadata(x, y, z) & 7;
-        TileEntityTFTrophy trophy = (TileEntityTFTrophy) par1IBlockAccess.getTileEntity(x, y, z);
-
+        TileEntityTFTrophy trophy = par1IBlockAccess.getTileEntity(x, y, z) instanceof TileEntityTFTrophy tile ? tile
+                : null;
         if (trophy != null && trophy.func_145904_a() == 0) {
             // hydra bounds
             switch (meta) {
@@ -230,9 +230,7 @@ public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser
         ArrayList<ItemStack> drops = new ArrayList<>();
         if ((metadata & 8) == 0) {
             ItemStack var7 = new ItemStack(TFItems.trophy, 1, this.getDamageValue(world, x, y, z));
-            TileEntityTFTrophy var8 = (TileEntityTFTrophy) world.getTileEntity(x, y, z);
-
-            if (var8 == null) {
+            if (!(world.getTileEntity(x, y, z) instanceof TileEntityTFTrophy)) {
                 return drops;
             }
             // if (var8.func_145904_a() == 3 && var8.func_145907_c() != null && var8.func_145907_c().length() > 0)
@@ -274,6 +272,8 @@ public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser
     @Override
     public boolean onBlockActivated(World worldIn, int x, int y, int z, EntityPlayer player, int side, float subX,
             float subY, float subZ) {
+        if (worldIn.isRemote) return true;
+        if (!(worldIn.getTileEntity(x, y, z) instanceof TileEntitySkull skull)) return false;
         if (player.isSneaking() && player.inventory.armorInventory[3] == null) {
             player.inventory.armorInventory[3] = new ItemStack(
                     TFItems.trophy,
@@ -283,7 +283,7 @@ public class BlockTFTrophy extends BlockContainer implements IInfusionStabiliser
             return true;
         } else {
             String sound;
-            switch (((TileEntitySkull) worldIn.getTileEntity(x, y, z)).func_145904_a()) {
+            switch (skull.func_145904_a()) {
                 default:
                 case 0:
                     sound = new EntityTFHydra(worldIn).getTrophySound();

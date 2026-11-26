@@ -8,15 +8,19 @@ import twilightforest.block.TFBlocks;
 
 public class TileEntityTFPoppingJet extends TileEntity {
 
-    int counter = 0;
+    private static final int POP_DURATION_TICKS = 80;
+    private static final int POP_INTERVAL_TICKS = 20;
+    private static final String NEXT_META_TAG = "NextMeta";
+
+    int counter;
     int nextMeta;
 
     public TileEntityTFPoppingJet() {
         this(BlockTFFireJet.META_JET_FLAME);
     }
 
-    public TileEntityTFPoppingJet(int parNextMeta) {
-        this.nextMeta = parNextMeta;
+    public TileEntityTFPoppingJet(int nextMetadata) {
+        this.nextMeta = nextMetadata;
     }
 
     /**
@@ -25,7 +29,7 @@ public class TileEntityTFPoppingJet extends TileEntity {
      */
     @Override
     public void updateEntity() {
-        if (++counter >= 80) {
+        if (++counter >= POP_DURATION_TICKS) {
             counter = 0;
             // turn to flame
             if (!worldObj.isRemote && worldObj.getBlock(this.xCoord, this.yCoord, this.zCoord) == TFBlocks.fireJet) {
@@ -33,7 +37,7 @@ public class TileEntityTFPoppingJet extends TileEntity {
             }
             this.invalidate();
         } else {
-            if (counter % 20 == 0) {
+            if (counter % POP_INTERVAL_TICKS == 0) {
                 worldObj.spawnParticle(
                         "lava",
                         this.xCoord + 0.5,
@@ -58,16 +62,18 @@ public class TileEntityTFPoppingJet extends TileEntity {
     /**
      * Reads a tile entity from NBT.
      */
+    @Override
     public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
         super.readFromNBT(par1NBTTagCompound);
-        this.nextMeta = par1NBTTagCompound.getInteger("NextMeta");
+        this.nextMeta = par1NBTTagCompound.getInteger(NEXT_META_TAG);
     }
 
     /**
      * Writes a tile entity to NBT.
      */
+    @Override
     public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
         super.writeToNBT(par1NBTTagCompound);
-        par1NBTTagCompound.setInteger("NextMeta", this.nextMeta);
+        par1NBTTagCompound.setInteger(NEXT_META_TAG, this.nextMeta);
     }
 }
