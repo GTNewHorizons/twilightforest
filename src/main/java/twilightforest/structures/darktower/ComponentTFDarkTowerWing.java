@@ -482,7 +482,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
     protected void addHalfFloors(World world, Random rand, StructureBoundingBox sbb, int bottom, int top) {
 
         int spacing = 4;// this.size > 9 ? 4 : 3;
-        int rotation = Math.floorMod(this.boundingBox.minY + bottom, 4);
+        int rotation = (this.boundingBox.minY + bottom) % 3;
 
         if (bottom == 0) {
             bottom += spacing;
