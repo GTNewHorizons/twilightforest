@@ -90,7 +90,7 @@ public class TFBaublesIntegration {
     }
 
     public static void restoreBaubles(EntityPlayer player, ItemStack[] baublesInventory) {
-        if (!TwilightForestMod.areBaublesLoaded || baublesInventory == null) {
+        if (!TwilightForestMod.areBaublesLoaded || baublesInventory == null || player.worldObj.isRemote) {
             return;
         }
 
@@ -104,10 +104,24 @@ public class TFBaublesIntegration {
             if (slot < inventory.getSizeInventory() && inventory.getStackInSlot(slot) == null) {
                 inventory.setInventorySlotContents(slot, saved.copy());
                 baublesInventory[slot] = null;
-            } else if (!player.worldObj.isRemote) {
-                // never overwrite an equipped bauble, consume the snapshot after returning the item
-                player.dropPlayerItemWithRandomChoice(saved.copy(), false);
-                baublesInventory[slot] = null;
+            } else {
+                // never overwrite an equipped bauble or discard an item
+                int emptySlot = player.inventory.getFirstEmptyStack();
+                if (emptySlot < 0) {
+                    continue;
+                }
+
+                int amount = Math.min(
+                        saved.stackSize,
+                        Math.min(saved.getMaxStackSize(), player.inventory.getInventoryStackLimit()));
+                ItemStack returned = saved.copy();
+                returned.stackSize = amount;
+                player.inventory.setInventorySlotContents(emptySlot, returned);
+                player.inventory.markDirty();
+                saved.stackSize -= amount;
+                if (saved.stackSize == 0) {
+                    baublesInventory[slot] = null;
+                }
             }
         }
     }

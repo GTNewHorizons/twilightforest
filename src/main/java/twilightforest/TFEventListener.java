@@ -3,6 +3,7 @@ package twilightforest;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import net.minecraft.block.Block;
@@ -547,7 +548,22 @@ public class TFEventListener {
                                     : tier == 2 ? TFItems.charmOfKeeping2 : TFItems.charmOfKeeping1));
             playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
             if (baublesInventory != null) {
-                playerBaublesMap.put(player.getCommandSenderName(), baublesInventory);
+                playerBaublesMap.merge(player.getCommandSenderName(), baublesInventory, (pending, retained) -> {
+                    int pendingCount = 0;
+                    for (ItemStack stack : pending) {
+                        if (stack != null && stack.stackSize > 0) {
+                            pendingCount++;
+                        }
+                    }
+                    ItemStack[] combined = Arrays.copyOf(retained, retained.length + pendingCount);
+                    int index = retained.length;
+                    for (ItemStack stack : pending) {
+                        if (stack != null && stack.stackSize > 0) {
+                            combined[index++] = stack;
+                        }
+                    }
+                    return combined;
+                });
             }
         }
 
@@ -678,6 +694,9 @@ public class TFEventListener {
     @SubscribeEvent
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         EntityPlayer player = event.player;
+        if (player.worldObj.isRemote) {
+            return;
+        }
         if (playerKeepsMap.containsKey(player.getCommandSenderName())
                 || playerBaublesMap.containsKey(player.getCommandSenderName())) {
             FMLLog.info(
@@ -685,8 +704,6 @@ public class TFEventListener {
                     player.getCommandSenderName());
 
             InventoryPlayer keepInventory = playerKeepsMap.get(player.getCommandSenderName());
-            ItemStack[] baublesInventory = playerBaublesMap.get(player.getCommandSenderName());
-
             if (keepInventory != null) {
                 for (int i = 0; i < player.inventory.armorInventory.length; i++) {
                     if (keepInventory.armorInventory[i] != null) {
@@ -700,8 +717,10 @@ public class TFEventListener {
                 }
             }
 
-            if (baublesInventory != null) {
-                TFBaublesIntegration.restoreBaubles(player, baublesInventory);
+            if (!restoreKeptBaubles(player)) {
+                player.addChatMessage(
+                        new ChatComponentText(
+                                "[TwilightForest] Some kept accessories are waiting for free inventory space."));
             }
 
             // spawn effect thingers
@@ -723,8 +742,24 @@ public class TFEventListener {
                 player.worldObj.playSoundEffect(player.posX, player.posY, player.posZ, "mob.zombie.unfect", 1.5F, 1.0F);
             }
             playerKeepsMap.remove(player.getCommandSenderName());
-            playerBaublesMap.remove(player.getCommandSenderName());
         }
+    }
+
+    private boolean restoreKeptBaubles(EntityPlayer player) {
+        String playerName = player.getCommandSenderName();
+        ItemStack[] retained = playerBaublesMap.get(playerName);
+        if (retained == null) {
+            return true;
+        }
+
+        TFBaublesIntegration.restoreBaubles(player, retained);
+        for (ItemStack stack : retained) {
+            if (stack != null && stack.stackSize > 0) {
+                return false;
+            }
+        }
+        playerBaublesMap.remove(playerName);
+        return true;
     }
 
     /**
@@ -734,7 +769,6 @@ public class TFEventListener {
     public void onPlayerLogout(PlayerLoggedOutEvent event) {
         EntityPlayer player = event.player;
         playerKeepsMap.remove(player.getCommandSenderName());
-        playerBaublesMap.remove(player.getCommandSenderName());
     }
 
     /**
@@ -757,6 +791,12 @@ public class TFEventListener {
      */
     @SubscribeEvent
     public boolean livingUpdate(LivingUpdateEvent event) {
+        if (event.entityLiving instanceof EntityPlayerMP player && player.isEntityAlive()
+                && !playerBaublesMap.isEmpty()
+                && player.ticksExisted % 20 == 0) {
+            // retry pending accessories every sec after the player is alive again
+            restoreKeptBaubles(player);
+        }
         if (event.entity instanceof EntityPlayer && event.entity.isSneaking()
                 && isRidingUnfriendly(event.entityLiving)) {
             event.entity.setSneaking(false);
