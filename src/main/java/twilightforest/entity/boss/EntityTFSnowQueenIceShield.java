@@ -24,12 +24,13 @@ public class EntityTFSnowQueenIceShield extends Entity {
      */
     @Override
     public boolean attackEntityFrom(DamageSource par1DamageSource, float par2) {
-        this.worldObj.playSoundAtEntity(
-                this,
-                "random.break",
-                1.0F,
-                ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-
+        if (!this.worldObj.isRemote && !this.isDead) {
+            this.worldObj.playSoundAtEntity(
+                    this,
+                    "random.break",
+                    1.0F,
+                    ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+        }
         return false;
     }
 
@@ -39,12 +40,6 @@ public class EntityTFSnowQueenIceShield extends Entity {
     @Override
     public void onUpdate() {
         super.onUpdate();
-
-        this.ticksExisted++;
-
-        lastTickPosX = posX;
-        lastTickPosY = posY;
-        lastTickPosZ = posZ;
 
         // System.out.println("Updating " + this + " with angles " + rotationYawHead + ", " +
         // rotationPitch);

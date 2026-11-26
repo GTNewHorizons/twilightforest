@@ -30,20 +30,22 @@ public class ItemTFIceBomb extends ItemTF {
         }
     }
 
-    public IIcon getSnowIcon(int i) {
-        return snowIcon[i];
+    public IIcon getSnowIcon(int index) {
+        return this.snowIcon[Math.floorMod(index, this.snowIcon.length)];
     }
 
-    public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player) {
+    @Override
+    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+        if (world.isRemote || stack.stackSize <= 0) {
+            return stack;
+        }
+        if (!world.spawnEntityInWorld(new EntityTFIceBomb(world, player))) {
+            return stack;
+        }
         if (!player.capabilities.isCreativeMode) {
-            --itemStack.stackSize;
+            --stack.stackSize;
         }
-
         world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
-
-        if (!world.isRemote) {
-            world.spawnEntityInWorld(new EntityTFIceBomb(world, player));
-        }
-        return itemStack;
+        return stack;
     }
 }

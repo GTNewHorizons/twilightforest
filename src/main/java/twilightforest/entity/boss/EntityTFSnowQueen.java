@@ -25,6 +25,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
@@ -175,7 +177,13 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
      */
     public void onLivingUpdate() {
         despawnIfInvalid();
+        if (this.isDead) {
+            return;
+        }
         super.onLivingUpdate();
+        if (!this.worldObj.isRemote) {
+            return;
+        }
         // make snow particles
         for (int i = 0; i < 3; i++) {
             float px = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.3F;
@@ -277,20 +285,43 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         super.writeEntityToNBT(nbttagcompound);
+        nbttagcompound.setInteger("BossPhase", this.getCurrentPhase().ordinal());
+        nbttagcompound.setInteger("SummonsRemaining", this.summonsRemaining);
+        nbttagcompound.setInteger("SuccessfulDrops", this.successfulDrops);
+        nbttagcompound.setInteger("MaxDrops", this.maxDrops);
+        nbttagcompound.setInteger("BeamDamage", this.damageWhileBeaming);
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
+        nbttagcompound.setInteger("TFHomeRadius", (int) func_110174_bM());
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
         super.readEntityFromNBT(nbttagcompound);
+        if (nbttagcompound.hasKey("BossPhase")) {
+            int phase = nbttagcompound.getInteger("BossPhase");
+            if (phase >= 0 && phase < Phase.values().length) {
+                // dont call setCurrentPhase, it resets counters during chunk loading
+                this.dataWatcher.updateObject(PHASE_FLAG, (byte) phase);
+            }
+        }
+        this.summonsRemaining = nbttagcompound.hasKey("SummonsRemaining")
+                ? Math.max(0, nbttagcompound.getInteger("SummonsRemaining"))
+                : this.summonsRemaining;
+        this.successfulDrops = Math.max(0, nbttagcompound.getInteger("SuccessfulDrops"));
+        this.maxDrops = Math.max(0, nbttagcompound.getInteger("MaxDrops"));
+        this.damageWhileBeaming = Math.max(0, nbttagcompound.getInteger("BeamDamage"));
         if (nbttagcompound.hasKey("Home", 9)) {
             NBTTagList nbttaglist = nbttagcompound.getTagList("Home", 6);
             int hx = (int) nbttaglist.func_150309_d(0);
             int hy = (int) nbttaglist.func_150309_d(1);
             int hz = (int) nbttaglist.func_150309_d(2);
-            this.setHomeArea(hx, hy, hz, 20);
+            this.setHomeArea(
+                    hx,
+                    hy,
+                    hz,
+                    nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
         }
         if (!nbttagcompound.getBoolean("HasHome")) {
             this.detachHome();
@@ -328,7 +359,7 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
         }
 
         // death animation
-        if (deathTime > 0) {
+        if (this.worldObj.isRemote && deathTime > 0) {
             for (int k = 0; k < 5; k++) {
                 double d = rand.nextGaussian() * 0.02D;
                 double d1 = rand.nextGaussian() * 0.02D;
@@ -515,6 +546,9 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
 
     // Destroys all ice related blocks in the AABB
     public boolean destroyBlocksInAABB(AxisAlignedBB par1AxisAlignedBB) {
+        if (this.worldObj.isRemote || !this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            return false;
+        }
         // System.out.println("Destroying blocks in " + par1AxisAlignedBB);
 
         int minX = MathHelper.floor_double(par1AxisAlignedBB.minX);
@@ -557,7 +591,8 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
     }
 
     public Phase getCurrentPhase() {
-        return Phase.values()[this.getDataWatcher().getWatchableObjectByte(PHASE_FLAG)];
+        int phase = this.getDataWatcher().getWatchableObjectByte(PHASE_FLAG);
+        return phase >= 0 && phase < Phase.values().length ? Phase.values()[phase] : Phase.SUMMON;
     }
 
     public void setCurrentPhase(Phase currentPhase) {
@@ -585,15 +620,24 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
     }
 
     public void summonMinionAt(EntityLivingBase targetedEntity) {
+        if (this.worldObj.isRemote || targetedEntity == null
+                || !targetedEntity.isEntityAlive()
+                || this.summonsRemaining <= 0) {
+            return;
+        }
 
         // find a good spot
         Vec3 minionSpot = findVecInLOSOf(targetedEntity);
+        if (minionSpot == null) {
+            return;
+        }
 
         // put a minion there
         EntityTFIceCrystal minion = new EntityTFIceCrystal(worldObj);
         minion.setPosition(minionSpot.xCoord, minionSpot.yCoord, minionSpot.zCoord);
-        worldObj.spawnEntityInWorld(minion);
-
+        if (!worldObj.spawnEntityInWorld(minion)) {
+            return;
+        }
         minion.setAttackTarget(targetedEntity);
         minion.setToDieIn30Seconds(); // don't stick around
 
@@ -603,81 +647,46 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
 
     /**
      * Returns coords that would be good to teleport to.
-     * 
+     *
      * Returns null if we can't find anything
      */
     protected Vec3 findVecInLOSOf(Entity targetEntity) {
-        // for some reason we occasionally get null here
-        if (targetEntity == null) {
+        if (targetEntity == null || !targetEntity.isEntityAlive()) {
             return null;
         }
-
-        double tx = 0, ty = 0, tz = 0;
-        int tries = 100;
-        for (int i = 0; i < tries; i++) {
-            tx = targetEntity.posX + rand.nextGaussian() * 16D;
-            ty = targetEntity.posY + rand.nextGaussian() * 8D;
-            tz = targetEntity.posZ + rand.nextGaussian() * 16D;
-
-            // put the y on something solid
-            boolean groundFlag = false;
-            // we need to get the integer coordinates for this calculation
+        for (int attempt = 0; attempt < 100; attempt++) {
+            double tx = targetEntity.posX + rand.nextGaussian() * 16.0D;
+            double ty = targetEntity.posY + rand.nextGaussian() * 8.0D;
+            double tz = targetEntity.posZ + rand.nextGaussian() * 16.0D;
             int bx = MathHelper.floor_double(tx);
             int by = MathHelper.floor_double(ty);
             int bz = MathHelper.floor_double(tz);
-            while (!groundFlag && ty > 0) {
-                Block whatsThere = worldObj.getBlock(bx, by - 1, bz);
-                if (whatsThere == Blocks.air || !whatsThere.getMaterial().isSolid()) {
-                    ty--;
-                    by--;
-                } else {
-                    groundFlag = true;
-                }
-            }
-
-            // did we not find anything at all to stand on?
-            if (by == 0) {
-                // System.out.println("teleport find failed to find a block to stand on");
+            if (by <= 1 || !worldObj.blockExists(bx, by, bz)) {
                 continue;
             }
-
-            //
-            if (!canEntitySee(targetEntity, tx, ty, tz)) {
-                // System.out.println("teleport find failed because of lack of LOS");
-                // System.out.println("ty = " + ty);
+            while (by > 1 && !worldObj.getBlock(bx, by - 1, bz).getMaterial().isSolid()) {
+                --by;
+            }
+            if (by <= 1) {
                 continue;
             }
+            ty = by;
 
-            // check that we're not colliding and not in liquid
             float halfWidth = this.width / 2.0F;
-            AxisAlignedBB destBox = AxisAlignedBB.getBoundingBox(
+            AxisAlignedBB destination = AxisAlignedBB.getBoundingBox(
                     tx - halfWidth,
                     ty - yOffset + ySize,
                     tz - halfWidth,
                     tx + halfWidth,
                     ty - yOffset + ySize + height,
                     tz + halfWidth);
-            if (worldObj.getCollidingBoundingBoxes(this, destBox).size() > 0) {
-                // System.out.println("teleport find failed because of collision");
+            if (!worldObj.getCollidingBoundingBoxes(this, destination).isEmpty() || worldObj.isAnyLiquid(destination)
+                    || !canEntitySee(targetEntity, tx, ty, tz)) {
                 continue;
             }
-
-            if (worldObj.isAnyLiquid(destBox)) {
-                // System.out.println("teleport find failed because of liquid at destination");
-                continue;
-            }
-            // if we made it this far, we win!
-            break;
+            return Vec3.createVectorHelper(tx, ty, tz);
         }
-
-        if (tries == 99) {
-            // System.out.println("Found no spots, giving up");
-            return null;
-        }
-
-        // System.out.println("I think we found a good destination at " + tx + ", " + ty + ", " + tz);
-        // System.out.println("canEntitySee = " + canEntitySee(targetEntity, tx, ty, tz));
-        return Vec3.createVectorHelper(tx, ty, tz);
+        return null;
     }
 
     // Can the specified entity see the specified location?
@@ -704,9 +713,17 @@ public class EntityTFSnowQueen extends EntityMob implements IBossDisplayData, IE
 
     @Override
     public void doBreathAttack(Entity target) {
-        // if (target.attackEntityFrom(DamageSource.causeMobDamage(this), BREATH_DAMAGE)) {
-        // slow target?
-        // }
+        if (this.worldObj.isRemote || !this.isBreathing()
+                || !this.isEntityAlive()
+                || !(target instanceof EntityLivingBase victim)
+                || target == this
+                || target instanceof EntityTFIceCrystal
+                || !victim.isEntityAlive()) {
+            return;
+        }
+        if (victim.attackEntityFrom(DamageSource.causeMobDamage(this), BREATH_DAMAGE)) {
+            victim.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 40, 1));
+        }
     }
 
 }

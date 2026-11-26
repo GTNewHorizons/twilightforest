@@ -1,6 +1,6 @@
 package twilightforest.entity.boss;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -69,7 +69,12 @@ public class EntityTFFallingIce extends Entity {
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
 
+        ++this.ticksExisted;
         ++this.fallTime;
+        if (!this.worldObj.isRemote && (this.fallTime > 600 || this.posY < -16.0D)) {
+            this.setDead();
+            return;
+        }
 
         if (this.fallTime > HANG_TIME) {
             this.motionY -= 0.03999999910593033D;
@@ -99,8 +104,7 @@ public class EntityTFFallingIce extends Entity {
 
         // kill other nearby blocks if they are not as old as this one
         if (!this.worldObj.isRemote) {
-            ArrayList<Entity> nearby = new ArrayList<>(
-                    this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox));
+            List<Entity> nearby = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox);
 
             for (Entity entity : nearby) {
                 if (entity instanceof EntityTFFallingIce otherIce) {
@@ -110,9 +114,13 @@ public class EntityTFFallingIce extends Entity {
                     }
                 }
             }
-            destroyIceInAABB(this.boundingBox.expand(0.5, 0, 0.5));
+            if (this.fallTime > HANG_TIME && !this.isDead) {
+                destroyIceInAABB(this.boundingBox.expand(0.5, 0, 0.5));
+            }
         }
-        makeTrail();
+        if (this.worldObj.isRemote) {
+            makeTrail();
+        }
     }
 
     public void makeTrail() {
@@ -133,9 +141,9 @@ public class EntityTFFallingIce extends Entity {
     protected void fall(float par1) {
         int distance = MathHelper.ceiling_float_int(par1 - 1.0F);
 
-        if (distance > 0) {
-            ArrayList<Entity> nearby = new ArrayList<>(
-                    this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(2, 0, 2)));
+        if (distance > 0 && !this.worldObj.isRemote) {
+            List<Entity> nearby = this.worldObj
+                    .getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(2, 0, 2));
             DamageSource damagesource = DamageSource.fallingBlock;
             for (Entity entity : nearby) {
                 if (!(entity instanceof EntityTFYetiAlpha)) {
@@ -146,23 +154,36 @@ public class EntityTFFallingIce extends Entity {
             }
         }
 
-        for (int i = 0; i < 200; i++) {
-            double dx = this.posX + 3F * (rand.nextFloat() - rand.nextFloat());
-            double dy = this.posY + 2 + 3F * (rand.nextFloat() - rand.nextFloat());
-            double dz = this.posZ + 3F * (rand.nextFloat() - rand.nextFloat());
+        if (this.worldObj.isRemote) {
+            for (int i = 0; i < 200; i++) {
+                double dx = this.posX + 3F * (rand.nextFloat() - rand.nextFloat());
+                double dy = this.posY + 2 + 3F * (rand.nextFloat() - rand.nextFloat());
+                double dz = this.posZ + 3F * (rand.nextFloat() - rand.nextFloat());
 
-            this.worldObj
-                    .spawnParticle("blockcrack_" + Block.getIdFromBlock(Blocks.packed_ice) + "_0", dx, dy, dz, 0, 0, 0);
+                this.worldObj.spawnParticle(
+                        "blockcrack_" + Block.getIdFromBlock(Blocks.packed_ice) + "_0",
+                        dx,
+                        dy,
+                        dz,
+                        0,
+                        0,
+                        0);
+            }
         }
 
-        this.playSound(Blocks.anvil.stepSound.getBreakSound(), 3F, 0.5F);
-        this.playSound(Blocks.packed_ice.stepSound.getBreakSound(), 3F, 0.5F);
+        if (!this.worldObj.isRemote) {
+            this.playSound(Blocks.anvil.stepSound.getBreakSound(), 3F, 0.5F);
+            this.playSound(Blocks.packed_ice.stepSound.getBreakSound(), 3F, 0.5F);
+        }
     }
 
     /**
      * Destroys all blocks that aren't associated with 'The End' inside the given bounding box.
      */
     public void destroyIceInAABB(AxisAlignedBB par1AxisAlignedBB) {
+        if (this.worldObj.isRemote || !this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            return;
+        }
         // System.out.println("Destroying blocks in " + par1AxisAlignedBB);
 
         int minX = MathHelper.floor_double(par1AxisAlignedBB.minX);
@@ -177,7 +198,8 @@ public class EntityTFFallingIce extends Entity {
                 for (int dz = minZ; dz <= maxZ; ++dz) {
                     Block block = this.worldObj.getBlock(dx, dy, dz);
 
-                    if (block == Blocks.ice || block == Blocks.packed_ice || block == Blocks.stone) {
+                    if ((block == Blocks.ice || block == Blocks.packed_ice || block == Blocks.stone)
+                            && block.getBlockHardness(this.worldObj, dx, dy, dz) >= 0.0F) {
                         this.worldObj.setBlock(dx, dy, dz, Blocks.air, 0, 3);
                     }
                 }
@@ -186,13 +208,13 @@ public class EntityTFFallingIce extends Entity {
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound var1) {
-        // TODO Auto-generated method stub
+    protected void readEntityFromNBT(NBTTagCompound nbt) {
+        this.fallTime = Math.max(0, nbt.getInteger("FallTime"));
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound var1) {
-        // TODO Auto-generated method stub
+    protected void writeEntityToNBT(NBTTagCompound nbt) {
+        nbt.setInteger("FallTime", this.fallTime);
     }
 
     /**
