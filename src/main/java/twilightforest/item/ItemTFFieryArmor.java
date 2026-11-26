@@ -36,14 +36,7 @@ public class ItemTFFieryArmor extends ItemArmor {
     @Override
     public String getArmorTexture(ItemStack itemstack, Entity entity, int slot, String layer) {
 
-        if (itemstack.getItem() == TFItems.fieryPlate || itemstack.getItem() == TFItems.fieryHelm
-                || itemstack.getItem() == TFItems.fieryBoots) {
-            return TwilightForestMod.ARMOR_DIR + "fiery_1.png";
-        }
-        if (itemstack.getItem() == TFItems.fieryLegs) {
-            return TwilightForestMod.ARMOR_DIR + "fiery_2.png";
-        }
-        return TwilightForestMod.ARMOR_DIR + "fiery_1.png";
+        return TwilightForestMod.ARMOR_DIR + (itemstack.getItem() == TFItems.fieryLegs ? "fiery_2.png" : "fiery_1.png");
     }
 
     /**
@@ -62,8 +55,8 @@ public class ItemTFFieryArmor extends ItemArmor {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with fiery ingots
-        return par2ItemStack.getItem() == TFItems.fieryIngot ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return par2ItemStack != null && (par2ItemStack.getItem() == TFItems.fieryIngot
+                || super.getIsRepairable(par1ItemStack, par2ItemStack));
     }
 
     /**
@@ -89,11 +82,11 @@ public class ItemTFFieryArmor extends ItemArmor {
 
     /**
      * Override this method to have an item handle its own armor rendering.
-     * 
+     *
      * @param entityLiving The entity wearing the armor
      * @param itemStack    The itemStack to render the model of
      * @param armorSlot    0=head, 1=torso, 2=legs, 3=feet
-     * 
+     *
      * @return A ModelBiped to render instead of the default
      */
     @SideOnly(Side.CLIENT)

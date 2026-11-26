@@ -1,9 +1,11 @@
 package twilightforest.item;
 
-import java.util.HashMap;
+import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -99,7 +101,7 @@ public class ItemTFOreMagnet extends ItemTF {
 
     /**
      * Player, Render pass, and item usage sensitive version of getIconIndex.
-     * 
+     *
      * @param stack        The item stack to get the icon for. (Usually this, and usingItem will be the same if
      *                     usingItem is not null)
      * @param renderPass   The pass to get the icon for, 0 is default.
@@ -169,134 +171,159 @@ public class ItemTFOreMagnet extends ItemTF {
         int destY = MathHelper.floor_double(destVec.yCoord);
         int destZ = MathHelper.floor_double(destVec.zCoord);
 
-        return doMagnet(world, useX, useY, useZ, destX, destY, destZ);
+        return doMagnet(world, player, useX, useY, useZ, destX, destY, destZ);
     }
 
-    private static final HashSet<Integer[]> FOUND_ORE_BLOCKS = new HashSet<>();
+    private static final int MAX_VEIN_SIZE = 24;
 
-    /**
-     * This function makes the magnet work
-     */
+    // public overload retained for integrations that invoke the magnet
     public static int doMagnet(World world, int useX, int useY, int useZ, int destX, int destY, int destZ) {
-        int blocksMoved = 0;
-        // get blocks in line from src to dest
-        ChunkCoordinates[] lineArray = TFGenerator.getBresehnamArrayCoords(useX, useY, useZ, destX, destY, destZ);
+        return doMagnet(world, null, useX, useY, useZ, destX, destY, destZ);
+    }
 
-        // System.out.println("Searching from " + useX + ", " + useY + ", " + useZ + " to " + destX + ", " +
-        // destY + ", " + destZ);
+    private static int doMagnet(World world, EntityPlayer player, int useX, int useY, int useZ, int destX, int destY,
+            int destZ) {
+        if (world.isRemote) {
+            return 0;
+        }
+        ChunkCoordinates[] line = TFGenerator.getBresehnamArrayCoords(useX, useY, useZ, destX, destY, destZ);
+        ChunkCoordinates base = null;
+        ChunkCoordinates ore = null;
+        Block oreBlock = null;
+        int oreMeta = 0;
+        boolean nether = false;
 
-        // find some ore?
-        Block foundID = Blocks.air;
-        int foundMeta = -1;
-        int foundX = -1;
-        int foundY = -1;
-        int foundZ = -1;
-        int baseX = -1;
-        int baseY = -1;
-        int baseZ = -1;
-        boolean isNetherrack = false;
-
-        for (ChunkCoordinates coord : lineArray) {
-            Block searchID = world.getBlock(coord.posX, coord.posY, coord.posZ);
-            int searchMeta = world.getBlockMetadata(coord.posX, coord.posY, coord.posZ);
-
-            // keep track of where the dirt/stone we first find is.s
-            if (baseY == -1) {
-                if (isReplaceable(world, searchID, searchMeta, coord.posX, coord.posY, coord.posZ)) {
-                    baseX = coord.posX;
-                    baseY = coord.posY;
-                    baseZ = coord.posZ;
-
-                } else if (isNetherReplaceable(world, searchID, searchMeta, coord.posX, coord.posY, coord.posZ)) {
-                    isNetherrack = true;
-                    baseX = coord.posX;
-                    baseY = coord.posY;
-                    baseZ = coord.posZ;
+        for (ChunkCoordinates pos : line) {
+            if (!validHeight(world, pos.posY)) {
+                continue;
+            }
+            Block block = world.getBlock(pos.posX, pos.posY, pos.posZ);
+            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
+            if (base == null) {
+                if (isReplaceable(world, block, meta, pos.posX, pos.posY, pos.posZ)) {
+                    base = pos;
+                } else if (isNetherReplaceable(world, block, meta, pos.posX, pos.posY, pos.posZ)) {
+                    base = pos;
+                    nether = true;
                 }
             }
-
-            if (searchID != Blocks.air && isOre(searchID, searchMeta)) {
-                // System.out.println("I found ore: " + searchID + " at " + coord.PosX + ", " + coord.PosY + ", " +
-                // coord.PosZ);
-
-                foundID = searchID;
-                foundMeta = searchMeta;
-                foundX = coord.posX;
-                foundY = coord.posY;
-                foundZ = coord.posZ;
-                FOUND_ORE_BLOCKS.add(new Integer[] { Block.getIdFromBlock(foundID), foundMeta });
+            if (block != Blocks.air && isOre(block, meta)) {
+                ore = pos;
+                oreBlock = block;
+                oreMeta = meta;
                 break;
             }
         }
+        if (base == null || ore == null) {
+            return 0;
+        }
 
-        // System.out.println("I found ground at " + baseX + ", " + baseY + ", " + baseZ);
+        int offsetX = base.posX - ore.posX;
+        int offsetY = base.posY - ore.posY;
+        int offsetZ = base.posZ - ore.posZ;
+        Map<ChunkCoordinates, TileEntity> vein = findVein(world, ore, oreBlock, oreMeta);
+        int moved = 0;
 
-        if (baseY != -1 && foundID != Blocks.air) {
-            // find the whole vein
-            HashMap<ChunkCoordinates, Optional<TileEntity>> veinBlocks = new HashMap<>();
-            findVein(world, foundX, foundY, foundZ, foundID, foundMeta, veinBlocks);
-
-            // move it up into minable blocks or dirt
-            int offX = baseX - foundX;
-            int offY = baseY - foundY;
-            int offZ = baseZ - foundZ;
-
-            for (Map.Entry<ChunkCoordinates, Optional<TileEntity>> entry : veinBlocks.entrySet()) {
-                ChunkCoordinates coord = entry.getKey();
-                int replaceX = coord.posX + offX;
-                int replaceY = coord.posY + offY;
-                int replaceZ = coord.posZ + offZ;
-
-                Block replaceID = world.getBlock(replaceX, replaceY, replaceZ);
-                int replaceMeta = world.getBlockMetadata(replaceX, replaceY, replaceZ);
-
-                if ((isNetherrack ? isNetherReplaceable(world, replaceID, replaceMeta, replaceX, replaceY, replaceZ)
-                        : isReplaceable(world, replaceID, replaceMeta, replaceX, replaceY, replaceZ))
-                        || replaceID == Blocks.air) {
-                    // set vein to stone / netherrack
-                    world.setBlock(
-                            coord.posX,
-                            coord.posY,
-                            coord.posZ,
-                            isNetherrack ? Blocks.netherrack : Blocks.stone,
-                            0,
-                            2);
-
-                    // set close to ore material
-                    world.setBlock(replaceX, replaceY, replaceZ, foundID, foundMeta, 2);
-
-                    // Tile Entity Handleing
-                    entry.getValue().ifPresent(tile -> {
-                        // Set XYZ on the Tile
-                        {
-                            tile.xCoord = replaceX;
-                            tile.yCoord = replaceY;
-                            tile.zCoord = replaceZ;
-                        }
-                        // Validate the tile and set the new position on the chunk-data
-                        {
-                            tile.validate();
-                            world.setTileEntity(replaceX, replaceY, replaceZ, tile);
-                        }
-                        // remove the old position from the chunk-data and re-Validate the tile
-                        {
-                            world.removeTileEntity(coord.posX, coord.posY, coord.posZ);
-                            tile.validate();
-                        }
-                        // mark the tile as dirty so it gets saved to disk
-                        tile.markDirty();
-                    });
-                    blocksMoved++;
+        for (Map.Entry<ChunkCoordinates, TileEntity> entry : vein.entrySet()) {
+            ChunkCoordinates source = entry.getKey();
+            int targetX = source.posX + offsetX;
+            int targetY = source.posY + offsetY;
+            int targetZ = source.posZ + offsetZ;
+            if (!validHeight(world, targetY) || !canEdit(player, world, source.posX, source.posY, source.posZ)
+                    || !canEdit(player, world, targetX, targetY, targetZ)) {
+                continue;
+            }
+            Block displaced = world.getBlock(targetX, targetY, targetZ);
+            int displacedMeta = world.getBlockMetadata(targetX, targetY, targetZ);
+            if (!(displaced == Blocks.air
+                    || (nether ? isNetherReplaceable(world, displaced, displacedMeta, targetX, targetY, targetZ)
+                            : isReplaceable(world, displaced, displacedMeta, targetX, targetY, targetZ)))) {
+                continue;
+            }
+            // never delete a tile entity in the destination, even on a replacement block
+            if (world.getTileEntity(targetX, targetY, targetZ) != null
+                    || world.getBlock(source.posX, source.posY, source.posZ) != oreBlock
+                    || world.getBlockMetadata(source.posX, source.posY, source.posZ) != oreMeta) {
+                continue;
+            }
+            if (player != null) {
+                net.minecraftforge.event.world.BlockEvent.BreakEvent breakEvent = new net.minecraftforge.event.world.BlockEvent.BreakEvent(
+                        source.posX,
+                        source.posY,
+                        source.posZ,
+                        world,
+                        oreBlock,
+                        oreMeta,
+                        player);
+                if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(breakEvent)) {
+                    continue;
                 }
-                /*
-                 * else {
-                 * System.out.println("Not moving a block because we did not find a replaceable block to move to"); }
-                 */
             }
 
-            // player.addChatMessage("Moved blocks! " + blocksMoved);
+            TileEntity originalTile = entry.getValue();
+            net.minecraftforge.common.util.BlockSnapshot destinationSnapshot = net.minecraftforge.common.util.BlockSnapshot
+                    .getBlockSnapshot(world, targetX, targetY, targetZ);
+            if (!world.setBlock(targetX, targetY, targetZ, oreBlock, oreMeta, 2)) {
+                continue;
+            }
+            if (player != null && net.minecraftforge.event.ForgeEventFactory
+                    .onPlayerBlockPlace(player, destinationSnapshot, net.minecraftforge.common.util.ForgeDirection.UP)
+                    .isCanceled()) {
+                destinationSnapshot.restore(true, false);
+                continue;
+            }
+            if (!world
+                    .setBlock(source.posX, source.posY, source.posZ, nether ? Blocks.netherrack : Blocks.stone, 0, 2)) {
+                // a failed source update musnt duplicate ore at the destination
+                destinationSnapshot.restore(true, false);
+                continue;
+            }
+            if (originalTile != null) {
+                // setBlock has already removed the original TE, transfer it after both writes succeed
+                world.removeTileEntity(targetX, targetY, targetZ);
+                originalTile.xCoord = targetX;
+                originalTile.yCoord = targetY;
+                originalTile.zCoord = targetZ;
+                originalTile.validate();
+                world.setTileEntity(targetX, targetY, targetZ, originalTile);
+                originalTile.markDirty();
+            }
+            moved++;
         }
-        return blocksMoved;
+        return moved;
+    }
+
+    private static boolean validHeight(World world, int y) {
+        return y >= 0 && y < world.getActualHeight();
+    }
+
+    private static boolean canEdit(EntityPlayer player, World world, int x, int y, int z) {
+        return player == null || (world.canMineBlock(player, x, y, z)
+                && player.canPlayerEdit(x, y, z, 1, player.getCurrentEquippedItem()));
+    }
+
+    private static Map<ChunkCoordinates, TileEntity> findVein(World world, ChunkCoordinates start, Block ore,
+            int meta) {
+        Map<ChunkCoordinates, TileEntity> vein = new LinkedHashMap<>();
+        Set<ChunkCoordinates> visited = new HashSet<>();
+        ArrayDeque<ChunkCoordinates> pending = new ArrayDeque<>();
+        pending.add(start);
+        while (!pending.isEmpty() && vein.size() < MAX_VEIN_SIZE) {
+            ChunkCoordinates at = pending.removeFirst();
+            if (!visited.add(at) || !validHeight(world, at.posY)
+                    || world.getBlock(at.posX, at.posY, at.posZ) != ore
+                    || world.getBlockMetadata(at.posX, at.posY, at.posZ) != meta) {
+                continue;
+            }
+            vein.put(at, world.getTileEntity(at.posX, at.posY, at.posZ));
+            pending.add(new ChunkCoordinates(at.posX + 1, at.posY, at.posZ));
+            pending.add(new ChunkCoordinates(at.posX - 1, at.posY, at.posZ));
+            pending.add(new ChunkCoordinates(at.posX, at.posY + 1, at.posZ));
+            pending.add(new ChunkCoordinates(at.posX, at.posY - 1, at.posZ));
+            pending.add(new ChunkCoordinates(at.posX, at.posY, at.posZ + 1));
+            pending.add(new ChunkCoordinates(at.posX, at.posY, at.posZ - 1));
+        }
+        return vein;
     }
 
     /**
@@ -311,63 +338,21 @@ public class ItemTFOreMagnet extends ItemTF {
         return Vec3.createVectorHelper(var3 * var4, var5, var2 * var4);
     }
 
-    private static boolean isReplaceable(World world, Block replaceID, int replaceMeta, int x, int y, int z) {
-        // Make found Ores NOT replaceable
-        if (FOUND_ORE_BLOCKS.contains(new Integer[] { Block.getIdFromBlock(replaceID), replaceMeta })) return false;
-
-        if (replaceID == Blocks.dirt) {
-            return true;
+    private static boolean isReplaceable(World world, Block block, int meta, int x, int y, int z) {
+        // nteger keys previously compared by identity and failed to protect previously found ores
+        if (block == Blocks.air || isOre(block, meta)) {
+            return false;
         }
-        if (replaceID == Blocks.grass) {
-            return true;
-        }
-        if (replaceID == Blocks.gravel) {
-            return true;
-        }
-        return replaceID != Blocks.air && replaceID.isReplaceableOreGen(world, x, y, z, Blocks.stone);
+        return block == Blocks.dirt || block == Blocks.grass
+                || block == Blocks.gravel
+                || block.isReplaceableOreGen(world, x, y, z, Blocks.stone);
     }
 
-    private static boolean isNetherReplaceable(World world, Block replaceID, int replaceMeta, int x, int y, int z) {
-        if (FOUND_ORE_BLOCKS.contains(new Integer[] { Block.getIdFromBlock(replaceID), replaceMeta })) return false;
-
-        if (replaceID == Blocks.netherrack) {
-            return true;
-        }
-        return replaceID != Blocks.air && replaceID.isReplaceableOreGen(world, x, y, z, Blocks.netherrack);
-    }
-
-    private static final int MAX_FIND_VEIN_RECURSION_DEPTH = 24;
-
-    private static boolean findVein(World world, int x, int y, int z, Block oreID, int oreMeta,
-            Map<ChunkCoordinates, Optional<TileEntity>> veinBlocks) {
-        ChunkCoordinates here = new ChunkCoordinates(x, y, z);
-
-        // is this already on the list?
-        if (veinBlocks.containsKey(here)) {
+    private static boolean isNetherReplaceable(World world, Block block, int meta, int x, int y, int z) {
+        if (block == Blocks.air || isOre(block, meta)) {
             return false;
         }
-
-        // let's limit it to 24 blocks at a time
-        if (veinBlocks.size() >= MAX_FIND_VEIN_RECURSION_DEPTH) {
-            return false;
-        }
-
-        // otherwise, check if we're still in the vein
-        if (world.getBlock(x, y, z) == oreID && world.getBlockMetadata(x, y, z) == oreMeta) {
-            veinBlocks.put(here, Optional.ofNullable(world.getTileEntity(x, y, z)));
-            // recurse in 6 directions
-            {
-                findVein(world, x + 1, y, z, oreID, oreMeta, veinBlocks);
-                findVein(world, x - 1, y, z, oreID, oreMeta, veinBlocks);
-                findVein(world, x, y + 1, z, oreID, oreMeta, veinBlocks);
-                findVein(world, x, y - 1, z, oreID, oreMeta, veinBlocks);
-                findVein(world, x, y, z + 1, oreID, oreMeta, veinBlocks);
-                findVein(world, x, y, z - 1, oreID, oreMeta, veinBlocks);
-            }
-            return true;
-        } else {
-            return false;
-        }
+        return block == Blocks.netherrack || block.isReplaceableOreGen(world, x, y, z, Blocks.netherrack);
     }
 
     public static boolean isOre(Block blockID, int meta) {
@@ -402,7 +387,7 @@ public class ItemTFOreMagnet extends ItemTF {
         if (blockID == TFBlocks.root && meta == BlockTFRoots.OREROOT_META) {
             return true;
         }
-        return blockID.getUnlocalizedName().toLowerCase().contains("ore");
+        return blockID.getUnlocalizedName().toLowerCase(Locale.ROOT).contains("ore");
     }
 
 }

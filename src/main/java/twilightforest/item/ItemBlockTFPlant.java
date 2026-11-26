@@ -50,8 +50,6 @@ public class ItemBlockTFPlant extends ItemBlock {
         return i;
     }
 
-    @SideOnly(Side.CLIENT)
-
     /**
      * Returns true if the given ItemBlock can be placed on the given side of the given block position.
      */
@@ -103,34 +101,32 @@ public class ItemBlockTFPlant extends ItemBlock {
             z += Facing.offsetsZForSide[direction];
         }
 
-        if (!player.canPlayerEdit(x, y, z, direction, itemStack)) {
+        if (itemStack.stackSize <= 0 || !world.canMineBlock(player, x, y, z)
+                || !player.canPlayerEdit(x, y, z, direction, itemStack)
+                || !BlockTFPlant.canPlaceRootBelow(world, x, y + 1, z)) {
             return false;
-        } else if (itemStack.stackSize == 0) {
-            return false;
-        } else {
-            if (BlockTFPlant.canPlaceRootBelow(world, x, y + 1, z)) {
-                Block plantBlock = TFBlocks.plant;
-
-                if (world
-                        .setBlock(x, y, z, plantBlock, itemStack.getItem().getMetadata(itemStack.getItemDamage()), 3)) {
-                    if (world.getBlock(x, y, z) == plantBlock) {
-                        // plantBlock.onBlockPlaced(world, x, y, z, direction);
-                        plantBlock.onBlockPlacedBy(world, x, y, z, player, itemStack);
-                    }
-
-                    world.playSoundEffect(
-                            x + 0.5F,
-                            y + 0.5F,
-                            z + 0.5F,
-                            plantBlock.stepSound.getBreakSound(),
-                            (plantBlock.stepSound.getVolume() + 1.0F) / 2.0F,
-                            plantBlock.stepSound.getPitch() * 0.8F);
-                    --itemStack.stackSize;
-                }
-            }
-
-            return true;
         }
+
+        Block plantBlock = TFBlocks.plant;
+        if (!world.setBlock(x, y, z, plantBlock, itemStack.getItem().getMetadata(itemStack.getItemDamage()), 3)) {
+            return false;
+        }
+
+        if (world.getBlock(x, y, z) == plantBlock) {
+            plantBlock.onBlockPlacedBy(world, x, y, z, player, itemStack);
+        }
+
+        world.playSoundEffect(
+                x + 0.5F,
+                y + 0.5F,
+                z + 0.5F,
+                plantBlock.stepSound.getBreakSound(),
+                (plantBlock.stepSound.getVolume() + 1.0F) / 2.0F,
+                plantBlock.stepSound.getPitch() * 0.8F);
+        if (!player.capabilities.isCreativeMode) {
+            --itemStack.stackSize;
+        }
+        return true;
     }
 
 }

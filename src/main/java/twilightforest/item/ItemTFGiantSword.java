@@ -25,8 +25,8 @@ public class ItemTFGiantSword extends ItemSword {
     @Override
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack) {
         // repair with ironwood ingots
-        return par2ItemStack.getItem() == TFItems.ironwoodIngot ? true
-                : super.getIsRepairable(par1ItemStack, par2ItemStack);
+        return par2ItemStack != null && (par2ItemStack.getItem() == TFItems.ironwoodIngot
+                || super.getIsRepairable(par1ItemStack, par2ItemStack));
     }
 
     /**
@@ -44,17 +44,13 @@ public class ItemTFGiantSword extends ItemSword {
      * Return the correct icon for rendering based on the supplied ItemStack and render pass.
      *
      * Defers to {@link #getIconFromDamageForRenderPass(int, int)}
-     * 
+     *
      * @param stack to render for
      * @param pass  the multi-render pass
      * @return the icon
      */
     public IIcon getIcon(ItemStack stack, int pass) {
         // render pass 1 gives the giant Icon
-        if (pass == -1) {
-            return this.giantIcon;
-        } else {
-            return super.getIcon(stack, pass);
-        }
+        return pass == -1 && this.giantIcon != null ? this.giantIcon : super.getIcon(stack, pass);
     }
 }

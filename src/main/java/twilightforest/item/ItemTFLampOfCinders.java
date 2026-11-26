@@ -1,12 +1,13 @@
 package twilightforest.item;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.BlockEvent;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -73,58 +74,67 @@ public class ItemTFLampOfCinders extends ItemTF {
     }
 
     private boolean burnBlock(EntityPlayer player, World world, int x, int y, int z) {
-        Block block = world.getBlock(x, y, z);
-        if (block == TFBlocks.thorns) {
-            world.setBlock(x, y, z, TFBlocks.burntThorns, world.getBlockMetadata(x, y, z) & 12, 2);
-            return true;
-        } else {
+        if (world.getBlock(x, y, z) != TFBlocks.thorns) {
             return false;
         }
+        if (world.isRemote) {
+            return true;
+        }
+        if (!world.canMineBlock(player, x, y, z) || !player.canPlayerEdit(x, y, z, 1, player.getHeldItem())) {
+            return false;
+        }
+        int metadata = world.getBlockMetadata(x, y, z);
+        BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(x, y, z, world, TFBlocks.thorns, metadata, player);
+        if (MinecraftForge.EVENT_BUS.post(event)) {
+            return false;
+        }
+        return world.setBlock(x, y, z, TFBlocks.burntThorns, metadata & 12, 2);
     }
 
     /**
      * called when the player releases the use item button. Args: itemstack, world, entityplayer, itemInUseCount
      */
     @Override
-    public void onPlayerStoppedUsing(ItemStack par1ItemStack, World world, EntityPlayer player, int useRemaining) {
-        int useTime = this.getMaxItemUseDuration(par1ItemStack) - useRemaining;
-
-        if (useTime > FIRING_TIME && (par1ItemStack.getItemDamage() + 1) < this.getMaxDamage()) {
-            doBurnEffect(world, player);
-
-            // trigger achievement
+    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int useRemaining) {
+        int useTime = this.getMaxItemUseDuration(stack) - useRemaining;
+        if (useTime <= FIRING_TIME || stack.getItemDamage() + 1 >= this.getMaxDamage()) {
+            return;
+        }
+        this.doBurnEffect(world, player);
+        // using the charged lamp is the original progression trigger, even without nearby thorns
+        if (!world.isRemote) {
             player.triggerAchievement(TFAchievementPage.twilightProgressTroll);
         }
-
     }
 
-    private void doBurnEffect(World world, EntityPlayer player) {
+    private boolean doBurnEffect(World world, EntityPlayer player) {
         int px = MathHelper.floor_double(player.lastTickPosX);
         int py = MathHelper.floor_double(player.lastTickPosY + player.getEyeHeight());
         int pz = MathHelper.floor_double(player.lastTickPosZ);
-
         int range = 4;
+        boolean burned = false;
 
         if (!world.isRemote) {
-            world.playSoundAtEntity(player, this.getSound(), 1.5F, 0.8F);
-
-            // set nearby thorns to burnt
             for (int dx = -range; dx <= range; dx++) {
                 for (int dy = -range; dy <= range; dy++) {
                     for (int dz = -range; dz <= range; dz++) {
-                        this.burnBlock(player, world, px + dx, py + dy, pz + dz);
+                        burned |= this.burnBlock(player, world, px + dx, py + dy, pz + dz);
                     }
                 }
             }
+            if (burned) {
+                world.playSoundAtEntity(player, this.getSound(), 1.5F, 0.8F);
+            }
         }
-
-        for (int i = 0; i < 6; i++) {
-            int rx = px + itemRand.nextInt(range) - itemRand.nextInt(range);
-            int ry = py + itemRand.nextInt(2);
-            int rz = pz + itemRand.nextInt(range) - itemRand.nextInt(range);
-
-            world.playAuxSFXAtEntity(player, 2004, rx, ry, rz, 0);
+        if (burned || world.isRemote) {
+            for (int i = 0; i < 6; i++) {
+                int rx = px + itemRand.nextInt(range) - itemRand.nextInt(range);
+                int ry = py + itemRand.nextInt(2);
+                int rz = pz + itemRand.nextInt(range) - itemRand.nextInt(range);
+                world.playAuxSFXAtEntity(player, 2004, rx, ry, rz, 0);
+            }
         }
+        return burned;
     }
 
     public String getSound() {

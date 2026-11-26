@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -69,9 +68,13 @@ public class ItemTFSpawnEgg extends ItemMonsterPlacer {
             par4 += Facing.offsetsXForSide[par7];
             par5 += Facing.offsetsYForSide[par7];
             par6 += Facing.offsetsZForSide[par7];
+            if (!player.canPlayerEdit(par4, par5, par6, par7, itemStack)
+                    || !world.canMineBlock(player, par4, par5, par6)) {
+                return false;
+            }
             double var12 = 0.0D;
 
-            if (par7 == 1 && var11 == Blocks.fence || var11 == Blocks.nether_brick_fence) {
+            if (par7 == 1 && (var11 == Blocks.fence || var11 == Blocks.nether_brick_fence)) {
                 var12 = 0.5D;
             }
 
@@ -91,7 +94,7 @@ public class ItemTFSpawnEgg extends ItemMonsterPlacer {
                     --itemStack.stackSize;
                 }
             }
-            return true;
+            return entity != null;
         }
     }
 
@@ -99,24 +102,22 @@ public class ItemTFSpawnEgg extends ItemMonsterPlacer {
      * Spawns the creature specified by the egg's type in the location specified by the last three parameters.
      * Parameters: world, entityID, x, y, z.
      */
-    public static Entity spawnCreature(World world, int par1, double par2, double par4, double par6) {
-        // System.out.println("Trying to spawn twilight egg");
-
-        if (!TFCreatures.entityEggs.containsKey(par1)) {
+    public static Entity spawnCreature(World world, int entityID, double x, double y, double z) {
+        if (world.isRemote || !TFCreatures.entityEggs.containsKey(entityID)) {
             return null;
-        } else {
-            Entity entityToSpawn = TFCreatures.createEntityByID(par1, world);
-
-            if (entityToSpawn != null && entityToSpawn instanceof EntityLivingBase) {
-                EntityLiving entityliving = (EntityLiving) entityToSpawn;
-
-                entityToSpawn.setLocationAndAngles(par2, par4, par6, world.rand.nextFloat() * 360.0F, 0.0F);
-                entityliving.onSpawnWithEgg(null);
-                world.spawnEntityInWorld(entityToSpawn);
-                ((EntityLiving) entityToSpawn).playLivingSound();
-            }
-            return entityToSpawn;
         }
+
+        Entity entity = TFCreatures.createEntityByID(entityID, world);
+        if (!(entity instanceof EntityLiving living)) {
+            return null;
+        }
+        entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
+        living.onSpawnWithEgg(null);
+        if (!world.spawnEntityInWorld(entity)) {
+            return null;
+        }
+        living.playLivingSound();
+        return entity;
     }
 
     // returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
