@@ -21,7 +21,7 @@ public class ComponentTFNagaCourtyardHedge extends ComponentTFNagaCourtyardRotat
 
     @Override
     public boolean addComponentParts(World world, Random random, StructureBoundingBox structureBoundingBox) {
-        adjustGroundHeightOnce(world, structureBoundingBox, 5, 5, 0);
+        adjustGroundHeightOnce(world, 5, 5, 0);
         buildHedge(world, structureBoundingBox);
         replaceGroundAround(world, structureBoundingBox, 5, 5);
         addFoliage(world, random, structureBoundingBox);

@@ -26,8 +26,22 @@ public class ComponentTFNagaCourtyardHedgePadder extends ComponentTFNagaCourtyar
     }
 
     @Override
+    public StructureBoundingBox getBoundingBox() {
+        boolean rotated = coordBaseMode == 1 || coordBaseMode == 3;
+        int expandX = rotated ? 1 : 0;
+        int expandZ = rotated ? 0 : 1;
+        return new StructureBoundingBox(
+                boundingBox.minX - expandX,
+                boundingBox.minY,
+                boundingBox.minZ - expandZ,
+                boundingBox.maxX + expandX,
+                boundingBox.maxY,
+                boundingBox.maxZ + expandZ);
+    }
+
+    @Override
     public boolean addComponentParts(World world, Random random, StructureBoundingBox structureBoundingBox) {
-        adjustGroundHeightOnce(world, structureBoundingBox, 5, 1, 1);
+        adjustGroundHeightOnce(world, 5, 1, 1);
         buildHedge(world, structureBoundingBox);
         addFoliage(world, random, structureBoundingBox);
         replaceGroundAround(world, structureBoundingBox, 5, 3);

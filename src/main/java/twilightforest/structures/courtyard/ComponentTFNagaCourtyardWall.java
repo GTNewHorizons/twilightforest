@@ -27,31 +27,13 @@ public class ComponentTFNagaCourtyardWall extends ComponentTFNagaCourtyardRotate
 
         // structure component coords transformation uses max x for rotation 1 and min x for rotation 3
         // preserve those anchors when rotating the box
-        if (rotation == 1) {
-            boundingBox = new StructureBoundingBox(
-                    x + WALL_LENGTH - WALL_WIDTH,
-                    y,
-                    z,
-                    x + WALL_LENGTH - 1,
-                    y + WALL_HEIGHT - 1,
-                    z + WALL_LENGTH - 1);
-        } else if (rotation == 3) {
-            boundingBox = new StructureBoundingBox(
-                    x,
-                    y,
-                    z,
-                    x + WALL_WIDTH - 1,
-                    y + WALL_HEIGHT - 1,
-                    z + WALL_LENGTH - 1);
-        } else {
-            boundingBox = new StructureBoundingBox(
-                    x,
-                    y,
-                    z,
-                    x + WALL_LENGTH - 1,
-                    y + WALL_HEIGHT - 1,
-                    z + WALL_WIDTH - 1);
-        }
+        boundingBox = new StructureBoundingBox(x, y, z, x + WALL_LENGTH - 1, y + WALL_HEIGHT - 1, z + WALL_WIDTH - 1);
+        normalizeRotatedFootprint();
+    }
+
+    @Override
+    protected void normalizeRotatedFootprint() {
+        fitRotatedFootprint(WALL_LENGTH, WALL_WIDTH);
     }
 
     @Override

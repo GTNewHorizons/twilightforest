@@ -105,7 +105,7 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
     }
 
     private void setStairs(int stair0, int stair1, int stair2, int stair3, int stair4, int stair5, int stair6,
-            int stair7) {
+                           int stair7) {
         rotatedStairs0 = stair0;
         rotatedStairs1 = stair1;
         rotatedStairs2 = stair2;
@@ -117,7 +117,7 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
     }
 
     private void setEtchedDirections(ForgeDirection north, ForgeDirection south, ForgeDirection west,
-            ForgeDirection east) {
+                                     ForgeDirection east) {
         EtchedNagastoneNorth = north;
         EtchedNagastoneSouth = south;
         EtchedNagastoneWest = west;
@@ -151,21 +151,29 @@ public class ComponentTFNagaCourtyardRotatedAbstract extends StructureTFComponen
 
     protected void normalizeRotatedFootprint() {}
 
-    protected final void adjustGroundHeightOnce(World world, StructureBoundingBox chunkBox, int width, int depth,
-            int sampleZ) {
+    protected final void adjustGroundHeightOnce(World world, int width, int depth, int sampleZ) {
         if (groundHeightChecked) {
             return;
         }
 
+        int groundY = getYWithOffset(-1);
+        int undergroundY = getYWithOffset(-2);
         int groundAir = 0;
         int undergroundAir = 0;
         for (int x = 0; x < width; x++) {
             for (int z = 0; z < depth; z++) {
                 int localZ = z + sampleZ;
-                if (getBlockAtCurrentPosition(world, x, -1, localZ, chunkBox) == Blocks.air) {
+                int worldX = getXWithOffset(x, localZ);
+                int worldZ = getZWithOffset(x, localZ);
+                if (!world.blockExists(worldX, groundY, worldZ)
+                        || !world.blockExists(worldX, undergroundY, worldZ)) {
+                    groundHeightChecked = true;
+                    return;
+                }
+                if (world.getBlock(worldX, groundY, worldZ) == Blocks.air) {
                     groundAir++;
                 }
-                if (getBlockAtCurrentPosition(world, x, -2, localZ, chunkBox) == Blocks.air) {
+                if (world.getBlock(worldX, undergroundY, worldZ) == Blocks.air) {
                     undergroundAir++;
                 }
             }
