@@ -29,7 +29,7 @@ public class EntitySeekerArrow extends EntityArrow {
     @Override
     public void onUpdate() {
         if (!this.worldObj.isRemote && isThisArrowFlying()) {
-            if (!isValidTarget(this.homingTarget)) {
+            if (!isValidTarget(this.homingTarget) || !isTargetAhead(this.homingTarget)) {
                 this.homingTarget = findHomingTarget();
             }
             if (this.homingTarget != null) {
@@ -46,6 +46,13 @@ public class EntitySeekerArrow extends EntityArrow {
 
     private boolean isValidTarget(EntityLivingBase target) {
         return target != null && !target.isDead && target.getHealth() > 0.0F && target.worldObj == this.worldObj;
+    }
+
+    private boolean isTargetAhead(EntityLivingBase target) {
+        double dx = target.posX - this.posX;
+        double dy = target.posY + target.getEyeHeight() - this.posY;
+        double dz = target.posZ - this.posZ;
+        return this.motionX * dx + this.motionY * dy + this.motionZ * dz > 0.0D;
     }
 
     private EntityLivingBase findHomingTarget() {

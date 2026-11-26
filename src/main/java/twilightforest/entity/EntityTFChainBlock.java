@@ -1,23 +1,29 @@
 package twilightforest.entity;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import net.minecraft.block.Block;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 
+import twilightforest.block.TFBlocks;
 import twilightforest.item.ItemTFChainBlock;
 import twilightforest.item.TFItems;
 
@@ -224,10 +230,20 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
                         if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)) {
                             continue;
                         }
+                        boolean canHarvest = block.canHarvestBlock(player, currentMeta);
+                        // trophy drops need their TE, capture them before removing the block
+                        int fortune = 0;
+                        ArrayList<ItemStack> trophyDrops = null;
+                        if (canHarvest && block == TFBlocks.trophy) {
+                            fortune = EnchantmentHelper.getFortuneModifier(player);
+                            trophyDrops = block.getDrops(this.worldObj, dx, dy, dz, currentMeta, fortune);
+                        }
                         if (!this.worldObj.setBlockToAir(dx, dy, dz)) {
                             continue;
                         }
-                        if (block.canHarvestBlock(player, currentMeta)) {
+                        if (trophyDrops != null) {
+                            dropHarvestedTrophy(player, block, dx, dy, dz, currentMeta, fortune, trophyDrops);
+                        } else if (canHarvest) {
                             block.harvestBlock(this.worldObj, player, dx, dy, dz, currentMeta);
                         }
                         worldObj.playAuxSFX(2001, dx, dy, dz, Block.getIdFromBlock(block) + (currentMeta << 12));
@@ -239,6 +255,26 @@ public class EntityTFChainBlock extends EntityThrowable implements IEntityMultiP
         }
 
         return hitBlock;
+    }
+
+    private void dropHarvestedTrophy(EntityPlayer player, Block block, int x, int y, int z, int meta, int fortune,
+            ArrayList<ItemStack> drops) {
+        player.addStat(StatList.mineBlockStatArray[Block.getIdFromBlock(block)], 1);
+        player.addExhaustion(0.025F);
+        if (!this.worldObj.getGameRules().getGameRuleBooleanValue("doTileDrops")
+                || this.worldObj.restoringBlockSnapshots) {
+            return;
+        }
+        float chance = ForgeEventFactory
+                .fireBlockHarvesting(drops, this.worldObj, block, x, y, z, meta, fortune, 1.0F, false, player);
+        for (ItemStack drop : drops) {
+            if (drop == null || drop.stackSize <= 0 || this.rand.nextFloat() > chance) {
+                continue;
+            }
+            EntityItem item = new EntityItem(this.worldObj, x + 0.5D, y + 0.5D, z + 0.5D, drop);
+            item.delayBeforeCanPickup = 10;
+            this.worldObj.spawnEntityInWorld(item);
+        }
     }
 
     /**
