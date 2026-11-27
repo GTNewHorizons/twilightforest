@@ -1,11 +1,8 @@
 package twilightforest.entity.ai;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
 import twilightforest.entity.boss.EntityTFSnowQueen;
@@ -29,6 +26,10 @@ public class EntityAITFHoverThenDrop extends EntityAIBase {
     private int maxSeekTime;
 
     private double dropY;
+    private boolean hasHoverSpot;
+    private boolean arrived;
+    private boolean countedDrop;
+    private int retryCooldown;
 
     public EntityAITFHoverThenDrop(EntityTFSnowQueen entityTFSnowQueen, Class<EntityPlayer> class1, int hoverTime,
             int dropTime) {
@@ -48,22 +49,14 @@ public class EntityAITFHoverThenDrop extends EntityAIBase {
      */
     @Override
     public boolean shouldExecute() {
-        EntityLivingBase target = this.attacker.getAttackTarget();
-
-        if (target == null) {
+        if (retryCooldown > 0) {
+            --retryCooldown;
             return false;
-        } else if (!target.isEntityAlive()) {
-            return false;
-        } else if (this.classTarget != null && !this.classTarget.isAssignableFrom(target.getClass())) {
-            return false;
-        } else if (this.attacker.getCurrentPhase() != Phase.DROP) {
-            return false;
-        } else {
-            // System.out.println("We can hover at target!");
-
-            return true;// attacker.canEntityBeSeen(target);
         }
-
+        EntityLivingBase target = attacker.getAttackTarget();
+        return target != null && target.isEntityAlive()
+                && (classTarget == null || classTarget.isInstance(target))
+                && attacker.getCurrentPhase() == Phase.DROP;
     }
 
     /**
@@ -71,26 +64,12 @@ public class EntityAITFHoverThenDrop extends EntityAIBase {
      */
     @Override
     public boolean continueExecuting() {
-        EntityLivingBase target = this.attacker.getAttackTarget();
-
-        if (target == null || !target.isEntityAlive()) {
-            return false;
-        } else if (this.attacker.getCurrentPhase() != Phase.DROP) {
-            return false;
-        } else if (this.seekTimer > this.maxSeekTime) {
-            return false;
-        } else if (this.attacker.getDistanceSq(hoverPosX, hoverPosY, hoverPosZ) <= 1.0F) {
-            // are we there yet?
-            // System.out.println("Successfully in position, beginning drop mode");
-            this.hoverTimer++;
-            return true;
-        } else if (this.dropTimer < this.maxDropTime) {
-            return true;
-        } else {
-            // max drop time!
-            this.attacker.incrementSuccessfulDrops();
-            return false;
-        }
+        EntityLivingBase target = attacker.getAttackTarget();
+        return hasHoverSpot && target != null
+                && target.isEntityAlive()
+                && attacker.getCurrentPhase() == Phase.DROP
+                && !countedDrop
+                && (arrived || seekTimer < maxSeekTime);
     }
 
     /**
@@ -98,11 +77,18 @@ public class EntityAITFHoverThenDrop extends EntityAIBase {
      */
     @Override
     public void startExecuting() {
-        EntityLivingBase target = this.attacker.getAttackTarget();
-
+        hoverTimer = 0;
+        dropTimer = 0;
+        seekTimer = 0;
+        arrived = false;
+        countedDrop = false;
+        hasHoverSpot = false;
+        EntityLivingBase target = attacker.getAttackTarget();
         if (target != null) {
-            // find a spot above the player
             makeNewHoverSpot(target);
+        }
+        if (!hasHoverSpot) {
+            retryCooldown = 20;
         }
     }
 
@@ -111,8 +97,11 @@ public class EntityAITFHoverThenDrop extends EntityAIBase {
      */
     @Override
     public void resetTask() {
-        this.hoverTimer = 0;
-        this.dropTimer = 0;
+        hoverTimer = 0;
+        dropTimer = 0;
+        seekTimer = 0;
+        arrived = false;
+        hasHoverSpot = false;
     }
 
     /**
@@ -120,98 +109,55 @@ public class EntityAITFHoverThenDrop extends EntityAIBase {
      */
     @Override
     public void updateTask() {
-
-        // if we have hit the drop spot, start dropping
-        if (this.hoverTimer > 0) {
-            this.hoverTimer++;
-        } else {
-            this.seekTimer++;
+        if (!hasHoverSpot || countedDrop) {
+            return;
         }
-
-        if (this.hoverTimer < this.maxHoverTime) {
-
-            // check if we are at our waypoint target
-            double offsetX = this.hoverPosX - this.attacker.posX;
-            double offsetY = this.hoverPosY - this.attacker.posY;
-            double offsetZ = this.hoverPosZ - this.attacker.posZ;
-
-            double distanceDesired = offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ;
-
-            distanceDesired = MathHelper.sqrt_double(distanceDesired);
-
-            // add velocity
-            double velX = offsetX / distanceDesired * 0.05D;
-            double velY = offsetY / distanceDesired * 0.1D;
-            double velZ = offsetZ / distanceDesired * 0.05D;
-
-            // gravity offset
-            velY += 0.05F;
-
-            this.attacker.addVelocity(velX, velY, velZ);
-
-            // look at target
-            EntityLivingBase target = this.attacker.getAttackTarget();
-            if (target != null) {
-                this.attacker.faceEntity(target, 30.0F, 30.0F);
-                this.attacker.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
+        if (!arrived) {
+            if (attacker.getDistanceSq(hoverPosX, hoverPosY, hoverPosZ) <= 1.0D) {
+                arrived = true;
+            } else {
+                ++seekTimer;
             }
-
-            // System.out.println("Hovering!");
+        }
+        if (!arrived || hoverTimer < maxHoverTime) {
+            if (arrived) {
+                ++hoverTimer;
+            }
+            SnowQueenHoverHelper.steerToward(attacker, hoverPosX, hoverPosY, hoverPosZ);
         } else {
-            // drop!
-            // System.out.println("Dropping!");
-            this.dropTimer++;
-
-            if (this.attacker.posY > this.dropY) {
-                this.attacker.destroyBlocksInAABB(this.attacker.boundingBox.expand(1, 0.5F, 1));
+            ++dropTimer;
+            if (!attacker.worldObj.isRemote && attacker.posY > dropY
+                    && attacker.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+                attacker.destroyBlocksInAABB(attacker.boundingBox.expand(1.0D, 0.5D, 1.0D));
             }
+            if (dropTimer >= maxDropTime) {
+                countedDrop = true;
+                if (!attacker.worldObj.isRemote) {
+                    attacker.incrementSuccessfulDrops();
+                }
+            }
+        }
+        EntityLivingBase target = attacker.getAttackTarget();
+        if (target != null) {
+            attacker.faceEntity(target, 30.0F, 30.0F);
+            attacker.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
         }
     }
 
-    /**
-     * Make a new spot to hover at!
-     */
     private void makeNewHoverSpot(EntityLivingBase target) {
-        double hx = 0, hy = 0, hz = 0;
-
-        int tries = 100;
-
-        for (int i = 0; i < tries; i++) {
-            hx = target.posX + (this.attacker.getRNG().nextFloat() - this.attacker.getRNG().nextFloat()) * HOVER_RADIUS;
-            hy = target.posY + HOVER_HEIGHT;
-            hz = target.posZ + (this.attacker.getRNG().nextFloat() - this.attacker.getRNG().nextFloat()) * HOVER_RADIUS;
-
-            if (!isPositionOccupied(hx, hy, hz) && this.canEntitySee(this.attacker, hx, hy, hz)
-                    && this.canEntitySee(target, hx, hy, hz)) {
-                break;
-            }
+        // The dive begins directly above its target; try one exact position first.
+        Vec3 spot = SnowQueenHoverHelper.findHoverPosition(attacker, target, HOVER_HEIGHT, HOVER_RADIUS, 1);
+        if (spot == null) {
+            // a low ceiling shouldnt leave the queen steering into solid blocks forever
+            spot = SnowQueenHoverHelper.findHoverPosition(attacker, target, HOVER_HEIGHT, 2.0D, 16);
         }
-
-        this.hoverPosX = hx;
-        this.hoverPosY = hy;
-        this.hoverPosZ = hz;
-
-        this.dropY = target.posY - 1F;
-        this.seekTimer = 0;
-    }
-
-    private boolean isPositionOccupied(double hx, double hy, double hz) {
-        float radius = this.attacker.width / 2F;
-        AxisAlignedBB aabb = AxisAlignedBB
-                .getBoundingBox(hx - radius, hy, hz - radius, hx + radius, hy + this.attacker.height, hz + radius);
-
-        boolean isOccupied = this.attacker.worldObj.getCollidingBoundingBoxes(attacker, aabb).isEmpty();
-
-        return isOccupied;
-    }
-
-    /**
-     * Can the specified entity see the specified location?
-     */
-    protected boolean canEntitySee(Entity entity, double dx, double dy, double dz) {
-        return entity.worldObj.rayTraceBlocks(
-                Vec3.createVectorHelper(entity.posX, entity.posY + (double) entity.getEyeHeight(), entity.posZ),
-                Vec3.createVectorHelper(dx, dy, dz)) == null;
-
+        hasHoverSpot = spot != null;
+        if (spot != null) {
+            hoverPosX = spot.xCoord;
+            hoverPosY = spot.yCoord;
+            hoverPosZ = spot.zCoord;
+            dropY = target.posY - 1.0D;
+            seekTimer = 0;
+        }
     }
 }

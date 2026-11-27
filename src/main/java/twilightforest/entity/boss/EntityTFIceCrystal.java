@@ -12,6 +12,7 @@ import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
 import twilightforest.TwilightForestMod;
@@ -102,6 +103,20 @@ public class EntityTFIceCrystal extends EntityMob {
     // return EnumCreatureAttribute.UNDEAD;
     // }
 
+    @Override
+    public void writeEntityToNBT(NBTTagCompound nbt) {
+        super.writeEntityToNBT(nbt);
+        nbt.setInteger("CrystalAge", this.crystalAge);
+        nbt.setInteger("MaxCrystalAge", this.maxCrystalAge);
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
+        this.crystalAge = Math.max(0, nbt.getInteger("CrystalAge"));
+        this.maxCrystalAge = nbt.hasKey("MaxCrystalAge") ? nbt.getInteger("MaxCrystalAge") : -1;
+    }
+
     /**
      * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
      * use this to react to sunlight and start to burn.
@@ -109,7 +124,9 @@ public class EntityTFIceCrystal extends EntityMob {
     public void onLivingUpdate() {
         super.onLivingUpdate();
 
-        this.crystalAge++;
+        if (!this.worldObj.isRemote) {
+            this.crystalAge++;
+        }
 
         // System.out.println("I am a skeleton and my age is " + this.skeletonAge);
 

@@ -105,7 +105,7 @@ public class ModelTFTowerBoss extends ModelTFGhast {
 
     /**
      * Make one of the small tentacles
-     * 
+     *
      * @param i
      */
     protected void makeSmallTentacle(int num) {}
@@ -127,15 +127,7 @@ public class ModelTFTowerBoss extends ModelTFGhast {
             //
             // }
 
-            float wiggle = Math.min(par2, 0.6F);
-
             float time = (timeAlive + (i * 9)) / 2.0F;
-
-            this.subTentacles[i][0].rotateAngleX = (MathHelper.cos(time * 0.6662F) * 1.0F - (float) Math.PI / 3.0F)
-                    * wiggle;
-            this.subTentacles[i][1].rotateAngleX = MathHelper.cos(time * 0.7774F) * 1.2F * wiggle;
-            this.subTentacles[i][2].rotateAngleX = MathHelper.cos(time * 0.8886F + (float) Math.PI / 2.0F) * 1.4F
-                    * wiggle;
 
             this.subTentacles[i][0].rotateAngleX = 0.2F + MathHelper.cos(time * 0.3335F) * 0.15F;
             this.subTentacles[i][1].rotateAngleX = 0.1F + MathHelper.cos(time * 0.4445F) * 0.20F;

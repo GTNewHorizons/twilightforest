@@ -6,24 +6,24 @@ import twilightforest.entity.boss.EntityTFYetiAlpha;
 
 public class EntityAITFYetiTired extends EntityAIBase {
 
-    private EntityTFYetiAlpha yeti;
-    private int tiredDuration;
+    private final EntityTFYetiAlpha yeti;
+    private final int tiredDuration;
     private int tiredTimer;
 
-    public EntityAITFYetiTired(EntityTFYetiAlpha entityTFYetiAlpha, int i) {
-        this.yeti = entityTFYetiAlpha;
-        this.tiredDuration = i;
+    public EntityAITFYetiTired(EntityTFYetiAlpha yeti, int duration) {
+        this.yeti = yeti;
+        this.tiredDuration = Math.max(1, duration);
         this.setMutexBits(5);
     }
 
     @Override
     public boolean shouldExecute() {
-        return this.yeti.isTired();
+        return this.yeti.isEntityAlive() && this.yeti.isTired();
     }
 
     @Override
     public boolean continueExecuting() {
-        return this.tiredTimer < this.tiredDuration;
+        return this.yeti.isEntityAlive() && this.yeti.isTired() && this.tiredTimer < this.tiredDuration;
     }
 
     @Override
@@ -44,7 +44,8 @@ public class EntityAITFYetiTired extends EntityAIBase {
 
     @Override
     public void updateTask() {
-        this.tiredTimer++;
+        if (this.tiredTimer < this.tiredDuration) {
+            ++this.tiredTimer;
+        }
     }
-
 }

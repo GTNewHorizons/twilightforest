@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 public class EntityTFMiniGhast extends EntityTFTowerGhast {
 
     public boolean isMinion = false;
+    private boolean trapChargeConsumed;
 
     public EntityTFMiniGhast(World par1World) {
         super(par1World);
@@ -43,29 +44,9 @@ public class EntityTFMiniGhast extends EntityTFTowerGhast {
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(this.isMinion ? 6 : 10); // max health
     }
 
-    @Override
-    public void onUpdate() {
-        super.onUpdate();
-        // byte aggroStatus = this.dataWatcher.getWatchableObjectByte(16);
-
-        // switch (aggroStatus)
-        // {
-        // case 0:
-        // default:
-        // this.texture = TwilightForestMod.MODEL_DIR + "towerghast.png";
-        // break;
-        // case 1:
-        // this.texture = TwilightForestMod.MODEL_DIR + "towerghast_openeyes.png";
-        // break;
-        // case 2:
-        // this.texture = TwilightForestMod.MODEL_DIR + "towerghast_fire.png";
-        // break;
-        // }
-    }
-
     /**
      * Checks to see if this mini ghast should be attacking this player.
-     * 
+     *
      * Very similar to endermen code, but we also attack at a certain range
      */
     protected boolean shouldAttackPlayer(EntityPlayer par1EntityPlayer) {
@@ -109,8 +90,11 @@ public class EntityTFMiniGhast extends EntityTFTowerGhast {
             if (this.worldObj.isThundering()) {
                 int var5 = this.worldObj.skylightSubtracted;
                 this.worldObj.skylightSubtracted = 10;
-                lightLevel = this.worldObj.getBlockLightValue(myX, myY, myZ);
-                this.worldObj.skylightSubtracted = var5;
+                try {
+                    lightLevel = this.worldObj.getBlockLightValue(myX, myY, myZ);
+                } finally {
+                    this.worldObj.skylightSubtracted = var5;
+                }
             }
 
             return lightLevel <= this.rand.nextInt(8);
@@ -121,10 +105,23 @@ public class EntityTFMiniGhast extends EntityTFTowerGhast {
      * Turn this mini ghast into a boss minion
      */
     public void makeBossMinion() {
+        this.configureMinion(true);
+    }
+
+    @Override
+    protected void checkForTowerHome() {
+        if (!isMinion) {
+            super.checkForTowerHome();
+        }
+    }
+
+    private void configureMinion(boolean heal) {
+        detachHome();
         this.wanderFactor = 0.005F;
         this.isMinion = true;
-
-        this.setHealth(this.getMaxHealth());
+        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(6.0D);
+        // loading a saved minion musnt heal it back to full health
+        this.setHealth(heal ? this.getMaxHealth() : Math.min(this.getHealth(), this.getMaxHealth()));
     }
 
     /**
@@ -138,17 +135,25 @@ public class EntityTFMiniGhast extends EntityTFTowerGhast {
         }
     }
 
+    public boolean consumeTrapCharge() {
+        if (worldObj.isRemote || deathTime <= 0 || trapChargeConsumed) return false;
+        trapChargeConsumed = true;
+        return true;
+    }
+
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
         nbttagcompound.setBoolean("isMinion", this.isMinion);
+        nbttagcompound.setBoolean("TrapChargeConsumed", trapChargeConsumed);
         super.writeEntityToNBT(nbttagcompound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
         super.readEntityFromNBT(nbttagcompound);
+        trapChargeConsumed = nbttagcompound.getBoolean("TrapChargeConsumed");
         if (nbttagcompound.getBoolean("isMinion")) {
-            makeBossMinion();
+            this.configureMinion(false);
         }
     }
 
