@@ -11,176 +11,210 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenRavine extends MapGenBase {
 
-    private float[] field_35627_a;
+    private static final int CHUNK_SIZE = 16;
+    private static final int RAVINE_CHANCE = 127;
+    private static final float PI_APPROXIMATION = 3.141593F;
 
+    private final float[] verticalStretch = new float[TFWorld.CHUNKHEIGHT];
     private final FastRandom ravineRNG = new FastRandom(0L);
 
     public TFGenRavine() {
-        field_35627_a = new float[1024];
         this.rand = new FastRandom(0L);
     }
 
-    protected void generateRavine(long l, int i, int j, Block[] blockStorage, double d, double d1, double d2, float f,
-            float f1, float f2, int k, int i1, double d3) {
-        ravineRNG.setSeed(l);
+    protected void generateRavine(long seed, int chunkX, int chunkZ, Block[] blockStorage, double x, double y, double z,
+            float width, float yaw, float pitch, int step, int totalSteps, double verticalScale) {
+        ravineRNG.setSeed(seed);
         FastRandom random = ravineRNG;
-        double d4 = i * 16 + 8;
-        double d5 = j * 16 + 8;
-        float f3 = 0.0F;
-        float f4 = 0.0F;
-        if (i1 <= 0) {
-            int j1 = range * 16 - 16;
-            i1 = j1 - random.nextInt(j1 / 4);
-        }
-        boolean flag = false;
-        if (k == -1) {
-            k = i1 / 2;
-            flag = true;
-        }
-        float f5 = 1.0F;
-        for (int k1 = 0; k1 < TFWorld.CHUNKHEIGHT; k1++) {
-            if (k1 == 0 || random.nextInt(3) == 0) {
-                f5 = 1.0F + random.nextFloat() * random.nextFloat() * 1.0F;
-            }
-            field_35627_a[k1] = f5 * f5;
+        double chunkCenterX = chunkX * CHUNK_SIZE + 8;
+        double chunkCenterZ = chunkZ * CHUNK_SIZE + 8;
+        float yawVelocity = 0.0F;
+        float pitchVelocity = 0.0F;
+
+        if (totalSteps <= 0) {
+            int rangeInBlocks = range * CHUNK_SIZE - CHUNK_SIZE;
+            totalSteps = rangeInBlocks - random.nextInt(rangeInBlocks / 4);
         }
 
-        for (; k < i1; k++) {
-            double d6 = 1.5D + (double) (MathHelper.sin(((float) k * 3.141593F) / (float) i1) * f * 1.0F);
-            double d7 = d6 * d3;
-            d6 *= (double) random.nextFloat() * 0.25D + 0.75D;
-            d7 *= (double) random.nextFloat() * 0.25D + 0.75D;
-            float f6 = MathHelper.cos(f2);
-            float f7 = MathHelper.sin(f2);
-            d += MathHelper.cos(f1) * f6;
-            d1 += f7;
-            d2 += MathHelper.sin(f1) * f6;
-            f2 *= 0.7F;
-            f2 += f4 * 0.05F;
-            f1 += f3 * 0.05F;
-            f4 *= 0.8F;
-            f3 *= 0.5F;
-            f4 += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
-            f3 += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4F;
-            if (!flag && random.nextInt(4) == 0) {
+        boolean singleNode = false;
+        if (step == -1) {
+            step = totalSteps / 2;
+            singleNode = true;
+        }
+
+        float verticalWidth = 1.0F;
+        for (int height = 0; height < TFWorld.CHUNKHEIGHT; height++) {
+            if (height == 0 || random.nextInt(3) == 0) {
+                verticalWidth = 1.0F + random.nextFloat() * random.nextFloat() * 1.0F;
+            }
+            verticalStretch[height] = verticalWidth * verticalWidth;
+        }
+
+        for (; step < totalSteps; step++) {
+            double horizontalRadius = 1.5D
+                    + (double) (MathHelper.sin(((float) step * PI_APPROXIMATION) / (float) totalSteps) * width * 1.0F);
+            double verticalRadius = horizontalRadius * verticalScale;
+            horizontalRadius *= (double) random.nextFloat() * 0.25D + 0.75D;
+            verticalRadius *= (double) random.nextFloat() * 0.25D + 0.75D;
+
+            float cosPitch = MathHelper.cos(pitch);
+            float sinPitch = MathHelper.sin(pitch);
+            x += MathHelper.cos(yaw) * cosPitch;
+            y += sinPitch;
+            z += MathHelper.sin(yaw) * cosPitch;
+            pitch *= 0.7F;
+            pitch += pitchVelocity * 0.05F;
+            yaw += yawVelocity * 0.05F;
+            pitchVelocity *= 0.8F;
+            yawVelocity *= 0.5F;
+            pitchVelocity += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
+            yawVelocity += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4F;
+
+            if (!singleNode && random.nextInt(4) == 0) {
                 continue;
             }
-            double d8a = d - d4;
-            double d9a = d2 - d5;
-            double d10a = i1 - k;
-            double d11 = f + 2.0F + 16F;
-            if ((d8a * d8a + d9a * d9a) - d10a * d10a > d11 * d11) {
+
+            double distanceX = x - chunkCenterX;
+            double distanceZ = z - chunkCenterZ;
+            double remainingSteps = totalSteps - step;
+            double maxReach = width + 2.0F + 16F;
+            if ((distanceX * distanceX + distanceZ * distanceZ) - remainingSteps * remainingSteps
+                    > maxReach * maxReach) {
                 return;
             }
-            if (d < d4 - 16D - d6 * 2D || d2 < d5 - 16D - d6 * 2D
-                    || d > d4 + 16D + d6 * 2D
-                    || d2 > d5 + 16D + d6 * 2D) {
+
+            if (x < chunkCenterX - 16D - horizontalRadius * 2D || z < chunkCenterZ - 16D - horizontalRadius * 2D
+                    || x > chunkCenterX + 16D + horizontalRadius * 2D
+                    || z > chunkCenterZ + 16D + horizontalRadius * 2D) {
                 continue;
             }
-            int d8 = MathHelper.floor_double(d - d6) - i * 16 - 1;
-            int l1 = (MathHelper.floor_double(d + d6) - i * 16) + 1;
-            int d9 = MathHelper.floor_double(d1 - d7) - 1;
-            int i2 = MathHelper.floor_double(d1 + d7) + 1;
-            int d10 = MathHelper.floor_double(d2 - d6) - j * 16 - 1;
-            int j2 = (MathHelper.floor_double(d2 + d6) - j * 16) + 1;
-            if (d8 < 0) {
-                d8 = 0;
+
+            int minX = MathHelper.floor_double(x - horizontalRadius) - chunkX * CHUNK_SIZE - 1;
+            int maxX = (MathHelper.floor_double(x + horizontalRadius) - chunkX * CHUNK_SIZE) + 1;
+            int minY = MathHelper.floor_double(y - verticalRadius) - 1;
+            int maxY = MathHelper.floor_double(y + verticalRadius) + 1;
+            int minZ = MathHelper.floor_double(z - horizontalRadius) - chunkZ * CHUNK_SIZE - 1;
+            int maxZ = (MathHelper.floor_double(z + horizontalRadius) - chunkZ * CHUNK_SIZE) + 1;
+
+            if (minX < 0) {
+                minX = 0;
             }
-            if (l1 > 16) {
-                l1 = 16;
+            if (maxX > CHUNK_SIZE) {
+                maxX = CHUNK_SIZE;
             }
-            if (d9 < 1) {
-                d9 = 1;
+            if (minY < 1) {
+                minY = 1;
             }
-            if (i2 > TFWorld.CHUNKHEIGHT - 8) {
-                i2 = TFWorld.CHUNKHEIGHT - 8;
+            if (maxY > TFWorld.CHUNKHEIGHT - 8) {
+                maxY = TFWorld.CHUNKHEIGHT - 8;
             }
-            if (d10 < 0) {
-                d10 = 0;
+            if (minZ < 0) {
+                minZ = 0;
             }
-            if (j2 > 16) {
-                j2 = 16;
+            if (maxZ > CHUNK_SIZE) {
+                maxZ = CHUNK_SIZE;
             }
-            boolean flag1 = false;
-            for (int k2 = d8; !flag1 && k2 < l1; k2++) {
-                for (int i3 = d10; !flag1 && i3 < j2; i3++) {
-                    for (int j3 = i2 + 1; !flag1 && j3 >= d9 - 1; j3--) {
-                        int k3 = (k2 * 16 + i3) * TFWorld.CHUNKHEIGHT + j3;
-                        if (j3 < 0 || j3 >= TFWorld.CHUNKHEIGHT) {
+
+            boolean hitWater = false;
+            for (int blockX = minX; !hitWater && blockX < maxX; blockX++) {
+                for (int blockZ = minZ; !hitWater && blockZ < maxZ; blockZ++) {
+                    for (int blockY = maxY + 1; !hitWater && blockY >= minY - 1; blockY--) {
+                        int index = (blockX * CHUNK_SIZE + blockZ) * TFWorld.CHUNKHEIGHT + blockY;
+                        if (blockY < 0 || blockY >= TFWorld.CHUNKHEIGHT) {
                             continue;
                         }
-                        if (blockStorage[k3] == Blocks.water || blockStorage[k3] == Blocks.flowing_water) {
-                            flag1 = true;
+                        if (blockStorage[index] == Blocks.water || blockStorage[index] == Blocks.flowing_water) {
+                            hitWater = true;
                         }
-                        if (j3 != d9 - 1 && k2 != d8 && k2 != l1 - 1 && i3 != d10 && i3 != j2 - 1) {
-                            j3 = d9;
+                        if (blockY != minY - 1 && blockX != minX
+                                && blockX != maxX - 1
+                                && blockZ != minZ
+                                && blockZ != maxZ - 1) {
+                            blockY = minY;
                         }
                     }
                 }
             }
 
-            if (flag1) {
+            if (hitWater) {
                 continue;
             }
-            for (int l2 = d8; l2 < l1; l2++) {
-                double d12 = (((double) (l2 + i * 16) + 0.5D) - d) / d6;
-                label0: for (int l3 = d10; l3 < j2; l3++) {
-                    double d13 = (((double) (l3 + j * 16) + 0.5D) - d2) / d6;
-                    int i4 = (l2 * 16 + l3) * TFWorld.CHUNKHEIGHT + i2;
-                    boolean flag2 = false;
-                    if (d12 * d12 + d13 * d13 >= 1.0D) {
+
+            for (int blockX = minX; blockX < maxX; blockX++) {
+                double normalizedX = (((double) (blockX + chunkX * CHUNK_SIZE) + 0.5D) - x) / horizontalRadius;
+                nextColumn: for (int blockZ = minZ; blockZ < maxZ; blockZ++) {
+                    double normalizedZ = (((double) (blockZ + chunkZ * CHUNK_SIZE) + 0.5D) - z) / horizontalRadius;
+                    // keep the legacy 1 block offset between sampled height and storage index
+                    int index = (blockX * CHUNK_SIZE + blockZ) * TFWorld.CHUNKHEIGHT + maxY;
+                    boolean hitGrass = false;
+                    if (normalizedX * normalizedX + normalizedZ * normalizedZ >= 1.0D) {
                         continue;
                     }
-                    int j4 = i2 - 1;
+
+                    int blockY = maxY - 1;
                     do {
-                        if (j4 < d9) {
-                            continue label0;
+                        if (blockY < minY) {
+                            continue nextColumn;
                         }
-                        double d14 = (((double) j4 + 0.5D) - d1) / d7;
-                        if ((d12 * d12 + d13 * d13) * (double) field_35627_a[j4] + (d14 * d14) / 6D < 1.0D) {
-                            Block curentBlock = blockStorage[i4];
-                            if (curentBlock == Blocks.grass) {
-                                flag2 = true;
+                        double normalizedY = (((double) blockY + 0.5D) - y) / verticalRadius;
+                        if ((normalizedX * normalizedX + normalizedZ * normalizedZ) * (double) verticalStretch[blockY]
+                                + (normalizedY * normalizedY) / 6D < 1.0D) {
+                            Block currentBlock = blockStorage[index];
+                            if (currentBlock == Blocks.grass) {
+                                hitGrass = true;
                             }
-                            if (curentBlock == Blocks.stone || curentBlock == TFBlocks.trollSteinn
-                                    || curentBlock == Blocks.dirt
-                                    || curentBlock == Blocks.grass) {
-                                blockStorage[i4] = Blocks.air;
-                                if (flag2 && blockStorage[i4 - 1] == Blocks.dirt) {
-                                    blockStorage[i4 - 1] = this.worldObj
-                                            .getBiomeGenForCoords(l2 + i * 16, l3 + j * 16).topBlock;
+                            if (currentBlock == Blocks.stone || currentBlock == TFBlocks.trollSteinn
+                                    || currentBlock == Blocks.dirt
+                                    || currentBlock == Blocks.grass) {
+                                blockStorage[index] = Blocks.air;
+                                if (hitGrass && blockStorage[index - 1] == Blocks.dirt) {
+                                    blockStorage[index - 1] = this.worldObj.getBiomeGenForCoords(
+                                            blockX + chunkX * CHUNK_SIZE,
+                                            blockZ + chunkZ * CHUNK_SIZE).topBlock;
                                 }
                             }
                         }
-                        i4--;
-                        j4--;
+                        index--;
+                        blockY--;
                     } while (true);
                 }
             }
 
-            if (flag) {
+            if (singleNode) {
                 break;
             }
         }
     }
 
+    @Override
     protected void func_151538_a(World world, int centerChunkX, int centerChunkZ, int currentChunkX, int currentChunkZ,
-            Block[] shortStorage) {
-        if (rand.nextInt(127) != 0) {
+            Block[] blockStorage) {
+        if (rand.nextInt(RAVINE_CHANCE) != 0) {
             return;
         }
         if (!TFFeature.getNearestFeature(currentChunkX, currentChunkZ, world).areChunkDecorationsEnabled) {
             return;
         }
-        double d = centerChunkX * 16 + rand.nextInt(16);
-        double d1 = rand.nextInt(rand.nextInt(40) + 8) + 20;
-        double d2 = centerChunkZ * 16 + rand.nextInt(16);
-        int i1 = 1;
-        for (int j1 = 0; j1 < i1; j1++) {
-            float f = rand.nextFloat() * 3.141593F * 2.0F;
-            float f1 = ((rand.nextFloat() - 0.5F) * 2.0F) / 8F;
-            float f2 = (rand.nextFloat() * 2.0F + rand.nextFloat()) * 2.0F;
-            generateRavine(rand.nextLong(), currentChunkX, currentChunkZ, shortStorage, d, d1, d2, f2, f, f1, 0, 0, 3D);
-        }
+
+        double x = centerChunkX * CHUNK_SIZE + rand.nextInt(CHUNK_SIZE);
+        double y = rand.nextInt(rand.nextInt(40) + 8) + 20;
+        double z = centerChunkZ * CHUNK_SIZE + rand.nextInt(CHUNK_SIZE);
+        float yaw = rand.nextFloat() * PI_APPROXIMATION * 2.0F;
+        float pitch = ((rand.nextFloat() - 0.5F) * 2.0F) / 8F;
+        float width = (rand.nextFloat() * 2.0F + rand.nextFloat()) * 2.0F;
+        generateRavine(
+                rand.nextLong(),
+                currentChunkX,
+                currentChunkZ,
+                blockStorage,
+                x,
+                y,
+                z,
+                width,
+                yaw,
+                pitch,
+                0,
+                0,
+                3D);
     }
 }

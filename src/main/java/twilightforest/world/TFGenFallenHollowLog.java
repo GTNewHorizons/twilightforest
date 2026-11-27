@@ -2,6 +2,7 @@ package twilightforest.world;
 
 import java.util.Random;
 
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
@@ -10,207 +11,154 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenFallenHollowLog extends TFGenerator {
 
+    private static final int CORE_START = 3;
+    private static final int CORE_LENGTH = 4;
+    private static final int CROSS_SECTION_WIDTH = 4;
+    private static final int CLEARANCE_LENGTH = 8;
+    private static final int CLEARANCE_HEIGHT = 4;
+
+    private static final int[] JAGGED_CROSS_POSITIONS = { 0, 3, 0, 3, 1, 2 };
+    private static final int[] JAGGED_HEIGHTS = { 0, 0, 1, 1, 2, 2 };
+
     @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
-
         return rand.nextBoolean() ? makeLog4Z(world, rand, x, y, z) : makeLog4X(world, rand, x, y, z);
     }
 
     private boolean makeLog4Z(World world, Random rand, int x, int y, int z) {
         // +Z 4x4 log
-        if (!isAreaSuitable(world, rand, x, y, z, 9, 3, 4)) {
-            return false;
-        }
-
-        // jaggy parts
-        makeNegativeZJaggy(world, x, y, z, rand.nextInt(3), 0, 0);
-        makeNegativeZJaggy(world, x, y, z, rand.nextInt(3), 3, 0);
-        makeNegativeZJaggy(world, x, y, z, rand.nextInt(3), 0, 1);
-        makeNegativeZJaggy(world, x, y, z, rand.nextInt(3), 3, 1);
-        makeNegativeZJaggy(world, x, y, z, rand.nextInt(3), 1, 2);
-        makeNegativeZJaggy(world, x, y, z, rand.nextInt(3), 2, 2);
-
-        makePositiveZJaggy(world, x, y, z, rand.nextInt(3), 0, 0);
-        makePositiveZJaggy(world, x, y, z, rand.nextInt(3), 3, 0);
-        makePositiveZJaggy(world, x, y, z, rand.nextInt(3), 0, 1);
-        makePositiveZJaggy(world, x, y, z, rand.nextInt(3), 3, 1);
-        makePositiveZJaggy(world, x, y, z, rand.nextInt(3), 1, 2);
-        makePositiveZJaggy(world, x, y, z, rand.nextInt(3), 2, 2);
-
-        // center
-        for (int dz = 0; dz < 4; dz++) {
-            // floor
-            if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + 1, y - 1, z + dz + 3, TFBlocks.log, 8);
-                if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(
-                            world,
-                            x + 1,
-                            y + 0,
-                            z + dz + 3,
-                            TFBlocks.plant,
-                            BlockTFPlant.META_MOSSPATCH);
-                }
-            } else {
-                this.setBlockAndMetadata(world, x + 1, y - 1, z + dz + 3, Blocks.dirt, 0);
-                this.setBlockAndMetadata(world, x + 1, y + 0, z + dz + 3, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-            }
-            if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + 2, y - 1, z + dz + 3, TFBlocks.log, 8);
-                if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(
-                            world,
-                            x + 2,
-                            y + 0,
-                            z + dz + 3,
-                            TFBlocks.plant,
-                            BlockTFPlant.META_MOSSPATCH);
-                }
-            } else {
-                this.setBlockAndMetadata(world, x + 2, y - 1, z + dz + 3, Blocks.dirt, 0);
-                this.setBlockAndMetadata(world, x + 2, y + 0, z + dz + 3, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-            }
-
-            // log part
-            this.setBlockAndMetadata(world, x + 0, y + 0, z + dz + 3, TFBlocks.log, 8);
-            this.setBlockAndMetadata(world, x + 3, y + 0, z + dz + 3, TFBlocks.log, 8);
-            this.setBlockAndMetadata(world, x + 0, y + 1, z + dz + 3, TFBlocks.log, 8);
-            this.setBlockAndMetadata(world, x + 3, y + 1, z + dz + 3, TFBlocks.log, 8);
-            this.setBlockAndMetadata(world, x + 1, y + 2, z + dz + 3, TFBlocks.log, 8);
-            this.setBlockAndMetadata(world, x + 2, y + 2, z + dz + 3, TFBlocks.log, 8);
-            if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + 1, y + 3, z + dz + 3, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-            }
-            if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + 2, y + 3, z + dz + 3, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-            }
-        }
-
-        // a few leaves?
-        int offZ = rand.nextInt(3) + 2;
-        boolean plusX = rand.nextBoolean();
-        for (int dz = 0; dz < 3; dz++) {
-            if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + (plusX ? 3 : 0), y + 2, z + dz + offZ, TFBlocks.leaves, 0);
-                if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(world, x + (plusX ? 3 : 0), y + 3, z + dz + offZ, TFBlocks.leaves, 0);
-                }
-                if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(world, x + (plusX ? 4 : -1), y + 2, z + dz + offZ, TFBlocks.leaves, 0);
-                }
-            }
-        }
-
-        // firefly
-        this.setBlockAndMetadata(world, x + (plusX ? 0 : 3), y + 2, z + rand.nextInt(4) + 3, TFBlocks.firefly, 0);
-
-        return true;
-    }
-
-    private void makeNegativeZJaggy(World world, int x, int y, int z, int length, int dx, int dy) {
-        for (int dz = -length; dz < 0; dz++) {
-            this.setBlockAndMetadata(world, x + dx, y + dy, z + dz + 3, TFBlocks.log, 8);
-        }
-    }
-
-    private void makePositiveZJaggy(World world, int x, int y, int z, int length, int dx, int dy) {
-        for (int dz = 0; dz < length; dz++) {
-            this.setBlockAndMetadata(world, x + dx, y + dy, z + dz + 7, TFBlocks.log, 8);
-        }
+        return generateLog(world, rand, x, y, z, true);
     }
 
     /**
      * Make a 4x4 log in the +X direction
      */
     private boolean makeLog4X(World world, Random rand, int x, int y, int z) {
-        // +Z 4x4 log
-        if (!isAreaSuitable(world, rand, x, y, z, 4, 3, 9)) {
+        // +X 4x4 log
+        return generateLog(world, rand, x, y, z, false);
+    }
+
+    private boolean generateLog(World world, Random rand, int x, int y, int z, boolean alongZ) {
+        // the ends reach one block past the core on either side, moss can reach y + 3.
+        int clearanceX = alongZ ? x : x + 1;
+        int clearanceZ = alongZ ? z + 1 : z;
+        int clearanceWidth = alongZ ? CROSS_SECTION_WIDTH : CLEARANCE_LENGTH;
+        int clearanceDepth = alongZ ? CLEARANCE_LENGTH : CROSS_SECTION_WIDTH;
+        if (y < 1 || y + CLEARANCE_HEIGHT > world.getHeight()
+                || !isAreaSuitable(
+                        world,
+                        rand,
+                        clearanceX,
+                        y,
+                        clearanceZ,
+                        clearanceWidth,
+                        CLEARANCE_HEIGHT,
+                        clearanceDepth)) {
             return false;
         }
 
-        // jaggy parts
-        makeNegativeXJaggy(world, x, y, z, rand.nextInt(3), 0, 0);
-        makeNegativeXJaggy(world, x, y, z, rand.nextInt(3), 3, 0);
-        makeNegativeXJaggy(world, x, y, z, rand.nextInt(3), 0, 1);
-        makeNegativeXJaggy(world, x, y, z, rand.nextInt(3), 3, 1);
-        makeNegativeXJaggy(world, x, y, z, rand.nextInt(3), 1, 2);
-        makeNegativeXJaggy(world, x, y, z, rand.nextInt(3), 2, 2);
+        int logMeta = alongZ ? 8 : 4;
 
-        makePositiveXJaggy(world, x, y, z, rand.nextInt(3), 0, 0);
-        makePositiveXJaggy(world, x, y, z, rand.nextInt(3), 3, 0);
-        makePositiveXJaggy(world, x, y, z, rand.nextInt(3), 0, 1);
-        makePositiveXJaggy(world, x, y, z, rand.nextInt(3), 3, 1);
-        makePositiveXJaggy(world, x, y, z, rand.nextInt(3), 1, 2);
-        makePositiveXJaggy(world, x, y, z, rand.nextInt(3), 2, 2);
+        // jaggy parts
+        makeJaggedEnds(world, rand, x, y, z, alongZ, logMeta);
 
         // center
-        for (int dx = 0; dx < 4; dx++) {
+        for (int along = CORE_START; along < CORE_START + CORE_LENGTH; along++) {
             // floor
-            if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + dx + 3, y - 1, z + 1, TFBlocks.log, 4);
-                if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(world, x + dx + 3, y, z + 1, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-                }
-            } else {
-                this.setBlockAndMetadata(world, x + dx + 3, y - 1, z + 1, Blocks.dirt, 0);
-                this.setBlockAndMetadata(world, x + dx + 3, y, z + 1, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-            }
-            if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + dx + 3, y - 1, z + 2, TFBlocks.log, 4);
-                if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(world, x + dx + 3, y, z + 2, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-                }
-            } else {
-                this.setBlockAndMetadata(world, x + dx + 3, y - 1, z + 2, Blocks.dirt, 0);
-                this.setBlockAndMetadata(world, x + dx + 3, y, z + 2, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
-            }
+            makeFloorBlock(world, rand, x, y, z, along, 1, alongZ, logMeta);
+            makeFloorBlock(world, rand, x, y, z, along, 2, alongZ, logMeta);
 
             // log part
-            this.setBlockAndMetadata(world, x + dx + 3, y + 0, z + 0, TFBlocks.log, 4);
-            this.setBlockAndMetadata(world, x + dx + 3, y + 0, z + 3, TFBlocks.log, 4);
-            this.setBlockAndMetadata(world, x + dx + 3, y + 1, z + 0, TFBlocks.log, 4);
-            this.setBlockAndMetadata(world, x + dx + 3, y + 1, z + 3, TFBlocks.log, 4);
-            this.setBlockAndMetadata(world, x + dx + 3, y + 2, z + 1, TFBlocks.log, 4);
-            this.setBlockAndMetadata(world, x + dx + 3, y + 2, z + 2, TFBlocks.log, 4);
+            placeBlock(world, x, y, z, along, 0, 0, alongZ, TFBlocks.log, logMeta);
+            placeBlock(world, x, y, z, along, 3, 0, alongZ, TFBlocks.log, logMeta);
+            placeBlock(world, x, y, z, along, 0, 1, alongZ, TFBlocks.log, logMeta);
+            placeBlock(world, x, y, z, along, 3, 1, alongZ, TFBlocks.log, logMeta);
+            placeBlock(world, x, y, z, along, 1, 2, alongZ, TFBlocks.log, logMeta);
+            placeBlock(world, x, y, z, along, 2, 2, alongZ, TFBlocks.log, logMeta);
             if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + dx + 3, y + 3, z + 1, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
+                placeBlock(world, x, y, z, along, 1, 3, alongZ, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
             }
             if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + dx + 3, y + 3, z + 2, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
+                placeBlock(world, x, y, z, along, 2, 3, alongZ, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
             }
-
         }
 
         // a few leaves?
-        int offX = rand.nextInt(3) + 2;
-        boolean plusZ = rand.nextBoolean();
-        for (int dx = 0; dx < 3; dx++) {
+        int leafOffset = rand.nextInt(3) + 2;
+        boolean positiveSide = rand.nextBoolean();
+        for (int along = leafOffset; along < leafOffset + 3; along++) {
             if (rand.nextBoolean()) {
-                this.setBlockAndMetadata(world, x + dx + offX, y + 2, z + (plusZ ? 3 : 0), TFBlocks.leaves, 0);
+                placeLeaf(world, x, y, z, along, positiveSide ? 3 : 0, 2, alongZ);
                 if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(world, x + dx + offX, y + 3, z + (plusZ ? 3 : 0), TFBlocks.leaves, 0);
+                    placeLeaf(world, x, y, z, along, positiveSide ? 3 : 0, 3, alongZ);
                 }
                 if (rand.nextBoolean()) {
-                    this.setBlockAndMetadata(world, x + dx + offX, y + 2, z + (plusZ ? 4 : -1), TFBlocks.leaves, 0);
+                    placeLeaf(world, x, y, z, along, positiveSide ? 4 : -1, 2, alongZ);
                 }
             }
         }
 
         // firefly
-        this.setBlockAndMetadata(world, x + rand.nextInt(4) + 3, y + 2, z + (plusZ ? 0 : 3), TFBlocks.firefly, 0);
-
+        placeBlock(world, x, y, z, rand.nextInt(4) + CORE_START, positiveSide ? 0 : 3, 2, alongZ, TFBlocks.firefly, 0);
         return true;
     }
 
-    private void makeNegativeXJaggy(World world, int x, int y, int z, int length, int dz, int dy) {
-        for (int dx = -length; dx < 0; dx++) {
-            this.setBlockAndMetadata(world, x + 3 + dx, y + dy, z + dz, TFBlocks.log, 4);
+    private void makeJaggedEnds(World world, Random rand, int x, int y, int z, boolean alongZ, int logMeta) {
+        // keep the negative ends 6 rng draws before the positive ends 6 draws
+        for (int end = 0; end < 2; end++) {
+            boolean positiveEnd = end == 1;
+            for (int i = 0; i < JAGGED_CROSS_POSITIONS.length; i++) {
+                int length = rand.nextInt(3);
+                int start = positiveEnd ? CORE_START + CORE_LENGTH : CORE_START - length;
+                for (int along = start; along < start + length; along++) {
+                    placeBlock(
+                            world,
+                            x,
+                            y,
+                            z,
+                            along,
+                            JAGGED_CROSS_POSITIONS[i],
+                            JAGGED_HEIGHTS[i],
+                            alongZ,
+                            TFBlocks.log,
+                            logMeta);
+                }
+            }
         }
     }
 
-    private void makePositiveXJaggy(World world, int x, int y, int z, int length, int dz, int dy) {
-        for (int dx = 0; dx < length; dx++) {
-            this.setBlockAndMetadata(world, x + dx + 7, y + dy, z + dz, TFBlocks.log, 4);
+    private void makeFloorBlock(World world, Random rand, int x, int y, int z, int along, int across, boolean alongZ,
+            int logMeta) {
+        if (rand.nextBoolean()) {
+            placeBlock(world, x, y, z, along, across, -1, alongZ, TFBlocks.log, logMeta);
+            if (rand.nextBoolean()) {
+                placeBlock(world, x, y, z, along, across, 0, alongZ, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
+            }
+        } else {
+            placeBlock(world, x, y, z, along, across, -1, alongZ, Blocks.dirt, 0);
+            placeBlock(world, x, y, z, along, across, 0, alongZ, TFBlocks.plant, BlockTFPlant.META_MOSSPATCH);
         }
+    }
+
+    // local coordinates let both orientations share the same block and rng order
+    private void placeBlock(World world, int x, int y, int z, int along, int across, int height, boolean alongZ,
+            Block block, int metadata) {
+        setBlockAndMetadata(
+                world,
+                x + (alongZ ? across : along),
+                y + height,
+                z + (alongZ ? along : across),
+                block,
+                metadata);
+    }
+
+    private void placeLeaf(World world, int x, int y, int z, int along, int across, int height, boolean alongZ) {
+        putLeafBlock(
+                world,
+                x + (alongZ ? across : along),
+                y + height,
+                z + (alongZ ? along : across),
+                TFBlocks.leaves,
+                0);
     }
 }

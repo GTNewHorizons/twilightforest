@@ -8,9 +8,9 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 
 public class TFGenTallGrass extends WorldGenerator {
 
-    private Block tallGrassID;
-    private int tallGrassMetadata;
-    private int amount;
+    private final Block tallGrassID;
+    private final int tallGrassMetadata;
+    private final int amount;
 
     public TFGenTallGrass(Block blockID, int meta, int amount) {
         this.amount = amount;
@@ -18,8 +18,9 @@ public class TFGenTallGrass extends WorldGenerator {
         this.tallGrassMetadata = meta;
     }
 
+    @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
-        Block block = null;
+        Block block;
         do {
             block = world.getBlock(x, y, z);
             if (block != null && !block.isLeaves(world, x, y, z)) {

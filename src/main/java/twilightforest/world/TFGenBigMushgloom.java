@@ -10,11 +10,15 @@ import twilightforest.block.TFBlocks;
 
 public class TFGenBigMushgloom extends TFGenerator {
 
+    private static final int CAP_RADIUS = 1;
+    private static final int MIN_HEIGHT = 3;
+
     @Override
     public boolean generate(World world, Random rand, int x, int y, int z) {
-        int height = 3 + rand.nextInt(2) + rand.nextInt(2);
+        int height = MIN_HEIGHT + rand.nextInt(2) + rand.nextInt(2);
 
-        if (!this.isAreaSuitable(world, rand, x - 1, y, z - 1, 3, height, 3)) {
+        if (y < 1 || (long) y + height > world.getHeight()
+                || !isAreaSuitable(world, rand, x - CAP_RADIUS, y, z - CAP_RADIUS, 3, height, 3)) {
             return false;
         }
 
@@ -25,7 +29,7 @@ public class TFGenBigMushgloom extends TFGenerator {
 
         // generate!
         for (int dy = 0; dy < height - 2; dy++) {
-            this.setBlockAndNotifyAdequately(world, x, y + dy, z, TFBlocks.hugeGloomBlock, 10);
+            setBlockAndNotifyAdequately(world, x, y + dy, z, TFBlocks.hugeGloomBlock, 10);
         }
 
         makeMushroomCap(world, x, z, y + (height - 2));
@@ -36,16 +40,13 @@ public class TFGenBigMushgloom extends TFGenerator {
         return true;
     }
 
-    private void makeMushroomCap(World world, int x, int z, int dy) {
-        this.setBlockAndNotifyAdequately(world, x - 1, dy, z - 1, TFBlocks.hugeGloomBlock, 1);
-        this.setBlockAndNotifyAdequately(world, x + 0, dy, z - 1, TFBlocks.hugeGloomBlock, 2);
-        this.setBlockAndNotifyAdequately(world, x + 1, dy, z - 1, TFBlocks.hugeGloomBlock, 3);
-        this.setBlockAndNotifyAdequately(world, x - 1, dy, z + 0, TFBlocks.hugeGloomBlock, 4);
-        this.setBlockAndNotifyAdequately(world, x + 0, dy, z + 0, TFBlocks.hugeGloomBlock, 5);
-        this.setBlockAndNotifyAdequately(world, x + 1, dy, z + 0, TFBlocks.hugeGloomBlock, 6);
-        this.setBlockAndNotifyAdequately(world, x - 1, dy, z + 1, TFBlocks.hugeGloomBlock, 7);
-        this.setBlockAndNotifyAdequately(world, x + 0, dy, z + 1, TFBlocks.hugeGloomBlock, 8);
-        this.setBlockAndNotifyAdequately(world, x + 1, dy, z + 1, TFBlocks.hugeGloomBlock, 9);
+    private void makeMushroomCap(World world, int x, int z, int y) {
+        // metadata is row major, the northern row is 1-3 and the southern row is 7-9
+        for (int dz = -CAP_RADIUS; dz <= CAP_RADIUS; dz++) {
+            for (int dx = -CAP_RADIUS; dx <= CAP_RADIUS; dx++) {
+                int metadata = (dz + CAP_RADIUS) * 3 + dx + CAP_RADIUS + 1;
+                setBlockAndNotifyAdequately(world, x + dx, y, z + dz, TFBlocks.hugeGloomBlock, metadata);
+            }
+        }
     }
-
 }

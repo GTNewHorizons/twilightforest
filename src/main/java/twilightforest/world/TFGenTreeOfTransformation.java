@@ -29,12 +29,12 @@ public class TFGenTreeOfTransformation extends TFGenCanopyTree {
 
     @Override
     public boolean generate(World world, Random random, int x, int y, int z) {
-        if (super.generate(world, random, x, y, z)) {
-            // heart of transformation
-            setBlockAndMetadata(world, x, y + 3, z, TFBlocks.magicLogSpecial, BlockTFMagicLogSpecial.META_TRANS);
-            return true;
-        } else {
+        if (!super.generate(world, random, x, y, z)) {
             return false;
         }
+
+        // heart of transformation
+        setBlockAndMetadata(world, x, y + 3, z, TFBlocks.magicLogSpecial, BlockTFMagicLogSpecial.META_TRANS);
+        return true;
     }
 }
