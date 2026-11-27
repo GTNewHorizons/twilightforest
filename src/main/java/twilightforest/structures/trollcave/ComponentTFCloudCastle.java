@@ -15,8 +15,11 @@ import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFCloudCastle extends StructureTFComponent {
 
-    private boolean minerPlaced = false;
-    private boolean warriorPlaced = false;
+    private static final int GIANT_BLOCK_SHIFT = 2;
+    private static final int CLOUD_TREE_Y = 168;
+
+    private boolean minerPlaced;
+    private boolean warriorPlaced;
 
     public ComponentTFCloudCastle() {}
 
@@ -25,9 +28,9 @@ public class ComponentTFCloudCastle extends StructureTFComponent {
         this.setCoordBaseMode(0);
 
         // adjust x, y, z
-        x = (x >> 2) << 2;
-        y = (y >> 2) << 2;
-        z = (z >> 2) << 2;
+        x = (x >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
+        y = (y >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
+        z = (z >> GIANT_BLOCK_SHIFT) << GIANT_BLOCK_SHIFT;
 
         // spawn list!
         this.spawnListIndex = 1;
@@ -66,10 +69,9 @@ public class ComponentTFCloudCastle extends StructureTFComponent {
         ComponentTFCloudTree treeX = new ComponentTFCloudTree(
                 this.getComponentType() + 1,
                 boundingBox.minX + (plus ? 16 : -16),
-                168,
+                CLOUD_TREE_Y,
                 boundingBox.minZ - 8 + (offset * 4));
-        list.add(treeX);
-        treeX.buildComponent(this, list, rand);
+        addTree(treeX, list, rand);
 
         // tree in z direction
         plus = rand.nextBoolean();
@@ -77,11 +79,15 @@ public class ComponentTFCloudCastle extends StructureTFComponent {
         ComponentTFCloudTree treeZ = new ComponentTFCloudTree(
                 this.getComponentType() + 1,
                 boundingBox.minX - 8 + (offset * 4),
-                168,
+                CLOUD_TREE_Y,
                 boundingBox.minZ + (plus ? 16 : -16));
-        list.add(treeZ);
-        treeZ.buildComponent(this, list, rand);
+        addTree(treeZ, list, rand);
 
+    }
+
+    private void addTree(ComponentTFCloudTree tree, List<StructureComponent> components, Random rand) {
+        components.add(tree);
+        tree.buildComponent(this, components, rand);
     }
 
     @Override
@@ -137,38 +143,37 @@ public class ComponentTFCloudCastle extends StructureTFComponent {
         this.fillWithAir(world, sbb, 0, 0, 4, 4, 7, 7);
 
         // add giants
-        if (!this.minerPlaced) {
-            int bx = this.getXWithOffset(6, 6);
-            int by = this.getYWithOffset(0);
-            int bz = this.getZWithOffset(6, 6);
-
-            if (sbb.isVecInside(bx, by, bz)) {
-                this.minerPlaced = true;
-
-                EntityTFGiantMiner miner = new EntityTFGiantMiner(world);
-                miner.setPosition(bx, by, bz);
-                miner.makeNonDespawning();
-
-                world.spawnEntityInWorld(miner);
-            }
-        }
-        if (!this.warriorPlaced) {
-            int bx = this.getXWithOffset(9, 9);
-            int by = this.getYWithOffset(0);
-            int bz = this.getZWithOffset(9, 9);
-
-            if (sbb.isVecInside(bx, by, bz)) {
-                this.warriorPlaced = true;
-
-                EntityTFArmoredGiant warrior = new EntityTFArmoredGiant(world);
-                warrior.setPosition(bx, by, bz);
-                warrior.makeNonDespawning();
-
-                world.spawnEntityInWorld(warrior);
-            }
-        }
-
+        spawnMiner(world, sbb);
+        spawnWarrior(world, sbb);
         return true;
     }
 
+    private void spawnMiner(World world, StructureBoundingBox sbb) {
+        if (minerPlaced) return;
+
+        int x = getXWithOffset(6, 6);
+        int y = getYWithOffset(0);
+        int z = getZWithOffset(6, 6);
+        if (!sbb.isVecInside(x, y, z)) return;
+
+        EntityTFGiantMiner miner = new EntityTFGiantMiner(world);
+        miner.setPosition(x, y, z);
+        miner.makeNonDespawning();
+        // retry on another generation pass if the entity wasnt accepted by the world
+        minerPlaced = world.spawnEntityInWorld(miner);
+    }
+
+    private void spawnWarrior(World world, StructureBoundingBox sbb) {
+        if (warriorPlaced) return;
+
+        int x = getXWithOffset(9, 9);
+        int y = getYWithOffset(0);
+        int z = getZWithOffset(9, 9);
+        if (!sbb.isVecInside(x, y, z)) return;
+
+        EntityTFArmoredGiant warrior = new EntityTFArmoredGiant(world);
+        warrior.setPosition(x, y, z);
+        warrior.makeNonDespawning();
+        warriorPlaced = world.spawnEntityInWorld(warrior);
+    }
 }

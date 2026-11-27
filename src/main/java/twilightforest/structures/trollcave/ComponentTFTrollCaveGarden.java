@@ -17,6 +17,13 @@ import twilightforest.world.TFGenMyceliumBlob;
 
 public class ComponentTFTrollCaveGarden extends ComponentTFTrollCaveMain {
 
+    private static final int DIRT_PATCH_COUNT = 24;
+    private static final int MYCELIUM_PATCH_COUNT = 16;
+    private static final int UBEROUS_PATCH_COUNT = 16;
+    private static final int MUSHGLOOM_COUNT = 32;
+    private static final int MUSHROOM_COUNT = 64;
+    private static final int STALACTITE_COUNT = 128;
+
     TFGenMyceliumBlob myceliumBlobGen = new TFGenMyceliumBlob(5);
     TFGenMyceliumBlob dirtGen = new TFGenMyceliumBlob(Blocks.dirt, 5);
     WorldGenBigMushroom bigMushroomGen = new WorldGenBigMushroom();
@@ -50,26 +57,25 @@ public class ComponentTFTrollCaveGarden extends ComponentTFTrollCaveMain {
         } else {
             // clear inside
             hollowCaveMiddle(world, sbb, rand, 0, 0, 0, this.size - 1, this.height - 1, this.size - 1);
-            Random decoRNG = new Random(
-                    world.getSeed() + (this.boundingBox.minX * 321534781) ^ (this.boundingBox.minZ * 756839));
+            Random decoRNG = createDecorationRandom(world);
 
             // treasure!
             makeTreasureCrate(world, rand, sbb);
 
             // dirt!
-            for (int i = 0; i < 24; i++) {
+            for (int i = 0; i < DIRT_PATCH_COUNT; i++) {
                 ChunkCoordinates dest = getCoordsInCave(decoRNG);
                 generate(world, dirtGen, decoRNG, dest.posX, 1, dest.posZ, sbb);
             }
 
             // mycelium!
-            for (int i = 0; i < 16; i++) {
+            for (int i = 0; i < MYCELIUM_PATCH_COUNT; i++) {
                 ChunkCoordinates dest = getCoordsInCave(decoRNG);
                 generate(world, myceliumBlobGen, decoRNG, dest.posX, 1, dest.posZ, sbb);
             }
 
             // uberous!
-            for (int i = 0; i < 16; i++) {
+            for (int i = 0; i < UBEROUS_PATCH_COUNT; i++) {
                 ChunkCoordinates dest = getCoordsInCave(decoRNG);
                 generate(world, uberousGen, decoRNG, dest.posX, 1, dest.posZ, sbb);
 
@@ -77,19 +83,19 @@ public class ComponentTFTrollCaveGarden extends ComponentTFTrollCaveMain {
             }
 
             // mushglooms first
-            for (int i = 0; i < 32; i++) {
+            for (int i = 0; i < MUSHGLOOM_COUNT; i++) {
                 ChunkCoordinates dest = getCoordsInCave(decoRNG);
                 generate(world, bigMushgloomGen, decoRNG, dest.posX, 1, dest.posZ, sbb);
             }
 
             // mushrooms!
-            for (int i = 0; i < 64; i++) {
+            for (int i = 0; i < MUSHROOM_COUNT; i++) {
                 ChunkCoordinates dest = getCoordsInCave(decoRNG);
                 generate(world, bigMushroomGen, decoRNG, dest.posX, 1, dest.posZ, sbb);
             }
 
             // stone stalactites!
-            for (int i = 0; i < 128; i++) {
+            for (int i = 0; i < STALACTITE_COUNT; i++) {
                 ChunkCoordinates dest = getCoordsInCave(decoRNG);
                 generateBlockStalactite(world, decoRNG, Blocks.stone, 0.7F, true, dest.posX, 3, dest.posZ, sbb);
             }
