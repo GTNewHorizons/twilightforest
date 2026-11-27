@@ -7,8 +7,8 @@ import net.minecraft.util.Vec3;
 
 public class EntityAIStayNearHome extends EntityAIBase {
 
-    private EntityCreature entity;
-    private float speed;
+    private final EntityCreature entity;
+    private final float speed;
 
     public EntityAIStayNearHome(EntityCreature entityTFYetiAlpha, float sp) {
         this.entity = entityTFYetiAlpha;
@@ -19,62 +19,28 @@ public class EntityAIStayNearHome extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        boolean isOutOfRange = !this.entity.isWithinHomeDistanceCurrentPosition();
-
-        // if (isOutOfRange) {
-        // System.out.println("This creature is outside home range, moving home!");
-        // } else {
-        // System.out.println("This creature is inside home range");
-        // }
-
-        return isOutOfRange;
+        return entity.hasHome() && !entity.isWithinHomeDistanceCurrentPosition();
     }
 
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
     public boolean continueExecuting() {
-        return !this.entity.getNavigator().noPath();
+        return entity.hasHome() && !entity.isWithinHomeDistanceCurrentPosition() && !entity.getNavigator().noPath();
     }
 
-    // /**
-    // * Execute a one shot task or start executing a continuous task
-    // */
-    // public void startExecuting()
-    // {
-    // this.entity.getNavigator().tryMoveToXYZ(this.entity.getHomePosition().posX, this.entity.getHomePosition().posY,
-    // this.entity.getHomePosition().posZ, this.speed);
-    // }
-
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
+    @Override
     public void startExecuting() {
-        // this.insidePosX = -1;
-
-        if (this.entity.getDistanceSq(
-                this.entity.getHomePosition().posX,
-                this.entity.getHomePosition().posY,
-                this.entity.getHomePosition().posZ) > 256.0D) {
-            Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(
-                    this.entity,
-                    14,
-                    3,
-                    Vec3.createVectorHelper(
-                            this.entity.getHomePosition().posX + 0.5D,
-                            this.entity.getHomePosition().posY,
-                            this.entity.getHomePosition().posZ + 0.5D));
-
-            if (vec3 != null) {
-                this.entity.getNavigator().tryMoveToXYZ(vec3.xCoord, vec3.yCoord, vec3.zCoord, speed);
+        double x = entity.getHomePosition().posX + 0.5D;
+        double y = entity.getHomePosition().posY;
+        double z = entity.getHomePosition().posZ + 0.5D;
+        if (entity.getDistanceSq(x, y, z) > 256.0D) {
+            Vec3 step = RandomPositionGenerator
+                    .findRandomTargetBlockTowards(entity, 14, 3, Vec3.createVectorHelper(x, y, z));
+            if (step != null && entity.getNavigator().tryMoveToXYZ(step.xCoord, step.yCoord, step.zCoord, speed)) {
+                return;
             }
-        } else {
-            this.entity.getNavigator().tryMoveToXYZ(
-                    this.entity.getHomePosition().posX + 0.5D,
-                    this.entity.getHomePosition().posY,
-                    this.entity.getHomePosition().posZ + 0.5D,
-                    speed);
         }
+        entity.getNavigator().tryMoveToXYZ(x, y, z, speed);
     }
-
 }

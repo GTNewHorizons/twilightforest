@@ -20,7 +20,7 @@ import twilightforest.item.TFItems;
 
 public class EntityTFRaven extends EntityTFTinyBird {
 
-    EntityTFRavenLookHelper ravenLook = new EntityTFRavenLookHelper(this);
+    private final EntityTFRavenLookHelper ravenLook = new EntityTFRavenLookHelper(this);
 
     public EntityTFRaven(World par1World) {
         super(par1World);
@@ -47,7 +47,7 @@ public class EntityTFRaven extends EntityTFTinyBird {
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D); // max health
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.20000001192092896D);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.2D);
     }
 
     /**
@@ -109,6 +109,6 @@ public class EntityTFRaven extends EntityTFTinyBird {
 
     @Override
     public ItemStack getSpookedDrop() {
-        return (this.rand.nextFloat() < 0.2f) ? new ItemStack(TFItems.feather, 1, 0) : null;
+        return (this.rand.nextFloat() < 0.2F) ? new ItemStack(TFItems.feather, 1, 0) : null;
     }
 }

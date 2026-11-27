@@ -6,79 +6,110 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.Vec3;
 
-import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import twilightforest.TFGenericPacketHandler;
 import twilightforest.TwilightForestMod;
 
 public class EntityAITFThrowRider extends EntityAIBase {
 
-    private EntityCreature theEntityCreature;
-    private int throwTimer;
+    private static final int MIN_HOLD_TICKS = 10;
+    private static final int RECOVERY_TICKS = 40;
+    private static final double THROW_SPEED = 2.0D;
+    private static final double THROW_UPWARD_SPEED = 0.9D;
 
-    public EntityAITFThrowRider(EntityCreature par1EntityCreature, float par2) {
-        this.theEntityCreature = par1EntityCreature;
+    private final EntityCreature creature;
+    private EntityLivingBase heldRider;
+    private int holdTicks;
+    private int recoveryTicks;
+
+    public EntityAITFThrowRider(EntityCreature creature, float ignoredSpeed) {
+        this.creature = creature;
         this.setMutexBits(1);
     }
 
-    /**
-     * Returns whether the EntityAIBase should begin execution.
-     */
     @Override
     public boolean shouldExecute() {
-        if (this.theEntityCreature.riddenByEntity == null || this.theEntityCreature.getRNG().nextInt(5) > 0) {
+        if (this.creature.worldObj.isRemote || !this.creature.isEntityAlive()
+                || !(this.creature.riddenByEntity instanceof EntityLivingBase rider)
+                || !rider.isEntityAlive()) {
+            this.heldRider = null;
+            this.holdTicks = 0;
             return false;
-        } else {
-            return true;
         }
+
+        if (this.heldRider != rider) {
+            this.heldRider = rider;
+            this.holdTicks = 0;
+        }
+        if (++this.holdTicks < MIN_HOLD_TICKS) {
+            return false;
+        }
+        return this.creature.getRNG().nextInt(5) == 0;
     }
 
-    /**
-     * Execute a one shot task or start executing a continuous task
-     */
     @Override
     public void startExecuting() {
-        EntityLivingBase rider = (EntityLivingBase) this.theEntityCreature.riddenByEntity;
-        rider.mountEntity(null);
-
-        Vec3 throwVec = this.theEntityCreature.getLookVec();
-        throwVec.xCoord *= 2F;
-        throwVec.yCoord *= 2F;
-        throwVec.zCoord *= 2F;
-
-        // let's throw the player a fixed value in the air
-        throwVec.yCoord = 0.9;
-
-        rider.addVelocity(throwVec.xCoord, throwVec.yCoord, throwVec.zCoord);
-
-        // if we're throwing a player (probably!), send a packet with the velocity
-        if (rider instanceof EntityPlayerMP player) {
-
-            FMLProxyPacket message = TFGenericPacketHandler
-                    .makeThrowPlayerPacket((float) throwVec.xCoord, (float) throwVec.yCoord, (float) throwVec.zCoord);
-            TwilightForestMod.genericChannel.sendTo(message, player);
-
+        this.recoveryTicks = 0;
+        if (this.heldRider == null || this.creature.riddenByEntity != this.heldRider
+                || !this.heldRider.isEntityAlive()
+                || this.creature.worldObj.isRemote) {
+            return;
         }
 
-        theEntityCreature.playSound(
-                TwilightForestMod.ID + ":mob.yeti.throw",
-                4F,
-                0.75F + this.theEntityCreature.rand.nextFloat() * 0.25F);
+        EntityLivingBase rider = this.heldRider;
+        rider.mountEntity(null);
+        if (rider.ridingEntity != null) {
+            // another mod may veto dismounting, never launch a still mounted entity
+            return;
+        }
 
-        FMLLog.finer("[TwilightForest] throw!");
-        this.throwTimer = 0;
+        // use horizontal facing so looking straight up/down cannot suppress the throw
+        Vec3 look = this.creature.getLookVec();
+        double horizontalSq = look.xCoord * look.xCoord + look.zCoord * look.zCoord;
+        double dx;
+        double dz;
+        if (horizontalSq > 1.0E-6D) {
+            double factor = THROW_SPEED / Math.sqrt(horizontalSq);
+            dx = look.xCoord * factor;
+            dz = look.zCoord * factor;
+        } else {
+            double yaw = Math.toRadians(this.creature.rotationYaw);
+            dx = -Math.sin(yaw) * THROW_SPEED;
+            dz = Math.cos(yaw) * THROW_SPEED;
+        }
+
+        rider.addVelocity(dx, THROW_UPWARD_SPEED, dz);
+        if (rider instanceof EntityPlayerMP player) {
+            FMLProxyPacket packet = TFGenericPacketHandler
+                    .makeThrowPlayerPacket((float) dx, (float) THROW_UPWARD_SPEED, (float) dz);
+            TwilightForestMod.genericChannel.sendTo(packet, player);
+        }
+
+        this.creature.playSound(
+                TwilightForestMod.ID + ":mob.yeti.throw",
+                4.0F,
+                0.75F + this.creature.getRNG().nextFloat() * 0.25F);
+        this.heldRider = null;
+        this.holdTicks = 0;
+        this.recoveryTicks = RECOVERY_TICKS;
     }
 
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
     @Override
     public boolean continueExecuting() {
-        if (this.theEntityCreature.riddenByEntity == null) {
-            this.throwTimer++;
-        }
-
-        return this.throwTimer <= 40;
+        return !this.creature.isDead && this.recoveryTicks > 0;
     }
 
+    @Override
+    public void updateTask() {
+        if (this.recoveryTicks > 0) {
+            --this.recoveryTicks;
+        }
+    }
+
+    @Override
+    public void resetTask() {
+        this.recoveryTicks = 0;
+        this.heldRider = null;
+        this.holdTicks = 0;
+    }
 }

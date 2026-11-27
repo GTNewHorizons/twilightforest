@@ -30,6 +30,9 @@ import twilightforest.item.TFItems;
 
 public class EntityTFQuestRam extends EntityAnimal {
 
+    private static final int COLOR_COUNT = 16;
+    private static final int ALL_COLORS = (1 << COLOR_COUNT) - 1;
+
     private int randomTickDivider;
 
     public EntityTFQuestRam(World world) {
@@ -96,8 +99,8 @@ public class EntityTFQuestRam extends EntityAnimal {
             this.randomTickDivider = 70 + this.rand.nextInt(50);
 
             // check if we're near a quest grove and if so, set that as home
-            int chunkX = MathHelper.floor_double(this.posX) / 16;
-            int chunkZ = MathHelper.floor_double(this.posZ) / 16;
+            int chunkX = MathHelper.floor_double(this.posX) >> 4;
+            int chunkZ = MathHelper.floor_double(this.posZ) >> 4;
 
             TFFeature nearFeature = TFFeature.getNearestFeature(chunkX, chunkZ, this.worldObj);
 
@@ -115,9 +118,10 @@ public class EntityTFQuestRam extends EntityAnimal {
             }
 
             // do we need to reward the player?
-            if (countColorsSet() > 15 && !getRewarded()) {
-                rewardQuest();
+            if (!this.worldObj.isRemote && getColorFlags() == ALL_COLORS && !getRewarded()) {
+                // mark completion before spawning drops so an update cant duplicate rewards
                 setRewarded(true);
+                rewardQuest();
             }
         }
         super.updateAITick();
@@ -163,9 +167,13 @@ public class EntityTFQuestRam extends EntityAnimal {
         ItemStack currentItem = par1EntityPlayer.inventory.getCurrentItem();
 
         if (currentItem != null && currentItem.getItem() == Item.getItemFromBlock(Blocks.wool)
-                && !isColorPresent(currentItem.getItemDamage())) {
+                && wantsColor(currentItem.getItemDamage())) {
             // par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, new
             // ItemStack(Items.bucketMilk));
+            if (this.worldObj.isRemote) {
+                return true;
+            }
+
             this.setColorPresent(currentItem.getItemDamage());
             this.animateAddColor(currentItem.getItemDamage(), 50);
 
@@ -207,8 +215,8 @@ public class EntityTFQuestRam extends EntityAnimal {
      * Called every tick. If we have got all the colors and have not paid out the reward yet, do a colorful animation.
      */
     public void checkAndAnimateColors() {
-        if (countColorsSet() > 15 && !getRewarded()) {
-            animateAddColor(this.rand.nextInt(16), 5);
+        if (getColorFlags() == ALL_COLORS && !getRewarded()) {
+            animateAddColor(this.rand.nextInt(COLOR_COUNT), 5);
         }
     }
 
@@ -228,7 +236,7 @@ public class EntityTFQuestRam extends EntityAnimal {
     @Override
     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
         super.readEntityFromNBT(par1NBTTagCompound);
-        this.setColorFlags(par1NBTTagCompound.getInteger("ColorFlags"));
+        this.setColorFlags(par1NBTTagCompound.getInteger("ColorFlags") & ALL_COLORS);
         this.setRewarded(par1NBTTagCompound.getBoolean("Rewarded"));
     }
 
@@ -243,28 +251,29 @@ public class EntityTFQuestRam extends EntityAnimal {
      * Sets the color flags int
      */
     public void setColorFlags(int par1) {
-        this.dataWatcher.updateObject(16, par1);
+        this.dataWatcher.updateObject(16, par1 & ALL_COLORS);
     }
 
     /**
      * @param color
      * @return true if the specified color is marked present
      */
-    public boolean isColorPresent(int color) {
-        int flags = this.getColorFlags();
+    private static boolean isValidColor(int color) {
+        return color >= 0 && color < COLOR_COUNT;
+    }
 
-        return (flags & (int) Math.pow(2, color)) > 0;
+    public boolean isColorPresent(int color) {
+        return isValidColor(color) && (getColorFlags() & (1 << color)) != 0;
+    }
+
+    public boolean wantsColor(int color) {
+        return isValidColor(color) && !isColorPresent(color);
     }
 
     public void setColorPresent(int color) {
-        int flags = this.getColorFlags();
-
-        // System.out.println("Setting color flag for color " + color);
-        // System.out.println("Color int is " + flags);
-        // System.out.println("ORing that with " + Math.pow(2, color) + " which is " + Integer.toBinaryString((int)
-        // Math.pow(2, color)));
-
-        setColorFlags(flags | (int) Math.pow(2, color));
+        if (isValidColor(color)) {
+            setColorFlags(getColorFlags() | (1 << color));
+        }
     }
 
     /**
@@ -283,11 +292,15 @@ public class EntityTFQuestRam extends EntityAnimal {
 
     /**
      * Do a little animation for when we successfully add a new color
-     * 
+     *
      * @param color
      */
     public void animateAddColor(int color, int iterations) {
         // EntitySheep.fleeceColorTable[i][0]
+
+        if (!isValidColor(color)) {
+            return;
+        }
 
         for (int i = 0; i < iterations; i++) {
             this.worldObj.spawnParticle(
@@ -305,19 +318,11 @@ public class EntityTFQuestRam extends EntityAnimal {
     }
 
     /**
-     * 
+     *
      * @return how many colors are present currently
      */
     public int countColorsSet() {
-        int count = 0;
-
-        for (int i = 0; i < 16; i++) {
-            if (isColorPresent(i)) {
-                count++;
-            }
-        }
-
-        return count;
+        return Integer.bitCount(getColorFlags() & ALL_COLORS);
     }
 
     /**

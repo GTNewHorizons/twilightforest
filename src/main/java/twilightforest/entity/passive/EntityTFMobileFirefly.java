@@ -89,7 +89,7 @@ public class EntityTFMobileFirefly extends EntityAmbientCreature {
     public void onUpdate() {
         super.onUpdate();
 
-        this.motionY *= 0.6000000238418579D;
+        this.motionY *= 0.6D;
     }
 
     @Override
@@ -114,9 +114,9 @@ public class EntityTFMobileFirefly extends EntityAmbientCreature {
         double var1 = this.currentFlightTarget.posX + 0.5D - this.posX;
         double var3 = this.currentFlightTarget.posY + 0.1D - this.posY;
         double var5 = this.currentFlightTarget.posZ + 0.5D - this.posZ;
-        double speed = 0.05000000149011612D;
+        double speed = 0.05D;
         this.motionX += (Math.signum(var1) * 0.5D - this.motionX) * speed;
-        this.motionY += (Math.signum(var3) * 0.699999988079071D - this.motionY) * speed * 2;
+        this.motionY += (Math.signum(var3) * 0.7D - this.motionY) * speed * 2;
         this.motionZ += (Math.signum(var5) * 0.5D - this.motionZ) * speed;
         float var7 = (float) (Math.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
         float var8 = MathHelper.wrapAngleTo180_float(var7 - this.rotationYaw);
@@ -169,7 +169,7 @@ public class EntityTFMobileFirefly extends EntityAmbientCreature {
             int var4 = this.worldObj.getBlockLightValue(var2, var1, var3);
             byte var5 = 4;
 
-            return var4 > this.rand.nextInt(var5) ? false : super.getCanSpawnHere();
+            return var4 <= this.rand.nextInt(var5) && super.getCanSpawnHere();
         }
     }
 
