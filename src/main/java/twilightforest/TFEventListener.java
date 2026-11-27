@@ -3,7 +3,6 @@ package twilightforest;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.minecraft.block.Block;
@@ -11,7 +10,6 @@ import net.minecraft.block.BlockSapling;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandGameRule;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
@@ -88,11 +86,16 @@ public class TFEventListener {
     private boolean isBreakingWithGiantPick = false;
     private boolean shouldMakeGiantCobble = false;
     private int amountOfCobbleToReplace = 0;
-    private long lastSpawnedHintMonsterTime;
+    private EntityPlayer giantCobbleHarvester;
+    private World giantCobbleWorld;
+    private int giantCobbleX;
+    private int giantCobbleY;
+    private int giantCobbleZ;
 
     public void clearCaches() {
         playerKeepsMap.clear();
         playerBaublesMap.clear();
+        clearGiantCobbleState();
     }
 
     /**
@@ -100,85 +103,86 @@ public class TFEventListener {
      */
     @SubscribeEvent
     public void pickupItem(EntityItemPickupEvent event) {
-        if (event.entityPlayer.worldObj.provider.dimensionId == TwilightForestMod.dimensionID) {
-            Item item = event.item.getEntityItem().getItem();
-            if (item == TFItems.scepterTwilight || item == TFItems.scepterLifeDrain || item == TFItems.scepterZombie) {
-                // the player has picked up a scepter. Check if they have them all in their inventory, and if so,
-                // achievement
-                // System.out.println("Player picked up a scepter");
-                checkPlayerForScepterMastery(event.entityPlayer);
-                event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressLich);
-                // naga scale gives naga progress achievement
-            } else if (item == TFItems.nagaScale) {
-                event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressNaga);
-                // trophy gives kill achievement
-            } else if (item == TFItems.trophy) {
-                switch (event.item.getEntityItem().getItemDamage()) {
-                    case 0 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillHydra);
-                    case 1 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillNaga);
-                    case 2 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightKillLich);
-                    case 3 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
-                    case 4 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
-                    case 5 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
-                    case 6 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressKnights);
-                    case 7 -> event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressYeti);
-                }
-                // mazebreaker
-            } else if (item == TFItems.mazebreakerPick) {
-                event.entityPlayer.triggerAchievement(TFAchievementPage.twilightMazebreaker);
-                // meef stroganoff (or axe)
-            } else if (item == TFItems.meefStroganoff || item == TFItems.minotaurAxe) {
-                event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
-                // fiery blood
-            } else if (item == TFItems.fieryBlood) {
-                event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressHydra);
-                // phantom helm/plate
-            } else if (item == TFItems.phantomHelm || item == TFItems.phantomPlate) {
-                event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressKnights);
-                // fiery tears
-            } else if (item == TFItems.fieryTears) {
-                event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
-                // yeti items
-            } else if (item == TFItems.alphaFur || item == TFItems.yetiBoots
-                    || item == TFItems.yetiHelm
-                    || item == TFItems.yetiPlate
-                    || item == TFItems.yetiLegs) {
-                        event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressYeti);
-                        // lamp of cinders
-                    } else
-                if (item == TFItems.lampOfCinders) {
-                    event.entityPlayer.triggerAchievement(TFAchievementPage.twilightProgressTroll);
-                }
+        if (event.entityPlayer.worldObj.provider.dimensionId != TwilightForestMod.dimensionID) {
+            return;
         }
+
+        EntityPlayer player = event.entityPlayer;
+        ItemStack pickedUp = event.item.getEntityItem();
+        Item item = pickedUp.getItem();
+        if (item == TFItems.scepterTwilight || item == TFItems.scepterLifeDrain || item == TFItems.scepterZombie) {
+            // the player has picked up a scepter. Check if they have them all in their inventory, and if so,
+            // achievement
+            // System.out.println("Player picked up a scepter");
+            checkPlayerForScepterMastery(player, item);
+            player.triggerAchievement(TFAchievementPage.twilightProgressLich);
+        } else if (item == TFItems.nagaScale) {
+            // naga scale gives naga progress achievement
+            player.triggerAchievement(TFAchievementPage.twilightProgressNaga);
+        } else if (item == TFItems.trophy) {
+            // trophy gives kill achievement
+            switch (pickedUp.getItemDamage()) {
+                case 0 -> player.triggerAchievement(TFAchievementPage.twilightKillHydra);
+                case 1 -> player.triggerAchievement(TFAchievementPage.twilightKillNaga);
+                case 2 -> player.triggerAchievement(TFAchievementPage.twilightKillLich);
+                case 3 -> player.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
+                case 4 -> player.triggerAchievement(TFAchievementPage.twilightProgressGlacier);
+                case 5 -> player.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
+                case 6 -> player.triggerAchievement(TFAchievementPage.twilightProgressKnights);
+                case 7 -> player.triggerAchievement(TFAchievementPage.twilightProgressYeti);
+                default -> {}
+            }
+        } else if (item == TFItems.mazebreakerPick) {
+            // mazebreaker
+            player.triggerAchievement(TFAchievementPage.twilightMazebreaker);
+        } else if (item == TFItems.meefStroganoff || item == TFItems.minotaurAxe) {
+            // meef stroganoff (or axe)
+            player.triggerAchievement(TFAchievementPage.twilightProgressLabyrinth);
+        } else if (item == TFItems.fieryBlood) {
+            // fiery blood
+            player.triggerAchievement(TFAchievementPage.twilightProgressHydra);
+        } else if (item == TFItems.phantomHelm || item == TFItems.phantomPlate) {
+            // phantom helm/plate
+            player.triggerAchievement(TFAchievementPage.twilightProgressKnights);
+        } else if (item == TFItems.fieryTears) {
+            // fiery tears
+            player.triggerAchievement(TFAchievementPage.twilightProgressUrghast);
+        } else if (item == TFItems.alphaFur || item == TFItems.yetiBoots
+                || item == TFItems.yetiHelm
+                || item == TFItems.yetiPlate
+                || item == TFItems.yetiLegs) {
+                    // yeti items
+                    player.triggerAchievement(TFAchievementPage.twilightProgressYeti);
+                } else
+            if (item == TFItems.lampOfCinders) {
+                // lamp of cinders
+                player.triggerAchievement(TFAchievementPage.twilightProgressTroll);
+            }
     }
 
     /**
      * Does the player have all three scepters somewhere in the inventory?
-     * 
+     *
      * @param player
      */
-    private void checkPlayerForScepterMastery(EntityPlayer player) {
-        boolean scepterTwilight = false;
-        boolean scepterLifeDrain = false;
-        boolean scepterZombie = false;
+    private void checkPlayerForScepterMastery(EntityPlayer player, Item pickedUpItem) {
+        boolean scepterTwilight = pickedUpItem == TFItems.scepterTwilight;
+        boolean scepterLifeDrain = pickedUpItem == TFItems.scepterLifeDrain;
+        boolean scepterZombie = pickedUpItem == TFItems.scepterZombie;
 
         IInventory inv = player.inventory;
-
         for (int i = 0; i < inv.getSizeInventory(); i++) {
             ItemStack stack = inv.getStackInSlot(i);
-            if (stack != null) {
-                Item item = stack.getItem();
-                if (item == TFItems.scepterTwilight) {
-                    scepterTwilight = true;
-                } else if (item == TFItems.scepterLifeDrain) {
-                    scepterLifeDrain = true;
-                } else if (item == TFItems.scepterZombie) {
-                    scepterZombie = true;
-                }
+            if (stack == null) {
+                continue;
             }
+            Item item = stack.getItem();
+            scepterTwilight |= item == TFItems.scepterTwilight;
+            scepterLifeDrain |= item == TFItems.scepterLifeDrain;
+            scepterZombie |= item == TFItems.scepterZombie;
         }
 
-        if (scepterTwilight & scepterLifeDrain & scepterZombie) {
+        if (scepterTwilight && scepterLifeDrain && scepterZombie) {
             player.triggerAchievement(TFAchievementPage.twilightLichScepters);
         }
     }
@@ -197,7 +201,7 @@ public class TFEventListener {
         // if the item is naga armor
         if ((item == TFItems.plateNaga || item == TFItems.legsNaga)) {
             // check if the player has made both armors
-            checkPlayerForNagaArmorer(player);
+            checkPlayerForNagaArmorer(player, item);
             // trigger achievements
         } else if (item == TFItems.magicMapFocus) {
             player.triggerAchievement(TFAchievementPage.twilightMagicMapFocus);
@@ -211,10 +215,9 @@ public class TFEventListener {
             // drop them nearby
         } else if (item == Item.getItemFromBlock(Blocks.planks) && itemStack.stackSize == 64
                 && this.doesCraftMatrixHaveGiantLog(event.craftMatrix)) {
-                    addToPlayerInventoryOrDrop(player, new ItemStack(Blocks.planks, 64));
-                    addToPlayerInventoryOrDrop(player, new ItemStack(Blocks.planks, 64));
-                    addToPlayerInventoryOrDrop(player, new ItemStack(Blocks.planks, 64));
-
+                    for (int i = 0; i < 3; i++) {
+                        addToPlayerInventoryOrDrop(player, new ItemStack(Blocks.planks, 64));
+                    }
                 }
     }
 
@@ -239,26 +242,23 @@ public class TFEventListener {
     /**
      * Does the player have two naga armors?
      */
-    private void checkPlayerForNagaArmorer(EntityPlayer player) {
-        boolean nagaScale = false;
-        boolean legsNaga = false;
+    private void checkPlayerForNagaArmorer(EntityPlayer player, Item craftedItem) {
+        // the crafting result may still be on the cursor when ItemCraftedEvent fires
+        boolean plateNaga = craftedItem == TFItems.plateNaga;
+        boolean legsNaga = craftedItem == TFItems.legsNaga;
 
         IInventory inv = player.inventory;
-
         for (int i = 0; i < inv.getSizeInventory(); i++) {
             ItemStack stack = inv.getStackInSlot(i);
-
-            if (stack != null) {
-                Item item = stack.getItem();
-                if (item == TFItems.nagaScale) {
-                    nagaScale = true;
-                } else if (item == TFItems.legsNaga) {
-                    legsNaga = true;
-                }
+            if (stack == null) {
+                continue;
             }
+            Item item = stack.getItem();
+            plateNaga |= item == TFItems.plateNaga;
+            legsNaga |= item == TFItems.legsNaga;
         }
 
-        if (nagaScale & legsNaga) {
+        if (plateNaga && legsNaga) {
             player.triggerAchievement(TFAchievementPage.twilightNagaArmors);
         }
     }
@@ -269,47 +269,44 @@ public class TFEventListener {
      */
     @SubscribeEvent
     public void harvestDrops(HarvestDropsEvent event) {
-        if (event.harvester != null && event.harvester.inventory.getCurrentItem() != null
-                && event.harvester.inventory.getCurrentItem().getItem().func_150897_b(event.block)) {
-            if (event.harvester.inventory.getCurrentItem().getItem() == TFItems.fieryPick) {
-                ArrayList<ItemStack> removeThese = new ArrayList<>(1);
-                ArrayList<ItemStack> addThese = new ArrayList<>(1);
-
-                for (ItemStack input : event.drops) {
-                    // does it smelt?
-                    ItemStack result = FurnaceRecipes.smelting().getSmeltingResult(input);
-                    if (result != null) {
-                        addThese.add(new ItemStack(result.getItem(), input.stackSize));
-                        removeThese.add(input);
-
-                        // spawn XP
-                        spawnSpeltXP(result, event.world, event.x, event.y, event.z);
-                    }
+        ItemStack held = event.harvester == null ? null : event.harvester.inventory.getCurrentItem();
+        if (held != null && held.getItem() == TFItems.fieryPick && held.getItem().func_150897_b(event.block)) {
+            // replace each smeltable drop in place, keeping the smelting recipe metadata and nbt
+            for (int i = 0; i < event.drops.size(); i++) {
+                ItemStack input = event.drops.get(i);
+                // does it smelt?
+                ItemStack result = FurnaceRecipes.smelting().getSmeltingResult(input);
+                if (result == null) {
+                    continue;
                 }
-
-                // remove things we've decided to remove
-                event.drops.removeAll(removeThese);
-
-                // add things we add
-                event.drops.addAll(addThese);
+                ItemStack smelted = result.copy();
+                smelted.stackSize *= input.stackSize;
+                event.drops.set(i, smelted);
+                // spawn XP
+                spawnSpeltXP(result, input.stackSize, event.world, event.x, event.y, event.z);
             }
         }
 
         // this flag is set in reaction to the breakBlock event, but we need to remove the drops in this
         // event
-        if (this.shouldMakeGiantCobble && event.drops.size() > 0) {
-            // turn the next 64 cobblestone drops into one giant cobble
-            if (event.drops.get(0).getItem() == Item.getItemFromBlock(Blocks.cobblestone)) {
-                event.drops.remove(0);
-                if (this.amountOfCobbleToReplace == 64) {
-                    event.drops.add(new ItemStack(TFBlocks.giantCobble));
-                }
-
-                this.amountOfCobbleToReplace--;
-
-                if (this.amountOfCobbleToReplace <= 0) {
-                    this.shouldMakeGiantCobble = false;
-                }
+        if (!shouldMakeGiantCobble || event.harvester != giantCobbleHarvester
+                || event.world != giantCobbleWorld
+                || event.x < giantCobbleX
+                || event.x >= giantCobbleX + 4
+                || event.y < giantCobbleY
+                || event.y >= giantCobbleY + 4
+                || event.z < giantCobbleZ
+                || event.z >= giantCobbleZ + 4) {
+            return;
+        }
+        // turn the next 64 cobblestone drops into one giant cobble
+        if (!event.drops.isEmpty() && event.drops.get(0).getItem() == Item.getItemFromBlock(Blocks.cobblestone)) {
+            event.drops.remove(0);
+            if (amountOfCobbleToReplace == 64) {
+                event.drops.add(new ItemStack(TFBlocks.giantCobble));
+            }
+            if (--amountOfCobbleToReplace <= 0) {
+                clearGiantCobbleState();
             }
         }
     }
@@ -317,8 +314,8 @@ public class TFEventListener {
     /**
      * Spawn XP for smelting the specified item at the specified location
      */
-    private void spawnSpeltXP(ItemStack smelted, World world, int x, int y, int z) {
-        float floatXP = FurnaceRecipes.smelting().func_151398_b(smelted);
+    private void spawnSpeltXP(ItemStack smelted, int inputCount, World world, int x, int y, int z) {
+        float floatXP = FurnaceRecipes.smelting().func_151398_b(smelted) * inputCount;
         int smeltXP = (int) floatXP;
         // random chance of +1 XP to handle fractions
         if (floatXP > smeltXP && world.rand.nextFloat() < (floatXP - smeltXP)) {
@@ -351,7 +348,7 @@ public class TFEventListener {
                 int fireLevel = TFEnchantment.getFieryAuraLevel(player.inventory, event.source);
                 if (fireLevel > 0 && player.getRNG().nextInt(25) < fireLevel) {
                     // System.out.println("Executing fire reaction.");
-                    event.source.getEntity().setFire(fireLevel / 2);
+                    event.source.getEntity().setFire(Math.max(1, fireLevel / 2));
                 }
 
                 // chill aura
@@ -396,7 +393,14 @@ public class TFEventListener {
                         player.playSound("mob.endermen.portal", 1.0F, 1.0F);
 
                         // monsters are easy to move
-                        event.entityLiving.setPositionAndRotation(sourceX, sourceY, sourceZ, sourceYaw, sourcePitch);
+                        if (event.entityLiving instanceof EntityPlayerMP targetPlayer) {
+                            targetPlayer.rotationYaw = sourceYaw;
+                            targetPlayer.rotationPitch = sourcePitch;
+                            targetPlayer.setPositionAndUpdate(sourceX, sourceY, sourceZ);
+                        } else {
+                            event.entityLiving
+                                    .setPositionAndRotation(sourceX, sourceY, sourceZ, sourceYaw, sourcePitch);
+                        }
                         event.entityLiving.playSound("mob.endermen.portal", 1.0F, 1.0F);
                     }
                 }
@@ -405,7 +409,7 @@ public class TFEventListener {
         }
 
         // charm of life?
-        if (entityIsPlayer && willEntityDie(event)) {
+        if (entityIsPlayer && !event.entityLiving.worldObj.isRemote && willEntityDie(event)) {
             EntityPlayer player = (EntityPlayer) event.entityLiving;
 
             boolean charm1 = false;
@@ -429,8 +433,7 @@ public class TFEventListener {
                     player.setHealth(8);
                     player.addPotionEffect(new PotionEffect(Potion.regeneration.id, 100, 0));
                 } else if (charm2) {
-                    player.setHealth(
-                            (float) player.getEntityAttribute(SharedMonsterAttributes.maxHealth).getBaseValue());
+                    player.setHealth(player.getMaxHealth());
 
                     player.addPotionEffect(new PotionEffect(Potion.regeneration.id, 600, 3));
                     player.addPotionEffect(new PotionEffect(Potion.resistance.id, 600, 0));
@@ -468,7 +471,7 @@ public class TFEventListener {
         EntityLivingBase living = event.entityLiving;
         // reduce damage by armor
         if (!source.isUnblockable()) {
-            int armor = 25 - living.getTotalArmorValue();
+            int armor = Math.max(0, 25 - living.getTotalArmorValue());
             // System.out.println("Initial amount = " + amount + ", armor = " + armor + " so damage after armor
             // is " + ((amount * armor) / 25F));
             amount = (amount * armor) / 25F;
@@ -476,13 +479,13 @@ public class TFEventListener {
 
         // maybe also potions?
         if (living.isPotionActive(Potion.resistance)) {
-            int resistance = 25 - (living.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5;
+            int resistance = Math.max(0, 25 - (living.getActivePotionEffect(Potion.resistance).getAmplifier() + 1) * 5);
             amount = amount * resistance / 25F;
         }
         // System.out.printf("I think the player is going to take %f damage and they have %f health.\n",
         // Math.ceil(amount), living.getHealth());
 
-        return Math.ceil(amount) >= Math.floor(living.getHealth());
+        return amount >= living.getHealth() + living.getAbsorptionAmount();
     }
 
     /**
@@ -502,99 +505,73 @@ public class TFEventListener {
 
     /**
      * If a player dies with a charm of keeping, consume the charm and then keep track of what items we need to keep
-     * 
+     *
      * Also keep tower keys
      */
-    @SuppressWarnings("unused")
     @SubscribeEvent
     public void livingDies(LivingDeathEvent event) {
-        if (event.entityLiving instanceof EntityPlayer player
-                && !player.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
+        if (!(event.entityLiving instanceof EntityPlayer player) || player.worldObj.isRemote
+                || player.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
+            return;
+        }
 
-            // TODO: Add support for keeping Bauble slot items on all tiers
-            if (TFBaublesIntegration.consumeBaublesItem(player, TFItems.charmOfKeeping3)
-                    || player.inventory.consumeInventoryItem(TFItems.charmOfKeeping3)) {
+        // TODO: Add support for keeping Bauble slot items on all tiers
+        int tier = consumeKeepingCharm(player);
+        if (tier > 0) {
+            InventoryPlayer keepInventory = new InventoryPlayer(null);
+            ItemStack[] baublesInventory = TFBaublesIntegration.keepAllBaubles(player);
+
+            // armor and full inventory
+            keepAllArmor(player, keepInventory);
+            if (tier == 3) {
                 FMLLog.info("[TwilightForest] Player died with charm of keeping III!  Keep it all!");
-                InventoryPlayer keepInventory = new InventoryPlayer(null);
-                ItemStack[] baublesInventory = TFBaublesIntegration.keepAllBaubles(player);
+                keepMainInventorySlots(player, keepInventory, player.inventory.mainInventory.length);
+            } else if (tier == 2) {
+                FMLLog.info("[TwilightForest] Player died with charm of keeping II!  Keep armor and hotbar!");
+                keepMainInventorySlots(player, keepInventory, 9);
+            } else {
+                FMLLog.info("[TwilightForest] Player died with charm of keeping I!  Keep armor and current item!");
+                int currentItem = player.inventory.currentItem;
+                if (currentItem >= 0 && currentItem < 9 && player.inventory.getCurrentItem() != null) {
+                    keepInventory.mainInventory[currentItem] = ItemStack
+                            .copyItemStack(player.inventory.mainInventory[currentItem]);
+                    player.inventory.mainInventory[currentItem] = null;
+                }
+            }
+            // TODO: Add support for keeping held M&B Battlegear slot items.
+            // TODO: Add support for keeping all M&B Battlegear slot items.
+            keepInventory.setItemStack(
+                    new ItemStack(
+                            tier == 3 ? TFItems.charmOfKeeping3
+                                    : tier == 2 ? TFItems.charmOfKeeping2 : TFItems.charmOfKeeping1));
+            playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
+            if (baublesInventory != null) {
+                playerBaublesMap.put(player.getCommandSenderName(), baublesInventory);
+            }
+        }
 
-                // armor and full inventory
-                keepAllArmor(player, keepInventory);
-                for (int i = 0; i < player.inventory.mainInventory.length; i++) {
-                    keepInventory.mainInventory[i] = ItemStack.copyItemStack(player.inventory.mainInventory[i]);
+        // check for tower keys
+        if (player.inventory.hasItem(TFItems.towerKey)) {
+            InventoryPlayer keepInventory = retrieveOrMakeKeepInventory(player);
+            // keep them all
+            for (int i = 0; i < player.inventory.mainInventory.length; i++) {
+                ItemStack stack = player.inventory.mainInventory[i];
+                if (stack != null && stack.getItem() == TFItems.towerKey) {
+                    keepInventory.mainInventory[i] = ItemStack.copyItemStack(stack);
                     player.inventory.mainInventory[i] = null;
                 }
-                // TODO: Add support for keeping held M&B Battlegear slot items.
-                keepInventory.setItemStack(new ItemStack(TFItems.charmOfKeeping3));
-
-                playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
-                if (baublesInventory != null) playerBaublesMap.put(player.getCommandSenderName(), baublesInventory);
-            } else if (TFBaublesIntegration.consumeBaublesItem(player, TFItems.charmOfKeeping2)
-                    || player.inventory.consumeInventoryItem(TFItems.charmOfKeeping2)) {
-                        FMLLog.info("[TwilightForest] Player died with charm of keeping II!  Keep armor and hotbar!");
-                        InventoryPlayer keepInventory = new InventoryPlayer(null);
-                        ItemStack[] baublesInventory = TFBaublesIntegration.keepAllBaubles(player);
-
-                        keepAllArmor(player, keepInventory);
-                        for (int i = 0; i < 9; i++) {
-                            keepInventory.mainInventory[i] = ItemStack.copyItemStack(player.inventory.mainInventory[i]);
-                            player.inventory.mainInventory[i] = null;
-                        }
-                        // TODO: Add support for keeping all M&B Battlegear slot items.
-                        keepInventory.setItemStack(new ItemStack(TFItems.charmOfKeeping2));
-
-                        playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
-                        if (baublesInventory != null)
-                            playerBaublesMap.put(player.getCommandSenderName(), baublesInventory);
-                    } else
-                if (TFBaublesIntegration.consumeBaublesItem(player, TFItems.charmOfKeeping1)
-                        || player.inventory.consumeInventoryItem(TFItems.charmOfKeeping1)) {
-                            FMLLog.info(
-                                    "[TwilightForest] Player died with charm of keeping I!  Keep armor and current item!");
-                            InventoryPlayer keepInventory = new InventoryPlayer(null);
-                            ItemStack[] baublesInventory = TFBaublesIntegration.keepAllBaubles(player);
-
-                            keepAllArmor(player, keepInventory);
-                            if (player.inventory.getCurrentItem() != null) {
-                                int currentItem = player.inventory.currentItem;
-                                // Fixed crash when holding a M&B Battlegear item.
-                                if (currentItem <= 8 & currentItem >= 0) {
-                                    keepInventory.mainInventory[currentItem] = ItemStack
-                                            .copyItemStack(player.inventory.mainInventory[currentItem]);
-                                    player.inventory.mainInventory[currentItem] = null;
-                                }
-                                // TODO: Add support for keeping held M&B Battlegear slot items.
-                            }
-                            keepInventory.setItemStack(new ItemStack(TFItems.charmOfKeeping1));
-
-                            playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
-                            if (baublesInventory != null)
-                                playerBaublesMap.put(player.getCommandSenderName(), baublesInventory);
-                        }
-
-            // check for tower keys
-            if (player.inventory.hasItem(TFItems.towerKey)) {
-                InventoryPlayer keepInventory = retrieveOrMakeKeepInventory(player);
-                // keep them all
-                for (int i = 0; i < player.inventory.mainInventory.length; i++) {
-                    if (player.inventory.mainInventory[i] != null
-                            && player.inventory.mainInventory[i].getItem() == TFItems.towerKey) {
-                        keepInventory.mainInventory[i] = ItemStack.copyItemStack(player.inventory.mainInventory[i]);
-                        player.inventory.mainInventory[i] = null;
-                    }
-                }
-                playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
             }
+            playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
+        }
 
-            // check for phantom armor
-            for (int i = 0; i < 4; i++) {
-                if (player.inventory.armorInventory[i] != null
-                        && player.inventory.armorInventory[i].getItem() instanceof ItemTFPhantomArmor) {
-                    InventoryPlayer keepInventory = retrieveOrMakeKeepInventory(player);
-                    keepInventory.armorInventory[i] = ItemStack.copyItemStack(player.inventory.armorInventory[i]);
-                    player.inventory.armorInventory[i] = null;
-                    playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
-                }
+        // check for phantom armor
+        for (int i = 0; i < player.inventory.armorInventory.length; i++) {
+            ItemStack armor = player.inventory.armorInventory[i];
+            if (armor != null && armor.getItem() instanceof ItemTFPhantomArmor) {
+                InventoryPlayer keepInventory = retrieveOrMakeKeepInventory(player);
+                keepInventory.armorInventory[i] = ItemStack.copyItemStack(armor);
+                player.inventory.armorInventory[i] = null;
+                playerKeepsMap.put(player.getCommandSenderName(), keepInventory);
             }
         }
 
@@ -604,15 +581,34 @@ public class TFEventListener {
         }
     }
 
+    private int consumeKeepingCharm(EntityPlayer player) {
+        if (TFBaublesIntegration.consumeBaublesItem(player, TFItems.charmOfKeeping3)
+                || player.inventory.consumeInventoryItem(TFItems.charmOfKeeping3)) {
+            return 3;
+        }
+        if (TFBaublesIntegration.consumeBaublesItem(player, TFItems.charmOfKeeping2)
+                || player.inventory.consumeInventoryItem(TFItems.charmOfKeeping2)) {
+            return 2;
+        }
+        if (TFBaublesIntegration.consumeBaublesItem(player, TFItems.charmOfKeeping1)
+                || player.inventory.consumeInventoryItem(TFItems.charmOfKeeping1)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    private void keepMainInventorySlots(EntityPlayer player, InventoryPlayer keepInventory, int count) {
+        for (int i = 0; i < Math.min(count, player.inventory.mainInventory.length); i++) {
+            keepInventory.mainInventory[i] = ItemStack.copyItemStack(player.inventory.mainInventory[i]);
+            player.inventory.mainInventory[i] = null;
+        }
+    }
+
     /**
      * If we have a stored inventory already, return that, if not, make a new one.
      */
     private InventoryPlayer retrieveOrMakeKeepInventory(EntityPlayer player) {
-        if (playerKeepsMap.containsKey(player.getCommandSenderName())) {
-            return playerKeepsMap.get(player.getCommandSenderName());
-        } else {
-            return new InventoryPlayer(null);
-        }
+        return playerKeepsMap.computeIfAbsent(player.getCommandSenderName(), ignored -> new InventoryPlayer(null));
     }
 
     /**
@@ -648,7 +644,12 @@ public class TFEventListener {
                     filep.delete();
                     File fb = getPlayerFileUUID(fileNameBackup, directory, player.getGameProfile().getId().toString());
                     if (fb.exists()) fb.delete();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    FMLLog.warning(
+                            "[TwilightForest] Failed to migrate keep inventory for %s: %s",
+                            player.getCommandSenderName(),
+                            e);
+                }
             }
         }
 
@@ -698,10 +699,12 @@ public class TFEventListener {
                 }
             }
 
-            TFBaublesIntegration.restoreBaubles(player, baublesInventory);
+            if (baublesInventory != null) {
+                TFBaublesIntegration.restoreBaubles(player, baublesInventory);
+            }
 
             // spawn effect thingers
-            if (keepInventory.getItemStack() != null) {
+            if (keepInventory != null && keepInventory.getItemStack() != null) {
                 EntityTFCharmEffect effect = new EntityTFCharmEffect(
                         player.worldObj,
                         player,
@@ -729,8 +732,7 @@ public class TFEventListener {
     @SubscribeEvent
     public void onPlayerLogout(PlayerLoggedOutEvent event) {
         EntityPlayer player = event.player;
-        if (playerKeepsMap.containsKey(player.getCommandSenderName()))
-            playerKeepsMap.remove(player.getCommandSenderName());
+        playerKeepsMap.remove(player.getCommandSenderName());
     }
 
     /**
@@ -764,72 +766,91 @@ public class TFEventListener {
      * Is the specified entity riding an unfriendly creature (pinch beetle?)
      */
     private boolean isRidingUnfriendly(EntityLivingBase entity) {
-        return entity.isRiding()
+        return entity != null && entity.isRiding()
                 && (entity.ridingEntity instanceof EntityTFPinchBeetle || entity.ridingEntity instanceof EntityTFYeti);
     }
 
     @SubscribeEvent
     public void breakBlock(BreakEvent event) {
         if (!event.getPlayer().capabilities.isCreativeMode
-                && isAreaProtected(event.world, event.getPlayer(), event.x, event.y, event.z)
-                && isBlockProtectedFromBreaking(event.world, event.x, event.y, event.z)) {
+                && isBlockProtectedFromBreaking(event.world, event.x, event.y, event.z)
+                && isAreaProtected(event.world, event.getPlayer(), event.x, event.y, event.z)) {
             event.setCanceled(true);
-        } else if (!this.isBreakingWithGiantPick && event.getPlayer().getCurrentEquippedItem() != null
-                && event.getPlayer().getCurrentEquippedItem().getItem() == TFItems.giantPick
-                && event.getPlayer().getCurrentEquippedItem().getItem().func_150897_b(event.block)) {
-                    // System.out.println("Breaking with giant pick!");
+            return;
+        }
+        if (isBreakingWithGiantPick) {
+            return;
+        }
 
-                    this.isBreakingWithGiantPick = true;
+        clearGiantCobbleState();
+        ItemStack held = event.getPlayer().getCurrentEquippedItem();
+        if (!(event.getPlayer() instanceof EntityPlayerMP player) || held == null
+                || held.getItem() != TFItems.giantPick
+                || !held.getItem().func_150897_b(event.block)) {
+            return;
+        }
 
-                    // check nearby blocks for same block or same drop
-                    int bx = (event.x >> 2) << 2;
-                    int by = (event.y >> 2) << 2;
-                    int bz = (event.z >> 2) << 2;
+        // System.out.println("Breaking with giant pick!");
+        isBreakingWithGiantPick = true;
+        try {
+            // check nearby blocks for same block or same drop
+            int bx = (event.x >> 2) << 2;
+            int by = (event.y >> 2) << 2;
+            int bz = (event.z >> 2) << 2;
 
-                    // pre-check for cobble!
-                    boolean allCobble = event.block.getItemDropped(event.blockMetadata, event.world.rand, 0)
-                            == Item.getItemFromBlock(Blocks.cobblestone);
-                    for (int dx = 0; dx < 4; dx++) {
-                        for (int dy = 0; dy < 4; dy++) {
-                            for (int dz = 0; dz < 4; dz++) {
-                                Block blockThere = event.world.getBlock(bx + dx, by + dy, bz + dz);
-                                int metaThere = event.world.getBlockMetadata(bx + dx, by + dy, bz + dz);
-                                allCobble &= blockThere.getItemDropped(metaThere, event.world.rand, 0)
-                                        == Item.getItemFromBlock(Blocks.cobblestone);
-                            }
-                        }
+            // pre-check for cobble!
+            boolean allCobble = event.block.getItemDropped(event.blockMetadata, event.world.rand, 0)
+                    == Item.getItemFromBlock(Blocks.cobblestone);
+            for (int dx = 0; dx < 4; dx++) {
+                for (int dy = 0; dy < 4; dy++) {
+                    for (int dz = 0; dz < 4; dz++) {
+                        Block blockThere = event.world.getBlock(bx + dx, by + dy, bz + dz);
+                        int metaThere = event.world.getBlockMetadata(bx + dx, by + dy, bz + dz);
+                        Item dropped = blockThere.getItemDropped(metaThere, event.world.rand, 0);
+                        allCobble &= blockThere == event.block && metaThere == event.blockMetadata
+                                && dropped == Item.getItemFromBlock(Blocks.cobblestone);
                     }
-
-                    if (allCobble && !event.getPlayer().capabilities.isCreativeMode) {
-                        // System.out.println("It's all cobble!");
-                        this.shouldMakeGiantCobble = true;
-                        this.amountOfCobbleToReplace = 64;
-                    } else {
-                        this.shouldMakeGiantCobble = false;
-                        this.amountOfCobbleToReplace = 0;
-                    }
-
-                    // break all nearby blocks
-                    for (int dx = 0; dx < 4; dx++) {
-                        for (int dy = 0; dy < 4; dy++) {
-                            for (int dz = 0; dz < 4; dz++) {
-                                Block blockThere = event.world.getBlock(bx + dx, by + dy, bz + dz);
-                                int metaThere = event.world.getBlockMetadata(bx + dx, by + dy, bz + dz);
-
-                                if (!(event.x == bx + dx && event.y == by + dy && event.z == bz + dz)
-                                        && blockThere == event.block
-                                        && metaThere == event.blockMetadata) {
-                                    // try to break that block too!
-                                    if (event.getPlayer() instanceof EntityPlayerMP playerMP) {
-
-                                        playerMP.theItemInWorldManager.tryHarvestBlock(bx + dx, by + dy, bz + dz);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    this.isBreakingWithGiantPick = false;
                 }
+            }
+
+            if (allCobble && !player.capabilities.isCreativeMode) {
+                // System.out.println("It's all cobble!");
+                shouldMakeGiantCobble = true;
+                amountOfCobbleToReplace = 64;
+                giantCobbleHarvester = player;
+                giantCobbleWorld = event.world;
+                giantCobbleX = bx;
+                giantCobbleY = by;
+                giantCobbleZ = bz;
+            }
+
+            // break all nearby blocks
+            for (int dx = 0; dx < 4; dx++) {
+                for (int dy = 0; dy < 4; dy++) {
+                    for (int dz = 0; dz < 4; dz++) {
+                        int x = bx + dx;
+                        int y = by + dy;
+                        int z = bz + dz;
+                        Block blockThere = event.world.getBlock(x, y, z);
+                        int metaThere = event.world.getBlockMetadata(x, y, z);
+                        if (!(event.x == x && event.y == y && event.z == z) && blockThere == event.block
+                                && metaThere == event.blockMetadata) {
+                            // try to break that block too!
+                            player.theItemInWorldManager.tryHarvestBlock(x, y, z);
+                        }
+                    }
+                }
+            }
+        } finally {
+            isBreakingWithGiantPick = false;
+        }
+    }
+
+    private void clearGiantCobbleState() {
+        shouldMakeGiantCobble = false;
+        amountOfCobbleToReplace = 0;
+        giantCobbleHarvester = null;
+        giantCobbleWorld = null;
     }
 
     /**
@@ -870,15 +891,11 @@ public class TFEventListener {
     private boolean isBlockProtectedFromInteraction(World world, int x, int y, int z) {
         Block block = world.getBlock(x, y, z);
 
-        if (block == TFBlocks.towerDevice || block == Blocks.chest
+        return block == TFBlocks.towerDevice || block == Blocks.chest
                 || block == Blocks.trapped_chest
                 || block == Blocks.stone_button
                 || block == Blocks.wooden_button
-                || block == Blocks.lever) {
-            return true;
-        } else {
-            return false;
-        }
+                || block == Blocks.lever;
     }
 
     /**
@@ -888,10 +905,7 @@ public class TFEventListener {
         Block block = world.getBlock(x, y, z);
 
         // graves are okay!
-        if (block.getUnlocalizedName().equals("tile.openblocks.grave")) {
-            return false;
-        }
-        return true;
+        return !"tile.openblocks.grave".equals(block.getUnlocalizedName());
     }
 
     /**
@@ -899,17 +913,10 @@ public class TFEventListener {
      */
     private boolean checkPlayerForFieryArmor(EntityPlayer entityPlayer) {
         ItemStack[] armor = entityPlayer.inventory.armorInventory;
-        if (armor[0] != null && armor[0].getItem() == TFItems.fieryBoots) {
-            return true;
-        } else if (armor[1] != null && armor[1].getItem() == TFItems.fieryLegs) {
-            return true;
-        } else if (armor[2] != null && armor[2].getItem() == TFItems.fieryPlate) {
-            return true;
-        } else if (armor[3] != null && armor[3].getItem() == TFItems.fieryHelm) {
-            return true;
-        } else {
-            return false;
-        }
+        return (armor[0] != null && armor[0].getItem() == TFItems.fieryBoots)
+                || (armor[1] != null && armor[1].getItem() == TFItems.fieryLegs)
+                || (armor[2] != null && armor[2].getItem() == TFItems.fieryPlate)
+                || (armor[3] != null && armor[3].getItem() == TFItems.fieryHelm);
     }
 
     /**
@@ -933,7 +940,9 @@ public class TFEventListener {
 
                     // send protection packet
                     StructureBoundingBox sbb = chunkProvider.getSBBAt(x, y, z);
-                    sendAreaProtectionPacket(world, x, y, z, sbb);
+                    if (sbb != null) {
+                        sendAreaProtectionPacket(world, x, y, z, sbb);
+                    }
 
                     // send a hint monster?
                     nearbyFeature.trySpawnHintMonster(world, player, x, y, z);
@@ -1105,9 +1114,12 @@ public class TFEventListener {
     public void commandSent(CommandEvent event) {
         if (event.command instanceof CommandGameRule && event.parameters.length > 1
                 && TwilightForestMod.ENFORCED_PROGRESSION_RULE.equals(event.parameters[0])) {
-            boolean isEnforced = Boolean.parseBoolean(event.parameters[1]);
-            TwilightForestMod.genericChannel
-                    .sendToAll(TFGenericPacketHandler.makeEnforcedProgressionStatusPacket(isEnforced));
+            String value = event.parameters[1];
+            if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+                boolean isEnforced = Boolean.parseBoolean(value);
+                TwilightForestMod.genericChannel
+                        .sendToAll(TFGenericPacketHandler.makeEnforcedProgressionStatusPacket(isEnforced));
+            }
         }
     }
 

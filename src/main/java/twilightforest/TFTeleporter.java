@@ -21,9 +21,19 @@ import twilightforest.world.TFWorld;
 
 public class TFTeleporter extends Teleporter {
 
+    private static final int PORTAL_SEARCH_RADIUS = 16;
+    private static final int PORTAL_SEARCH_HEIGHT = 128;
+    private static final int MIN_PORTAL_HEIGHT = 30;
+    private static final int MAX_PORTAL_HEIGHT = PORTAL_SEARCH_HEIGHT - 10;
+    private static final int PORTAL_FRAME_MIN = -1;
+    private static final int PORTAL_FRAME_MAX = 2;
+    private static final int PORTAL_EMERGENCE_VERTICAL_TOLERANCE = 5;
+
+    private static final Block[] NATURE_BLOCKS = { Blocks.brown_mushroom, Blocks.red_mushroom, Blocks.tallgrass,
+            Blocks.red_flower, Blocks.yellow_flower };
+
     protected WorldServer myWorld;
     protected Random rand;
-    private final int portalEmergenceVerticalTolerance = 5;
 
     public TFTeleporter(WorldServer par1WorldServer) {
         super(par1WorldServer);
@@ -79,15 +89,16 @@ public class TFTeleporter extends Teleporter {
      * Find some safe coords within range of the destination coords, or return null.
      */
     private ChunkCoordinates findSafeCoords(int range, int x, int z, Entity entity) {
-        if (isSafeBiomeAt(x, z, entity)) return new ChunkCoordinates(x, 100, z);
+        if (isSafeBiomeAt(x, z, entity)) {
+            return new ChunkCoordinates(x, 100, z);
+        }
         Coord2D coords = new Coord2D(0, 0);
-        int dx, dz;
         // 25 tries covers a 2 level spiral
         int step = range / 2;
         for (int i = 0; i < 25; i++) {
             coords = coords.spiralNext(step);
-            dx = x + coords.x();
-            dz = z + coords.z();
+            int dx = x + coords.x();
+            int dz = z + coords.z();
             if (isSafeBiomeAt(dx, dz, entity)) {
                 return new ChunkCoordinates(dx, 100, dz);
             }
@@ -102,13 +113,11 @@ public class TFTeleporter extends Teleporter {
         BiomeGenBase biomeAt = myWorld.getBiomeGenForCoords(x, z);
 
         if (biomeAt instanceof TFBiomeBase tfBiome && entity instanceof EntityPlayerMP player) {
-
             return tfBiome.doesPlayerHaveRequiredAchievement(player);
-
-        } else {
-            // I guess it's safe, or maybe I just have no way to be sure!
-            return true;
         }
+
+        // I guess it's safe, or maybe I just have no way to be sure!
+        return true;
     }
 
     @Override
@@ -158,9 +167,11 @@ public class TFTeleporter extends Teleporter {
         }
 
         // no portal found within range
-        if (finalDist == -1) return false;
+        if (finalDist == -1) {
+            return false;
+        }
 
-        for (int dy = 1; dy >= -portalEmergenceVerticalTolerance;) {
+        for (int dy = 1; dy >= -PORTAL_EMERGENCE_VERTICAL_TOLERANCE;) {
             spiral = new Coord2D(0, 0);
             while (spiral.rad() <= TwilightForestMod.portalMaxSize) {
                 // spiral outward from portal column until we find a viable place to deposit entity
@@ -177,12 +188,17 @@ public class TFTeleporter extends Teleporter {
                 spiral = spiral.spiralNext();
             }
             // check layers from portal up, then from portal down
-            dy = (dy > 0) ? ((dy < portalEmergenceVerticalTolerance) ? dy + 1 : 0) : dy - 1;
+            dy = (dy > 0) ? ((dy < PORTAL_EMERGENCE_VERTICAL_TOLERANCE) ? dy + 1 : 0) : dy - 1;
         }
         return false;
     }
 
     private boolean isSafeExit(int x, int y, int z) {
+        // the exit needs a supporting block and 2 blocks of headroom
+        if (y <= 0 || y + 1 >= myWorld.getActualHeight()) {
+            return false;
+        }
+
         // Must stand on solid ground
         if (!myWorld.getBlock(x, y - 1, z).getMaterial().isSolid()) return false;
 
@@ -198,7 +214,7 @@ public class TFTeleporter extends Teleporter {
     }
 
     /**
-     * Is this block either our portal or an existing nether portal?
+     * Is this block a Twilight Forest portal?
      */
     public boolean isBlockPortal(World world, int x, int y, int z) {
         return world.getBlock(x, y, z) == TFBlocks.portal;
@@ -248,13 +264,13 @@ public class TFTeleporter extends Teleporter {
 
         ChunkCoordinates spot = null;
 
-        byte range = 16;
+        int range = PORTAL_SEARCH_RADIUS;
         for (int rx = entityX - range; rx <= entityX + range; rx++) {
             double xWeight = (rx + 0.5D) - entity.posX;
             for (int rz = entityZ - range; rz <= entityZ + range; rz++) {
                 double zWeight = (rz + 0.5D) - entity.posZ;
 
-                for (int ry = 128 - 1; ry >= 0; ry--) {
+                for (int ry = PORTAL_SEARCH_HEIGHT - 1; ry >= 0; ry--) {
                     if (!myWorld.isAirBlock(rx, ry, rz)) {
                         continue;
                     }
@@ -277,118 +293,85 @@ public class TFTeleporter extends Teleporter {
     }
 
     public boolean isIdealPortal(int rx, int rz, int ry) {
-        for (int potentialZ = 0; potentialZ < 4; potentialZ++) {
-            for (int potentialX = 0; potentialX < 4; potentialX++) {
-                for (int potentialY = -1; potentialY < 3; potentialY++) {
-                    int tx = rx + (potentialX - 1);
-                    int ty = ry + potentialY;
-                    int tz = rz + (potentialZ - 1);
-                    if (potentialY == -1 && myWorld.getBlock(tx, ty, tz).getMaterial() != Material.grass
-                            || potentialY >= 0 && !myWorld.getBlock(tx, ty, tz).getMaterial().isReplaceable()) {
-                        return false;
-                    }
-                }
-
-            }
-
-        }
-        return true;
+        return isPortalLocationSuitable(rx, rz, ry, true);
     }
 
     public boolean isOkayPortal(int rx, int rz, int ry) {
-        for (int potentialZ = 0; potentialZ < 4; potentialZ++) {
-            for (int potentialX = 0; potentialX < 4; potentialX++) {
-                for (int potentialY = -1; potentialY < 3; potentialY++) {
-                    int tx = rx + (potentialX - 1);
-                    int ty = ry + potentialY;
-                    int tz = rz + (potentialZ - 1);
-                    if (potentialY == -1 && !myWorld.getBlock(tx, ty, tz).getMaterial().isSolid()
-                            || potentialY >= 0 && !myWorld.getBlock(tx, ty, tz).getMaterial().isReplaceable()) {
+        return isPortalLocationSuitable(rx, rz, ry, false);
+    }
+
+    private boolean isPortalLocationSuitable(int x, int z, int y, boolean requireGrass) {
+        for (int offsetZ = 0; offsetZ < 4; offsetZ++) {
+            for (int offsetX = 0; offsetX < 4; offsetX++) {
+                for (int offsetY = -1; offsetY < 3; offsetY++) {
+                    Material material = myWorld.getBlock(x + offsetX - 1, y + offsetY, z + offsetZ - 1).getMaterial();
+                    if (offsetY == -1) {
+                        if (requireGrass ? material != Material.grass : !material.isSolid()) {
+                            return false;
+                        }
+                    } else if (!material.isReplaceable()) {
                         return false;
                     }
                 }
-
             }
-
         }
         return true;
     }
 
     private void makePortalAt(World world, int px, int py, int pz) {
-
-        if (py < 30) {
-            py = 30;
-        }
-        world.getClass();
-        if (py > 128 - 10) {
-            world.getClass();
-            py = 128 - 10;
-        }
+        // keep the original 128 block portal search/build range for existing portal compatibility
+        py = Math.max(MIN_PORTAL_HEIGHT, Math.min(MAX_PORTAL_HEIGHT, py));
 
         // sink the portal 1 into the ground
         py--;
 
-        // grass all around it
-        world.setBlock(px - 1, py + 0, pz - 1, Blocks.grass);
-        world.setBlock(px + 0, py + 0, pz - 1, Blocks.grass);
-        world.setBlock(px + 1, py + 0, pz - 1, Blocks.grass);
-        world.setBlock(px + 2, py + 0, pz - 1, Blocks.grass);
-
-        world.setBlock(px - 1, py + 0, pz + 0, Blocks.grass);
-        world.setBlock(px + 2, py + 0, pz + 0, Blocks.grass);
-
-        world.setBlock(px - 1, py + 0, pz + 1, Blocks.grass);
-        world.setBlock(px + 2, py + 0, pz + 1, Blocks.grass);
-
-        world.setBlock(px - 1, py + 0, pz + 2, Blocks.grass);
-        world.setBlock(px + 0, py + 0, pz + 2, Blocks.grass);
-        world.setBlock(px + 1, py + 0, pz + 2, Blocks.grass);
-        world.setBlock(px + 2, py + 0, pz + 2, Blocks.grass);
+        // grass all around it, in the original north to south placement order
+        for (int dz = PORTAL_FRAME_MIN; dz <= PORTAL_FRAME_MAX; dz++) {
+            for (int dx = PORTAL_FRAME_MIN; dx <= PORTAL_FRAME_MAX; dx++) {
+                if (dx == PORTAL_FRAME_MIN || dx == PORTAL_FRAME_MAX
+                        || dz == PORTAL_FRAME_MIN
+                        || dz == PORTAL_FRAME_MAX) {
+                    world.setBlock(px + dx, py, pz + dz, Blocks.grass);
+                }
+            }
+        }
 
         // dirt under it
-        world.setBlock(px + 0, py - 1, pz + 0, Blocks.dirt);
-        world.setBlock(px + 1, py - 1, pz + 0, Blocks.dirt);
-        world.setBlock(px + 0, py - 1, pz + 1, Blocks.dirt);
-        world.setBlock(px + 1, py - 1, pz + 1, Blocks.dirt);
+        for (int dz = 0; dz < 2; dz++) {
+            for (int dx = 0; dx < 2; dx++) {
+                world.setBlock(px + dx, py - 1, pz + dz, Blocks.dirt);
+            }
+        }
 
         // portal in it
-        world.setBlock(px + 0, py + 0, pz + 0, TFBlocks.portal, 0, 2);
-        world.setBlock(px + 1, py + 0, pz + 0, TFBlocks.portal, 0, 2);
-        world.setBlock(px + 0, py + 0, pz + 1, TFBlocks.portal, 0, 2);
-        world.setBlock(px + 1, py + 0, pz + 1, TFBlocks.portal, 0, 2);
+        for (int dz = 0; dz < 2; dz++) {
+            for (int dx = 0; dx < 2; dx++) {
+                world.setBlock(px + dx, py, pz + dz, TFBlocks.portal, 0, 2);
+            }
+        }
 
         // meh, let's just make a bunch of air over it for 4 squares
-        for (int dx = -1; dx <= 2; dx++) {
-            for (int dz = -1; dz <= 2; dz++) {
+        for (int dx = PORTAL_FRAME_MIN; dx <= PORTAL_FRAME_MAX; dx++) {
+            for (int dz = PORTAL_FRAME_MIN; dz <= PORTAL_FRAME_MAX; dz++) {
                 for (int dy = 1; dy <= 5; dy++) {
                     world.setBlock(px + dx, py + dy, pz + dz, Blocks.air);
                 }
             }
         }
 
-        // finally, "nature decorations"!
-        world.setBlock(px - 1, py + 1, pz - 1, randNatureBlock(world.rand), 0, 2);
-        world.setBlock(px + 0, py + 1, pz - 1, randNatureBlock(world.rand), 0, 2);
-        world.setBlock(px + 1, py + 1, pz - 1, randNatureBlock(world.rand), 0, 2);
-        world.setBlock(px + 2, py + 1, pz - 1, randNatureBlock(world.rand), 0, 2);
-
-        world.setBlock(px - 1, py + 1, pz + 0, randNatureBlock(world.rand), 0, 2);
-        world.setBlock(px + 2, py + 1, pz + 0, randNatureBlock(world.rand), 0, 2);
-
-        world.setBlock(px - 1, py + 1, pz + 1, randNatureBlock(world.rand), 0, 2);
-        world.setBlock(px + 2, py + 1, pz + 1, randNatureBlock(world.rand), 0, 2);
-
-        world.setBlock(px - 1, py + 1, pz + 2, randNatureBlock(world.rand), 0, 2);
-        world.setBlock(px + 0, py + 1, pz + 2, randNatureBlock(world.rand), 0, 2);
-        world.setBlock(px + 1, py + 1, pz + 2, randNatureBlock(world.rand), 0, 2);
-        world.setBlock(px + 2, py + 1, pz + 2, randNatureBlock(world.rand), 0, 2);
+        // finally, nature decorations! keep the same draw and placement order
+        for (int dz = PORTAL_FRAME_MIN; dz <= PORTAL_FRAME_MAX; dz++) {
+            for (int dx = PORTAL_FRAME_MIN; dx <= PORTAL_FRAME_MAX; dx++) {
+                if (dx == PORTAL_FRAME_MIN || dx == PORTAL_FRAME_MAX
+                        || dz == PORTAL_FRAME_MIN
+                        || dz == PORTAL_FRAME_MAX) {
+                    world.setBlock(px + dx, py + 1, pz + dz, randNatureBlock(world.rand), 0, 2);
+                }
+            }
+        }
     }
 
     public Block randNatureBlock(Random random) {
-        Block[] block = { Blocks.brown_mushroom, Blocks.red_mushroom, Blocks.tallgrass, Blocks.red_flower,
-                Blocks.yellow_flower };
-
-        return block[random.nextInt(block.length)];
+        return NATURE_BLOCKS[random.nextInt(NATURE_BLOCKS.length)];
     }
-
 }
