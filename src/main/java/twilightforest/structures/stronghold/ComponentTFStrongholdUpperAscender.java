@@ -11,12 +11,11 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 public class ComponentTFStrongholdUpperAscender extends StructureTFStrongholdComponent {
 
+    private static final String NBT_EXIT_TOP = "exitTop";
+
     boolean exitTop;
 
-    public ComponentTFStrongholdUpperAscender() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdUpperAscender() {}
 
     public ComponentTFStrongholdUpperAscender(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -29,7 +28,7 @@ public class ComponentTFStrongholdUpperAscender extends StructureTFStrongholdCom
     protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
         super.func_143012_a(par1NBTTagCompound);
 
-        par1NBTTagCompound.setBoolean("exitTop", this.exitTop);
+        par1NBTTagCompound.setBoolean(NBT_EXIT_TOP, this.exitTop);
     }
 
     /**
@@ -38,7 +37,7 @@ public class ComponentTFStrongholdUpperAscender extends StructureTFStrongholdCom
     @Override
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
-        this.exitTop = par1NBTTagCompound.getBoolean("exitTop");
+        this.exitTop = par1NBTTagCompound.getBoolean(NBT_EXIT_TOP);
     }
 
     /**
@@ -72,33 +71,29 @@ public class ComponentTFStrongholdUpperAscender extends StructureTFStrongholdCom
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
         if (this.isLiquidInStructureBoundingBox(world, sbb)) {
             return false;
-        } else {
-            placeUpperStrongholdWalls(world, sbb, 0, 0, 0, 4, 9, 9, rand, deco.randomBlocks);
-
-            // entrance doorway
-            placeSmallDoorwayAt(world, rand, 2, 2, exitTop ? 1 : 6, 0, sbb);
-
-            // exit doorway
-            placeSmallDoorwayAt(world, rand, 0, 2, exitTop ? 6 : 1, 9, sbb);
-
-            // steps!
-            if (exitTop) {
-                makeStairsAt(world, 1, 3, 1, sbb);
-                makeStairsAt(world, 2, 4, 1, sbb);
-                makeStairsAt(world, 3, 5, 1, sbb);
-                makeStairsAt(world, 4, 6, 1, sbb);
-                makeStairsAt(world, 5, 7, 1, sbb);
-                makePlatformAt(world, 5, 8, sbb);
-            } else {
-                makeStairsAt(world, 1, 6, 3, sbb);
-                makeStairsAt(world, 2, 5, 3, sbb);
-                makeStairsAt(world, 3, 4, 3, sbb);
-                makeStairsAt(world, 4, 3, 3, sbb);
-                makeStairsAt(world, 5, 2, 3, sbb);
-                makePlatformAt(world, 5, 1, sbb);
-            }
-            return true;
         }
+
+        placeUpperStrongholdWalls(world, sbb, 0, 0, 0, 4, 9, 9, rand, deco.randomBlocks);
+
+        // entrance doorway
+        placeSmallDoorwayAt(world, rand, 2, 2, exitTop ? 1 : 6, 0, sbb);
+
+        // exit doorway
+        placeSmallDoorwayAt(world, rand, 0, 2, exitTop ? 6 : 1, 9, sbb);
+
+        // steps!
+        if (exitTop) {
+            for (int y = 1; y <= 5; y++) {
+                makeStairsAt(world, y, y + 2, 1, sbb);
+            }
+            makePlatformAt(world, 5, 8, sbb);
+        } else {
+            for (int y = 1; y <= 5; y++) {
+                makeStairsAt(world, y, 7 - y, 3, sbb);
+            }
+            makePlatformAt(world, 5, 1, sbb);
+        }
+        return true;
     }
 
     /**
@@ -137,6 +132,7 @@ public class ComponentTFStrongholdUpperAscender extends StructureTFStrongholdCom
     /**
      * Does this component fall under block protection when progression is turned on, normally true
      */
+    @Override
     public boolean isComponentProtected() {
         return false;
     }

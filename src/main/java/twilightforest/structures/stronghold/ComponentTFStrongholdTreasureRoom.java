@@ -14,16 +14,16 @@ import twilightforest.entity.TFCreatures;
 
 public class ComponentTFStrongholdTreasureRoom extends StructureTFStrongholdComponent {
 
+    private static final String NBT_ENTER_BOTTOM = "enterBottom";
+
+    private static final int EAST_WALL_X = 8;
+
     private boolean enterBottom;
 
-    public ComponentTFStrongholdTreasureRoom() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdTreasureRoom() {}
 
     public ComponentTFStrongholdTreasureRoom(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -33,7 +33,7 @@ public class ComponentTFStrongholdTreasureRoom extends StructureTFStrongholdComp
     protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
         super.func_143012_a(par1NBTTagCompound);
 
-        par1NBTTagCompound.setBoolean("enterBottom", this.enterBottom);
+        par1NBTTagCompound.setBoolean(NBT_ENTER_BOTTOM, this.enterBottom);
     }
 
     /**
@@ -42,7 +42,7 @@ public class ComponentTFStrongholdTreasureRoom extends StructureTFStrongholdComp
     @Override
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
-        this.enterBottom = par1NBTTagCompound.getBoolean("enterBottom");
+        this.enterBottom = par1NBTTagCompound.getBoolean(NBT_ENTER_BOTTOM);
     }
 
     /**
@@ -97,8 +97,9 @@ public class ComponentTFStrongholdTreasureRoom extends StructureTFStrongholdComp
     /**
      * Make a doorway
      */
+    // use local coords, a rotated rectangular room doesnt share the world bounding box X size
     protected void placeDoorwayAt(World world, Random rand, int x, int y, int z, StructureBoundingBox sbb) {
-        if (x == 0 || x == getXSize()) {
+        if (x == 0 || x == EAST_WALL_X) {
             this.fillWithMetadataBlocks(
                     world,
                     sbb,

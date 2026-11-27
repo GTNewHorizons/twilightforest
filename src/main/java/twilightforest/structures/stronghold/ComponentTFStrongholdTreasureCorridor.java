@@ -11,10 +11,7 @@ import twilightforest.TFTreasure;
 
 public class ComponentTFStrongholdTreasureCorridor extends StructureTFStrongholdComponent {
 
-    public ComponentTFStrongholdTreasureCorridor() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdTreasureCorridor() {}
 
     public ComponentTFStrongholdTreasureCorridor(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -55,7 +52,7 @@ public class ComponentTFStrongholdTreasureCorridor extends StructureTFStronghold
         this.placeWallStatue(world, 7, 1, 9, 3, sbb);
         this.placeWallStatue(world, 7, 1, 17, 3, sbb);
 
-        int rotation = (this.boundingBox.minX ^ this.boundingBox.minZ) % 2 == 0 ? 0 : 2;
+        int rotation = ((this.boundingBox.minX ^ this.boundingBox.minZ) & 1) == 0 ? 0 : 2;
 
         // treasure!
         this.placeTreasureRotated(world, 8, 2, 13, rotation, TFTreasure.stronghold_cache, sbb);

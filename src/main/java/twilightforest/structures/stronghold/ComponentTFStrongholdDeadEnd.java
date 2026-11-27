@@ -13,12 +13,11 @@ import twilightforest.TFTreasure;
 
 public class ComponentTFStrongholdDeadEnd extends StructureTFStrongholdComponent {
 
+    private static final String NBT_CHEST_TRAPPED = "chestTrapped";
+
     private boolean chestTrapped;
 
-    public ComponentTFStrongholdDeadEnd() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdDeadEnd() {}
 
     public ComponentTFStrongholdDeadEnd(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
@@ -31,7 +30,7 @@ public class ComponentTFStrongholdDeadEnd extends StructureTFStrongholdComponent
     protected void func_143012_a(NBTTagCompound par1NBTTagCompound) {
         super.func_143012_a(par1NBTTagCompound);
 
-        par1NBTTagCompound.setBoolean("chestTrapped", this.chestTrapped);
+        par1NBTTagCompound.setBoolean(NBT_CHEST_TRAPPED, this.chestTrapped);
     }
 
     /**
@@ -41,7 +40,7 @@ public class ComponentTFStrongholdDeadEnd extends StructureTFStrongholdComponent
     protected void func_143011_b(NBTTagCompound par1NBTTagCompound) {
         super.func_143011_b(par1NBTTagCompound);
 
-        this.chestTrapped = par1NBTTagCompound.getBoolean("chestTrapped");
+        this.chestTrapped = par1NBTTagCompound.getBoolean(NBT_CHEST_TRAPPED);
     }
 
     /**

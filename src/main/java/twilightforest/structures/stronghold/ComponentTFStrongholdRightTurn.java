@@ -9,10 +9,7 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 public class ComponentTFStrongholdRightTurn extends StructureTFStrongholdComponent {
 
-    public ComponentTFStrongholdRightTurn() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    public ComponentTFStrongholdRightTurn() {}
 
     public ComponentTFStrongholdRightTurn(int i, int facing, int x, int y, int z) {
         super(i, facing, x, y, z);
