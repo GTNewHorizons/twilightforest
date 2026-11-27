@@ -96,13 +96,13 @@ public abstract class TFGenerator extends WorldGenerator {
     }
 
     @FunctionalInterface
-    private interface CoordinateVisitor {
+    interface CoordinateVisitor {
 
         void accept(int x, int y, int z);
     }
 
     // preserve the original major axis tie breaking and error accumulator rules
-    private static void visitBresenham(int x1, int y1, int z1, int x2, int y2, int z2, CoordinateVisitor visitor) {
+    static void visitBresenham(int x1, int y1, int z1, int x2, int y2, int z2, CoordinateVisitor visitor) {
         int dx = x2 - x1;
         int dy = y2 - y1;
         int dz = z2 - z1;

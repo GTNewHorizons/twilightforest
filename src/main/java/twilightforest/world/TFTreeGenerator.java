@@ -37,16 +37,14 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
         ChunkCoordinates destination = translateCoords(x, y - b - 2, z, 5, 0.3 * b + offset, 0.8);
 
         // go through block by block and stop drawing when we head too far into open air
-        ChunkCoordinates[] rootLine = getBresehnamArrayCoords(
+        TFGenerator.visitBresenham(
                 x,
                 y - b - 2,
                 z,
                 destination.posX,
                 destination.posY,
-                destination.posZ);
-        for (ChunkCoordinates coordinate : rootLine) {
-            placeRootBlock(world, coordinate.posX, coordinate.posY, coordinate.posZ, rootBlock, rootMeta);
-        }
+                destination.posZ,
+                (px, py, pz) -> placeRootBlock(world, px, py, pz, rootBlock, rootMeta));
     }
 
     /**
@@ -137,7 +135,7 @@ public abstract class TFTreeGenerator extends WorldGenAbstractTree {
      */
     protected void drawBresehnam(World world, int x1, int y1, int z1, int x2, int y2, int z2, Block blockValue,
             int metaValue) {
-        // draw in the same order as getBresehnamArrayCoords without allocating an array
+        // draw the same order as getBresehnamArrayCoords without allocating an array
         int dx = x2 - x1;
         int dy = y2 - y1;
         int dz = z2 - z1;
