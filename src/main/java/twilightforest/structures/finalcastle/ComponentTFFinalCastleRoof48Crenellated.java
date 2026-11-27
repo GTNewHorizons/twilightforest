@@ -12,6 +12,8 @@ import twilightforest.structures.StructureTFComponent;
 
 public class ComponentTFFinalCastleRoof48Crenellated extends StructureTFComponent {
 
+    private static final int BOTTOM_OVERHANG = 2;
+
     public ComponentTFFinalCastleRoof48Crenellated() {}
 
     public ComponentTFFinalCastleRoof48Crenellated(Random rand, int i, StructureTFComponent keep) {
@@ -22,7 +24,7 @@ public class ComponentTFFinalCastleRoof48Crenellated extends StructureTFComponen
         this.setCoordBaseMode(keep.getCoordBaseMode());
         this.boundingBox = new StructureBoundingBox(
                 keep.getBoundingBox().minX - 2,
-                keep.getBoundingBox().maxY - 1,
+                keep.getBoundingBox().maxY - 1 - BOTTOM_OVERHANG,
                 keep.getBoundingBox().minZ - 2,
                 keep.getBoundingBox().maxX + 2,
                 keep.getBoundingBox().maxY + height - 1,
@@ -31,22 +33,24 @@ public class ComponentTFFinalCastleRoof48Crenellated extends StructureTFComponen
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
     }
 
     @Override
     public boolean addComponentParts(World world, Random rand, StructureBoundingBox sbb) {
+        int yOffset = this.boundingBox.getYSize() == 8 ? BOTTOM_OVERHANG : 0;
+
         // add second layer of floor
         this.fillWithMetadataBlocks(
                 world,
                 sbb,
                 2,
-                2,
+                2 + yOffset,
                 2,
                 50,
-                2,
+                2 + yOffset,
                 50,
                 TFBlocks.castleMagic,
                 3,
@@ -56,11 +60,33 @@ public class ComponentTFFinalCastleRoof48Crenellated extends StructureTFComponen
 
         // crenellations
         for (int rotation = 0; rotation < 4; rotation++) {
-            this.fillBlocksRotated(world, sbb, 3, 1, 1, 45, 3, 1, deco.blockID, deco.blockMeta, rotation);
+            this.fillBlocksRotated(
+                    world,
+                    sbb,
+                    3,
+                    yOffset + 1,
+                    1,
+                    45,
+                    yOffset + 3,
+                    1,
+                    deco.blockID,
+                    deco.blockMeta,
+                    rotation);
 
             for (int i = 10; i < 41; i += 5) {
-                this.fillBlocksRotated(world, sbb, i, 1, 0, i + 2, 5, 2, deco.blockID, deco.blockMeta, rotation);
-                this.placeBlockRotated(world, deco.blockID, deco.blockMeta, i + 1, 0, 1, rotation, sbb);
+                this.fillBlocksRotated(
+                        world,
+                        sbb,
+                        i,
+                        yOffset + 1,
+                        0,
+                        i + 2,
+                        yOffset + 5,
+                        2,
+                        deco.blockID,
+                        deco.blockMeta,
+                        rotation);
+                this.placeBlockRotated(world, deco.blockID, deco.blockMeta, i + 1, yOffset, 1, rotation, sbb);
             }
         }
         return true;

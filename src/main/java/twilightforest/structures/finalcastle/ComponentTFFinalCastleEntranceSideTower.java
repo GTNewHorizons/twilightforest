@@ -20,7 +20,7 @@ public class ComponentTFFinalCastleEntranceSideTower extends ComponentTFFinalCas
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 

@@ -21,14 +21,16 @@ public class ComponentTFFinalCastleDungeonExit extends ComponentTFFinalCastleDun
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 
         // no need for additional rooms, we're along the outside anyways
 
         // add stairway down
-        int bestDir = this.findStairDirectionTowards(parent.getBoundingBox().minX, parent.getBoundingBox().minZ);
+        int bestDir = findStairDirectionTowards(
+                parent.getBoundingBox().getCenterX(),
+                parent.getBoundingBox().getCenterZ());
 
         ComponentTFFinalCastleDungeonSteps steps0 = new ComponentTFFinalCastleDungeonSteps(
                 rand,

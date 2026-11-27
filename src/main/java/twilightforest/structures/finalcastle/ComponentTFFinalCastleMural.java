@@ -125,20 +125,8 @@ public class ComponentTFFinalCastleMural extends StructureTFComponent {
 
             // recurse?
             if (bx > 0 && bx < width && by > 0 && by < height) {
-                if (!this.makeHorizontalBranch(mural, rand, bx, by, branchLength, plusX, true)) {
-                    if (!this.makeHorizontalBranch(mural, rand, bx, by, branchLength, plusX, true)) {
-                        if (!this.makeHorizontalBranch(mural, rand, bx, by, branchLength, plusX, true)) {
-                            this.makeHorizontalBranch(mural, rand, bx, by, branchLength, plusX, true);
-                        }
-                    }
-                }
-                if (!this.makeHorizontalBranch(mural, rand, bx, by, branchLength, plusX, false)) {
-                    if (!this.makeHorizontalBranch(mural, rand, bx, by, branchLength, plusX, false)) {
-                        if (!this.makeHorizontalBranch(mural, rand, bx, by, branchLength, plusX, false)) {
-                            this.makeHorizontalBranch(mural, rand, bx, by, branchLength, plusX, false);
-                        }
-                    }
-                }
+                retryHorizontalBranch(rand, mural, bx, by, branchLength, plusX, true);
+                retryHorizontalBranch(rand, mural, bx, by, branchLength, plusX, false);
             }
             return true;
         } else {
@@ -174,24 +162,30 @@ public class ComponentTFFinalCastleMural extends StructureTFComponent {
 
             // recurse?
             if (bx > 0 && bx < width && by > 0 && by < height) {
-                if (!this.makeVerticalBranch(mural, rand, bx, by, branchLength, plusY, true)) {
-                    if (!this.makeVerticalBranch(mural, rand, bx, by, branchLength, plusY, true)) {
-                        if (!this.makeVerticalBranch(mural, rand, bx, by, branchLength, plusY, true)) {
-                            this.makeVerticalBranch(mural, rand, bx, by, branchLength, plusY, true);
-                        }
-                    }
-                }
-                if (!this.makeVerticalBranch(mural, rand, bx, by, branchLength, plusY, false)) {
-                    if (!this.makeVerticalBranch(mural, rand, bx, by, branchLength, plusY, false)) {
-                        if (!this.makeVerticalBranch(mural, rand, bx, by, branchLength, plusY, false)) {
-                            this.makeVerticalBranch(mural, rand, bx, by, branchLength, plusY, false);
-                        }
-                    }
-                }
+                retryVerticalBranch(rand, mural, bx, by, branchLength, plusY, true);
+                retryVerticalBranch(rand, mural, bx, by, branchLength, plusY, false);
             }
             return true;
         } else {
             return false;
+        }
+    }
+
+    private void retryHorizontalBranch(Random rand, byte[][] canvas, int x, int y, int length, boolean positiveX,
+            boolean positiveY) {
+        for (int attempt = 0; attempt < 4; attempt++) {
+            if (makeHorizontalBranch(canvas, rand, x, y, length, positiveX, positiveY)) {
+                return;
+            }
+        }
+    }
+
+    private void retryVerticalBranch(Random rand, byte[][] canvas, int x, int y, int length, boolean positiveY,
+            boolean positiveX) {
+        for (int attempt = 0; attempt < 4; attempt++) {
+            if (makeVerticalBranch(canvas, rand, x, y, length, positiveY, positiveX)) {
+                return;
+            }
         }
     }
 
@@ -202,9 +196,8 @@ public class ComponentTFFinalCastleMural extends StructureTFComponent {
         for (int i = 0; i <= length; i++) {
             if (x >= 0 && x < width && y >= 0 && y < height) {
                 mural[x][y] = (byte) (positive ? 1 : 4);
-
-                x += positive ? 1 : -1;
             }
+            x += positive ? 1 : -1;
         }
     }
 
@@ -215,30 +208,29 @@ public class ComponentTFFinalCastleMural extends StructureTFComponent {
         for (int i = 0; i <= length; i++) {
             if (x >= 0 && x < width && y >= 0 && y < height) {
                 mural[x][y] = (byte) (positive ? 2 : 3);
-
-                y += positive ? 1 : -1;
             }
+            y += positive ? 1 : -1;
         }
     }
 
-    private void makeStripes(Random decoRNG, byte[][] mural2) {
+    private void makeStripes(Random decoRNG, byte[][] canvas) {
         // stagger slightly on our way down
         for (int y = this.height - 2; y > this.height / 3; y -= (2 + decoRNG.nextInt(2))) {
-            makeSingleStripe(mural2, y);
+            makeSingleStripe(canvas, y);
         }
     }
 
-    private void makeSingleStripe(byte[][] mural2, int y) {
+    private void makeSingleStripe(byte[][] canvas, int y) {
         for (int x = 0; x < this.width - 2; x++) {
-            if (mural[x + 1][y] == 0 && mural[x + 1][y + 1] == 0) {
-                mural[x][y] = 1;
+            if (canvas[x + 1][y] == 0 && canvas[x + 1][y + 1] == 0) {
+                canvas[x][y] = 1;
             } else {
                 break;
             }
         }
         for (int x = this.width - 1; x > 2; x--) {
-            if (mural[x - 1][y] == 0 && mural[x - 1][y + 1] == 0) {
-                mural[x][y] = 1;
+            if (canvas[x - 1][y] == 0 && canvas[x - 1][y + 1] == 0) {
+                canvas[x][y] = 1;
             } else {
                 break;
             }

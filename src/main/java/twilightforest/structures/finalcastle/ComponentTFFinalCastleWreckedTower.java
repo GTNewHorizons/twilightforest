@@ -19,7 +19,7 @@ public class ComponentTFFinalCastleWreckedTower extends ComponentTFFinalCastleDa
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 
@@ -43,34 +43,31 @@ public class ComponentTFFinalCastleWreckedTower extends ComponentTFFinalCastleDa
         // this.buildNonCriticalTowers(parent, list, rand);
     }
 
+    @Override
     public int getGlyphMeta() {
         return 1;
     }
 
+    @Override
     protected void determineBlockDestroyed(World world, ArrayList<DestroyArea> areas, int y, int x, int z) {
-        boolean isInside = false;
-        for (DestroyArea dArea : areas) {
-            if (dArea != null && dArea.isVecInside(x, y, z)) {
-                isInside = true;
+        for (DestroyArea area : areas) {
+            if (area != null && area.isVecInside(x, y, z)) {
+                return;
             }
         }
-
-        if (!isInside) {
-            world.setBlockToAir(x, y, z);
-        }
+        world.setBlockToAir(x, y, z);
     }
 
+    @Override
     protected ArrayList<DestroyArea> makeInitialDestroyList(Random rand) {
-        ArrayList<DestroyArea> areas = new ArrayList<>(2);
-
-        areas.add(
-                DestroyArea.createNonIntersecting(this.getBoundingBox(), rand, this.getBoundingBox().maxY - 1, areas));
-        areas.add(
-                DestroyArea.createNonIntersecting(this.getBoundingBox(), rand, this.getBoundingBox().maxY - 1, areas));
-        areas.add(
-                DestroyArea.createNonIntersecting(this.getBoundingBox(), rand, this.getBoundingBox().maxY - 1, areas));
-        areas.add(
-                DestroyArea.createNonIntersecting(this.getBoundingBox(), rand, this.getBoundingBox().maxY - 1, areas));
+        ArrayList<DestroyArea> areas = new ArrayList<>(4);
+        for (int i = 0; i < 4; i++) {
+            DestroyArea area = DestroyArea
+                    .createNonIntersecting(this.getBoundingBox(), rand, this.getBoundingBox().maxY - 1, areas);
+            if (area != null) {
+                areas.add(area);
+            }
+        }
         return areas;
     }
 }
