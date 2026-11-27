@@ -50,22 +50,11 @@ public class StructureTFDecorator {
     public StructureComponent.BlockSelector randomBlocks = new StructureTFStrongholdStones();
 
     public static String getDecoString(StructureTFDecorator deco) {
-        if (deco instanceof StructureDecoratorDarkTower) {
-            return DECO_DARK_TOWER;
-        }
-        if (deco instanceof StructureDecoratorIceTower) {
-            return DECO_ICE_TOWER;
-        }
-        if (deco instanceof StructureDecoratorMushroomTower) {
-            return DECO_MUSHROOM_TOWER;
-        }
-        if (deco instanceof StructureTFDecoratorStronghold) {
-            return DECO_STRONGHOLD;
-        }
-        if (deco instanceof StructureTFDecoratorCastle) {
-            return DECO_CASTLE;
-        }
-
+        if (deco instanceof StructureDecoratorDarkTower) return DECO_DARK_TOWER;
+        if (deco instanceof StructureDecoratorIceTower) return DECO_ICE_TOWER;
+        if (deco instanceof StructureDecoratorMushroomTower) return DECO_MUSHROOM_TOWER;
+        if (deco instanceof StructureTFDecoratorStronghold) return DECO_STRONGHOLD;
+        if (deco instanceof StructureTFDecoratorCastle) return DECO_CASTLE;
         return "";
     }
 
