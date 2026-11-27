@@ -17,7 +17,12 @@ import twilightforest.tileentity.TileEntityTFCinderFurnace;
 
 public class ContainerTFCinderFurnace extends Container {
 
-    private TileEntityTFCinderFurnace tileFurnace;
+    private static final int OUTPUT_SLOT = 2;
+    private static final int INVENTORY_START = 3;
+    private static final int HOTBAR_START = 30;
+    private static final int SLOT_COUNT = 39;
+
+    private final TileEntityTFCinderFurnace tileFurnace;
     private int lastCookTime;
     private int lastBurnTime;
     private int lastItemBurnTime;
@@ -26,127 +31,105 @@ public class ContainerTFCinderFurnace extends Container {
         this(inventory, (TileEntityTFCinderFurnace) world.getTileEntity(x, y, z));
     }
 
-    public ContainerTFCinderFurnace(InventoryPlayer p_i1812_1_, TileEntityTFCinderFurnace p_i1812_2_) {
-        this.tileFurnace = p_i1812_2_;
-        this.addSlotToContainer(new Slot(p_i1812_2_, 0, 56, 17));
-        this.addSlotToContainer(new Slot(p_i1812_2_, 1, 56, 53));
-        this.addSlotToContainer(new SlotFurnace(p_i1812_1_.player, p_i1812_2_, 2, 116, 35));
-        int i;
+    public ContainerTFCinderFurnace(InventoryPlayer inventory, TileEntityTFCinderFurnace furnace) {
+        this.tileFurnace = furnace;
+        addSlotToContainer(new Slot(furnace, 0, 56, 17));
+        addSlotToContainer(new Slot(furnace, 1, 56, 53));
+        addSlotToContainer(new SlotFurnace(inventory.player, furnace, OUTPUT_SLOT, 116, 35));
 
-        for (i = 0; i < 3; ++i) {
-            for (int j = 0; j < 9; ++j) {
-                this.addSlotToContainer(new Slot(p_i1812_1_, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 9; column++) {
+                addSlotToContainer(new Slot(inventory, column + row * 9 + 9, 8 + column * 18, 84 + row * 18));
             }
         }
-
-        for (i = 0; i < 9; ++i) {
-            this.addSlotToContainer(new Slot(p_i1812_1_, i, 8 + i * 18, 142));
+        for (int column = 0; column < 9; column++) {
+            addSlotToContainer(new Slot(inventory, column, 8 + column * 18, 142));
         }
     }
 
-    public void addCraftingToCrafters(ICrafting p_75132_1_) {
-        super.addCraftingToCrafters(p_75132_1_);
-        p_75132_1_.sendProgressBarUpdate(this, 0, this.tileFurnace.furnaceCookTime);
-        p_75132_1_.sendProgressBarUpdate(this, 1, this.tileFurnace.furnaceBurnTime);
-        p_75132_1_.sendProgressBarUpdate(this, 2, this.tileFurnace.currentItemBurnTime);
+    @Override
+    public void addCraftingToCrafters(ICrafting crafter) {
+        super.addCraftingToCrafters(crafter);
+        crafter.sendProgressBarUpdate(this, 0, tileFurnace.furnaceCookTime);
+        crafter.sendProgressBarUpdate(this, 1, tileFurnace.furnaceBurnTime);
+        crafter.sendProgressBarUpdate(this, 2, tileFurnace.currentItemBurnTime);
     }
 
-    /**
-     * Looks for changes made in the container, sends them to every listener.
-     */
+    @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
-
-        for (ICrafting crafter : this.crafters) {
-            ICrafting icrafting = crafter;
-
-            if (this.lastCookTime != this.tileFurnace.furnaceCookTime) {
-                icrafting.sendProgressBarUpdate(this, 0, this.tileFurnace.furnaceCookTime);
+        for (ICrafting crafter : crafters) {
+            if (lastCookTime != tileFurnace.furnaceCookTime) {
+                crafter.sendProgressBarUpdate(this, 0, tileFurnace.furnaceCookTime);
             }
-
-            if (this.lastBurnTime != this.tileFurnace.furnaceBurnTime) {
-                icrafting.sendProgressBarUpdate(this, 1, this.tileFurnace.furnaceBurnTime);
+            if (lastBurnTime != tileFurnace.furnaceBurnTime) {
+                crafter.sendProgressBarUpdate(this, 1, tileFurnace.furnaceBurnTime);
             }
-
-            if (this.lastItemBurnTime != this.tileFurnace.currentItemBurnTime) {
-                icrafting.sendProgressBarUpdate(this, 2, this.tileFurnace.currentItemBurnTime);
+            if (lastItemBurnTime != tileFurnace.currentItemBurnTime) {
+                crafter.sendProgressBarUpdate(this, 2, tileFurnace.currentItemBurnTime);
             }
         }
-
-        this.lastCookTime = this.tileFurnace.furnaceCookTime;
-        this.lastBurnTime = this.tileFurnace.furnaceBurnTime;
-        this.lastItemBurnTime = this.tileFurnace.currentItemBurnTime;
+        lastCookTime = tileFurnace.furnaceCookTime;
+        lastBurnTime = tileFurnace.furnaceBurnTime;
+        lastItemBurnTime = tileFurnace.currentItemBurnTime;
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
-    public void updateProgressBar(int p_75137_1_, int p_75137_2_) {
-        if (p_75137_1_ == 0) {
-            this.tileFurnace.furnaceCookTime = p_75137_2_;
-        }
-
-        if (p_75137_1_ == 1) {
-            this.tileFurnace.furnaceBurnTime = p_75137_2_;
-        }
-
-        if (p_75137_1_ == 2) {
-            this.tileFurnace.currentItemBurnTime = p_75137_2_;
+    public void updateProgressBar(int id, int value) {
+        switch (id) {
+            case 0 -> tileFurnace.furnaceCookTime = value;
+            case 1 -> tileFurnace.furnaceBurnTime = value;
+            case 2 -> tileFurnace.currentItemBurnTime = value;
+            default -> {}
         }
     }
 
-    public boolean canInteractWith(EntityPlayer p_75145_1_) {
-        return this.tileFurnace.isUseableByPlayer(p_75145_1_);
+    @Override
+    public boolean canInteractWith(EntityPlayer player) {
+        return tileFurnace != null && tileFurnace.isUseableByPlayer(player);
     }
 
-    /**
-     * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
-     */
-    public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_) {
-        ItemStack itemstack = null;
-        Slot slot = this.inventorySlots.get(p_82846_2_);
+    @Override
+    public ItemStack transferStackInSlot(EntityPlayer player, int slotIndex) {
+        if (slotIndex < 0 || slotIndex >= inventorySlots.size()) {
+            return null;
+        }
+        Slot slot = inventorySlots.get(slotIndex);
+        if (!slot.getHasStack() || !slot.canTakeStack(player)) {
+            return null;
+        }
 
-        if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
-            itemstack = itemstack1.copy();
-
-            if (p_82846_2_ == 2) {
-                if (!this.mergeItemStack(itemstack1, 3, 39, true)) {
-                    return null;
-                }
-
-                slot.onSlotChange(itemstack1, itemstack);
-            } else if (p_82846_2_ != 1 && p_82846_2_ != 0) {
-                if (FurnaceRecipes.smelting().getSmeltingResult(itemstack1) != null) {
-                    if (!this.mergeItemStack(itemstack1, 0, 1, false)) {
-                        return null;
-                    }
-                } else if (TileEntityFurnace.isItemFuel(itemstack1)) {
-                    if (!this.mergeItemStack(itemstack1, 1, 2, false)) {
-                        return null;
-                    }
-                } else if (p_82846_2_ >= 3 && p_82846_2_ < 30) {
-                    if (!this.mergeItemStack(itemstack1, 30, 39, false)) {
-                        return null;
-                    }
-                } else if (p_82846_2_ >= 30 && p_82846_2_ < 39 && !this.mergeItemStack(itemstack1, 3, 30, false)) {
-                    return null;
-                }
-            } else if (!this.mergeItemStack(itemstack1, 3, 39, false)) {
-                return null;
-            }
-
-            if (itemstack1.stackSize == 0) {
-                slot.putStack(null);
+        ItemStack stack = slot.getStack();
+        ItemStack original = stack.copy();
+        boolean moved;
+        if (slotIndex == OUTPUT_SLOT) {
+            moved = mergeItemStack(stack, INVENTORY_START, SLOT_COUNT, true);
+        } else if (slotIndex >= INVENTORY_START) {
+            if (FurnaceRecipes.smelting().getSmeltingResult(stack) != null) {
+                moved = mergeItemStack(stack, 0, 1, false);
+            } else if (TileEntityFurnace.isItemFuel(stack)) {
+                moved = mergeItemStack(stack, 1, 2, false);
+            } else if (slotIndex < HOTBAR_START) {
+                moved = mergeItemStack(stack, HOTBAR_START, SLOT_COUNT, false);
             } else {
-                slot.onSlotChanged();
+                moved = mergeItemStack(stack, INVENTORY_START, HOTBAR_START, false);
             }
-
-            if (itemstack1.stackSize == itemstack.stackSize) {
-                return null;
-            }
-
-            slot.onPickupFromSlot(p_82846_1_, itemstack1);
+        } else {
+            moved = mergeItemStack(stack, INVENTORY_START, SLOT_COUNT, false);
         }
-
-        return itemstack;
+        if (!moved || stack.stackSize == original.stackSize) {
+            return null;
+        }
+        if (slotIndex == OUTPUT_SLOT) {
+            slot.onSlotChange(stack, original);
+        }
+        if (stack.stackSize == 0) {
+            slot.putStack(null);
+        } else {
+            slot.onSlotChanged();
+        }
+        slot.onPickupFromSlot(player, stack);
+        return original;
     }
 }

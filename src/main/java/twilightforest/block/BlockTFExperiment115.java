@@ -44,13 +44,14 @@ public class BlockTFExperiment115 extends Block {
 
     @Override
     public boolean canConnectRedstone(IBlockAccess world, int x, int y, int z, int side) {
-        return ((TileEntityTFCake) world.getTileEntity(x, y, z)).getSprinkled() && side != -1;
+        return side != -1 && world.getTileEntity(x, y, z) instanceof TileEntityTFCake cake && cake.getSprinkled();
     }
 
     @Override
     public int isProvidingWeakPower(IBlockAccess world, int x, int y, int z, int side) {
-        TileEntityTFCake te = (TileEntityTFCake) world.getTileEntity(x, y, z);
-        return te.getSprinkled() && side != -1 ? world.getBlockMetadata(x, y, z) * 2 : 0;
+        return side != -1 && world.getTileEntity(x, y, z) instanceof TileEntityTFCake cake && cake.getSprinkled()
+                ? Math.min(15, world.getBlockMetadata(x, y, z) * 2)
+                : 0;
     }
 
     /**
@@ -162,21 +163,22 @@ public class BlockTFExperiment115 extends Block {
      */
     public boolean onBlockActivated(World worldIn, int x, int y, int z, EntityPlayer player, int side, float subX,
             float subY, float subZ) {
+        if (worldIn.isRemote) return true;
         if (player.getHeldItem() != null) {
             if (player.getHeldItem().getItem() == TFItems.experiment115 && player.isSneaking()) {
                 int l = worldIn.getBlockMetadata(x, y, z) + 1;
                 if (l <= 8) {
                     worldIn.setBlockMetadataWithNotify(x, y, z, l, 2);
-                    player.getHeldItem().stackSize--;
+                    if (!player.capabilities.isCreativeMode) player.getHeldItem().stackSize--;
                 }
                 worldIn.notifyBlocksOfNeighborChange(x, y, z, this);
             } else {
                 if (player.getHeldItem().getItem() == Items.redstone) {
-                    TileEntityTFCake te = (TileEntityTFCake) worldIn.getTileEntity(x, y, z);
+                    if (!(worldIn.getTileEntity(x, y, z) instanceof TileEntityTFCake te)) return true;
                     int l = worldIn.getBlockMetadata(x, y, z);
                     if (l == 8 && !te.getSprinkled()) {
                         te.setSprinkled(true);
-                        player.getHeldItem().stackSize--;
+                        if (!player.capabilities.isCreativeMode) player.getHeldItem().stackSize--;
                     }
                     worldIn.notifyBlocksOfNeighborChange(x, y, z, this);
                 } else this.eatCake(worldIn, x, y, z, player);
@@ -193,11 +195,11 @@ public class BlockTFExperiment115 extends Block {
     }
 
     private void eatCake(World worldIn, int x, int y, int z, EntityPlayer player) {
-        if (player.canEat(false)) {
+        if (!worldIn.isRemote && player.canEat(false)) {
             player.getFoodStats().addStats(4, 0.3F);
             int l = worldIn.getBlockMetadata(x, y, z) - 1;
 
-            if (l == 0) worldIn.setBlockToAir(x, y, z);
+            if (l <= 0) worldIn.setBlockToAir(x, y, z);
             else worldIn.setBlockMetadataWithNotify(x, y, z, l, 2);
             worldIn.notifyBlocksOfNeighborChange(x, y, z, this);
         }
@@ -212,8 +214,7 @@ public class BlockTFExperiment115 extends Block {
 
     @Override
     public void updateTick(World worldIn, int x, int y, int z, Random random) {
-        TileEntityTFCake te = (TileEntityTFCake) worldIn.getTileEntity(x, y, z);
-        if (te.getSprinkled()) {
+        if (worldIn.getTileEntity(x, y, z) instanceof TileEntityTFCake te && te.getSprinkled()) {
             {
                 int l = te.getBlockMetadata() + 1;
                 if (l <= 8) {
