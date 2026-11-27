@@ -10,7 +10,6 @@ public class ComponentTFMazeDeadEndTrappedChest extends ComponentTFMazeDeadEndCh
 
     public ComponentTFMazeDeadEndTrappedChest() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeDeadEndTrappedChest(int i, int x, int y, int z, int rotation) {
@@ -42,13 +41,8 @@ public class ComponentTFMazeDeadEndTrappedChest extends ComponentTFMazeDeadEndCh
         return true;
     }
 
-    /**
-     * Gets the metadata necessary to make stairs facing the proper direction.
-     * 
-     * @param dir
-     * @return
-     */
+    // tripwire hooks rotate independently of the stair metadata used elsewhere
     protected int getHookMeta(int dir) {
-        return (this.getCoordBaseMode() + dir) % 4;
+        return (getCoordBaseMode() + dir) & 3;
     }
 }

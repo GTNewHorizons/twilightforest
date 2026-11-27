@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -15,7 +16,6 @@ public class ComponentTFMazeEntranceShaft extends StructureTFComponent {
 
     public ComponentTFMazeEntranceShaft() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     private int averageGroundLevel = -1;
@@ -48,15 +48,19 @@ public class ComponentTFMazeEntranceShaft extends StructureTFComponent {
         this.fillWithMetadataBlocks(world, sbb, 0, 0 - 10, 0, 5, 0 + 30, 5, TFBlocks.mazestone, 1, Blocks.air, 0, true);
         this.fillWithAir(world, sbb, 1, 0 - 10, 1, 4, 0 + 30, 4);
 
-        // System.out.println("Drawing entrance");
-
-        int var8 = this.getXWithOffset(0, 0);
-        int var9 = this.getYWithOffset(0);
-        int var10 = this.getZWithOffset(0, 0);
-
-        // System.out.println("Drawing entrance at " + var8 + ", " + var9 + ", " + var10);
-
         return true;
+    }
+
+    @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setInteger("tfShaftGround", averageGroundLevel);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        averageGroundLevel = nbt.hasKey("tfShaftGround") ? nbt.getInteger("tfShaftGround") : -1;
     }
 
     /**

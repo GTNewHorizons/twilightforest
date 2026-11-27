@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -14,10 +15,19 @@ public class ComponentTFMazeMound extends StructureTFComponent {
 
     public ComponentTFMazeMound() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public static final int DIAMETER = 35;
+    private static final int[] HEIGHT_PROFILE = createHeightProfile();
+
+    private static int[] createHeightProfile() {
+        int[] heights = new int[DIAMETER];
+        for (int distance = 0; distance < heights.length; distance++) {
+            heights[distance] = (int) (Math.cos((double) distance / DIAMETER * Math.PI) * (DIAMETER / 3));
+        }
+        return heights;
+    }
+
     private int averageGroundLevel = -1;
 
     private ComponentTFMazeUpperEntrance mazeAbove;
@@ -26,7 +36,7 @@ public class ComponentTFMazeMound extends StructureTFComponent {
         super(i);
         this.coordBaseMode = rand.nextInt(4);
 
-        this.boundingBox = new StructureBoundingBox(x, y, z, x + DIAMETER, y + 8, z + DIAMETER);
+        this.boundingBox = new StructureBoundingBox(x, y, z, x + DIAMETER - 1, y + DIAMETER / 3, z + DIAMETER - 1);
     }
 
     /**
@@ -57,7 +67,8 @@ public class ComponentTFMazeMound extends StructureTFComponent {
                 return true;
             }
 
-            int offset = this.averageGroundLevel - this.boundingBox.maxY + 8 - 1;
+            // keep the base at surface - 1 even though the box includes the taller mound peak
+            int offset = this.averageGroundLevel - this.boundingBox.minY - 1;
 
             this.boundingBox.offset(0, offset, 0);
 
@@ -66,15 +77,13 @@ public class ComponentTFMazeMound extends StructureTFComponent {
             }
         }
 
-        // this.fillWithBlocks(world, sbb, 0, 0, 0, 25, 8, 25, Blocks.dirt, 0, false);
-
         for (int x = 0; x < DIAMETER; x++) {
             for (int z = 0; z < DIAMETER; z++) {
                 int cx = x - DIAMETER / 2;
                 int cz = z - DIAMETER / 2;
 
                 int dist = (int) Math.sqrt(cx * cx + cz * cz);
-                int hheight = (int) (Math.cos((double) dist / DIAMETER * Math.PI) * (DIAMETER / 3));
+                int hheight = HEIGHT_PROFILE[dist];
 
                 // leave a hole in the middle
                 if (!(cx <= 2 && cx >= -1 && cz <= 2 && cz >= -1)
@@ -92,6 +101,18 @@ public class ComponentTFMazeMound extends StructureTFComponent {
         }
 
         return true;
+    }
+
+    @Override
+    protected void func_143012_a(NBTTagCompound nbt) {
+        super.func_143012_a(nbt);
+        nbt.setInteger("tfMoundGround", averageGroundLevel);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound nbt) {
+        super.func_143011_b(nbt);
+        averageGroundLevel = nbt.hasKey("tfMoundGround") ? nbt.getInteger("tfMoundGround") : -1;
     }
 
     /**

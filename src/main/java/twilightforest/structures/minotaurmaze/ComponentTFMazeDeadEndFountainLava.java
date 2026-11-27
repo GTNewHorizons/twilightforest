@@ -10,7 +10,6 @@ public class ComponentTFMazeDeadEndFountainLava extends ComponentTFMazeDeadEndFo
 
     public ComponentTFMazeDeadEndFountainLava() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFMazeDeadEndFountainLava(int i, int x, int y, int z, int rotation) {
@@ -22,10 +21,7 @@ public class ComponentTFMazeDeadEndFountainLava extends ComponentTFMazeDeadEndFo
         // normal fountain
         super.addComponentParts(world, rand, sbb);
 
-        // remove water
-        this.placeBlockAtCurrentPosition(world, Blocks.air, 0, 2, 3, 4, sbb);
-        this.placeBlockAtCurrentPosition(world, Blocks.air, 0, 3, 3, 4, sbb);
-
+        // replace both water outlets directly, an air update is unnecessary
         // lava instead of water
         this.placeBlockAtCurrentPosition(world, Blocks.flowing_lava, 0, 2, 3, 4, sbb);
         this.placeBlockAtCurrentPosition(world, Blocks.flowing_lava, 0, 3, 3, 4, sbb);

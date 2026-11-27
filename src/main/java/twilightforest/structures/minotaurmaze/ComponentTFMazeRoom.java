@@ -21,7 +21,7 @@ public class ComponentTFMazeRoom extends StructureTFComponent {
         super(i);
         this.coordBaseMode = rand.nextInt(4);
 
-        this.boundingBox = new StructureBoundingBox(x, y, z, x + 15, y + 4, z + 15);
+        this.boundingBox = new StructureBoundingBox(x, y, z, x + 15, y + 5, z + 15);
     }
 
     /**
