@@ -32,8 +32,7 @@ public class EntityTFSnowFX extends EntityFX {
         this.particleScale *= 0.75F;
         this.particleScale *= par14;
         this.initialParticleScale = this.particleScale;
-        this.particleMaxAge = (int) (6.0D / (this.rand.nextDouble() * 0.8D + 0.6D));
-        this.particleMaxAge = Math.max(1, (int) ((float) this.particleMaxAge * par14));
+        this.particleMaxAge = Math.max(1, (int) ((int) (6.0D / (this.rand.nextDouble() * 0.8D + 0.6D)) * par14));
         this.noClip = false;
 
         this.setParticleIcon(((ItemTFIceBomb) TFItems.iceBomb).getSnowIcon(rand.nextInt(4)));

@@ -94,28 +94,21 @@ public class ModelTFKobold extends ModelBiped {
         this.bipedHead.rotateAngleY = par4 / (180F / (float) Math.PI);
         this.bipedHead.rotateAngleX = par5 / (180F / (float) Math.PI);
 
-        this.bipedRightArm.rotateAngleZ = 0.0F;
-        this.bipedLeftArm.rotateAngleZ = 0.0F;
-
-        this.bipedRightArm.rotateAngleX = -((float) Math.PI * .15F);
-        this.bipedLeftArm.rotateAngleX = -((float) Math.PI * .15F);
-
         this.bipedRightLeg.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 1.4F * par2;
         this.bipedLeftLeg.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float) Math.PI) * 1.4F * par2;
-        this.bipedRightLeg.rotateAngleY = 0.0F;
-        this.bipedLeftLeg.rotateAngleY = 0.0F;
+        this.bipedRightLeg.rotateAngleY = this.bipedLeftLeg.rotateAngleY = 0.0F;
 
-        this.bipedRightArm.rotateAngleZ += MathHelper.cos(par3 * 0.19F) * 0.15F + 0.05F;
-        this.bipedLeftArm.rotateAngleZ -= MathHelper.cos(par3 * 0.19F) * 0.15F + 0.05F;
-        this.bipedRightArm.rotateAngleX += MathHelper.sin(par3 * 0.267F) * 0.25F;
-        this.bipedLeftArm.rotateAngleX -= MathHelper.sin(par3 * 0.267F) * 0.25F;
+        float armBaseX = -((float) Math.PI * 0.15F);
+        float armSwingZ = MathHelper.cos(par3 * 0.19F) * 0.15F + 0.05F;
+        float armSwingX = MathHelper.sin(par3 * 0.267F) * 0.25F;
 
-        if (this.isJumping) {
-            // open jaw
-            this.jaw.rotateAngleX = 1.44F;
-        } else {
-            this.jaw.rotateAngleX = 0.20944F;
-        }
+        this.bipedRightArm.rotateAngleZ = armSwingZ;
+        this.bipedLeftArm.rotateAngleZ = -armSwingZ;
+        this.bipedRightArm.rotateAngleX = armBaseX + armSwingX;
+        this.bipedLeftArm.rotateAngleX = armBaseX - armSwingX;
+
+        // open jaw
+        this.jaw.rotateAngleX = this.isJumping ? 1.44F : 0.20944F;
     }
 
     /**

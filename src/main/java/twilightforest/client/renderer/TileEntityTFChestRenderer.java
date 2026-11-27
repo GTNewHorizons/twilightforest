@@ -72,7 +72,10 @@ public class TileEntityTFChestRenderer extends TileEntitySpecialRenderer {
                 if (tileEntity.hasWorldObj()) {
                     Block block = tileEntity.getWorldObj()
                             .getBlock(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
-                    if (block instanceof BlockTFChest) type = ((BlockTFChest) block).getWoodType();
+
+                    if (block instanceof BlockTFChest chest) {
+                        type = chest.getWoodType();
+                    }
                 }
             } else type = ((TileEntityTFChest) tileEntity).cachedMaterial;
         }

@@ -29,11 +29,9 @@ public class EntityTFAnnihilateFX extends EntityFX {
         this.motionY += par10 * 0.4D;
         this.motionZ += par12 * 0.4D;
         this.particleRed = this.particleGreen = this.particleBlue = 1.0F;
-        this.particleScale *= 0.75F;
-        this.particleScale *= par14;
+        this.particleScale *= 0.75F * par14;
         this.initialParticleScale = this.particleScale;
-        this.particleMaxAge = (int) (60.0D / (this.rand.nextDouble() * 0.8D + 0.6D));
-        this.particleMaxAge = Math.max(1, (int) ((float) this.particleMaxAge * par14));
+        this.particleMaxAge = Math.max(1, (int) ((int) (60.0D / (this.rand.nextDouble() * 0.8D + 0.6D)) * par14));
         this.noClip = false;
 
         this.setParticleIcon(((ItemTFCubeOfAnnihilation) TFItems.cubeOfAnnihilation).getAnnihilateIcon());

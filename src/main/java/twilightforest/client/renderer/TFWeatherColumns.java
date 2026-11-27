@@ -1,6 +1,7 @@
 package twilightforest.client.renderer;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 
 import net.minecraft.client.multiplayer.WorldClient;
@@ -127,7 +128,14 @@ public final class TFWeatherColumns {
     private boolean keyFancy;
     private boolean keyCreative;
     private boolean keyEnforced;
-    private int[] keyBoxBounds;
+    private BoxBounds keyBoxBounds;
+
+    private record BoxBounds(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+
+        private static BoxBounds from(StructureBoundingBox box) {
+            return box == null ? null : new BoxBounds(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+        }
+    }
 
     public TFWeatherColumns() {
         for (int i = 0; i < LAYER_COUNT; i++) {
@@ -163,6 +171,8 @@ public final class TFWeatherColumns {
         double offY = view.lastTickPosY + (view.posY - view.lastTickPosY) * (double) partialTicks;
         int floorY = MathHelper.floor_double(offY);
 
+        BoxBounds boxBounds = BoxBounds.from(box);
+
         if (built && world == builtWorld
                 && px == keyX
                 && py == keyY
@@ -170,7 +180,7 @@ public final class TFWeatherColumns {
                 && fancy == keyFancy
                 && creative == keyCreative
                 && enforced == keyEnforced
-                && matchesBox(box)
+                && Objects.equals(keyBoxBounds, boxBounds)
                 && worldTime - builtTime >= 0
                 && worldTime - builtTime < REBUILD_TICKS) {
             return;
@@ -183,7 +193,7 @@ public final class TFWeatherColumns {
         keyFancy = fancy;
         keyCreative = creative;
         keyEnforced = enforced;
-        keyBoxBounds = box == null ? null : new int[] { box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ };
+        keyBoxBounds = boxBounds;
         builtTime = worldTime;
         built = true;
         serial++;
@@ -209,17 +219,6 @@ public final class TFWeatherColumns {
         if (nearLockedStructure) {
             buildStructure(box, px, py, pz, rainXCoords, rainYCoords);
         }
-    }
-
-    private boolean matchesBox(StructureBoundingBox box) {
-        if (box == null || keyBoxBounds == null) {
-            return box == null && keyBoxBounds == null;
-        }
-        return box.minX == keyBoxBounds[0] && box.minY == keyBoxBounds[1]
-                && box.minZ == keyBoxBounds[2]
-                && box.maxX == keyBoxBounds[3]
-                && box.maxY == keyBoxBounds[4]
-                && box.maxZ == keyBoxBounds[5];
     }
 
     private void scanLockedBiome(WorldClient world, EntityPlayer player, int px, int py, int pz, int floorY,

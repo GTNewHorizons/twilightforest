@@ -180,7 +180,11 @@ public class RenderBlockTFNagastone2 implements ISimpleBlockRenderingHandler {
                     iconYNeg = block.CROSS_SECTION;
                     break;
                 default:
-                case SIDE:
+                    switch (dir) {
+                        case DOWN -> {}
+                        case UP -> {}
+                        case SIDE -> {}
+                    }
                     switch (face) {
                         default:
                         case EAST:
@@ -1901,7 +1905,11 @@ public class RenderBlockTFNagastone2 implements ISimpleBlockRenderingHandler {
                     }
                     break;
                 default:
-                case SIDE:
+                    switch (dir) {
+                        case DOWN -> {}
+                        case UP -> {}
+                        case SIDE -> {}
+                    }
                     iconYNeg = block.BOTTOM_LONG;
                     iconYPos = block.TOP_LONG;
                     Direction upperDirection = null;
