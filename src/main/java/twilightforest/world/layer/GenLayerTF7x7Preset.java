@@ -8,11 +8,24 @@ import twilightforest.biomes.TFBiomeBase;
 
 public class GenLayerTF7x7Preset extends GenLayer {
 
-    BiomeGenBase[][] preset = new BiomeGenBase[9][9];
+    private static final int MAP_SIZE = 9;
+    private static final int ACTIVE_MAP_SIZE = 8;
+    private static final int MAP_ORIGIN_OFFSET = 4;
+    private static final char[][] DEFAULT_MAP = { { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' },
+            { 'P', 'H', 'H', 'H', 'H', 'D', 'D', 'D', 'P' }, { 'P', 'H', 'H', 'H', 'H', 'D', 'D', 'D', 'P' },
+            { 'P', 'F', 'f', 'F', 'm', 'M', 'D', 'D', 'P' }, { 'P', 'F', 'F', 'F', 'C', 'm', 'D', 'D', 'P' },
+            { 'P', 'F', 'f', 'f', 'F', 'E', 'O', 'O', 'P' }, { 'P', 'S', 'S', 'S', 'L', 'L', 'O', 'G', 'P' },
+            { 'P', 'Y', 'S', 'S', 'L', 'L', 'O', 'G', 'P' }, { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' } };
 
-    public GenLayerTF7x7Preset(long par1) {
-        super(par1);
-        initPresets();
+    BiomeGenBase[][] preset = new BiomeGenBase[MAP_SIZE][MAP_SIZE];
+
+    public GenLayerTF7x7Preset(long seed) {
+        this(seed, DEFAULT_MAP);
+    }
+
+    protected GenLayerTF7x7Preset(long seed, char[][] map) {
+        super(seed);
+        loadPreset(map);
     }
 
     @Override
@@ -20,10 +33,11 @@ public class GenLayerTF7x7Preset extends GenLayer {
         int[] dest = IntCache.getIntCache(width * depth);
         for (int dz = 0; dz < depth; dz++) {
             for (int dx = 0; dx < width; dx++) {
-                int sx = x + dx + 4;
-                int sz = z + dz + 4;
+                int sx = x + dx + MAP_ORIGIN_OFFSET;
+                int sz = z + dz + MAP_ORIGIN_OFFSET;
 
-                if (sx >= 0 && sx < 8 && sz >= 0 && sz < 8) {
+                // the 9th row and column are padding, keep the original eight cell active range
+                if (sx >= 0 && sx < ACTIVE_MAP_SIZE && sz >= 0 && sz < ACTIVE_MAP_SIZE) {
                     dest[dx + dz * width] = preset[sx][sz].biomeID;
                 } else {
                     dest[dx + dz * width] = BiomeGenBase.ocean.biomeID;
@@ -36,13 +50,7 @@ public class GenLayerTF7x7Preset extends GenLayer {
 
     }
 
-    private void initPresets() {
-        char[][] map = { { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' },
-                { 'P', 'H', 'H', 'H', 'H', 'D', 'D', 'D', 'P' }, { 'P', 'H', 'H', 'H', 'H', 'D', 'D', 'D', 'P' },
-                { 'P', 'F', 'f', 'F', 'm', 'M', 'D', 'D', 'P' }, { 'P', 'F', 'F', 'F', 'C', 'm', 'D', 'D', 'P' },
-                { 'P', 'F', 'f', 'f', 'F', 'E', 'O', 'O', 'P' }, { 'P', 'S', 'S', 'S', 'L', 'L', 'O', 'G', 'P' },
-                { 'P', 'Y', 'S', 'S', 'L', 'L', 'O', 'G', 'P' }, { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' } };
-
+    protected final void loadPreset(char[][] map) {
         for (int x = 0; x < map.length; x++) {
             for (int z = 0; z < map[x].length; z++) {
                 preset[x][z] = getBiomeFor(map[z][x]);

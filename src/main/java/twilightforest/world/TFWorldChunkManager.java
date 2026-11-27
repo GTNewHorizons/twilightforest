@@ -21,16 +21,24 @@ import twilightforest.world.layer.GenLayerTF;
 
 public class TFWorldChunkManager extends WorldChunkManager {
 
+    private static final int CHUNK_SHIFT = 4;
+    private static final int CHUNK_SIZE = 1 << CHUNK_SHIFT;
+    private static final int BIOME_SAMPLE_SHIFT = 2;
+    private static final int FEATURE_REGION_SIZE = 16;
+    private static final int FEATURE_CENTER_MAX_OFFSET = 3;
+    private static final float MAX_RAINFALL = 1.0F;
+    private static final float RAINFALL_SCALE = 65536.0F;
+
     private GenLayer unzoomedBiomes;
 
     /** A GenLayer containing the indices into BiomeGenBase.biomeList[] */
     private GenLayer zoomedBiomes;
 
     /** The BiomeCache object for this world. */
-    private BiomeCache myBiomeCache;
+    private final BiomeCache myBiomeCache;
 
     /** A list of biomes that the player can spawn in. */
-    private List<BiomeGenBase> myBiomesToSpawnIn;
+    private final List<BiomeGenBase> myBiomesToSpawnIn;
 
     protected TFWorldChunkManager() {
         myBiomeCache = new BiomeCache(this);
@@ -42,26 +50,23 @@ public class TFWorldChunkManager extends WorldChunkManager {
         myBiomesToSpawnIn.add(TFBiomeBase.mushrooms);
     }
 
-    public TFWorldChunkManager(long par1, WorldType par3WorldType) {
+    public TFWorldChunkManager(long seed, WorldType worldType) {
         this();
-        GenLayer[] agenlayer;
-        // new world gen!
-        if (TwilightForestMod.oldMapGen) {
-            agenlayer = GenLayerTF.makeTheWorldOldMapGen(par1);
-        } else {
-            agenlayer = GenLayerTF.makeTheWorld(par1);
-        }
-        unzoomedBiomes = agenlayer[0];
-        zoomedBiomes = agenlayer[1];
+        // new world gen! the order of each pipeline, its seeds and both indices must be stable
+        GenLayer[] layers = TwilightForestMod.oldMapGen ? GenLayerTF.makeTheWorldOldMapGen(seed)
+                : GenLayerTF.makeTheWorld(seed);
+        unzoomedBiomes = layers[0];
+        zoomedBiomes = layers[1];
     }
 
-    public TFWorldChunkManager(World par1World) {
-        this(par1World.getSeed(), par1World.getWorldInfo().getTerrainType());
+    public TFWorldChunkManager(World world) {
+        this(world.getSeed(), world.getWorldInfo().getTerrainType());
     }
 
     /**
      * Gets the list of valid biomes for the player to spawn in.
      */
+    @Override
     public List<BiomeGenBase> getBiomesToSpawnIn() {
         return myBiomesToSpawnIn;
     }
@@ -69,142 +74,125 @@ public class TFWorldChunkManager extends WorldChunkManager {
     /**
      * Returns the BiomeGenBase related to the x, z position on the world.
      */
-    public BiomeGenBase getBiomeGenAt(int par1, int par2) {
-        BiomeGenBase biome = myBiomeCache.getBiomeGenAt(par1, par2);
-        if (biome == null) {
-            // FMLLog.warning("[TwilightForest] Suppressing bad biome data in getBiomeGenAt, %s at %d, %d",
-            // biome, par1, par2);
-
-            // throw new IllegalArgumentException();
-            return TFBiomeBase.twilightForest;
-        } else {
-            return biome;
-        }
+    @Override
+    public BiomeGenBase getBiomeGenAt(int x, int z) {
+        BiomeGenBase biome = myBiomeCache.getBiomeGenAt(x, z);
+        return biome != null ? biome : TFBiomeBase.twilightForest;
     }
 
     /**
      * Returns a list of rainfall values for the specified blocks. Args: listToReuse, x, z, width, length.
      */
-    public float[] getRainfall(float[] par1ArrayOfFloat, int par2, int par3, int par4, int par5) {
+    @Override
+    public float[] getRainfall(float[] rainfall, int x, int z, int width, int length) {
         IntCache.resetIntCache();
 
-        if (par1ArrayOfFloat == null || par1ArrayOfFloat.length < par4 * par5) {
-            par1ArrayOfFloat = new float[par4 * par5];
+        int area = width * length;
+        if (rainfall == null || rainfall.length < area) {
+            rainfall = new float[area];
         }
 
-        int[] ai = zoomedBiomes.getInts(par2, par3, par4, par5);
-
-        for (int i = 0; i < par4 * par5; i++) {
-            // this keeps NPEing, I wonder why
-            if (ai[i] >= 0 && BiomeGenBase.getBiome(ai[i]) != null) {
-                float f = (float) BiomeGenBase.getBiome(ai[i]).getIntRainfall() / 65536F;
-
-                if (f > 1.0F) {
-                    f = 1.0F;
-                }
-
-                par1ArrayOfFloat[i] = f;
-            } else {
-                // nothing
-            }
+        int[] biomeIds = zoomedBiomes.getInts(x, z, width, length);
+        for (int i = 0; i < area; i++) {
+            BiomeGenBase biome = biomeIds[i] >= 0 ? BiomeGenBase.getBiome(biomeIds[i]) : null;
+            // clear invalid samples even when the caller reuses a previously populated array
+            rainfall[i] = biome != null ? Math.min(MAX_RAINFALL, biome.getIntRainfall() / RAINFALL_SCALE) : 0.0F;
         }
 
-        return par1ArrayOfFloat;
+        return rainfall;
     }
 
     /**
      * Return an adjusted version of a given temperature based on the y height
      */
-    public float getTemperatureAtHeight(float par1, int par2) {
-        return par1;
+    @Override
+    public float getTemperatureAtHeight(float temperature, int y) {
+        return temperature;
+    }
+
+    private static BiomeGenBase resolveBiome(int biomeId) {
+        BiomeGenBase biome = biomeId >= 0 ? BiomeGenBase.getBiome(biomeId) : null;
+        return biome != null ? biome : TFBiomeBase.twilightForest;
     }
 
     /**
      * Returns an array of biomes for the location input.
      */
-    public BiomeGenBase[] getBiomesForGeneration(BiomeGenBase[] par1ArrayOfBiomeGenBase, int x, int z, int length,
-            int width) {
+    @Override
+    public BiomeGenBase[] getBiomesForGeneration(BiomeGenBase[] biomes, int x, int z, int length, int width) {
         IntCache.resetIntCache();
 
-        if (par1ArrayOfBiomeGenBase == null || par1ArrayOfBiomeGenBase.length < length * width) {
-            par1ArrayOfBiomeGenBase = new BiomeGenBase[length * width];
+        int area = length * width;
+        if (biomes == null || biomes.length < area) {
+            biomes = new BiomeGenBase[area];
         }
 
-        int[] arrayOfInts = unzoomedBiomes.getInts(x, z, length, width);
-
-        for (int i = 0; i < length * width; i++) {
+        int[] biomeIds = unzoomedBiomes.getInts(x, z, length, width);
+        for (int i = 0; i < area; i++) {
             // biome validity check
-            if (arrayOfInts[i] >= 0) {
-                par1ArrayOfBiomeGenBase[i] = BiomeGenBase.getBiome(arrayOfInts[i]);
-            } else {
-                // System.err.println("Got bad biome data : " + ai[i]);
-                par1ArrayOfBiomeGenBase[i] = TFBiomeBase.twilightForest;
-            }
+            biomes[i] = resolveBiome(biomeIds[i]);
         }
 
-        return par1ArrayOfBiomeGenBase;
+        return biomes;
     }
 
     /**
      * Returns biomes to use for the blocks and loads the other data like temperature and humidity onto the
      * WorldChunkManager Args: oldBiomeList, x, z, width, depth
      */
-    public BiomeGenBase[] loadBlockGeneratorData(BiomeGenBase[] par1ArrayOfBiomeGenBase, int par2, int par3, int par4,
-            int par5) {
-        return getBiomeGenAt(par1ArrayOfBiomeGenBase, par2, par3, par4, par5, true);
+    @Override
+    public BiomeGenBase[] loadBlockGeneratorData(BiomeGenBase[] biomes, int x, int z, int width, int depth) {
+        return getBiomeGenAt(biomes, x, z, width, depth, true);
     }
 
     /**
      * Return a list of biomes for the specified blocks. Args: listToReuse, x, y, width, length, cacheFlag (if false,
      * don't check biomeCache to avoid infinite loop in BiomeCacheBlock)
      */
-    public BiomeGenBase[] getBiomeGenAt(BiomeGenBase[] par1ArrayOfBiomeGenBase, int x, int y, int width, int length,
-            boolean cacheFlag) {
+    @Override
+    public BiomeGenBase[] getBiomeGenAt(BiomeGenBase[] biomes, int x, int z, int width, int length, boolean cacheFlag) {
         IntCache.resetIntCache();
 
-        if (par1ArrayOfBiomeGenBase == null || par1ArrayOfBiomeGenBase.length < width * length) {
-            par1ArrayOfBiomeGenBase = new BiomeGenBase[width * length];
+        int area = width * length;
+        if (biomes == null || biomes.length < area) {
+            biomes = new BiomeGenBase[area];
         }
 
-        if (cacheFlag && width == 16 && length == 16 && (x & 0xf) == 0 && (y & 0xf) == 0) {
-            BiomeGenBase[] abiomegenbase = myBiomeCache.getCachedBiomes(x, y);
-            System.arraycopy(abiomegenbase, 0, par1ArrayOfBiomeGenBase, 0, width * length);
-            return par1ArrayOfBiomeGenBase;
+        if (cacheFlag && width == CHUNK_SIZE
+                && length == CHUNK_SIZE
+                && (x & (CHUNK_SIZE - 1)) == 0
+                && (z & (CHUNK_SIZE - 1)) == 0) {
+            BiomeGenBase[] cachedBiomes = myBiomeCache.getCachedBiomes(x, z);
+            System.arraycopy(cachedBiomes, 0, biomes, 0, area);
+            return biomes;
         }
 
-        int[] ai = zoomedBiomes.getInts(x, y, width, length);
-
-        for (int i = 0; i < width * length; i++) {
+        int[] biomeIds = zoomedBiomes.getInts(x, z, width, length);
+        for (int i = 0; i < area; i++) {
             // biome validity check
-            if (ai[i] >= 0) {
-                par1ArrayOfBiomeGenBase[i] = BiomeGenBase.getBiome(ai[i]);
-            } else {
-                // System.err.println("Got bad biome data : " + ai[i]);
-                par1ArrayOfBiomeGenBase[i] = TFBiomeBase.twilightForest;
-            }
+            biomes[i] = resolveBiome(biomeIds[i]);
         }
 
-        return par1ArrayOfBiomeGenBase;
+        return biomes;
     }
 
     /**
      * checks given Chunk's Biomes against List of allowed ones
      */
+    @Override
     @SuppressWarnings("rawtypes")
-    public boolean areBiomesViable(int par1, int par2, int par3, List par4List) {
+    public boolean areBiomesViable(int x, int z, int radius, List allowedBiomes) {
         IntCache.resetIntCache();
-        int i = par1 - par3 >> 2;
-        int j = par2 - par3 >> 2;
-        int k = par1 + par3 >> 2;
-        int l = par2 + par3 >> 2;
-        int i1 = (k - i) + 1;
-        int j1 = (l - j) + 1;
-        int[] ai = unzoomedBiomes.getInts(i, j, i1, j1);
+        int minX = (x - radius) >> BIOME_SAMPLE_SHIFT;
+        int minZ = (z - radius) >> BIOME_SAMPLE_SHIFT;
+        int maxX = (x + radius) >> BIOME_SAMPLE_SHIFT;
+        int maxZ = (z + radius) >> BIOME_SAMPLE_SHIFT;
+        int width = maxX - minX + 1;
+        int length = maxZ - minZ + 1;
+        int[] biomeIds = unzoomedBiomes.getInts(minX, minZ, width, length);
 
-        for (int k1 = 0; k1 < i1 * j1; k1++) {
-            BiomeGenBase biomegenbase = BiomeGenBase.getBiome(ai[k1]);
-
-            if (!par4List.contains(biomegenbase)) {
+        for (int i = 0; i < width * length; i++) {
+            if (!allowedBiomes.contains(BiomeGenBase.getBiome(biomeIds[i]))) {
                 return false;
             }
         }
@@ -215,36 +203,42 @@ public class TFWorldChunkManager extends WorldChunkManager {
     /**
      * Finds a valid position within a range, that is once of the listed biomes.
      */
+    @Override
     @SuppressWarnings("rawtypes")
-    public ChunkPosition findBiomePosition(int par1, int par2, int par3, List par4List, Random par5Random) {
+    public ChunkPosition findBiomePosition(int x, int z, int radius, List allowedBiomes, Random random) {
         IntCache.resetIntCache();
-        int i = par1 - par3 >> 2;
-        int j = par2 - par3 >> 2;
-        int k = par1 + par3 >> 2;
-        int l = par2 + par3 >> 2;
-        int i1 = (k - i) + 1;
-        int j1 = (l - j) + 1;
-        int[] ai = unzoomedBiomes.getInts(i, j, i1, j1);
-        ChunkPosition chunkposition = null;
-        int k1 = 0;
+        int minX = (x - radius) >> BIOME_SAMPLE_SHIFT;
+        int minZ = (z - radius) >> BIOME_SAMPLE_SHIFT;
+        int maxX = (x + radius) >> BIOME_SAMPLE_SHIFT;
+        int maxZ = (z + radius) >> BIOME_SAMPLE_SHIFT;
+        int width = maxX - minX + 1;
+        int length = maxZ - minZ + 1;
+        int[] biomeIds = unzoomedBiomes.getInts(minX, minZ, width, length);
+        ChunkPosition chosen = null;
+        int matches = 0;
 
-        for (int l1 = 0; l1 < ai.length; l1++) {
-            int i2 = i + l1 % i1 << 2;
-            int j2 = j + l1 / i1 << 2;
-            BiomeGenBase biomegenbase = BiomeGenBase.getBiome(ai[l1]);
+        // may return a larger backing array, only the requested area is valid
+        for (int i = 0; i < width * length; i++) {
+            if (!allowedBiomes.contains(BiomeGenBase.getBiome(biomeIds[i]))) {
+                continue;
+            }
 
-            if (par4List.contains(biomegenbase) && (chunkposition == null || par5Random.nextInt(k1 + 1) == 0)) {
-                chunkposition = new ChunkPosition(i2, 0, j2);
-                k1++;
+            matches++;
+            // sampling gives every matching location the same probability
+            if (matches == 1 || random.nextInt(matches) == 0) {
+                int sampleX = (minX + i % width) << BIOME_SAMPLE_SHIFT;
+                int sampleZ = (minZ + i / width) << BIOME_SAMPLE_SHIFT;
+                chosen = new ChunkPosition(sampleX, 0, sampleZ);
             }
         }
 
-        return chunkposition;
+        return chosen;
     }
 
     /**
      * Calls the WorldChunkManager's biomeCache.cleanupCache()
      */
+    @Override
     public void cleanupCache() {
         myBiomeCache.cleanupCache();
     }
@@ -260,12 +254,12 @@ public class TFWorldChunkManager extends WorldChunkManager {
      * Returns feature at the specified location
      */
     public TFFeature getFeatureAt(int mapX, int mapZ, World world) {
-        return TFFeature.generateFeatureFor1Point7(mapX >> 4, mapZ >> 4, world);
+        return TFFeature.generateFeatureFor1Point7(mapX >> CHUNK_SHIFT, mapZ >> CHUNK_SHIFT, world);
     }
 
     /**
      * Checks if the coordinates are in a feature chunk.
-     * 
+     *
      * @param world
      */
     public boolean isInFeatureChunk(World world, int mapX, int mapZ) {
@@ -274,47 +268,32 @@ public class TFWorldChunkManager extends WorldChunkManager {
             return isInFeatureChunkOld(world, mapX, mapZ);
         }
 
-        int chunkX = mapX >> 4;
-        int chunkZ = mapZ >> 4;
-        ChunkCoordinates cc = TFFeature.getNearestCenterXYZ(chunkX, chunkZ, world);
+        int chunkX = mapX >> CHUNK_SHIFT;
+        int chunkZ = mapZ >> CHUNK_SHIFT;
 
-        return chunkX == (cc.posX >> 4) && chunkZ == (cc.posZ >> 4);
+        // all feature centres lie within three chunks of a chunk boundary
+        // reject impossible candidates without calculating a centre or allocating ChunkCoordinates
+        if (!couldBeFeatureCenter(chunkX) || !couldBeFeatureCenter(chunkZ)) {
+            return false;
+        }
 
-        // logic moved to TFFeature.getNearestCenterXYZ :
+        ChunkCoordinates center = TFFeature.getNearestCenterXYZ(chunkX, chunkZ, world);
+        return chunkX == (center.posX >> CHUNK_SHIFT) && chunkZ == (center.posZ >> CHUNK_SHIFT);
+    }
 
-        // int chunkX = (mapX + 128) >> 4;
-        // int chunkZ = (mapZ + 128) >> 4;
-        //
-        // // generate random number for the whole biome area
-        // int regionX = chunkX >> 4;
-        // int regionZ = chunkZ >> 4;
-        //
-        // long seed = (long)(regionX * 3129871) ^ (long)regionZ * 116129781L;
-        // seed = seed * seed * 42317861L + seed * 7L;
-        //
-        // int num0 = (int) (seed >> 12 & 3L);
-        // int num1 = (int) (seed >> 15 & 3L);
-        // int num2 = (int) (seed >> 18 & 3L);
-        // int num3 = (int) (seed >> 21 & 3L);
-        //
-        // // slightly randomize center of biome (+/- 3)
-        // int centerX = 8 + num0 - num1;
-        // int centerZ = 8 + num2 - num3;
-        //
-        // return Math.abs(chunkX % 16) == centerX && Math.abs(chunkZ % 16) == centerZ;
-
+    private static boolean couldBeFeatureCenter(int chunkCoordinate) {
+        int offset = chunkCoordinate & (FEATURE_REGION_SIZE - 1);
+        return offset <= FEATURE_CENTER_MAX_OFFSET || offset >= FEATURE_REGION_SIZE - FEATURE_CENTER_MAX_OFFSET;
     }
 
     /**
      * Checks if the coordinates are in a feature chunk.
-     * 
+     *
      * @param world
      */
     public boolean isInFeatureChunkOld(World world, int mapX, int mapZ) {
-        int chunkX = mapX >> 4;
-        int chunkZ = mapZ >> 4;
-
-        return chunkX % 16 == 0 && chunkZ % 16 == 0;
+        int chunkX = mapX >> CHUNK_SHIFT;
+        int chunkZ = mapZ >> CHUNK_SHIFT;
+        return chunkX % FEATURE_REGION_SIZE == 0 && chunkZ % FEATURE_REGION_SIZE == 0;
     }
-
 }
