@@ -10,7 +10,6 @@ import net.minecraft.world.gen.structure.StructureComponent;
 
 import cpw.mods.fml.common.FMLLog;
 import twilightforest.structures.StructureTFComponent;
-import twilightforest.structures.lichtower.ComponentTFTowerRoof;
 
 public class ComponentTFMushroomTowerMain extends ComponentTFMushroomTowerWing {
 
@@ -49,7 +48,7 @@ public class ComponentTFMushroomTowerMain extends ComponentTFMushroomTowerWing {
 
     @Override
     public void buildComponent(StructureComponent parent, List<StructureComponent> list, Random rand) {
-        if (parent != null && parent instanceof StructureTFComponent) {
+        if (parent instanceof StructureTFComponent) {
             this.deco = ((StructureTFComponent) parent).deco;
         }
 
@@ -142,9 +141,12 @@ public class ComponentTFMushroomTowerMain extends ComponentTFMushroomTowerWing {
      */
     @Override
     public void makeARoof(StructureComponent parent, List list, Random rand) {
-        ComponentTFTowerRoof roof = new ComponentTFTowerRoofMushroom(this.getComponentType() + 1, this, 1.6F);
-        list.add(roof);
-        roof.buildComponent(this, list, rand);
+        // main towers prefer the largest cap but dont overwrite nearby towers
+        for (float overhang : new float[] { 1.6F, 1.0F, 0.6F }) {
+            if (addRoofIfClear(list, rand, new ComponentTFTowerRoofMushroom(getComponentType() + 1, this, overhang))) {
+                return;
+            }
+        }
     }
 
     /**

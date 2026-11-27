@@ -18,6 +18,7 @@ public class ComponentTFIceTowerEntrance extends ComponentTFIceTowerWing {
         super(i, x, y, z, pSize, pHeight, direction);
     }
 
+    @Override
     protected boolean shouldHaveBase(Random rand) {
         return true;
     }
@@ -46,8 +47,7 @@ public class ComponentTFIceTowerEntrance extends ComponentTFIceTowerWing {
     /**
      * Add some stairs leading to this tower
      */
-    private boolean addStairs(List<StructureComponent> list, Random rand, int index, int x, int y, int z,
-            int rotation) {
+    private void addStairs(List<StructureComponent> list, Random rand, int index, int x, int y, int z, int rotation) {
         // add door
         this.addOpening(x, y, z, rotation);
 
@@ -65,7 +65,6 @@ public class ComponentTFIceTowerEntrance extends ComponentTFIceTowerWing {
 
         list.add(entrance);
         entrance.buildComponent(list.get(0), list, rand);
-        return true;
     }
 
     /**
@@ -87,57 +86,7 @@ public class ComponentTFIceTowerEntrance extends ComponentTFIceTowerWing {
 
     protected void decoratePillarsCornersHigh(World world, Random rand, int bottom, int top, int rotation,
             StructureBoundingBox sbb) {
-        int beamMetaNS = ((this.coordBaseMode + rotation) % 2 == 0) ? 4 : 8;
-        int beamMetaEW = (beamMetaNS == 4) ? 8 : 4;
-
-        this.fillBlocksRotated(
-                world,
-                sbb,
-                3,
-                bottom + 5,
-                1,
-                3,
-                bottom + 5,
-                9,
-                deco.pillarID,
-                deco.pillarMeta + beamMetaEW,
-                rotation);
-        this.fillBlocksRotated(
-                world,
-                sbb,
-                7,
-                bottom + 5,
-                1,
-                7,
-                bottom + 5,
-                9,
-                deco.pillarID,
-                deco.pillarMeta + beamMetaEW,
-                rotation);
-        this.fillBlocksRotated(
-                world,
-                sbb,
-                1,
-                bottom + 5,
-                3,
-                9,
-                bottom + 5,
-                3,
-                deco.pillarID,
-                deco.pillarMeta + beamMetaNS,
-                rotation);
-        this.fillBlocksRotated(
-                world,
-                sbb,
-                1,
-                bottom + 5,
-                7,
-                9,
-                bottom + 5,
-                7,
-                deco.pillarID,
-                deco.pillarMeta + beamMetaNS,
-                rotation);
+        placePillarBeams(world, bottom, rotation, sbb);
 
         this.fillAirRotated(world, sbb, 3, bottom + 5, 3, 7, bottom + 5, 7, rotation);
 

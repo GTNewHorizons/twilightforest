@@ -23,6 +23,7 @@ public class ComponentTFIceTowerBossWing extends ComponentTFIceTowerWing {
         this.spawnListIndex = -1;
     }
 
+    @Override
     protected boolean shouldHaveBase(Random rand) {
         return false;
     }
@@ -30,7 +31,9 @@ public class ComponentTFIceTowerBossWing extends ComponentTFIceTowerWing {
     /**
      * Put down planks or whatevs for a floor
      */
+    @Override
     protected void placeFloor(World world, Random rand, StructureBoundingBox sbb, int floorHeight, int floor) {
+        int floorY = (floor + 1) * floorHeight;
         for (int x = 1; x < size - 1; x++) {
             for (int z = 1; z < size - 1; z++) {
 
@@ -38,7 +41,7 @@ public class ComponentTFIceTowerBossWing extends ComponentTFIceTowerWing {
                 int thickness = 1 + rand.nextInt(2) + rand.nextInt(2) + rand.nextInt(2);
 
                 for (int y = 0; y < thickness; y++) {
-                    placeBlockAtCurrentPosition(world, ice, 0, x, (floor * floorHeight) + floorHeight - y, z, sbb);
+                    placeBlockAtCurrentPosition(world, ice, 0, x, floorY - y, z, sbb);
                 }
             }
         }
@@ -47,13 +50,14 @@ public class ComponentTFIceTowerBossWing extends ComponentTFIceTowerWing {
     /**
      * Called to decorate each floor. This is responsible for adding a ladder up, the stub of the ladder going down,
      * then picking a theme for each floor and executing it.
-     * 
+     *
      * @param floor
      * @param bottom
      * @param top
      * @param ladderUpDir
      * @param laddderDownDir
      */
+    @Override
     protected void decorateFloor(World world, Random rand, int floor, int bottom, int top, int ladderUpDir,
             int ladderDownDir, StructureBoundingBox sbb) {
 
@@ -124,6 +128,7 @@ public class ComponentTFIceTowerBossWing extends ComponentTFIceTowerWing {
                 rotation);
     }
 
+    @Override
     protected void decorateTopFloor(World world, Random rand, int floor, int bottom, int top, int ladderUpDir,
             int ladderDownDir, StructureBoundingBox sbb) {
         for (int x = 1; x < size - 1; x++) {
