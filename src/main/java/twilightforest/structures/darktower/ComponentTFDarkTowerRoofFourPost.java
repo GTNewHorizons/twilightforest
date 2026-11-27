@@ -11,7 +11,6 @@ public class ComponentTFDarkTowerRoofFourPost extends ComponentTFDarkTowerRoof {
 
     public ComponentTFDarkTowerRoofFourPost() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public ComponentTFDarkTowerRoofFourPost(int i, ComponentTFTowerWing wing) {
@@ -38,7 +37,7 @@ public class ComponentTFDarkTowerRoofFourPost extends ComponentTFDarkTowerRoof {
         for (int y = 1; y < height; y++) {
             placeBlockAtCurrentPosition(world, deco.blockID, deco.blockMeta, x, y, z, sbb);
         }
-        placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x, height + 0, z, sbb);
+        placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x, height, z, sbb);
         placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x, height + 1, z, sbb);
         placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x + 1, height + 1, z, sbb);
         placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x - 1, height + 1, z, sbb);

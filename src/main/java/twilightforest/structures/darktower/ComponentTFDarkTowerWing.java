@@ -1,6 +1,5 @@
 package twilightforest.structures.darktower;
 
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -37,7 +36,6 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
 
     public ComponentTFDarkTowerWing() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     protected ComponentTFDarkTowerWing(int i, int x, int y, int z, int pSize, int pHeight, int direction) {
@@ -60,13 +58,11 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
      * Turn the openings array into an array of ints.
      */
     private int[] getDoorsTypesAsIntArray() {
-        IntBuffer ibuffer = IntBuffer.allocate(this.openingTypes.size());
-
-        for (EnumDarkTowerDoor doorType : openingTypes) {
-            ibuffer.put(doorType.ordinal());
+        int[] types = new int[openings.size()];
+        for (int i = 0; i < types.length; i++) {
+            types[i] = i < openingTypes.size() ? openingTypes.get(i).ordinal() : EnumDarkTowerDoor.VANISHING.ordinal();
         }
-
-        return ibuffer.array();
+        return types;
     }
 
     /**
@@ -83,21 +79,12 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
     /**
      * Read in opening types from int array
      */
-    private void readDoorsTypesFromArray(int[] intArray) {
-        for (int typeInt : intArray) {
-            this.openingTypes.add(EnumDarkTowerDoor.values()[typeInt]);
-        }
-    }
-
-    /**
-     * Read in openings from int array
-     */
-    @SuppressWarnings("unused")
-    private void readOpeningsFromArray(int[] intArray) {
-        for (int i = 0; i < intArray.length; i += 3) {
-            ChunkCoordinates door = new ChunkCoordinates(intArray[i], intArray[i + 1], intArray[i + 2]);
-
-            this.openings.add(door);
+    private void readDoorsTypesFromArray(int[] savedTypes) {
+        openingTypes.clear();
+        // old saves may have no door types, malformed IDs musnt crash structure loading
+        for (int i = 0; i < openings.size(); i++) {
+            int savedId = i < savedTypes.length ? savedTypes[i] : EnumDarkTowerDoor.VANISHING.ordinal();
+            openingTypes.add(EnumDarkTowerDoor.fromSerializedId(savedId));
         }
     }
 
@@ -363,23 +350,12 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
         Random rand = new Random(inRand.nextLong());
 
         // then trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dy = 0; dy <= rad; dy++) {
-                for (byte dz = 0; dz <= rad; dz++) {
-                    // determine how far we are from the center.
-                    byte dist = 0;
-                    if (dx >= dy && dx >= dz) {
-                        dist = (byte) (dx + (byte) ((Math.max(dy, dz) * 0.5) + (Math.min(dy, dz) * 0.25)));
-                    } else if (dy >= dx && dy >= dz) {
-                        dist = (byte) (dy + (byte) ((Math.max(dx, dz) * 0.5) + (Math.min(dx, dz) * 0.25)));
-                    } else {
-                        dist = (byte) (dz + (byte) ((Math.max(dx, dy) * 0.5) + (Math.min(dx, dy) * 0.25)));
-                    }
-
-                    // if we're inside the blob, fill it
-                    if (dist <= rad) {
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dy = 0; dy <= rad; dy++) {
+                for (int dz = 0; dz <= rad; dz++) {
+                    // the original ellipsoid metric rounds its term down
+                    if (blobDistance(dx, dy, dz) <= rad) {
                         // do eight at a time for easiness!
-                        testAndChangeToNetherrack(world, rand, sx + dx, sy + dy, sz + dz, sbb);
                         testAndChangeToNetherrack(world, rand, sx + dx, sy + dy, sz + dz, sbb);
                         testAndChangeToNetherrack(world, rand, sx + dx, sy + dy, sz - dz, sbb);
                         testAndChangeToNetherrack(world, rand, sx - dx, sy + dy, sz + dz, sbb);
@@ -392,6 +368,13 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
                 }
             }
         }
+    }
+
+    private static int blobDistance(int dx, int dy, int dz) {
+        int largest = Math.max(dx, Math.max(dy, dz));
+        int smallest = Math.min(dx, Math.min(dy, dz));
+        int middle = dx + dy + dz - largest - smallest;
+        return largest + (int) (middle * 0.5 + smallest * 0.25);
     }
 
     private void testAndChangeToNetherrack(World world, Random rand, int x, int y, int z, StructureBoundingBox sbb) {
@@ -410,30 +393,83 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
     public void drawBlob(World world, int sx, int sy, int sz, int rad, Block blockValue, int metaValue,
             StructureBoundingBox sbb) {
         // then trace out a quadrant
-        for (byte dx = 0; dx <= rad; dx++) {
-            for (byte dy = 0; dy <= rad; dy++) {
-                for (byte dz = 0; dz <= rad; dz++) {
-                    // determine how far we are from the center.
-                    byte dist = 0;
-                    if (dx >= dy && dx >= dz) {
-                        dist = (byte) (dx + (byte) ((Math.max(dy, dz) * 0.5) + (Math.min(dy, dz) * 0.25)));
-                    } else if (dy >= dx && dy >= dz) {
-                        dist = (byte) (dy + (byte) ((Math.max(dx, dz) * 0.5) + (Math.min(dx, dz) * 0.25)));
-                    } else {
-                        dist = (byte) (dz + (byte) ((Math.max(dx, dy) * 0.5) + (Math.min(dx, dy) * 0.25)));
-                    }
-
-                    // if we're inside the blob, fill it
-                    if (dist <= rad) {
-                        // do eight at a time for easiness!
+        for (int dx = 0; dx <= rad; dx++) {
+            for (int dy = 0; dy <= rad; dy++) {
+                for (int dz = 0; dz <= rad; dz++) {
+                    // The original ellipsoid metric rounds its fractional term down.
+                    if (blobDistance(dx, dy, dz) <= rad) {
+                        // mirror only non zero offsets to avoid writing the same block up to 8 times
                         this.placeBlockAtCurrentPosition(world, blockValue, metaValue, sx + dx, sy + dy, sz + dz, sbb);
-                        this.placeBlockAtCurrentPosition(world, blockValue, metaValue, sx + dx, sy + dy, sz - dz, sbb);
-                        this.placeBlockAtCurrentPosition(world, blockValue, metaValue, sx - dx, sy + dy, sz + dz, sbb);
-                        this.placeBlockAtCurrentPosition(world, blockValue, metaValue, sx - dx, sy + dy, sz - dz, sbb);
-                        this.placeBlockAtCurrentPosition(world, blockValue, metaValue, sx + dx, sy - dy, sz + dz, sbb);
-                        this.placeBlockAtCurrentPosition(world, blockValue, metaValue, sx + dx, sy - dy, sz - dz, sbb);
-                        this.placeBlockAtCurrentPosition(world, blockValue, metaValue, sx - dx, sy - dy, sz + dz, sbb);
-                        this.placeBlockAtCurrentPosition(world, blockValue, metaValue, sx - dx, sy - dy, sz - dz, sbb);
+                        if (dz != 0) {
+                            this.placeBlockAtCurrentPosition(
+                                    world,
+                                    blockValue,
+                                    metaValue,
+                                    sx + dx,
+                                    sy + dy,
+                                    sz - dz,
+                                    sbb);
+                        }
+                        if (dx != 0) {
+                            this.placeBlockAtCurrentPosition(
+                                    world,
+                                    blockValue,
+                                    metaValue,
+                                    sx - dx,
+                                    sy + dy,
+                                    sz + dz,
+                                    sbb);
+                            if (dz != 0) {
+                                this.placeBlockAtCurrentPosition(
+                                        world,
+                                        blockValue,
+                                        metaValue,
+                                        sx - dx,
+                                        sy + dy,
+                                        sz - dz,
+                                        sbb);
+                            }
+                        }
+                        if (dy != 0) {
+                            this.placeBlockAtCurrentPosition(
+                                    world,
+                                    blockValue,
+                                    metaValue,
+                                    sx + dx,
+                                    sy - dy,
+                                    sz + dz,
+                                    sbb);
+                            if (dz != 0) {
+                                this.placeBlockAtCurrentPosition(
+                                        world,
+                                        blockValue,
+                                        metaValue,
+                                        sx + dx,
+                                        sy - dy,
+                                        sz - dz,
+                                        sbb);
+                            }
+                            if (dx != 0) {
+                                this.placeBlockAtCurrentPosition(
+                                        world,
+                                        blockValue,
+                                        metaValue,
+                                        sx - dx,
+                                        sy - dy,
+                                        sz + dz,
+                                        sbb);
+                                if (dz != 0) {
+                                    this.placeBlockAtCurrentPosition(
+                                            world,
+                                            blockValue,
+                                            metaValue,
+                                            sx - dx,
+                                            sy - dy,
+                                            sz - dz,
+                                            sbb);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -575,7 +611,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
 
     /**
      * Dark tower treasure rooms!
-     * 
+     *
      * @param myDeco
      */
     protected void decorateTreasureRoom(World world, StructureBoundingBox sbb, int rotation, int y, int spacing,
@@ -1036,7 +1072,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
                 logDeco.pillarMeta = 3;
 
                 logDeco.platformID = TFBlocks.log;
-                logDeco.pillarMeta = 3;
+                logDeco.platformMeta = 3;
 
                 decorateTreasureRoom(world, sbb, rotation, y, 4, logDeco);
             } else {
@@ -1177,12 +1213,20 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
      * Utility function to pick a random number between two values, excluding three specified values
      */
     protected int pickBetweenExcluding(int low, int high, Random rand, int k, int l, int m) {
-        int result;
+        int validCandidates = 0;
+        for (int candidate = low; candidate < high; candidate++) {
+            if (candidate != k && candidate != l && candidate != m) {
+                validCandidates++;
+            }
+        }
+        if (validCandidates == 0) {
+            throw new IllegalArgumentException("No available beam positions in [" + low + ", " + high + ")");
+        }
 
+        int result;
         do {
             result = rand.nextInt(high - low) + low;
         } while (result == k || result == l || result == m);
-
         return result;
     }
 
@@ -1214,7 +1258,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
 
     /**
      * Generate walls for the tower with the distinct pattern of blocks and accent blocks
-     * 
+     *
      * @param rand
      */
     protected void makeEncasedWalls(World world, Random rand, StructureBoundingBox sbb, int minX, int minY, int minZ,
@@ -1223,33 +1267,33 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
-                    if (x != minX && x != maxX && y != minY && y != maxY && z != minZ && z != maxZ) {} else {
-                        // wall
-                        if (((x == minY || x == maxX) && ((y == minY || y == maxY) || (z == minZ || z == maxZ)))
-                                || ((y == minY || y == maxY) && ((x == minY || x == maxX) || (z == minZ || z == maxZ)))
-                                || ((z == minZ || z == maxZ)
-                                        && ((x == minY || x == maxX) || (y == minY || y == maxY)))) {
-                            this.placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x, y, z, sbb);
-                        }
-                        // else if (this.isKeyTower())
-                        // {
-                        // this.placeBlockAtCurrentPosition(world, Blocks.diamond_block, 0, x, y, z, sbb);
-                        // }
-                        else {
-                            StructureComponent.BlockSelector blocker = deco.randomBlocks;
+                    if (x != minX && x != maxX && y != minY && y != maxY && z != minZ && z != maxZ) {
+                        continue;
+                    }
+                    // wall
+                    if (((x == minX || x == maxX) && ((y == minY || y == maxY) || (z == minZ || z == maxZ)))
+                            || ((y == minY || y == maxY) && ((x == minX || x == maxX) || (z == minZ || z == maxZ)))
+                            || ((z == minZ || z == maxZ) && ((x == minX || x == maxX) || (y == minY || y == maxY)))) {
+                        this.placeBlockAtCurrentPosition(world, deco.accentID, deco.accentMeta, x, y, z, sbb);
+                    }
+                    // else if (this.isKeyTower())
+                    // {
+                    // this.placeBlockAtCurrentPosition(world, Blocks.diamond_block, 0, x, y, z, sbb);
+                    // }
+                    else {
+                        StructureComponent.BlockSelector blocker = deco.randomBlocks;
 
-                            blocker.selectBlocks(rand, x, y, z, true);
-                            this.placeBlockAtCurrentPosition(
-                                    world,
-                                    blocker.func_151561_a(),
-                                    blocker.getSelectedBlockMetaData(),
-                                    x,
-                                    y,
-                                    z,
-                                    sbb);
+                        blocker.selectBlocks(rand, x, y, z, true);
+                        this.placeBlockAtCurrentPosition(
+                                world,
+                                blocker.func_151561_a(),
+                                blocker.getSelectedBlockMetaData(),
+                                x,
+                                y,
+                                z,
+                                sbb);
 
-                            // this.placeBlockAtCurrentPosition(world, deco.blockID, deco.blockMeta, x, y, z, sbb);
-                        }
+                        // this.placeBlockAtCurrentPosition(world, deco.blockID, deco.blockMeta, x, y, z, sbb);
                     }
                 }
             }
@@ -1326,7 +1370,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
      */
     protected void addOpening(int dx, int dy, int dz, int direction, EnumDarkTowerDoor type) {
         super.addOpening(dx, dy, dz, direction);
-        this.openingTypes.add(openings.indexOf(new ChunkCoordinates(dx, dy, dz)), type);
+        this.openingTypes.add(type);
     }
 
     /**
@@ -1337,12 +1381,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
         for (int i = 0; i < openings.size(); i++) {
             ChunkCoordinates doorCoords = openings.get(i);
 
-            EnumDarkTowerDoor doorType;
-            if (openingTypes.size() > i) {
-                doorType = openingTypes.get(i);
-            } else {
-                doorType = EnumDarkTowerDoor.VANISHING;
-            }
+            EnumDarkTowerDoor doorType = i < openingTypes.size() ? openingTypes.get(i) : EnumDarkTowerDoor.VANISHING;
 
             switch (doorType) {
                 default -> makeDoorOpening(world, doorCoords.posX, doorCoords.posY, doorCoords.posZ, sbb);
@@ -1363,152 +1402,32 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
      */
     @Override
     protected void makeDoorOpening(World world, int dx, int dy, int dz, StructureBoundingBox sbb) {
-        // nullify sky light
-        nullifySkyLightAtCurrentPosition(world, dx - 3, dy - 1, dz - 3, dx + 3, dy + 3, dz + 3);
-
-        // clear the door
-        if (dx == 0 || dx == size - 1) {
-            this.fillWithMetadataBlocks(
-                    world,
-                    sbb,
-                    dx,
-                    dy - 1,
-                    dz - 2,
-                    dx,
-                    dy + 3,
-                    dz + 2,
-                    deco.accentID,
-                    deco.accentMeta,
-                    Blocks.air,
-                    0,
-                    false);
-            this.fillWithMetadataBlocks(
-                    world,
-                    sbb,
-                    dx,
-                    dy,
-                    dz - 1,
-                    dx,
-                    dy + 2,
-                    dz + 1,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_INACTIVE,
-                    Blocks.air,
-                    0,
-                    false);
-        }
-        if (dz == 0 || dz == size - 1) {
-            this.fillWithMetadataBlocks(
-                    world,
-                    sbb,
-                    dx - 2,
-                    dy - 1,
-                    dz,
-                    dx + 2,
-                    dy + 3,
-                    dz,
-                    deco.accentID,
-                    deco.accentMeta,
-                    Blocks.air,
-                    0,
-                    false);
-            this.fillWithMetadataBlocks(
-                    world,
-                    sbb,
-                    dx - 1,
-                    dy,
-                    dz,
-                    dx + 1,
-                    dy + 2,
-                    dz,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_INACTIVE,
-                    Blocks.air,
-                    0,
-                    false);
-        }
+        makeDarkTowerDoorOpening(world, dx, dy, dz, EnumDarkTowerDoor.VANISHING, sbb);
     }
 
     /**
      * Make a 3x3 tower door that reappears
      */
     protected void makeReappearingDoorOpening(World world, int dx, int dy, int dz, StructureBoundingBox sbb) {
-        // nullify sky light
-        nullifySkyLightAtCurrentPosition(world, dx - 3, dy - 1, dz - 3, dx + 3, dy + 3, dz + 3);
-
-        // clear the door
-        if (dx == 0 || dx == size - 1) {
-            this.fillWithMetadataBlocks(
-                    world,
-                    sbb,
-                    dx,
-                    dy - 1,
-                    dz - 2,
-                    dx,
-                    dy + 3,
-                    dz + 2,
-                    deco.accentID,
-                    deco.accentMeta,
-                    Blocks.air,
-                    0,
-                    false);
-            this.fillWithMetadataBlocks(
-                    world,
-                    sbb,
-                    dx,
-                    dy,
-                    dz - 1,
-                    dx,
-                    dy + 2,
-                    dz + 1,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_REAPPEARING_INACTIVE,
-                    Blocks.air,
-                    0,
-                    false);
-        }
-        if (dz == 0 || dz == size - 1) {
-            this.fillWithMetadataBlocks(
-                    world,
-                    sbb,
-                    dx - 2,
-                    dy - 1,
-                    dz,
-                    dx + 2,
-                    dy + 3,
-                    dz,
-                    deco.accentID,
-                    deco.accentMeta,
-                    Blocks.air,
-                    0,
-                    false);
-            this.fillWithMetadataBlocks(
-                    world,
-                    sbb,
-                    dx - 1,
-                    dy,
-                    dz,
-                    dx + 1,
-                    dy + 2,
-                    dz,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_REAPPEARING_INACTIVE,
-                    Blocks.air,
-                    0,
-                    false);
-        }
+        makeDarkTowerDoorOpening(world, dx, dy, dz, EnumDarkTowerDoor.REAPPEARING, sbb);
     }
 
     /**
      * Make a 3x3 tower door that is locked
      */
     protected void makeLockedDoorOpening(World world, int dx, int dy, int dz, StructureBoundingBox sbb) {
-        // nullify sky light
+        makeDarkTowerDoorOpening(world, dx, dy, dz, EnumDarkTowerDoor.LOCKED, sbb);
+    }
+
+    private void makeDarkTowerDoorOpening(World world, int dx, int dy, int dz, EnumDarkTowerDoor type,
+            StructureBoundingBox sbb) {
         nullifySkyLightAtCurrentPosition(world, dx - 3, dy - 1, dz - 3, dx + 3, dy + 3, dz + 3);
 
-        // clear the door
+        int doorMeta = type == EnumDarkTowerDoor.REAPPEARING ? BlockTFTowerDevice.META_REAPPEARING_INACTIVE
+                : BlockTFTowerDevice.META_VANISH_INACTIVE;
+
         if (dx == 0 || dx == size - 1) {
-            this.fillWithMetadataBlocks(
+            fillWithMetadataBlocks(
                     world,
                     sbb,
                     dx,
@@ -1522,7 +1441,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
                     Blocks.air,
                     0,
                     false);
-            this.fillWithMetadataBlocks(
+            fillWithMetadataBlocks(
                     world,
                     sbb,
                     dx,
@@ -1532,45 +1451,17 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
                     dy + 2,
                     dz + 1,
                     TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_INACTIVE,
+                    doorMeta,
                     Blocks.air,
                     0,
                     false);
-            this.placeBlockAtCurrentPosition(
-                    world,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_LOCKED,
-                    dx,
-                    dy + 0,
-                    dz + 1,
-                    sbb);
-            this.placeBlockAtCurrentPosition(
-                    world,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_LOCKED,
-                    dx,
-                    dy + 0,
-                    dz - 1,
-                    sbb);
-            this.placeBlockAtCurrentPosition(
-                    world,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_LOCKED,
-                    dx,
-                    dy + 2,
-                    dz + 1,
-                    sbb);
-            this.placeBlockAtCurrentPosition(
-                    world,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_LOCKED,
-                    dx,
-                    dy + 2,
-                    dz - 1,
-                    sbb);
+
+            if (type == EnumDarkTowerDoor.LOCKED) {
+                placeLockedDoorCorners(world, dx, dy, dz, false, sbb);
+            }
         }
         if (dz == 0 || dz == size - 1) {
-            this.fillWithMetadataBlocks(
+            fillWithMetadataBlocks(
                     world,
                     sbb,
                     dx - 2,
@@ -1584,7 +1475,7 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
                     Blocks.air,
                     0,
                     false);
-            this.fillWithMetadataBlocks(
+            fillWithMetadataBlocks(
                     world,
                     sbb,
                     dx - 1,
@@ -1594,48 +1485,36 @@ public class ComponentTFDarkTowerWing extends ComponentTFTowerWing {
                     dy + 2,
                     dz,
                     TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_INACTIVE,
+                    doorMeta,
                     Blocks.air,
                     0,
                     false);
-            this.placeBlockAtCurrentPosition(
-                    world,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_LOCKED,
-                    dx + 1,
-                    dy + 0,
-                    dz,
-                    sbb);
-            this.placeBlockAtCurrentPosition(
-                    world,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_LOCKED,
-                    dx - 1,
-                    dy + 0,
-                    dz,
-                    sbb);
-            this.placeBlockAtCurrentPosition(
-                    world,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_LOCKED,
-                    dx + 1,
-                    dy + 2,
-                    dz,
-                    sbb);
-            this.placeBlockAtCurrentPosition(
-                    world,
-                    TFBlocks.towerDevice,
-                    BlockTFTowerDevice.META_VANISH_LOCKED,
-                    dx - 1,
-                    dy + 2,
-                    dz,
-                    sbb);
+
+            if (type == EnumDarkTowerDoor.LOCKED) {
+                placeLockedDoorCorners(world, dx, dy, dz, true, sbb);
+            }
+        }
+    }
+
+    private void placeLockedDoorCorners(World world, int dx, int dy, int dz, boolean alongX, StructureBoundingBox sbb) {
+        // retain the exact original placement order and positions for locked vanishing blocks
+        for (int yOffset : new int[] { 0, 2 }) {
+            for (int side : new int[] { 1, -1 }) {
+                placeBlockAtCurrentPosition(
+                        world,
+                        TFBlocks.towerDevice,
+                        BlockTFTowerDevice.META_VANISH_LOCKED,
+                        dx + (alongX ? side : 0),
+                        dy + yOffset,
+                        dz + (alongX ? 0 : side),
+                        sbb);
+            }
         }
     }
 
     /**
      * Returns true if this tower has only one exit.
-     * 
+     *
      * TODO: is this really the best way?
      */
     public boolean isDeadEnd() {

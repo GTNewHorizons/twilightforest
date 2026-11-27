@@ -15,7 +15,6 @@ public class ComponentTFDarkTowerBalcony extends ComponentTFTowerWing {
 
     public ComponentTFDarkTowerBalcony() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     protected ComponentTFDarkTowerBalcony(int i, int x, int y, int z, int direction) {

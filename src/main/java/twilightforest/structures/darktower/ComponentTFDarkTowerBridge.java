@@ -3,6 +3,7 @@ package twilightforest.structures.darktower;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
@@ -24,6 +25,20 @@ public class ComponentTFDarkTowerBridge extends ComponentTFTowerWing {
 
         this.dSize = pSize;
         this.dHeight = pHeight;
+    }
+
+    @Override
+    protected void func_143012_a(NBTTagCompound tag) {
+        super.func_143012_a(tag);
+        tag.setInteger("bridgeTargetSize", dSize);
+        tag.setInteger("bridgeTargetHeight", dHeight);
+    }
+
+    @Override
+    protected void func_143011_b(NBTTagCompound tag) {
+        super.func_143011_b(tag);
+        dSize = tag.getInteger("bridgeTargetSize");
+        dHeight = tag.getInteger("bridgeTargetHeight");
     }
 
     @Override
@@ -95,7 +110,7 @@ public class ComponentTFDarkTowerBridge extends ComponentTFTowerWing {
 
     /**
      * Gets the bounding box of the tower wing we would like to make.
-     * 
+     *
      * @return
      */
     public StructureBoundingBox getWingBB() {
