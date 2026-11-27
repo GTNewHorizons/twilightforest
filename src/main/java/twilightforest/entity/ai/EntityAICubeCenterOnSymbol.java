@@ -5,21 +5,21 @@ import net.minecraft.entity.ai.EntityAIBase;
 import twilightforest.entity.EntityTFRovingCube;
 
 /**
- * 
+ *
  * This is a task that runs when we are near a symbol and have stopped pathfinding, but are not centered on the symbol.
- * 
+ *
  * The goal of this task is to center on a symbol.
- * 
+ *
  * @author benma_000
  *
  */
 public class EntityAICubeCenterOnSymbol extends EntityAIBase {
 
-    private EntityTFRovingCube myCube;
+    private final EntityTFRovingCube myCube;
     private double xPosition;
     private double yPosition;
     private double zPosition;
-    private double speed;
+    private final double speed;
 
     public EntityAICubeCenterOnSymbol(EntityTFRovingCube entityTFRovingCube, double d) {
         this.myCube = entityTFRovingCube;
@@ -27,50 +27,34 @@ public class EntityAICubeCenterOnSymbol extends EntityAIBase {
         this.yPosition = this.myCube.symbolY;
         this.zPosition = this.myCube.symbolZ;
         this.speed = d;
+        this.setMutexBits(1);
     }
 
     @Override
     public boolean shouldExecute() {
-        this.xPosition = this.myCube.symbolX;
-        this.yPosition = this.myCube.symbolY;
-        this.zPosition = this.myCube.symbolZ;
-
-        if (!this.myCube.getNavigator().noPath()) {
-            return false;
-        } else if (this.isCloseToSymbol()) {
-
-            return true;
-        } else {
+        if (!myCube.hasFoundSymbol || !myCube.getNavigator().noPath()) {
             return false;
         }
+        xPosition = myCube.symbolX;
+        yPosition = myCube.symbolY;
+        zPosition = myCube.symbolZ;
+        double distance = distanceFromSymbol();
+        return distance > 0.1D && distance < 10.0D;
     }
 
     // Returns whether an in-progress EntityAIBase should continue executing
     public boolean continueExecuting() {
-
-        // inch towards it
-        double dist = this.distanceFromSymbol();
-
-        this.myCube.getMoveHelper().setMoveTo(this.xPosition + 0.5F, this.yPosition, this.zPosition + 0.5F, this.speed);
-
-        /*
-         * if (this.myCube.ticksExisted % 5 == 0) { // System.out.println("Centering cube on symbol. Dist = " + dist);
-         * // System.out.println("heading to " + this.xPosition + ", " + this.yPosition + ", " + // this.zPosition); }
-         */
-
-        return dist > 0.1F && this.isCourseTraversable();
+        return myCube.hasFoundSymbol && myCube.getNavigator().noPath()
+                && myCube.symbolX == xPosition
+                && myCube.symbolY == yPosition
+                && myCube.symbolZ == zPosition
+                && distanceFromSymbol() > 0.1D
+                && distanceFromSymbol() < 10.0D;
     }
 
-    private boolean isCourseTraversable() {
-
-        return this.distanceFromSymbol() < 100;
-    }
-
-    private boolean isCloseToSymbol() {
-        double dist = this.distanceFromSymbol();
-        // System.out.println("are we close? Dist = " + dist);
-
-        return dist > 0.25F && dist < 10F;
+    @Override
+    public void updateTask() {
+        myCube.getMoveHelper().setMoveTo(xPosition + 0.5D, yPosition, zPosition + 0.5D, speed);
     }
 
     public double distanceFromSymbol() {

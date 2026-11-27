@@ -109,7 +109,8 @@ public class EntityTFBlockGoblin extends EntityMob implements IEntityMultiPart {
     /**
      * Returns the item ID for the item the mob drops on death.
      */
-    protected Item getDropItemId() {
+    @Override
+    protected Item getDropItem() {
         return TFItems.armorShard;
     }
 
@@ -173,6 +174,9 @@ public class EntityTFBlockGoblin extends EntityMob implements IEntityMultiPart {
     public void onUpdate() {
 
         super.onUpdate();
+        if (this.isDead) {
+            return;
+        }
         block.onUpdate();
         chain1.onUpdate();
         chain2.onUpdate();
@@ -186,11 +190,18 @@ public class EntityTFBlockGoblin extends EntityMob implements IEntityMultiPart {
         chainAngle %= 360;
 
         if (!this.worldObj.isRemote) {
-            this.dataWatcher.updateObject(DATA_CHAINLENGTH, (byte) Math.floor(getChainLength() * 127F));
-            this.dataWatcher.updateObject(DATA_CHAINPOS, (byte) Math.floor(getChainAngle() / 360F * 255F));
+            byte length = (byte) Math.floor(getChainLength() * 127F);
+            byte angle = (byte) Math.floor(getChainAngle() / 360F * 255F);
+            if (this.dataWatcher.getWatchableObjectByte(DATA_CHAINLENGTH) != length) {
+                this.dataWatcher.updateObject(DATA_CHAINLENGTH, length);
+            }
+            if (this.dataWatcher.getWatchableObjectByte(DATA_CHAINPOS) != angle) {
+                this.dataWatcher.updateObject(DATA_CHAINPOS, angle);
+            }
         } else {
             // synch chain pos if it's wrong
-            if (Math.abs(this.chainAngle - this.getChainAngle()) > CHAIN_SPEED * 2) {
+            if (Math.abs(net.minecraft.util.MathHelper.wrapAngleTo180_float(this.chainAngle - this.getChainAngle()))
+                    > CHAIN_SPEED * 2) {
                 // FMLLog.info("Fixing chain pos on client");
                 this.chainAngle = getChainAngle();
             }
@@ -229,12 +240,10 @@ public class EntityTFBlockGoblin extends EntityMob implements IEntityMultiPart {
                 collider,
                 collider.boundingBox.expand(0.20000000298023224D, 0.0D, 0.20000000298023224D));
 
-        if (list != null && !list.isEmpty()) {
+        if (!list.isEmpty()) {
             for (Entity value : list) {
-                Entity entity = value;
-
-                if (entity.canBePushed()) {
-                    applyBlockCollision(collider, entity);
+                if (!value.isDead && value.canBePushed()) {
+                    applyBlockCollision(collider, value);
                 }
             }
         }

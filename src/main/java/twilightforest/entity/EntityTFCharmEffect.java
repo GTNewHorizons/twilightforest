@@ -42,7 +42,7 @@ public class EntityTFCharmEffect extends EntityItem {
         this.setSize(0.25F, 0.25F);
 
         this.orbiting = par2EntityLiving;
-        if (this.orbiting instanceof EntityPlayer) this.setOwner(((EntityPlayer) orbiting).getDisplayName());
+        if (this.orbiting instanceof EntityPlayer) this.setOwner(((EntityPlayer) orbiting).getCommandSenderName());
         this.setItemID(item);
         this.setEntityItemStack(new ItemStack(item));
 
@@ -116,7 +116,8 @@ public class EntityTFCharmEffect extends EntityItem {
             }
         }
 
-        if (this.ticksExisted > 200 || this.orbiting == null || this.orbiting.isDead) {
+        // clients may receive the orbiting entity before its owner is available locally
+        if (this.ticksExisted > 200 || (!this.worldObj.isRemote && (this.orbiting == null || this.orbiting.isDead))) {
             this.setDead();
         }
     }
@@ -166,17 +167,17 @@ public class EntityTFCharmEffect extends EntityItem {
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
-        super.readEntityFromNBT(par1NBTTagCompound);
-        par1NBTTagCompound.setString("Owner", this.getOwnerName());
-        par1NBTTagCompound.setShort("ItemID", (short) this.getItemID());
+    public void readEntityFromNBT(NBTTagCompound tags) {
+        super.readEntityFromNBT(tags);
+        this.setOwner(tags.getString("Owner"));
+        this.setItemID(tags.getInteger("ItemID"));
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
-        this.setOwner(par1NBTTagCompound.getString("Owner"));
-        this.setItemID(par1NBTTagCompound.getShort("ItemID"));
-        super.writeEntityToNBT(par1NBTTagCompound);
+    public void writeEntityToNBT(NBTTagCompound tags) {
+        super.writeEntityToNBT(tags);
+        tags.setString("Owner", this.getOwnerName());
+        tags.setInteger("ItemID", this.getItemID());
     }
 
     /**

@@ -21,6 +21,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -51,13 +52,26 @@ public class ItemTFScepterLifeDrain extends ItemTF {
      * Animates the target falling apart into a rain of shatter particles
      */
     public static void animateTargetShatter(World worldObj, EntityLivingBase target) {
+        Item drop = getTargetDropItemId(target);
+        Item popItem = drop != null ? drop : Items.rotten_flesh;
+        if (worldObj instanceof WorldServer server) {
+            server.func_147487_a(
+                    "iconcrack_" + Item.getIdFromItem(popItem),
+                    target.posX,
+                    target.posY + target.height * 0.5D,
+                    target.posZ,
+                    50,
+                    target.width * 0.5D,
+                    target.height * 0.25D,
+                    target.width * 0.5D,
+                    0.02D);
+            return;
+        }
         for (int var1 = 0; var1 < 50; ++var1) {
             double gaussX = itemRand.nextGaussian() * 0.02D;
             double gaussY = itemRand.nextGaussian() * 0.02D;
             double gaussZ = itemRand.nextGaussian() * 0.02D;
             double gaussFactor = 10.0D;
-
-            Item popItem = getTargetDropItemId(target) != null ? getTargetDropItemId(target) : Items.rotten_flesh;
 
             worldObj.spawnParticle(
                     "iconcrack_" + Item.getIdFromItem(popItem),
@@ -84,12 +98,18 @@ public class ItemTFScepterLifeDrain extends ItemTF {
         Vec3 srcVec = Vec3.createVectorHelper(player.posX, player.posY + player.getEyeHeight(), player.posZ);
         Vec3 lookVec = player.getLook(1.0F);
         Vec3 destVec = srcVec.addVector(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range);
+        // respect solid walls, the original entity only ray could drain creatures through blocks
+        MovingObjectPosition blockHit = worldObj
+                .rayTraceBlocks(Vec3.createVectorHelper(srcVec.xCoord, srcVec.yCoord, srcVec.zCoord), destVec);
+        if (blockHit != null && blockHit.hitVec != null) {
+            destVec = blockHit.hitVec;
+        }
         float var9 = 1.0F;
         List<Entity> possibleList = worldObj.getEntitiesWithinAABBExcludingEntity(
                 player,
                 player.boundingBox.addCoord(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range)
                         .expand(var9, var9, var9));
-        double hitDist = 0;
+        double hitDist = srcVec.distanceTo(destVec);
 
         for (Entity possibleEntity : possibleList) {
 
@@ -99,14 +119,14 @@ public class ItemTFScepterLifeDrain extends ItemTF {
                 MovingObjectPosition interceptPos = collisionBB.calculateIntercept(srcVec, destVec);
 
                 if (collisionBB.isVecInside(srcVec)) {
-                    if (0.0D < hitDist || hitDist == 0.0D) {
+                    if (pointedEntity == null || hitDist > 0.0D) {
                         pointedEntity = possibleEntity;
                         hitDist = 0.0D;
                     }
                 } else if (interceptPos != null) {
                     double possibleDist = srcVec.distanceTo(interceptPos.hitVec);
 
-                    if (possibleDist < hitDist || hitDist == 0.0D) {
+                    if (possibleDist < hitDist || pointedEntity == null && possibleDist == hitDist) {
                         pointedEntity = possibleEntity;
                         hitDist = possibleDist;
                     }
@@ -131,13 +151,12 @@ public class ItemTFScepterLifeDrain extends ItemTF {
             // is the player looking at an entity
             Entity pointedEntity = getPlayerLookTarget(worldObj, player);
 
-            if (pointedEntity != null && pointedEntity instanceof EntityLivingBase target) {
+            if (pointedEntity instanceof EntityLivingBase target && target.isEntityAlive()) {
 
                 if (target.getActivePotionEffect(Potion.moveSlowdown) != null || target.getHealth() < 1) {
 
                     if (target.getHealth() <= 3) {
-                        // make it explode
-
+                        // keep the drain active unless the server knows the target died
                         makeRedMagicTrail(
                                 worldObj,
                                 player.posX,
@@ -146,24 +165,29 @@ public class ItemTFScepterLifeDrain extends ItemTF {
                                 target.posX,
                                 target.posY + target.getEyeHeight(),
                                 target.posZ);
-                        if (target instanceof EntityLiving) {
-                            ((EntityLiving) target).spawnExplosionParticle();
-                        }
-                        worldObj.playSoundAtEntity(
-                                target,
-                                "game.player.hurt.fall.big",
-                                1.0F,
-                                ((itemRand.nextFloat() - itemRand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                        animateTargetShatter(worldObj, target);
                         if (!worldObj.isRemote) {
-                            target.setDead();
-                            target.onDeath(DamageSource.causeIndirectMagicDamage(player, player));
+                            // use the regular damage/death path
+                            target.attackEntityFrom(
+                                    DamageSource.causeIndirectMagicDamage(player, player),
+                                    Math.max(3.0F, target.getHealth() + 1.0F));
+                            if (!target.isEntityAlive()) {
+                                if (target instanceof EntityLiving living) {
+                                    living.spawnExplosionParticle();
+                                }
+                                worldObj.playSoundAtEntity(
+                                        target,
+                                        "game.player.hurt.fall.big",
+                                        1.0F,
+                                        ((itemRand.nextFloat() - itemRand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                                animateTargetShatter(worldObj, target);
+                                player.stopUsingItem();
+                            }
                         }
-                        player.stopUsingItem();
                     } else {
                         // we have hit this creature recently
                         if (!worldObj.isRemote) {
-                            target.attackEntityFrom(DamageSource.causeIndirectMagicDamage(player, player), 3);
+                            boolean damaged = target
+                                    .attackEntityFrom(DamageSource.causeIndirectMagicDamage(player, player), 3);
 
                             // only do lifting effect on creatures weaker than the player
                             if (getMaxHealth(target) <= getMaxHealth(player)) {
@@ -174,7 +198,7 @@ public class ItemTFScepterLifeDrain extends ItemTF {
 
                             target.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 20, 2));
 
-                            if (count % 10 == 0) {
+                            if (damaged && count % 10 == 0) {
                                 // heal the player
                                 player.heal(1);
                                 // and give foods

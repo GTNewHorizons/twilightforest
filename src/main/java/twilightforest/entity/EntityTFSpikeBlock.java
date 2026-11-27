@@ -34,8 +34,6 @@ public class EntityTFSpikeBlock extends Entity {
     public void onUpdate() {
         super.onUpdate();
 
-        this.ticksExisted++;
-
         lastTickPosX = posX;
         lastTickPosY = posY;
         lastTickPosZ = posZ;

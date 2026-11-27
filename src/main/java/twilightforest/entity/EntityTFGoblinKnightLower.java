@@ -108,28 +108,22 @@ public class EntityTFGoblinKnightLower extends EntityMob {
      * Initialize this creature.
      */
     public void initCreature() {
-        // we start with the upper guy riding us
+        if (this.worldObj.isRemote || this.riddenByEntity instanceof EntityTFGoblinKnightUpper) {
+            return;
+        }
         EntityTFGoblinKnightUpper upper = new EntityTFGoblinKnightUpper(this.worldObj);
         upper.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
         upper.onSpawnWithEgg(null);
-        this.worldObj.spawnEntityInWorld(upper);
-        upper.mountEntity(this);
+        if (this.worldObj.spawnEntityInWorld(upper)) {
+            upper.mountEntity(this);
+        }
     }
 
-    /**
-     * Init creature with mount
-     */
-    public IEntityLivingData onSpawnWithEgg(IEntityLivingData par1EntityLivingData) {
-        Object par1EntityLivingData1 = super.onSpawnWithEgg(par1EntityLivingData);
-
-        // we start with the upper guy riding us
-        EntityTFGoblinKnightUpper upper = new EntityTFGoblinKnightUpper(this.worldObj);
-        upper.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-        upper.onSpawnWithEgg(null);
-        this.worldObj.spawnEntityInWorld(upper);
-        upper.mountEntity(this);
-
-        return (IEntityLivingData) par1EntityLivingData1;
+    @Override
+    public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
+        IEntityLivingData result = super.onSpawnWithEgg(data);
+        initCreature();
+        return result;
     }
 
     /**
@@ -174,14 +168,7 @@ public class EntityTFGoblinKnightLower extends EntityMob {
     @Override
     public boolean attackEntityFrom(DamageSource par1DamageSource, float damageAmount) {
         // check the angle of attack, if applicable
-        Entity attacker = null;
-        if (par1DamageSource.getEntity() != null) {
-            attacker = par1DamageSource.getEntity();
-        }
-
-        if (par1DamageSource.getEntity() != null) {
-            attacker = par1DamageSource.getEntity();
-        }
+        Entity attacker = par1DamageSource.getEntity();
 
         if (attacker != null) {
             // determine angle
@@ -190,7 +177,7 @@ public class EntityTFGoblinKnightLower extends EntityMob {
             double dz = this.posZ - attacker.posZ;
             float angle = (float) ((Math.atan2(dz, dx) * 180D) / Math.PI) - 90F;
 
-            float difference = MathHelper.abs((this.renderYawOffset - angle) % 360);
+            float difference = MathHelper.abs(MathHelper.wrapAngleTo180_float(this.renderYawOffset - angle));
 
             // System.out.println("Difference in angle of approach is " + difference);
 
@@ -201,14 +188,14 @@ public class EntityTFGoblinKnightLower extends EntityMob {
                 upper = (EntityTFGoblinKnightUpper) this.riddenByEntity;
             }
 
-            if (upper != null && upper.hasShield() && difference > 150 && difference < 230) {
+            if (upper != null && upper.hasShield() && difference > 150) {
                 if (upper.takeHitOnShield(par1DamageSource, damageAmount)) {
                     return false;
                 }
             }
 
             // break armor?
-            if (this.hasArmor() && (difference > 300 || difference < 60)) {
+            if (this.hasArmor() && (difference < 60)) {
                 breakArmor();
             }
         }
@@ -223,6 +210,9 @@ public class EntityTFGoblinKnightLower extends EntityMob {
      * Break our armor
      */
     public void breakArmor() {
+        if (!this.hasArmor() || this.worldObj.isRemote) {
+            return;
+        }
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
         this.renderBrokenItemStack(new ItemStack(Items.iron_chestplate));
@@ -250,7 +240,8 @@ public class EntityTFGoblinKnightLower extends EntityMob {
     /**
      * Returns the item ID for the item the mob drops on death.
      */
-    protected Item getDropItemId() {
+    @Override
+    protected Item getDropItem() {
         return TFItems.armorShard;
     }
 

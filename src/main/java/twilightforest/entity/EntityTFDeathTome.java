@@ -109,7 +109,7 @@ public class EntityTFDeathTome extends EntityMob {
      */
     @Override
     protected void dropFewItems(boolean par1, int par2) {
-        int var3 = this.rand.nextInt(3 + par2);
+        int var3 = this.rand.nextInt(Math.max(1, 3 + par2));
         int var4;
 
         for (var4 = 0; var4 < var3; ++var4) {

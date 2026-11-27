@@ -1,5 +1,6 @@
 package twilightforest.entity;
 
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
@@ -104,58 +105,31 @@ public class EntityTFBoggard extends EntityMob {
         }
     }
 
-    /**
-     * The redcap is hesitant, and when he is getting close to the player, he may suddenly veer off to the side
-     * 
-     * This is our old AI, no longer used
-     *
-     * protected void updateEntityActionState() { super.updateEntityActionState();
-     * 
-     * if (entityToAttack != null) { float enemyDist = entityToAttack.getDistanceToEntity(this);
-     * 
-     * // speed up when very close to enemy or feeling bold if (enemyDist < 4 || !shy) { moveSpeed = 0.8F; } else {
-     * moveSpeed = 0.5F; }
-     * 
-     * // avoid frontal assault if (enemyDist > 4 && enemyDist < 6 && shy) {
-     * 
-     * if (isTargetLookingAtMe()) { // strafe to the side moveStrafing = lefty ? moveForward : -moveForward; moveForward
-     * = 0; } } }
-     * 
-     * }
-     */
-
     public boolean isShy() {
         return shy && this.recentlyHit <= 0;
     }
 
     /**
      * Fairly straightforward. Returns true in a 120 degree arc in front of the player's view.
-     * 
+     *
      * @return
      */
     public boolean isTargetLookingAtMe() {
         // find angle of approach
-        double dx = posX - entityToAttack.posX;
-        double dz = posZ - entityToAttack.posZ;
+        EntityLivingBase target = this.getAttackTarget();
+        if (target == null) {
+            return false;
+        }
+        double dx = posX - target.posX;
+        double dz = posZ - target.posZ;
         float angle = (float) ((Math.atan2(dz, dx) * 180D) / 3.1415927410125732D) - 90F;
 
-        float difference = MathHelper.abs((entityToAttack.rotationYaw - angle) % 360);
+        float difference = MathHelper.abs((target.rotationYaw - angle) % 360);
 
         // System.out.println("Difference in angle of approach is " + difference);
 
         return difference < 60 || difference > 300;
     }
-
-    // @Override
-    // public boolean attackEntityFrom(Entity entity, int i) {
-    //
-    // if (entityToAttack != null && entityToAttack == entity) {
-    // shy = false;
-    // // possibly notify others?
-    // }
-    //
-    // return super.attackEntityFrom(entity, i);
-    // }
 
     /**
      * Trigger achievement when killed
@@ -175,15 +149,6 @@ public class EntityTFBoggard extends EntityMob {
             }
 
         }
-    }
-
-    @Override
-    public void moveEntityWithHeading(float par1, float par2) {
-        super.moveEntityWithHeading(par1, par2);
-
-        // System.out.println("prevLegYaw = " + this.prevLimbYaw);
-        // System.out.println("legYaw = " + this.limbYaw);
-
     }
 
 }
