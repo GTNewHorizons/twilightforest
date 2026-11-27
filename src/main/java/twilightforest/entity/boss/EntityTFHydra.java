@@ -45,10 +45,12 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
     private static int HEAD_MAX_DAMAGE = 120;
     private static float ARMOR_MULTIPLIER = 8.0F;
     private static int MAX_HEALTH = 360;
-    private static float HEADS_ACTIVITY_FACTOR = 0.3F;
+    // Difficulty belongs to an individual Hydra, not a static shared across all worlds.
+    private float headsActivityFactor = 0.3F;
 
-    private static int SECONDARY_FLAME_CHANCE = 10;
-    private static int SECONDARY_MORTAR_CHANCE = 16;
+    // Scanned once per five ticks; retain approximately the old attack rate.
+    private static final int SECONDARY_FLAME_CHANCE = 2;
+    private static final int SECONDARY_MORTAR_CHANCE = 3;
 
     private static final int DATA_SPAWNHEADS = 17;
     private static final int DATA_BOSSHEALTH = 18;
@@ -119,21 +121,12 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
 
     @Override
     public void onLivingUpdate() {
-        if (hc[0].headEntity == null || hc[1].headEntity == null || hc[2].headEntity == null) {
-            // don't spawn if we're connected in multiplayer
-            if (shouldSpawnHeads() && !worldObj.isRemote) {
-                for (int i = 0; i < numHeads; i++) {
-                    hc[i].headEntity = new EntityTFHydraHead(this, "head" + i, 3F, 3F);
-                    hc[i].headEntity.setPosition(this.posX, this.posY, this.posZ);
-                    worldObj.spawnEntityInWorld(hc[i].headEntity);
-                }
-
-                setSpawnHeads(false);
-
-                // System.out.println("Server is spawning heads");
-            } else {
-                // I think the head containers should attempt connection during the update call below
+        if (!worldObj.isRemote && shouldSpawnHeads()) {
+            boolean allSpawned = true;
+            for (HydraHeadContainer head : hc) {
+                allSpawned &= head.spawnHead();
             }
+            setSpawnHeads(!allSpawned);
         }
 
         body.onUpdate();
@@ -145,7 +138,10 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
 
         // update health
         if (!this.worldObj.isRemote) {
-            this.dataWatcher.updateObject(DATA_BOSSHEALTH, (int) this.getHealth());
+            int health = (int) this.getHealth();
+            if (this.dataWatcher.getWatchableObjectInt(DATA_BOSSHEALTH) != health) {
+                this.dataWatcher.updateObject(DATA_BOSSHEALTH, health);
+            }
         } else {
             // if (this.getBossHealth() != this.getHealth())
             // {
@@ -359,8 +355,12 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
         ChunkCoordinates home = this.getHomePosition();
         nbttagcompound.setTag("Home", newDoubleNBTList(home.posX, home.posY, home.posZ));
         nbttagcompound.setBoolean("HasHome", this.hasHome());
+        nbttagcompound.setInteger("TFHomeRadius", (int) maximumHomeDistance);
         nbttagcompound.setBoolean("SpawnHeads", shouldSpawnHeads());
         nbttagcompound.setByte("NumHeads", (byte) countActiveHeads());
+        NBTTagList states = new NBTTagList();
+        for (HydraHeadContainer head : hc) states.appendTag(head.writeState());
+        nbttagcompound.setTag("HydraHeadStates", states);
     }
 
     /**
@@ -374,13 +374,22 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
             int hx = (int) nbttaglist.func_150309_d(0);
             int hy = (int) nbttaglist.func_150309_d(1);
             int hz = (int) nbttaglist.func_150309_d(2);
-            this.setHomeArea(hx, hy, hz, 20);
+            this.setHomeArea(
+                    hx,
+                    hy,
+                    hz,
+                    nbttagcompound.hasKey("TFHomeRadius", 99) ? nbttagcompound.getInteger("TFHomeRadius") : 46);
         }
         if (!nbttagcompound.getBoolean("HasHome")) {
             this.detachHome();
         }
         setSpawnHeads(nbttagcompound.getBoolean("SpawnHeads"));
-        activateNumberOfHeads(nbttagcompound.getByte("NumHeads"));
+        NBTTagList states = nbttagcompound.getTagList("HydraHeadStates", 10);
+        if (states.tagCount() == numHeads) {
+            for (int i = 0; i < numHeads; i++) hc[i].readState(states.getCompoundTagAt(i));
+        } else if (nbttagcompound.hasKey("NumHeads", 99)) {
+            activateNumberOfHeads(nbttagcompound.getByte("NumHeads"));
+        }
     }
 
     @Override
@@ -409,15 +418,16 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
             }
         }
 
-        if (rand.nextFloat() < 0.7F) {
-            EntityPlayer entityplayer1 = worldObj.getClosestVulnerablePlayerToEntity(this, f);
-            // EntityPlayer entityplayer1 = worldObj.getClosestPlayerToEntity(this, f);
-
-            if (entityplayer1 != null) {
-                currentTarget = entityplayer1;
+        // keep a valid target rather than retargeting nearly every tick
+        if (currentTarget == null || !currentTarget.isEntityAlive()
+                || currentTarget.getDistanceSqToEntity(this) > (double) (f * f)) {
+            currentTarget = null;
+        }
+        if (currentTarget == null && this.ticksExisted % 10 == 0) {
+            EntityPlayer nearbyPlayer = worldObj.getClosestVulnerablePlayerToEntity(this, f);
+            if (nearbyPlayer != null && nearbyPlayer.isEntityAlive()) {
+                currentTarget = nearbyPlayer;
                 numTicksToChaseTarget = 100 + rand.nextInt(20);
-            } else {
-                randomYawVelocity = (rand.nextFloat() - 0.5F) * 20F;
             }
         }
 
@@ -477,32 +487,31 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
      * Make some of the mechanics harder on hard mode
      */
     private void setDifficultyVariables() {
-        if (worldObj.difficultySetting != EnumDifficulty.HARD) {
-            EntityTFHydra.HEADS_ACTIVITY_FACTOR = 0.3F;
-        } else {
-            // hard mode!
-            EntityTFHydra.HEADS_ACTIVITY_FACTOR = 0.5F; // higher is harder
-        }
+        this.headsActivityFactor = worldObj.difficultySetting == EnumDifficulty.HARD ? 0.5F : 0.3F;
 
     }
 
     /**
      * Find a random head to respawn
-     * 
+     *
      * TODO: make random
      */
     private int getRandomDeadHead() {
+        int chosen = -1;
+        int choices = 0;
         for (int i = 0; i < numHeads; i++) {
             if (hc[i].currentState == HydraHeadContainer.STATE_DEAD && hc[i].respawnCounter == -1) {
-                return i;
+                if (rand.nextInt(++choices) == 0) {
+                    chosen = i;
+                }
             }
         }
-        return -1;
+        return chosen;
     }
 
     /**
      * Used when re-loading from save. Assumes three heads are active and activates more if necessary.
-     * 
+     *
      * @param howMany
      */
     private void activateNumberOfHeads(int howMany) {
@@ -574,7 +583,7 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
             }
         }
 
-        return otherAttacks >= 1 + (countActiveHeads() * HEADS_ACTIVITY_FACTOR);
+        return otherAttacks >= 1 + (countActiveHeads() * this.headsActivityFactor);
     }
 
     /**
@@ -623,10 +632,14 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
     /**
      * Called sometime after the main attackEntity routine. Finds a valid secondary target and has an unoccupied head
      * start an attack against it.
-     * 
+     *
      * The center head (head 0) does not make secondary attacks
      */
     private void secondaryAttacks() {
+        // Secondary scans are much more expensive than the per-head attack state checks.
+        if (this.ticksExisted % 5 != 0) {
+            return;
+        }
         for (int i = 0; i < numHeads; i++) {
             if (hc[i].headEntity == null) {
                 return;
@@ -682,7 +695,7 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
 
     /**
      * Find an EntityLiving within the specified range. Exclude our primary target and any head's target.
-     * 
+     *
      * Right now just finds the closest living entity that is not exluded by our criteria
      */
     public EntityLivingBase findSecondaryTarget(double range) {
@@ -696,8 +709,9 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
                         .expand(range, range, range));
 
         for (EntityLivingBase nearbyLiving : nearbyEntities) {
-            // exclude me
-            if (nearbyLiving instanceof EntityTFHydra || nearbyLiving instanceof EntityTFHydraPart) {
+            // exclude ourselves, dead entities and allied parts
+            if (!nearbyLiving.isEntityAlive() || nearbyLiving instanceof EntityTFHydra
+                    || nearbyLiving instanceof EntityTFHydraPart) {
                 continue;
             }
 
@@ -740,21 +754,23 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
         double pushPower = 4.0D;
 
         double centerX = (part.boundingBox.minX + part.boundingBox.maxX) / 2.0D;
-        double centerY = (part.boundingBox.minZ + part.boundingBox.maxZ) / 2.0D;
+        double centerZ = (part.boundingBox.minZ + part.boundingBox.maxZ) / 2.0D;
 
         for (Entity entity : par1List) {
             if (entity instanceof EntityLivingBase) {
                 double distX = entity.posX - centerX;
-                double distZ = entity.posZ - centerY;
+                double distZ = entity.posZ - centerZ;
                 double sqDist = distX * distX + distZ * distZ;
-                entity.addVelocity(distX / sqDist * pushPower, 0.20000000298023224D, distZ / sqDist * pushPower);
+                // never divide by zero or impart huge velocity near the centre
+                double strength = Math.min(2.0D, pushPower / Math.max(1.0D, sqDist));
+                entity.addVelocity(distX * strength, 0.2D, distZ * strength);
             }
         }
     }
 
     /**
      * Check the surface immediately beneath us, if it is less than 80% solid
-     * 
+     *
      * @return
      */
     private boolean isUnsteadySurfaceBeneath() {
@@ -789,6 +805,9 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
      * Destroys all blocks that aren't associated with 'The End' inside the given bounding box.
      */
     private boolean destroyBlocksInAABB(AxisAlignedBB par1AxisAlignedBB) {
+        if (this.worldObj.isRemote || !this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            return false;
+        }
         // System.out.println("Destroying blocks in " + par1AxisAlignedBB);
 
         int minX = MathHelper.floor_double(par1AxisAlignedBB.minX);
@@ -807,7 +826,8 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
                         int currentMeta = this.worldObj.getBlockMetadata(dx, dy, dz);
 
                         if (currentID != Blocks.obsidian && currentID != Blocks.end_stone
-                                && currentID != Blocks.bedrock) {
+                                && currentID != Blocks.bedrock
+                                && currentID.getBlockHardness(this.worldObj, dx, dy, dz) >= 0.0F) {
                             this.worldObj.setBlock(dx, dy, dz, Blocks.air, 0, 2);
 
                             // here, this effect will have to do
@@ -913,10 +933,6 @@ public class EntityTFHydra extends EntityLiving implements IBossDisplayData, IEn
 
     protected double calculateRange(DamageSource damagesource) {
         double range = -1;
-
-        if (damagesource.getEntity() != null) {
-            range = this.getDistanceSqToEntity(damagesource.getEntity());
-        }
 
         if (damagesource.getEntity() != null) {
             range = this.getDistanceSqToEntity(damagesource.getEntity());
