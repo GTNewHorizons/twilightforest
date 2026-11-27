@@ -73,7 +73,35 @@ import twilightforest.world.TFWorldChunkManager;
 
 public class TFFeature {
 
-    public static final TFFeature[] featureList = new TFFeature[256];
+    private static final int FEATURE_LIST_SIZE = 256;
+    private static final int CHUNK_SHIFT = 4;
+    private static final int CHUNK_SIZE = 1 << CHUNK_SHIFT;
+    private static final int FEATURE_GRID_SIZE = 16;
+    private static final int FEATURE_GRID_SHIFT = 4;
+    private static final int REGION_GRID_SIZE = 8;
+    private static final int REGION_OFFSET = 64;
+    private static final int MAX_NEARBY_FEATURE_RADIUS = 3;
+    private static final int FEATURE_RANDOM_BOUND = 16;
+    private static final long FEATURE_X_SEED_MULTIPLIER = 25117L;
+    private static final long FEATURE_Z_SEED_MULTIPLIER = 151121L;
+    private static final int HINT_SPAWN_ATTEMPTS = 20;
+    private static final int HINT_SPAWN_HORIZONTAL_RANGE = 16;
+    private static final int HINT_SPAWN_VERTICAL_RANGE = 4;
+    private static final long HINT_SPAWN_COOLDOWN_TICKS = 1200L;
+    private static final String HINT_BOOK_PREFIX = "progressionBook.";
+    private static final String HINT_BOOK_PAGES_TAG = "pages";
+    private static final String HINT_BOOK_AUTHOR_TAG = "author";
+    private static final String HINT_BOOK_TITLE_TAG = "title";
+
+    // preset layouts are reused instead of allocating 2D arrays on each lookup
+    private static final int[][] PRESET_5X5 = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 19, 18, 8, 15, 14, 0 }, { 0, 0, 18, 18, 2, 3, 15, 0 }, { 0, 0, 4, 4, 5, 16, 9, 0 },
+            { 0, 0, 13, 6, 1, 2, 17, 0 }, { 0, 0, 12, 13, 3, 17, 7, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0 } };
+    private static final int[][] PRESET_6X6 = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 19, 19, 18, 15, 0, 0, 0 },
+            { 0, 18, 18, 18, 0, 14, 0, 0 }, { 0, 0, 4, 1, 2, 3, 15, 0 }, { 0, 4, 1, 5, 16, 9, 17, 0 },
+            { 0, 0, 13, 2, 3, 17, 17, 0 }, { 0, 0, 12, 13, 6, 17, 7, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0 } };
+
+    public static final TFFeature[] featureList = new TFFeature[FEATURE_LIST_SIZE];
 
     public static final TFFeature nothing = new TFFeature(0, 0, "No Feature").enableDecorations().disableStructure();
     public static final TFFeature hill1 = new TFFeature(1, 1, "Small Hollow Hill").enableDecorations()
@@ -241,10 +269,16 @@ public class TFFeature {
     private long lastSpawnedHintMonsterTime;
 
     public TFFeature(int parID, int parSize, String parName) {
+        if (parID < 0 || parID >= FEATURE_LIST_SIZE) {
+            throw new IllegalArgumentException("Feature ID is out of bounds: " + parID);
+        }
+        if (parSize < 0) {
+            throw new IllegalArgumentException("Feature radius can't be negative: " + parSize);
+        }
         this.featureID = parID;
-        TFFeature.featureList[parID] = this;
+        featureList[parID] = this;
         this.size = parSize;
-        this.name = parName;
+        this.name = java.util.Objects.requireNonNull(parName, "Feature name");
         this.areChunkDecorationsEnabled = false;
         this.isStructureEnabled = true;
         this.isTerrainAltered = false;
@@ -288,15 +322,15 @@ public class TFFeature {
     // Add a monster to a specific spawn list
     public TFFeature addMonster(int listIndex, Class<? extends EntityLiving> monsterClass, int weight, int minGroup,
             int maxGroup) {
-        List<SpawnListEntry> monsterList;
-        if (this.spawnableMonsterLists.size() > listIndex) {
-            monsterList = this.spawnableMonsterLists.get(listIndex);
-        } else {
-            monsterList = new ArrayList<>();
-            this.spawnableMonsterLists.add(listIndex, monsterList);
+        if (listIndex < 0) {
+            throw new IllegalArgumentException("Spawn list index must be nonnegative: " + listIndex);
         }
 
-        monsterList.add(new SpawnListEntry(monsterClass, weight, minGroup, maxGroup));
+        // integrations may register a higher index before the intermediate lists exist
+        while (spawnableMonsterLists.size() <= listIndex) {
+            spawnableMonsterLists.add(new ArrayList<>());
+        }
+        spawnableMonsterLists.get(listIndex).add(new SpawnListEntry(monsterClass, weight, minGroup, maxGroup));
         return this;
     }
 
@@ -312,8 +346,8 @@ public class TFFeature {
 
         if (world != null && world.getWorldChunkManager() instanceof TFWorldChunkManager tfManager) {
 
-            if (tfManager.isInFeatureChunk(world, chunkX << 4, chunkZ << 4)) {
-                return tfManager.getFeatureAt(chunkX << 4, chunkZ << 4, world);
+            if (tfManager.isInFeatureChunk(world, chunkX << CHUNK_SHIFT, chunkZ << CHUNK_SHIFT)) {
+                return tfManager.getFeatureAt(chunkX << CHUNK_SHIFT, chunkZ << CHUNK_SHIFT, world);
             } else {
                 return nothing;
             }
@@ -329,11 +363,12 @@ public class TFFeature {
     public static TFFeature generateFeatureForOldMapGen(int chunkX, int chunkZ, World world) {
 
         // what biome is at the center of the chunk?
-        BiomeGenBase biomeAt = world.getBiomeGenForCoords((chunkX << 4) + 8, (chunkZ << 4) + 8);
+        BiomeGenBase biomeAt = world.getBiomeGenForCoords((chunkX << CHUNK_SHIFT) + 8, (chunkZ << CHUNK_SHIFT) + 8);
 
         // get random value
-        Random hillRNG = new Random(world.getSeed() + chunkX * 25117L + chunkZ * 151121L);
-        int randnum = hillRNG.nextInt(16);
+        Random hillRNG = new Random(
+                world.getSeed() + chunkX * FEATURE_X_SEED_MULTIPLIER + chunkZ * FEATURE_Z_SEED_MULTIPLIER);
+        int randnum = hillRNG.nextInt(FEATURE_RANDOM_BOUND);
 
         // glaciers have ice towers
         if (biomeAt == TFBiomeBase.glacier) {
@@ -405,15 +440,16 @@ public class TFFeature {
         }
 
         // set the chunkX and chunkZ to the center of the biome
-        chunkX = Math.round(chunkX / 16F) * 16;
-        chunkZ = Math.round(chunkZ / 16F) * 16;
+        chunkX = Math.round(chunkX / (float) FEATURE_GRID_SIZE) * FEATURE_GRID_SIZE;
+        chunkZ = Math.round(chunkZ / (float) FEATURE_GRID_SIZE) * FEATURE_GRID_SIZE;
 
         // what biome is at the center of the chunk?
-        BiomeGenBase biomeAt = world.getBiomeGenForCoords((chunkX << 4) + 8, (chunkZ << 4) + 8);
+        BiomeGenBase biomeAt = world.getBiomeGenForCoords((chunkX << CHUNK_SHIFT) + 8, (chunkZ << CHUNK_SHIFT) + 8);
 
         // get random value
-        Random hillRNG = new Random(world.getSeed() + chunkX * 25117L + chunkZ * 151121L);
-        int randnum = hillRNG.nextInt(16);
+        Random hillRNG = new Random(
+                world.getSeed() + chunkX * FEATURE_X_SEED_MULTIPLIER + chunkZ * FEATURE_Z_SEED_MULTIPLIER);
+        int randnum = hillRNG.nextInt(FEATURE_RANDOM_BOUND);
 
         // glaciers have ice towers
         if (biomeAt == TFBiomeBase.glacier) {
@@ -465,8 +501,8 @@ public class TFFeature {
             return mushroomTower;
         }
 
-        int regionOffsetX = Math.abs((chunkX + 64 >> 4) % 8);
-        int regionOffsetZ = Math.abs((chunkZ + 64 >> 4) % 8);
+        int regionOffsetX = Math.abs(((chunkX + REGION_OFFSET) >> FEATURE_GRID_SHIFT) % REGION_GRID_SIZE);
+        int regionOffsetZ = Math.abs(((chunkZ + REGION_OFFSET) >> FEATURE_GRID_SHIFT) % REGION_GRID_SIZE);
 
         // plant two lich towers near the center of each 2048x2048 map area
         if ((regionOffsetX == 4 && regionOffsetZ == 5) || (regionOffsetX == 4 && regionOffsetZ == 3)) {
@@ -494,24 +530,7 @@ public class TFFeature {
      * generating this chunk for the first time, or using the magic map to forecast beyond the edge of the world.
      */
     public static TFFeature generateFeaturePreset5x5(int chunkX, int chunkZ, World world) {
-        int cf = 16;
-
-        if (chunkX % cf != 0 || chunkZ % cf != 0) {
-            return TFFeature.nothing;
-        }
-
-        int mx = (chunkX / cf) + 4;
-        int mz = (chunkZ / cf) + 4;
-
-        int[][] map = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 0, 19, 18, 8, 15, 14, 0 },
-                { 0, 0, 18, 18, 2, 3, 15, 0 }, { 0, 0, 4, 4, 5, 16, 9, 0 }, { 0, 0, 13, 6, 1, 2, 17, 0 },
-                { 0, 0, 12, 13, 3, 17, 7, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0 } };
-
-        if (mx >= 0 && mx < 8 && mz >= 0 && mz < 8) {
-            return TFFeature.featureList[map[mz][mx]];
-        } else {
-            return TFFeature.nothing;
-        }
+        return getFeatureFromPreset(chunkX, chunkZ, PRESET_5X5, 4);
     }
 
     /**
@@ -519,46 +538,73 @@ public class TFFeature {
      * generating this chunk for the first time, or using the magic map to forecast beyond the edge of the world.
      */
     public static TFFeature generateFeaturePreset6x6(int chunkX, int chunkZ, World world) {
-        int cf = 16;
+        return getFeatureFromPreset(chunkX, chunkZ, PRESET_6X6, 3);
+    }
 
-        if (chunkX % cf != 0 || chunkZ % cf != 0) {
-            return TFFeature.nothing;
+    private static TFFeature getFeatureFromPreset(int chunkX, int chunkZ, int[][] preset, int originOffset) {
+        if (chunkX % FEATURE_GRID_SIZE != 0 || chunkZ % FEATURE_GRID_SIZE != 0) {
+            return nothing;
         }
 
-        int mx = (chunkX / cf) + 3;
-        int mz = (chunkZ / cf) + 3;
-
-        int[][] map = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 19, 19, 18, 15, 0, 0, 0 }, { 0, 18, 18, 18, 0, 14, 0, 0 },
-                { 0, 0, 4, 1, 2, 3, 15, 0 }, { 0, 4, 1, 5, 16, 9, 17, 0 }, { 0, 0, 13, 2, 3, 17, 17, 0 },
-                { 0, 0, 12, 13, 6, 17, 7, 0 }, { 0, 0, 0, 0, 0, 0, 0, 0 } };
-
-        if (mx >= 0 && mx < 8 && mz >= 0 && mz < 8) {
-            return TFFeature.featureList[map[mz][mx]];
-        } else {
-            return TFFeature.nothing;
+        int mapX = chunkX / FEATURE_GRID_SIZE + originOffset;
+        int mapZ = chunkZ / FEATURE_GRID_SIZE + originOffset;
+        if (mapX < 0 || mapZ < 0 || mapZ >= preset.length || mapX >= preset[mapZ].length) {
+            return nothing;
         }
+        TFFeature feature = featureList[preset[mapZ][mapX]];
+        return feature != null ? feature : nothing;
     }
 
     // @return The feature nearest to the specified chunk coordinates
     public static TFFeature getNearestFeature(int cx, int cz, World world) {
-        for (int rad = 1; rad <= 3; rad++) {
-            for (int x = -rad; x <= rad; x++) {
-                for (int z = -rad; z <= rad; z++) {
-                    TFFeature directlyAt = getFeatureDirectlyAt(x + cx, z + cz, world);
-                    if (directlyAt.size == rad) {
-                        return directlyAt;
+        FeatureMatch match = findNearbyFeature(cx, cz, world);
+        return match != null ? match.feature : nothing;
+    }
+
+    // preserve radius first and X then Z selection order but cache cells visited by earlier radii
+    private static FeatureMatch findNearbyFeature(int cx, int cz, World world) {
+        if (world == null || !(world.getWorldChunkManager() instanceof TFWorldChunkManager)) {
+            return null;
+        }
+
+        int width = MAX_NEARBY_FEATURE_RADIUS * 2 + 1;
+        TFFeature[] checked = new TFFeature[width * width];
+        for (int radius = 1; radius <= MAX_NEARBY_FEATURE_RADIUS; radius++) {
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    int index = (x + MAX_NEARBY_FEATURE_RADIUS) * width + z + MAX_NEARBY_FEATURE_RADIUS;
+                    TFFeature feature = checked[index];
+                    if (feature == null) {
+                        feature = getFeatureDirectlyAt(x + cx, z + cz, world);
+                        checked[index] = feature;
+                    }
+                    if (feature.size == radius) {
+                        return new FeatureMatch(feature, x, z);
                     }
                 }
             }
         }
-        return nothing;
+        return null;
+    }
+
+    private static final class FeatureMatch {
+
+        private final TFFeature feature;
+        private final int chunkOffsetX;
+        private final int chunkOffsetZ;
+
+        private FeatureMatch(TFFeature feature, int chunkOffsetX, int chunkOffsetZ) {
+            this.feature = feature;
+            this.chunkOffsetX = chunkOffsetX;
+            this.chunkOffsetZ = chunkOffsetZ;
+        }
     }
 
     // @return The feature in the chunk "region"
     public static TFFeature getFeatureForRegion(int chunkX, int chunkZ, World world) {
         // just round to the nearest multiple of 16 chunks?
-        int featureX = Math.round(chunkX / 16F) * 16;
-        int featureZ = Math.round(chunkZ / 16F) * 16;
+        int featureX = Math.round(chunkX / (float) FEATURE_GRID_SIZE) * FEATURE_GRID_SIZE;
+        int featureZ = Math.round(chunkZ / (float) FEATURE_GRID_SIZE) * FEATURE_GRID_SIZE;
 
         return TFFeature.generateFeatureFor1Point7(featureX, featureZ, world);
     }
@@ -566,47 +612,38 @@ public class TFFeature {
     /**
      * If we're near a hollow hill, this returns relative block coordinates indicating the center of that hill relative
      * to the current chunk block coordinate system.
-     * 
+     *
      * @param cx
      * @param cz
-     * @param seed
+     * @param world
      * @return
      */
     public static int[] getNearestCenter(int cx, int cz, World world) {
-        for (int rad = 1; rad <= 3; rad++) {
-            for (int x = -rad; x <= rad; x++) {
-                for (int z = -rad; z <= rad; z++) {
-                    if (getFeatureDirectlyAt(x + cx, z + cz, world).size == rad) {
-                        int[] center = { x * 16 + 8, z * 16 + 8 };
-                        return center;
-                    }
-                }
-            }
+        FeatureMatch match = findNearbyFeature(cx, cz, world);
+        if (match == null) {
+            return new int[] { 0, 0 };
         }
-        int[] no = { 0, 0 };
-        return no;
+        return new int[] { match.chunkOffsetX * CHUNK_SIZE + 8, match.chunkOffsetZ * CHUNK_SIZE + 8 };
     }
 
     /**
      * Given some coordinates, return the center of the nearest feature.
-     * 
-     * At the moment, with how features are distributed, just get the closest multiple of 256 and add +8 in both
-     * directions.
-     * 
-     * Maybe in the future we'll have to actually search for a feature chunk nearby, but for now this will work.
+     *
+     * Feature centres are approximately one per 16x16-chunk region, with seed-derived offsets. The negative-coordinate
+     * adjustment is retained for existing world compatibility.
      */
     public static ChunkCoordinates getNearestCenterXYZ(int cx, int cz, World world) {
         // legacy support
         if (TwilightForestMod.oldMapGen) {
-            return getNearestCenterXYZOld(cx, cz, world);
+            return getNearestCenterXYZOld(cx, cz);
         }
 
         int chunkX = cx;
         int chunkZ = cz;
 
         // generate random number for the whole biome area
-        int regionX = (chunkX + 8) >> 4;
-        int regionZ = (chunkZ + 8) >> 4;
+        int regionX = (chunkX + 8) >> FEATURE_GRID_SHIFT;
+        int regionZ = (chunkZ + 8) >> FEATURE_GRID_SHIFT;
 
         long seed = (regionX * 3129871L) ^ (long) regionZ * 116129781L;
         seed = seed * seed * 42317861L + seed * 7L;
@@ -623,25 +660,26 @@ public class TFFeature {
         // centers are offset strangely depending on +/-
         int ccz;
         if (regionZ >= 0) {
-            ccz = (regionZ * 16 + centerZ - 8) * 16 + 8;
+            ccz = (regionZ * FEATURE_GRID_SIZE + centerZ - 8) * CHUNK_SIZE + 8;
         } else {
-            ccz = (regionZ * 16 + (16 - centerZ) - 8) * 16 + 9;
+            ccz = (regionZ * FEATURE_GRID_SIZE + (FEATURE_GRID_SIZE - centerZ) - 8) * CHUNK_SIZE + 9;
         }
 
         int ccx;
         if (regionX >= 0) {
-            ccx = (regionX * 16 + centerX - 8) * 16 + 8;
+            ccx = (regionX * FEATURE_GRID_SIZE + centerX - 8) * CHUNK_SIZE + 8;
         } else {
-            ccx = (regionX * 16 + (16 - centerX) - 8) * 16 + 9;
+            ccx = (regionX * FEATURE_GRID_SIZE + (FEATURE_GRID_SIZE - centerX) - 8) * CHUNK_SIZE + 9;
         }
 
-        return new ChunkCoordinates(ccx, TFWorld.SEALEVEL, ccz);// Math.abs(chunkX % 16) == centerX && Math.abs(chunkZ %
-                                                                // 16) == centerZ;
+        return new ChunkCoordinates(ccx, TFWorld.SEALEVEL, ccz);
     }
 
-    private static ChunkCoordinates getNearestCenterXYZOld(int cx, int cz, World world) {
-        int fx = (int) (Math.round(cx / 256.0) * 256 + 8);
-        int fz = (int) (Math.round(cz / 256.0) * 256 + 8);
+    private static ChunkCoordinates getNearestCenterXYZOld(int cx, int cz) {
+        int fx = (int) (Math.round(cx / (double) (FEATURE_GRID_SIZE * CHUNK_SIZE)) * (FEATURE_GRID_SIZE * CHUNK_SIZE)
+                + 8);
+        int fz = (int) (Math.round(cz / (double) (FEATURE_GRID_SIZE * CHUNK_SIZE)) * (FEATURE_GRID_SIZE * CHUNK_SIZE)
+                + 8);
 
         return new ChunkCoordinates(fx, TFWorld.SEALEVEL, fz);
     }
@@ -676,18 +714,15 @@ public class TFFeature {
     }
 
     public boolean doesPlayerHaveRequiredAchievement(EntityPlayer player) {
-        if (this.requiredAchievement != null) {
-            // can we get the player's stats here at all?
-            if (player instanceof EntityPlayerMP && ((EntityPlayerMP) player).func_147099_x() != null) {
-                StatisticsFile stats = ((EntityPlayerMP) player).func_147099_x();
-
-                return stats.hasAchievementUnlocked(this.requiredAchievement);
-            } else {
-                return false; // cannot get stats
-            }
-        } else {
+        if (requiredAchievement == null) {
             return true; // no required achievement
         }
+        // can we get the player's stats here at all?
+        if (!(player instanceof EntityPlayerMP serverPlayer)) {
+            return false; // cannot get stats
+        }
+        StatisticsFile stats = serverPlayer.func_147099_x();
+        return stats != null && stats.hasAchievementUnlocked(requiredAchievement);
     }
 
     // Try to spawn a hint monster near the specified player
@@ -702,6 +737,9 @@ public class TFFeature {
 
     // Try several times to spawn a hint monster
     public void trySpawnHintMonster(World world, EntityPlayer player, int x, int y, int z) {
+        if (world == null || world.isRemote || player == null) {
+            return;
+        }
         // check if the timer is valid
         long currentTime = world.getTotalWorldTime();
 
@@ -710,29 +748,27 @@ public class TFFeature {
             this.lastSpawnedHintMonsterTime = 0;
         }
 
-        if (currentTime - this.lastSpawnedHintMonsterTime > 1200) {
+        if (currentTime - this.lastSpawnedHintMonsterTime > HINT_SPAWN_COOLDOWN_TICKS) {
             // okay, time is good, try several times to spawn one
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < HINT_SPAWN_ATTEMPTS; i++) {
                 if (didSpawnHintMonster(world, player, x, y, z)) {
                     this.lastSpawnedHintMonsterTime = currentTime;
                     break;
                 }
             }
-        } else {
-            // System.out.println("Can't spawn hint monster because of timer");
         }
     }
 
     /**
      * Try once to spawn a hint monster near the player. Return true if we did.
-     * 
+     *
      * We could change up the monster depending on what feature this is, but we currently are not doing that
      */
     private boolean didSpawnHintMonster(World world, EntityPlayer player, int x, int y, int z) {
         // find a target point
-        int dx = x + world.rand.nextInt(16) - world.rand.nextInt(16);
-        int dy = y + world.rand.nextInt(4) - world.rand.nextInt(4);
-        int dz = z + world.rand.nextInt(16) - world.rand.nextInt(16);
+        int dx = x + world.rand.nextInt(HINT_SPAWN_HORIZONTAL_RANGE) - world.rand.nextInt(HINT_SPAWN_HORIZONTAL_RANGE);
+        int dy = y + world.rand.nextInt(HINT_SPAWN_VERTICAL_RANGE) - world.rand.nextInt(HINT_SPAWN_VERTICAL_RANGE);
+        int dz = z + world.rand.nextInt(HINT_SPAWN_HORIZONTAL_RANGE) - world.rand.nextInt(HINT_SPAWN_HORIZONTAL_RANGE);
 
         // make our hint monster
         EntityTFKobold hinty = new EntityTFKobold(world);
@@ -751,113 +787,56 @@ public class TFFeature {
             hinty.setCurrentItemOrArmor(0, book);
             hinty.setEquipmentDropChance(0, 1.0F);
 
-            world.spawnEntityInWorld(hinty);
-            return true;
-        } else {
-            // System.out.println("Spawn point no go");
-            // System.out.println("Spawn point clear? " + isClearSpawn);
-            // System.out.println("Spawn point can see player? " + skel.canEntityBeSeen(player));
-            return false;
+            return world.spawnEntityInWorld(hinty);
         }
+        return false;
     }
 
     private String formatBook(String address) {
         String page = StatCollector.translateToLocal(address);
-        if (page == address) page = StatCollector.translateToFallback(address);
-        page = page.replaceAll("\\\\n", "\n");
-        page = page.replaceAll("\\\\u00A78", "\u00A78");
-        page = page.replaceAll("\\\\u00A70", "\u00A70");
-        return page;
+        if (address.equals(page)) {
+            page = StatCollector.translateToFallback(address);
+        }
+        return page.replace("\\n", "\n").replace("\\u00A78", "\u00A78").replace("\\u00A70", "\u00A70");
     }
 
     /**
      * Create a hint book for the specified feature. Only features with block protection will need this.
      */
     public ItemStack createHintBook() {
+        HintBookInfo info = switch (featureID) {
+            case 6 -> new HintBookInfo("lichTower", 4);
+            case 13 -> new HintBookInfo("labyrinth", 5);
+            case 12 -> new HintBookInfo("hydraLair", 4);
+            case 15 -> new HintBookInfo("stronghold", 5);
+            case 14 -> new HintBookInfo("darkTower", 3);
+            case 17 -> new HintBookInfo("yetiCave", 4);
+            case 7 -> new HintBookInfo("iceTower", 3);
+            case 18 -> new HintBookInfo("trollCave", 3);
+            default -> new HintBookInfo("default", 2);
+        };
+
         ItemStack book = new ItemStack(Items.written_book);
-
-        NBTTagList bookPages = new NBTTagList();
-
-        if (this == TFFeature.lichTower) {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.lichTower.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.lichTower.1")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.lichTower.2")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.lichTower.3")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.lichTower.title")));
-        } else if (this == TFFeature.labyrinth) {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.labyrinth.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.labyrinth.1")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.labyrinth.2")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.labyrinth.3")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.labyrinth.4")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.labyrinth.title")));
-        } else if (this == TFFeature.hydraLair) {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.hydraLair.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.hydraLair.1")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.hydraLair.2")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.hydraLair.3")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.hydraLair.title")));
-        } else if (this == TFFeature.tfStronghold) {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.stronghold.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.stronghold.1")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.stronghold.2")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.stronghold.3")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.stronghold.4")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.stronghold.title")));
-        } else if (this == TFFeature.darkTower) {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.darkTower.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.darkTower.1")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.darkTower.2")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.darkTower.title")));
-        } else if (this == TFFeature.yetiCave) {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.yetiCave.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.yetiCave.1")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.yetiCave.2")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.yetiCave.3")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.yetiCave.title")));
-        } else if (this == TFFeature.iceTower) {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.iceTower.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.iceTower.1")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.iceTower.2")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.iceTower.title")));
-        } else if (this == TFFeature.trollCave) {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.trollCave.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.trollCave.1")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.trollCave.2")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.trollCave.title")));
-        } else {
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.default.0")));
-            bookPages.appendTag(new NBTTagString(formatBook("progressionBook.default.1")));
-
-            book.setTagInfo("pages", bookPages);
-            book.setTagInfo("author", new NBTTagString(formatBook("progressionBook.author")));
-            book.setTagInfo("title", new NBTTagString(formatBook("progressionBook.default.title")));
+        NBTTagList pages = new NBTTagList();
+        String bookPrefix = HINT_BOOK_PREFIX + info.type + ".";
+        for (int page = 0; page < info.pageCount; page++) {
+            pages.appendTag(new NBTTagString(formatBook(bookPrefix + page)));
         }
+
+        book.setTagInfo(HINT_BOOK_PAGES_TAG, pages);
+        book.setTagInfo(HINT_BOOK_AUTHOR_TAG, new NBTTagString(formatBook(HINT_BOOK_PREFIX + "author")));
+        book.setTagInfo(HINT_BOOK_TITLE_TAG, new NBTTagString(formatBook(bookPrefix + "title")));
         return book;
     }
 
+    private static final class HintBookInfo {
+
+        private final String type;
+        private final int pageCount;
+
+        private HintBookInfo(String type, int pageCount) {
+            this.type = type;
+            this.pageCount = pageCount;
+        }
+    }
 }
