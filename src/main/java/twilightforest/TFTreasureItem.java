@@ -47,7 +47,7 @@ public class TFTreasureItem {
         ItemStack result = this.itemStack.copy();
         if (result.stackSize <= 0) {
             // A malformed loot entry should not crash chest generation.
-            return result;
+            return null;
         }
         result.stackSize = rand.nextInt(result.stackSize) + 1;
 

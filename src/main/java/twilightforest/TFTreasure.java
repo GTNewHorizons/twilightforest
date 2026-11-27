@@ -1,5 +1,7 @@
 package twilightforest;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
@@ -13,6 +15,7 @@ import net.minecraft.world.World;
 
 import twilightforest.block.TFBlocks;
 import twilightforest.compat.Mods;
+import twilightforest.integration.TFAvaritiaIntegration;
 import twilightforest.item.TFItems;
 
 public class TFTreasure {
@@ -79,6 +82,9 @@ public class TFTreasure {
      * Generates a treasure chest in the world at the specified coordinates.
      */
     public boolean generate(World world, Random rand, int cx, int cy, int cz) {
+        if (this == darktower_boss || this == stronghold_boss) {
+            return generateBossReward(world, cx, cy, cz);
+        }
         return this.generate(world, rand, cx, cy, cz, Blocks.chest);
     }
 
@@ -126,12 +132,10 @@ public class TFTreasure {
                     for (int dz = -radius; dz <= radius; dz++) {
                         if (Math.max(Math.abs(dx), Math.abs(dz)) != radius) continue;
                         int px = x + dx, py = y + dy, pz = z + dz;
-                        if (py <= 0 || py >= world.getHeight()
-                                || !world.blockExists(px, py, pz)
-                                || !world.isAirBlock(px, py, pz)
+                        if (!world.blockExists(px, py, pz) || !world.isAirBlock(px, py, pz)
                                 || !World.doesBlockHaveSolidTopSurface(world, px, py - 1, pz))
                             continue;
-                        if (generate(world, null, px, py, pz)) return true;
+                        if (generate(world, null, px, py, pz, Blocks.chest)) return true;
                         // Never roll the same reward a second time if a chest was partially filled.
                         if (world.getTileEntity(px, py, pz) instanceof TileEntityChest) return false;
                     }
@@ -141,9 +145,15 @@ public class TFTreasure {
         // if no safe chest location exists, drop the same loot tiers instead of overwriting a block
         Random random = new Random(world.getSeed() * x + y ^ z);
         int py = Math.max(1, Math.min(world.getHeight() - 1, y));
-        for (int i = 0; i < COMMON_ROLLS; i++) dropBossItem(world, x, py, z, getCommonItem(random));
-        for (int i = 0; i < UNCOMMON_ROLLS; i++) dropBossItem(world, x, py, z, getUncommonItem(random));
-        for (int i = 0; i < RARE_ROLLS; i++) dropBossItem(world, x, py, z, getRareItem(random));
+        List<ItemStack> loot = new ArrayList<>(COMMON_ROLLS + UNCOMMON_ROLLS + RARE_ROLLS);
+        for (int i = 0; i < COMMON_ROLLS; i++) loot.add(getCommonItem(random));
+        for (int i = 0; i < UNCOMMON_ROLLS; i++) loot.add(getUncommonItem(random));
+        for (int i = 0; i < RARE_ROLLS; i++) loot.add(getRareItem(random));
+        loot.removeIf(stack -> stack == null || stack.getItem() == null || stack.stackSize <= 0);
+
+        for (ItemStack stack : TFAvaritiaIntegration.createRewardClusters(loot)) {
+            dropBossItem(world, x, py, z, stack);
+        }
         return false;
     }
 
@@ -210,7 +220,7 @@ public class TFTreasure {
             }
         }
 
-        // retain the original random sequence for normal chests but never miss a slot
+        // preserve the original loot gen sequence whilst ensuring every item is spawned
         for (int slot = 0; slot < chest.getSizeInventory(); slot++) {
             if (chest.getStackInSlot(slot) == null) return slot;
         }
@@ -231,6 +241,8 @@ public class TFTreasure {
         useless.add(Blocks.sand, 4);
         useless.add(Items.flower_pot, 1);
         useless.add(new ItemStack(Items.dye, 1, 0));
+
+        // TODO: replace the hardcoded loot pools with proper loot tables when in GTNH
 
         switch (i) {
             case 1 -> fillHill1();
