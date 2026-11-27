@@ -2,8 +2,10 @@ package twilightforest.biomes;
 
 public class TFBiomeDarkForestCenter extends TFBiomeDarkForest {
 
-    public TFBiomeDarkForestCenter(int i) {
-        super(i);
+    private static final double COLOR_NOISE_SCALE = 0.0225D;
+
+    public TFBiomeDarkForestCenter(int biomeId) {
+        super(biomeId);
     }
 
     /**
@@ -11,8 +13,7 @@ public class TFBiomeDarkForestCenter extends TFBiomeDarkForest {
      */
     @Override
     public int getBiomeGrassColor(int x, int y, int z) {
-        double d0 = plantNoise.func_151601_a((double) x * 0.0225D, (double) z * 0.0225D);
-        return d0 < -0.2D ? 0x667540 : 0x554114;
+        return getColorNoise(x, z) < -0.2D ? 0x667540 : 0x554114;
     }
 
     /**
@@ -20,7 +21,10 @@ public class TFBiomeDarkForestCenter extends TFBiomeDarkForest {
      */
     @Override
     public int getBiomeFoliageColor(int x, int y, int z) {
-        double d0 = plantNoise.func_151601_a((double) x * 0.0225D, (double) z * 0.0225D);
-        return d0 < -0.1D ? 0xf9821e : 0xe94e14;
+        return getColorNoise(x, z) < -0.1D ? 0xf9821e : 0xe94e14;
+    }
+
+    private double getColorNoise(int x, int z) {
+        return plantNoise.func_151601_a((double) x * COLOR_NOISE_SCALE, (double) z * COLOR_NOISE_SCALE);
     }
 }

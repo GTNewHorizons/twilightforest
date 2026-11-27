@@ -15,60 +15,63 @@ import twilightforest.block.TFBlocks;
 
 public class TFBiomeTwilightForestVariant extends TFBiomeBase {
 
-    public TFBiomeTwilightForestVariant(int i) {
-        super(i);
+    private static final int TALL_FERN_TYPE = 3;
+    private static final int TALL_FERN_ATTEMPTS = 7;
+
+    public TFBiomeTwilightForestVariant(int biomeId) {
+        super(biomeId);
 
         this.temperature = 0.7F;
         this.rainfall = 0.8F;
 
-        // this.rootHeight = 0.15F;
-        // this.heightVariation = 0.4F;
-
-        getTFBiomeDecorator().setTreesPerChunk(25);
-        getTFBiomeDecorator().setGrassPerChunk(15);
-        getTFBiomeDecorator().setFlowersPerChunk(8);
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        decorator.setTreesPerChunk(25);
+        decorator.setGrassPerChunk(15);
+        decorator.setFlowersPerChunk(8);
     }
 
     /**
      * Occasional shrub, no birches
      */
+    @Override
     public WorldGenAbstractTree func_150567_a(Random random) {
         if (random.nextInt(5) == 0) {
             return new WorldGenShrub(3, 0);
-        } else if (random.nextInt(10) == 0) {
-            return new WorldGenBigTree(false);
-        } else {
-            return worldGeneratorTrees;
         }
+        if (random.nextInt(10) == 0) {
+            return new WorldGenBigTree(false);
+        }
+        return worldGeneratorTrees;
     }
 
     /**
      * EVEN MOAR FERNZ!
      */
-    public WorldGenerator getRandomWorldGenForGrass(Random par1Random) {
-        if (par1Random.nextInt(4) != 0) {
+    @Override
+    public WorldGenerator getRandomWorldGenForGrass(Random random) {
+        if (random.nextInt(4) != 0) {
             return new WorldGenTallGrass(Blocks.tallgrass, 2);
-        } else if (par1Random.nextBoolean()) {
-            return new WorldGenTallGrass(TFBlocks.plant, BlockTFPlant.META_MAYAPPLE);
-        } else {
-            return new WorldGenTallGrass(Blocks.tallgrass, 1);
         }
+        if (random.nextBoolean()) {
+            return new WorldGenTallGrass(TFBlocks.plant, BlockTFPlant.META_MAYAPPLE);
+        }
+        return new WorldGenTallGrass(Blocks.tallgrass, 1);
     }
 
     /**
      * Add tall ferns
      */
-    public void decorate(World par1World, Random par2Random, int par3, int par4) {
-        genTallFlowers.func_150548_a(3);
+    @Override
+    public void decorate(World world, Random random, int chunkX, int chunkZ) {
+        genTallFlowers.func_150548_a(TALL_FERN_TYPE);
 
-        for (int i = 0; i < 7; ++i) {
-            int rx = par3 + par2Random.nextInt(16) + 8;
-            int rz = par4 + par2Random.nextInt(16) + 8;
-            int ry = par2Random.nextInt(par1World.getHeightValue(rx, rz) + 32);
-            genTallFlowers.generate(par1World, par2Random, rx, ry, rz);
+        for (int i = 0; i < TALL_FERN_ATTEMPTS; i++) {
+            int x = chunkX + random.nextInt(16) + 8;
+            int z = chunkZ + random.nextInt(16) + 8;
+            int y = random.nextInt(world.getHeightValue(x, z) + 32);
+            genTallFlowers.generate(world, random, x, y, z);
         }
 
-        super.decorate(par1World, par2Random, par3, par4);
+        super.decorate(world, random, chunkX, chunkZ);
     }
-
 }

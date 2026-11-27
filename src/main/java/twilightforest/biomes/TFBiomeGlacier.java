@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package twilightforest.biomes;
 
@@ -16,6 +16,7 @@ import net.minecraft.world.gen.feature.WorldGenTaiga2;
 
 import twilightforest.TFAchievementPage;
 import twilightforest.TFFeature;
+import twilightforest.entity.passive.EntityTFPenguin;
 import twilightforest.world.TFGenPenguins;
 import twilightforest.world.TFWorld;
 
@@ -31,23 +32,20 @@ public class TFBiomeGlacier extends TFBiomeBase {
     public TFBiomeGlacier(int i) {
         super(i);
 
-        getTFBiomeDecorator().setTreesPerChunk(1);
-        getTFBiomeDecorator().setGrassPerChunk(0);
+        TFBiomeDecorator decorator = getTFBiomeDecorator();
+        decorator.setTreesPerChunk(1);
+        decorator.setGrassPerChunk(0);
+        decorator.canopyPerChunk = -999;
 
         this.temperature = 0.0F;
         this.rainfall = 0.1F;
-        getTFBiomeDecorator().canopyPerChunk = -999;
 
-        spawnableCreatureList.add(new SpawnListEntry(twilightforest.entity.passive.EntityTFPenguin.class, 10, 4, 4));
-
+        spawnableCreatureList.add(new SpawnListEntry(EntityTFPenguin.class, 10, 4, 4));
     }
 
+    @Override
     public WorldGenAbstractTree func_150567_a(Random random) {
-        if (random.nextInt(3) == 0) {
-            return new WorldGenTaiga1();
-        } else {
-            return new WorldGenTaiga2(true);
-        }
+        return random.nextInt(3) == 0 ? new WorldGenTaiga1() : new WorldGenTaiga2(true);
     }
 
     /**
@@ -70,21 +68,24 @@ public class TFBiomeGlacier extends TFBiomeBase {
      * Decorate this biome. Weeeee should generate penguins
      */
     @Override
-    public void decorate(World par1World, Random par2Random, int par3, int par4) {
-        super.decorate(par1World, par2Random, par3, par4);
-        TFGenPenguins penguins = new TFGenPenguins();
+    public void decorate(World world, Random random, int mapX, int mapZ) {
+        super.decorate(world, random, mapX, mapZ);
 
-        if (par2Random.nextInt(4) == 0) {
-            int j = par3 + par2Random.nextInt(16) + 8;
-            byte byte0 = (byte) TFWorld.SEALEVEL;
-            int k = par4 + par2Random.nextInt(16) + 8;
-            penguins.generate(par1World, par2Random, j, byte0, k);
+        TFGenPenguins penguins = new TFGenPenguins();
+        if (random.nextInt(4) != 0) {
+            return;
         }
+
+        int x = mapX + random.nextInt(16) + 8;
+        byte y = (byte) TFWorld.SEALEVEL;
+        int z = mapZ + random.nextInt(16) + 8;
+        penguins.generate(world, random, x, y, z);
     }
 
     /**
      * If there is a required achievement to be here, return it, otherwise return null
      */
+    @Override
     protected Achievement getRequiredAchievement() {
         return TFAchievementPage.twilightProgressUrghast;
     }
@@ -92,10 +93,14 @@ public class TFBiomeGlacier extends TFBiomeBase {
     /**
      * Do something bad to a player in the wrong biome.
      */
+    @Override
     public void enforceProgession(EntityPlayer player, World world) {
-        if (!world.isRemote && world.getWorldTime() % 60 == 0) {
-            player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 100, 3));
+        if (world.isRemote || world.getWorldTime() % 60 != 0) {
+            return;
         }
+
+        player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 100, 3));
+
         // hint monster?
         if (world.rand.nextInt(4) == 0) {
             TFFeature.iceTower.trySpawnHintMonster(world, player);

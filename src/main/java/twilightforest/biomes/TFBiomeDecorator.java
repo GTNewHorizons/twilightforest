@@ -37,6 +37,15 @@ import twilightforest.world.TFTreeGenerator;
 
 public class TFBiomeDecorator extends BiomeDecorator {
 
+    private static final int CHUNK_SIZE = 16;
+    private static final int DECORATION_OFFSET = 8;
+    private static final int RANDOM_FEATURE_CHANCE = 6;
+    private static final int MAX_RANDOM_FEATURE_HEIGHT = 75;
+    private static final int PLANT_ROOTS_PER_CHUNK = 12;
+    private static final int WOOD_ROOTS_PER_CHUNK = 20;
+    private static final int CAVE_WATER_SOURCES_PER_CHUNK = 50;
+    private static final int TORCH_BERRIES_PER_CHUNK = 3;
+
     TFGenCanopyTree canopyTreeGen;
     TFTreeGenerator alternateCanopyGen;
     TFGenHollowTree hollowTreeGen;
@@ -121,32 +130,38 @@ public class TFBiomeDecorator extends BiomeDecorator {
             // no normal decorations here, these parts supply their own decorations.
             decorateUnderground(world, rand, mapX, mapZ);
             decorateOnlyOres(world, rand, mapX, mapZ);
-        } else {
-            final World oldWorld = this.currentWorld;
-            final Random oldRandom = this.randomGenerator;
-            final int oldX = this.chunk_X;
-            final int oldZ = this.chunk_Z;
-            if (world != null) {
-                this.currentWorld = world;
-            }
-            if (rand != null) {
-                this.randomGenerator = rand;
-            }
-            this.chunk_X = mapX;
-            this.chunk_Z = mapZ;
+            return;
+        }
+
+        final World oldWorld = this.currentWorld;
+        final Random oldRandom = this.randomGenerator;
+        final int oldX = this.chunk_X;
+        final int oldZ = this.chunk_Z;
+
+        if (world != null) {
+            this.currentWorld = world;
+        }
+        if (rand != null) {
+            this.randomGenerator = rand;
+        }
+        this.chunk_X = mapX;
+        this.chunk_Z = mapZ;
+
+        try {
             genDecorations(biome);
+        } finally {
             // Restore old values to prevent cascading generation issues.
             this.currentWorld = oldWorld;
             this.randomGenerator = oldRandom;
             this.chunk_X = oldX;
             this.chunk_Z = oldZ;
         }
-
     }
 
     /**
      * The method that does the work of actually decorating chunks
      */
+    @Override
     protected void genDecorations(BiomeGenBase biome) {
         final Random randomGenerator = this.randomGenerator;
 
@@ -158,65 +173,89 @@ public class TFBiomeDecorator extends BiomeDecorator {
         }
 
         // random features!
-        if (randomGenerator.nextInt(6) == 0) {
-            int rx = chunk_X + randomGenerator.nextInt(16) + 8;
-            int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
-            int ry = currentWorld.getHeightValue(rx, rz);
-            if (ry < 75) {
-                TFGenerator rf = randomFeature(randomGenerator);
-                rf.generate(currentWorld, randomGenerator, rx, ry, rz);
-            }
-        }
+        generateRandomFeature(randomGenerator);
 
         // add canopy trees
-        int nc = (int) canopyPerChunk
-                + ((randomGenerator.nextFloat() < (canopyPerChunk - (int) canopyPerChunk)) ? 1 : 0);
-        for (int i = 0; i < nc; i++) {
-            int rx = chunk_X + randomGenerator.nextInt(16) + 8;
-            int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
-            int ry = currentWorld.getHeightValue(rx, rz);
-            if (this.alternateCanopyChance > 0 && randomGenerator.nextFloat() <= alternateCanopyChance) {
-                alternateCanopyGen.generate(currentWorld, randomGenerator, rx, ry, rz);
-            } else {
-                canopyTreeGen.generate(currentWorld, randomGenerator, rx, ry, rz);
-            }
-        }
+        generateCanopyTrees(randomGenerator);
 
         // mangrove trees
-        for (int i = 0; i < mangrovesPerChunk; i++) {
-            int rx = chunk_X + randomGenerator.nextInt(16) + 8;
-            int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
-            int ry = currentWorld.getHeightValue(rx, rz);
-            mangroveTreeGen.generate(currentWorld, randomGenerator, rx, ry, rz);
-        }
+        generateMangroves(randomGenerator);
+
         // add extra lakes for swamps
-        for (int i = 0; i < lakesPerChunk; i++) {
-            int rx = chunk_X + randomGenerator.nextInt(16) + 8;
-            int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
-            int ry = currentWorld.getHeightValue(rx, rz);
-            extraLakeGen.generate(currentWorld, randomGenerator, rx, ry, rz);
-        }
+        generateExtraLakes(randomGenerator);
 
         // add extra lava for fire swamps
-        if (randomGenerator.nextFloat() <= lavaPoolChance) {
-            int rx = chunk_X + randomGenerator.nextInt(16) + 8;
-            int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
-            int ry = currentWorld.getHeightValue(rx, rz);
-            extraLavaPoolGen.generate(currentWorld, randomGenerator, rx, ry, rz);
-        }
+        generateLavaPool(randomGenerator);
 
         // mycelium blobs
-        for (int i = 0; i < myceliumPerChunk; i++) {
-            int rx = chunk_X + randomGenerator.nextInt(16) + 8;
-            int rz = chunk_Z + randomGenerator.nextInt(16) + 8;
-            int ry = currentWorld.getHeightValue(rx, rz);
-            myceliumBlobGen.generate(currentWorld, randomGenerator, rx, ry, rz);
-        }
+        generateMycelium(randomGenerator);
 
         super.genDecorations(biome);
 
         decorateUnderground(currentWorld, randomGenerator, chunk_X, chunk_Z);
+    }
 
+    private void generateRandomFeature(Random rand) {
+        if (rand.nextInt(RANDOM_FEATURE_CHANCE) == 0) {
+            int x = chunk_X + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = chunk_Z + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int y = currentWorld.getHeightValue(x, z);
+            if (y < MAX_RANDOM_FEATURE_HEIGHT) {
+                randomFeature(rand).generate(currentWorld, rand, x, y, z);
+            }
+        }
+    }
+
+    private void generateCanopyTrees(Random rand) {
+        // always roll the chance even if the configured coverage is an integer
+        int treeCount = (int) canopyPerChunk + (rand.nextFloat() < canopyPerChunk - (int) canopyPerChunk ? 1 : 0);
+        for (int i = 0; i < treeCount; i++) {
+            int x = chunk_X + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = chunk_Z + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int y = currentWorld.getHeightValue(x, z);
+            if (alternateCanopyChance > 0 && rand.nextFloat() <= alternateCanopyChance) {
+                alternateCanopyGen.generate(currentWorld, rand, x, y, z);
+            } else {
+                canopyTreeGen.generate(currentWorld, rand, x, y, z);
+            }
+        }
+    }
+
+    private void generateMangroves(Random rand) {
+        for (int i = 0; i < mangrovesPerChunk; i++) {
+            int x = chunk_X + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = chunk_Z + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int y = currentWorld.getHeightValue(x, z);
+            mangroveTreeGen.generate(currentWorld, rand, x, y, z);
+        }
+    }
+
+    private void generateExtraLakes(Random rand) {
+        for (int i = 0; i < lakesPerChunk; i++) {
+            int x = chunk_X + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = chunk_Z + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int y = currentWorld.getHeightValue(x, z);
+            extraLakeGen.generate(currentWorld, rand, x, y, z);
+        }
+    }
+
+    private void generateLavaPool(Random rand) {
+        // keep this rng draw even when the chance is zero
+        if (rand.nextFloat() <= lavaPoolChance) {
+            int x = chunk_X + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = chunk_Z + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int y = currentWorld.getHeightValue(x, z);
+            extraLavaPoolGen.generate(currentWorld, rand, x, y, z);
+        }
+    }
+
+    private void generateMycelium(Random rand) {
+        for (int i = 0; i < myceliumPerChunk; i++) {
+            int x = chunk_X + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int z = chunk_Z + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
+            int y = currentWorld.getHeightValue(x, z);
+            myceliumBlobGen.generate(currentWorld, rand, x, y, z);
+        }
     }
 
     /**
@@ -224,36 +263,36 @@ public class TFBiomeDecorator extends BiomeDecorator {
      */
     protected void decorateUnderground(World world, Random rand, int mapX, int mapZ) {
         // generate roots
-        for (int i = 0; i < 12; ++i) {
-            int rx = mapX + rand.nextInt(16) + 8;
+        for (int i = 0; i < PLANT_ROOTS_PER_CHUNK; ++i) {
+            int rx = mapX + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
             byte ry = 64;
-            int rz = mapZ + rand.nextInt(16) + 8;
+            int rz = mapZ + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
             plantRootGen.generate(world, rand, rx, ry, rz);
         }
 
         // generate roots
-        for (int i = 0; i < 20; ++i) {
-            int rx = mapX + rand.nextInt(16) + 8;
+        for (int i = 0; i < WOOD_ROOTS_PER_CHUNK; ++i) {
+            int rx = mapX + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
             int ry = rand.nextInt(64);
-            int rz = mapZ + rand.nextInt(16) + 8;
+            int rz = mapZ + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
             woodRootGen.generate(world, rand, rx, ry, rz);
         }
 
         // extra underground water sources
         if (this.generateLakes) {
-            for (int i = 0; i < 50; ++i) {
-                int rx = mapX + rand.nextInt(16) + 8;
+            for (int i = 0; i < CAVE_WATER_SOURCES_PER_CHUNK; ++i) {
+                int rx = mapX + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
                 int ry = rand.nextInt(24) + 4;
-                int rz = mapZ + rand.nextInt(16) + 8;
+                int rz = mapZ + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
                 caveWaterGen.generate(world, rand, rx, ry, rz);
             }
         }
 
         // torch berries are almost guaranteed to spawn so we don't need many
-        for (int i = 0; i < 3; ++i) {
-            int rx = mapX + rand.nextInt(16) + 8;
+        for (int i = 0; i < TORCH_BERRIES_PER_CHUNK; ++i) {
+            int rx = mapX + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
             int ry = 64;
-            int rz = mapZ + rand.nextInt(16) + 8;
+            int rz = mapZ + rand.nextInt(CHUNK_SIZE) + DECORATION_OFFSET;
             torchBerryGen.generate(world, rand, rx, ry, rz);
         }
     }
@@ -266,6 +305,7 @@ public class TFBiomeDecorator extends BiomeDecorator {
         final Random oldRandom = this.randomGenerator;
         final int oldX = this.chunk_X;
         final int oldZ = this.chunk_Z;
+
         if (world != null) {
             this.currentWorld = world;
         }
@@ -274,12 +314,16 @@ public class TFBiomeDecorator extends BiomeDecorator {
         }
         this.chunk_X = mapX;
         this.chunk_Z = mapZ;
-        this.generateOres();
-        // Restore old values to prevent cascading generation issues.
-        this.currentWorld = oldWorld;
-        this.randomGenerator = oldRandom;
-        this.chunk_X = oldX;
-        this.chunk_Z = oldZ;
+
+        try {
+            this.generateOres();
+        } finally {
+            // restore old values to prevent cascading gen issues
+            this.currentWorld = oldWorld;
+            this.randomGenerator = oldRandom;
+            this.chunk_X = oldX;
+            this.chunk_Z = oldZ;
+        }
     }
 
     /**
